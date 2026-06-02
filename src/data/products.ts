@@ -31,8 +31,8 @@ export const products: Product[] = [
     categoryLabel: "Chân Gà",
     price: "89.000đ",
     priceRange: "45.000đ - 189.000đ",
-    image: "https://placehold.co/600x600/D63031/FFFFFF?text=Ch%C3%A2n+G%C3%A0",
-    heroImage: "https://placehold.co/1920x1080/D63031/FFFFFF?text=Ch%C3%A2n+G%C3%A0+R%C3%BAt+X%C6%B0%C6%A1ng",
+    image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&auto=format&fit=crop&q=80",
+    heroImage: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=1200&auto=format&fit=crop&q=80",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "2.000.000+" },
@@ -86,8 +86,8 @@ export const products: Product[] = [
     categoryLabel: "Tăm Cay",
     price: "35.000đ",
     priceRange: "15.000đ - 99.000đ",
-    image: "https://placehold.co/600x600/E76F51/FFFFFF?text=T%C4%83m+Cay",
-    heroImage: "https://placehold.co/1920x1080/E76F51/FFFFFF?text=T%C4%83m+Cay+B%C3%A0+Tuy%E1%BA%BFt",
+    image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&auto=format&fit=crop&q=80",
+    heroImage: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=1200&auto=format&fit=crop&q=80",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "1.500.000+" },
@@ -140,8 +140,8 @@ export const products: Product[] = [
     categoryLabel: "Bánh Tráng",
     price: "29.000đ",
     priceRange: "12.000đ - 79.000đ",
-    image: "https://placehold.co/600x600/F4A261/FFFFFF?text=B%C3%A1nh+Tr%C3%A1ng",
-    heroImage: "https://placehold.co/1920x1080/F4A261/FFFFFF?text=Snack+B%C3%A1nh+Tr%C3%A1ng",
+    image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80",
+    heroImage: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=1200&auto=format&fit=crop&q=80",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "800.000+" },
@@ -185,12 +185,12 @@ export const products: Product[] = [
 ];
 
 export const otherProducts = [
-  { id: "k-01", name: "Snack Đùi Gà Phô Mai", price: "39.000đ", image: "https://placehold.co/400x400/2D6A4F/FFFFFF?text=%C4%90%C3%B9i+G%C3%A0" },
-  { id: "k-02", name: "Snack Bò Kobe", price: "35.000đ", image: "https://placehold.co/400x400/457B9D/FFFFFF?text=B%C3%B2+Kobe" },
-  { id: "k-03", name: "Snack Sashimi", price: "32.000đ", image: "https://placehold.co/400x400/E63946/FFFFFF?text=Sashimi" },
-  { id: "k-04", name: "Snack Bìa Cát Tông", price: "25.000đ", image: "https://placehold.co/400x400/F4A261/FFFFFF?text=B%C3%ACa+CT" },
-  { id: "k-05", name: "Bim Bim Que", price: "20.000đ", image: "https://placehold.co/400x400/D63031/FFFFFF?text=Bim+Bim" },
-  { id: "k-06", name: "Quẩy Que", price: "22.000đ", image: "https://placehold.co/400x400/2D6A4F/FFFFFF?text=Qu%E1%BA%A9y" },
+  { id: "k-01", name: "Snack Đùi Gà Phô Mai", price: "39.000đ", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-02", name: "Snack Bò Kobe", price: "35.000đ", image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-03", name: "Snack Sashimi", price: "32.000đ", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-04", name: "Snack Bìa Cát Tông", price: "25.000đ", image: "https://images.unsplash.com/photo-1599490659213-e2b9527b0876?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-05", name: "Bim Bim Que", price: "20.000đ", image: "https://images.unsplash.com/photo-1618449840665-9ed506d73a34?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-06", name: "Quẩy Que", price: "22.000đ", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=80" },
 ];
 
 export function getProductBySlug(slug: string): Product | undefined {

@@ -24,8 +24,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 lg:h-18">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BT</span>
+            <div className="w-10 h-10 overflow-hidden rounded-full border border-slate-100 flex items-center justify-center bg-white shadow-sm">
+              <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block">
               <p className="font-bold text-neutral text-sm leading-tight">Ăn Cùng</p>

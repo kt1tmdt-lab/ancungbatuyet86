@@ -8,8 +8,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">BT</span>
+              <div className="w-10 h-10 overflow-hidden rounded-full border border-slate-800 flex items-center justify-center bg-white shadow-sm">
+                <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="w-full h-full object-cover" />
               </div>
               <div>
                 <p className="font-bold text-sm leading-tight">Ăn Cùng</p>

@@ -3,6 +3,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/lib/auth-context";
+import AnalyticsTracker from "@/components/layout/AnalyticsTracker";
 
 const font = Plus_Jakarta_Sans({
   subsets: ["latin", "vietnamese"],
@@ -21,11 +23,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" className={`${font.variable} scroll-smooth`}>
-      <body className="min-h-screen flex flex-col font-sans bg-cream text-gray-900 antialiased">
-        <Navbar />
-        <main className="flex-1 pt-16 lg:pt-18">{children}</main>
-        <Footer />
+    <html lang="vi" className={`${font.variable} scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col font-sans bg-cream text-gray-900 antialiased" suppressHydrationWarning>
+        <AuthProvider>
+          <AnalyticsTracker />
+          <Navbar />
+          <main className="flex-1 pt-16 lg:pt-18">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
