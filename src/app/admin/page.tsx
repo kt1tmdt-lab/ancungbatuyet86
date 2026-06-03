@@ -66,12 +66,12 @@ export default function AdminPage() {
     <ProtectedRoute allowedRoles={["ADMIN", "EDITOR", "AUTHOR"]}>
       <div className="space-y-8">
         {/* Banner Chào Mừng */}
-        <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-slate-800">
+        <div className="relative overflow-hidden bg-slate-900 p-6 sm:p-8 text-white shadow-lg border border-slate-800">
           <div className="absolute right-0 bottom-0 translate-y-12 translate-x-12 opacity-10 pointer-events-none">
             <TrendingUp size={300} className="text-orange-500" />
           </div>
           <div className="relative z-10 space-y-2">
-            <span className="inline-block bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            <span className="inline-block bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 uppercase tracking-wider">
               Hệ thống quản lý
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
@@ -87,7 +87,7 @@ export default function AdminPage() {
         {loading ? (
           <div className={`grid grid-cols-2 ${isEditorOrAdmin ? "lg:grid-cols-6" : "lg:grid-cols-5"} gap-4 animate-pulse`}>
             {[...Array(isEditorOrAdmin ? 6 : 5)].map((_, i) => (
-              <div key={i} className="h-28 bg-slate-800/10 rounded-2xl border border-gray-100" />
+              <div key={i} className="h-28 bg-slate-800/10 border border-gray-100" />
             ))}
           </div>
         ) : (
@@ -95,7 +95,7 @@ export default function AdminPage() {
             {/* Card 1: Tổng bài */}
             <div 
               onClick={() => setSelectedStatus("")}
-              className={`cursor-pointer rounded-2xl border p-5 shadow-sm transition hover:shadow-md select-none ${
+              className={`cursor-pointer border p-5 shadow-sm transition hover:shadow-md select-none ${
                 selectedStatus === "" 
                   ? "bg-blue-50/20 border-blue-500 ring-2 ring-blue-500/20" 
                   : "bg-white border-slate-100 hover:border-slate-200"
@@ -103,7 +103,7 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Tổng bài viết</span>
-                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-50 flex items-center justify-center">
                   <FileText className="text-blue-600" size={16} />
                 </div>
               </div>
@@ -114,7 +114,7 @@ export default function AdminPage() {
             {/* Card 2: Đã xuất bản */}
             <div 
               onClick={() => setSelectedStatus("PUBLISHED")}
-              className={`cursor-pointer rounded-2xl border p-5 shadow-sm transition hover:shadow-md select-none ${
+              className={`cursor-pointer border p-5 shadow-sm transition hover:shadow-md select-none ${
                 selectedStatus === "PUBLISHED" 
                   ? "bg-green-50/20 border-green-500 ring-2 ring-green-500/20" 
                   : "bg-white border-slate-100 hover:border-slate-200"
@@ -122,7 +122,7 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Đã xuất bản</span>
-                <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                <div className="w-8 h-8 bg-green-50 flex items-center justify-center">
                   <CheckCircle className="text-green-600" size={16} />
                 </div>
               </div>
@@ -133,7 +133,7 @@ export default function AdminPage() {
             {/* Card 3: Chờ duyệt */}
             <div 
               onClick={() => setSelectedStatus("PENDING_REVIEW")}
-              className={`cursor-pointer rounded-2xl border p-5 shadow-sm transition hover:shadow-md select-none ${
+              className={`cursor-pointer border p-5 shadow-sm transition hover:shadow-md select-none ${
                 selectedStatus === "PENDING_REVIEW" 
                   ? "bg-orange-50/30 border-orange-500 ring-2 ring-orange-500/20" 
                   : "bg-white border-slate-100 hover:border-slate-200"
@@ -141,7 +141,7 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Chờ duyệt</span>
-                <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                <div className="w-8 h-8 bg-orange-50 flex items-center justify-center">
                   <Clock className="text-orange-500" size={16} />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function AdminPage() {
             {/* Card 4: Bị từ chối */}
             <div 
               onClick={() => setSelectedStatus("REJECTED")}
-              className={`cursor-pointer rounded-2xl border p-5 shadow-sm transition hover:shadow-md select-none ${
+              className={`cursor-pointer border p-5 shadow-sm transition hover:shadow-md select-none ${
                 selectedStatus === "REJECTED" 
                   ? "bg-red-50/20 border-red-500 ring-2 ring-red-500/20" 
                   : "bg-white border-slate-100 hover:border-slate-200"
@@ -160,7 +160,7 @@ export default function AdminPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Từ chối</span>
-                <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
+                <div className="w-8 h-8 bg-red-50 flex items-center justify-center">
                   <XCircle className="text-red-500" size={16} />
                 </div>
               </div>
@@ -169,10 +169,10 @@ export default function AdminPage() {
             </div>
 
             {/* Card 5: Tổng lượt xem */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition col-span-2 lg:col-span-1 select-none">
+            <div className="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition col-span-2 lg:col-span-1 select-none">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Lượt xem</span>
-                <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                <div className="w-8 h-8 bg-purple-50 flex items-center justify-center">
                   <Eye className="text-purple-600" size={16} />
                 </div>
               </div>
@@ -184,10 +184,10 @@ export default function AdminPage() {
 
             {/* Card 6: Khách truy cập (chỉ Admin/Editor) */}
             {isEditorOrAdmin && (
-              <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition col-span-2 lg:col-span-1 select-none">
+              <div className="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition col-span-2 lg:col-span-1 select-none">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Khách truy cập</span>
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-orange-50 flex items-center justify-center">
                     <Users className="text-orange-500" size={16} />
                   </div>
                 </div>
@@ -201,11 +201,11 @@ export default function AdminPage() {
         )}
 
         {/* Danh sách bài viết động */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm">
+        <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-orange-500 inline-block shadow-sm shadow-orange-500/30"></span>
+                <span className="w-3 h-3 bg-orange-500 inline-block shadow-sm shadow-orange-500/30"></span>
                 <span>
                   Danh sách: {
                     selectedStatus === "" ? "Tất cả bài viết" :
@@ -222,7 +222,7 @@ export default function AdminPage() {
             {selectedStatus && (
               <button
                 onClick={() => setSelectedStatus("")}
-                className="text-xs font-semibold text-orange-500 hover:text-orange-600 hover:underline self-start sm:self-auto bg-orange-50 px-3 py-1.5 rounded-lg transition"
+                className="text-xs font-semibold text-orange-500 hover:text-orange-600 hover:underline self-start sm:self-auto bg-orange-50 px-3 py-1.5 transition"
               >
                 Xóa bộ lọc
               </button>
@@ -234,16 +234,16 @@ export default function AdminPage() {
         {/* Quick Actions & Navigation Section */}
         <div className="grid md:grid-cols-3 gap-8">
           {/* Cột 1: Lối tắt thao tác nhanh */}
-          <div className="md:col-span-2 bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="md:col-span-2 bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <h2 className="text-lg font-bold text-slate-900">Thao tác nhanh</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {/* Action: Viết bài */}
               <Link 
                 href="/admin/posts/new"
-                className="group p-5 bg-slate-50 hover:bg-orange-50 rounded-2xl border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between"
+                className="group p-5 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center mb-4 shadow-md shadow-orange-500/10">
+                  <div className="w-10 h-10 bg-orange-500 text-white flex items-center justify-center mb-4 shadow-md shadow-orange-500/10">
                     <PenTool size={18} />
                   </div>
                   <h3 className="font-bold text-slate-900 group-hover:text-orange-500 transition-colors">
@@ -261,10 +261,10 @@ export default function AdminPage() {
               {/* Action: Quản lý bài viết */}
               <Link 
                 href="/admin/posts"
-                className="group p-5 bg-slate-50 hover:bg-slate-900 hover:text-white rounded-2xl border border-slate-100 hover:border-slate-800 transition-all flex flex-col justify-between"
+                className="group p-5 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 hover:border-slate-800 transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 group-hover:bg-slate-800 text-white flex items-center justify-center mb-4">
+                  <div className="w-10 h-10 bg-slate-900 group-hover:bg-slate-800 text-white flex items-center justify-center mb-4">
                     <FileText size={18} />
                   </div>
                   <h3 className="font-bold text-slate-900 group-hover:text-white transition-colors">
@@ -283,10 +283,10 @@ export default function AdminPage() {
               {isEditorOrAdmin && (
                 <Link 
                   href="/admin/posts/review"
-                  className="group p-5 bg-slate-50 hover:bg-orange-50 rounded-2xl border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between"
+                  className="group p-5 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 bg-orange-100 text-orange-600 flex items-center justify-center mb-4">
                       <ClipboardCheck size={18} />
                     </div>
                     <h3 className="font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
@@ -306,10 +306,10 @@ export default function AdminPage() {
               {isEditorOrAdmin && (
                 <Link 
                   href="/admin/categories"
-                  className="group p-5 bg-slate-50 hover:bg-slate-900 hover:text-white rounded-2xl border border-slate-100 hover:border-slate-800 transition-all flex flex-col justify-between"
+                  className="group p-5 bg-slate-50 hover:bg-slate-900 hover:text-white border border-slate-100 hover:border-slate-800 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center mb-4">
+                    <div className="w-10 h-10 bg-slate-200 text-slate-700 flex items-center justify-center mb-4">
                       <FolderPlus size={18} />
                     </div>
                     <h3 className="font-bold text-slate-900 group-hover:text-white transition-colors">
@@ -329,10 +329,10 @@ export default function AdminPage() {
               {user?.role === "ADMIN" && (
                 <Link 
                   href="/admin/users"
-                  className="group p-5 bg-slate-50 hover:bg-orange-50 rounded-2xl border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between sm:col-span-2"
+                  className="group p-5 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-200 transition-all flex flex-col justify-between sm:col-span-2"
                 >
                   <div className="flex gap-4 items-start">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                    <div className="w-10 h-10 shrink-0 bg-slate-900 text-white flex items-center justify-center">
                       <Users size={18} />
                     </div>
                     <div>
@@ -353,30 +353,30 @@ export default function AdminPage() {
           </div>
 
           {/* Cột 2: Hướng dẫn quy trình duyệt */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6 flex flex-col justify-between">
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6 flex flex-col justify-between">
             <div className="space-y-4">
               <h2 className="text-lg font-bold text-slate-900">Quy trình biên tập</h2>
               <div className="relative border-l-2 border-slate-100 pl-6 space-y-6">
                 {/* Step 1 */}
                 <div className="relative">
-                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full border-2 border-white bg-slate-950 flex items-center justify-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 border-2 border-white bg-slate-950 flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 bg-white" />
                   </div>
                   <p className="text-sm font-bold text-slate-900">Bước 1: Soạn thảo (Author)</p>
                   <p className="text-xs text-slate-500 mt-0.5">Tác giả viết bài viết mới, lưu ở dạng DRAFT (Nháp). Trực quan hóa nội dung và hình ảnh bằng URL Cloudflare CDN.</p>
                 </div>
                 {/* Step 2 */}
                 <div className="relative">
-                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full border-2 border-white bg-orange-500 flex items-center justify-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 border-2 border-white bg-orange-500 flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 bg-white" />
                   </div>
                   <p className="text-sm font-bold text-orange-500">Bước 2: Gửi duyệt (Author)</p>
                   <p className="text-xs text-slate-500 mt-0.5">Tác giả gửi yêu cầu xét duyệt. Bài viết chuyển thành PENDING_REVIEW (Chờ duyệt) và khóa chỉnh sửa đối với tác giả.</p>
                 </div>
                 {/* Step 3 */}
                 <div className="relative">
-                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 rounded-full border-2 border-white bg-green-500 flex items-center justify-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="absolute -left-[31px] top-0.5 w-4 h-4 border-2 border-white bg-green-500 flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 bg-white" />
                   </div>
                   <p className="text-sm font-bold text-green-600">Bước 3: Xuất bản (Editor/Admin)</p>
                   <p className="text-xs text-slate-500 mt-0.5">Ban biên tập phê duyệt bài viết lên PUBLISHED (Đã duyệt), hệ thống ghi nhận thời gian xuất bản và bài viết hiển thị công khai.</p>
@@ -387,7 +387,7 @@ export default function AdminPage() {
             <Link 
               href="/"
               target="_blank"
-              className="mt-6 w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2"
+              className="mt-6 w-full text-center py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-2"
             >
               <span>Xem website chính</span>
               <ArrowRight size={12} />

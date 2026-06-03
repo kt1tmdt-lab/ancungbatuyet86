@@ -213,15 +213,15 @@ function ImageBlock({
 }) {
   return (
     <div
-      className={`relative overflow-hidden rounded-[2rem] bg-cream ${className}`}
+      className={`relative overflow-hidden bg-cream ${className}`}
     >
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
         style={{ backgroundImage: `url("${src}")` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+      <div className="absolute inset-0 bg-black/65" />
       <div className="absolute left-5 right-5 bottom-5">
-        <p className="inline-flex rounded-full bg-white/90 px-4 py-2 text-sm font-bold text-neutral backdrop-blur">
+        <p className="inline-flex bg-white/90 px-4 py-2 text-sm font-bold text-neutral backdrop-blur">
           {label}
         </p>
       </div>
@@ -249,7 +249,7 @@ function HeroSection() {
           className="absolute inset-0 bg-cover bg-center opacity-35"
           style={{ backgroundImage: `url("${tempImages.factory}")` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-neutral via-neutral/85 to-neutral/30" />
+        <div className="absolute inset-0 bg-neutral/85" />
         <div className="absolute -top-40 -right-28 w-[620px] h-[620px] rounded-full bg-primary/30 blur-3xl" />
         <div className="absolute bottom-0 -left-28 w-[460px] h-[460px] rounded-full bg-orange-400/20 blur-3xl" />
       </div>
@@ -264,7 +264,7 @@ function HeroSection() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-primary-light text-sm font-semibold uppercase tracking-wider"
+              className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 px-4 py-2 text-primary-light text-sm font-semibold uppercase tracking-wider"
             >
               <Sparkles size={16} />
               Quy trình sản xuất
@@ -304,7 +304,7 @@ function HeroSection() {
                 (item) => (
                   <span
                     key={item}
-                    className="rounded-full bg-white/10 border border-white/10 px-5 py-3 text-sm font-semibold backdrop-blur"
+                    className="bg-white/10 border border-white/10 px-5 py-3 text-sm font-semibold backdrop-blur"
                   >
                     {item}
                   </span>
@@ -339,7 +339,7 @@ function HeroSection() {
               </div>
             </div>
 
-            <div className="absolute -bottom-6 left-8 right-8 rounded-3xl bg-white text-neutral p-5 shadow-2xl">
+            <div className="absolute -bottom-6 left-8 right-8 bg-white text-neutral p-5 shadow-2xl">
               <p className="text-sm text-gray-500">Điểm khác biệt</p>
               <p className="text-xl font-extrabold">
                 Quy trình có hình, có điểm kiểm tra, có bằng chứng.
@@ -353,9 +353,9 @@ function HeroSection() {
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2"
+          className="w-6 h-10 border-2 border-white/30 flex justify-center pt-2"
         >
-          <div className="w-1.5 h-3 rounded-full bg-white/50" />
+          <div className="w-1.5 h-3 bg-white/50" />
         </motion.div>
       </div>
     </section>
@@ -395,7 +395,7 @@ function ProcessStepsSection() {
                 </div>
 
                 <div
-                  className={`lg:col-span-7 rounded-[2rem] p-8 sm:p-10 border relative overflow-hidden ${step.highlight
+                  className={`lg:col-span-7 p-8 sm:p-10 border relative overflow-hidden ${step.highlight
                     ? "bg-neutral text-white border-neutral"
                     : "bg-cream border-black/5 text-neutral"
                     }`}
@@ -429,7 +429,7 @@ function ProcessStepsSection() {
                       </div>
 
                       <div
-                        className={`w-16 h-16 shrink-0 rounded-2xl flex items-center justify-center ${step.highlight
+                        className={`w-16 h-16 shrink-0 flex items-center justify-center ${step.highlight
                           ? "bg-primary/20"
                           : "bg-white shadow-sm"
                           }`}
@@ -454,7 +454,7 @@ function ProcessStepsSection() {
                       {step.tags.map((tag) => (
                         <span
                           key={tag}
-                          className={`rounded-full px-4 py-2 text-sm font-bold ${step.highlight
+                          className={`px-4 py-2 text-sm font-bold ${step.highlight
                             ? "bg-white/10 text-white border border-white/10"
                             : "bg-white text-neutral border border-black/5"
                             }`}
@@ -465,7 +465,7 @@ function ProcessStepsSection() {
                     </div>
 
                     <div
-                      className={`mt-8 rounded-2xl p-5 ${step.highlight ? "bg-white/10" : "bg-white"
+                      className={`mt-8 p-5 ${step.highlight ? "bg-white/10" : "bg-white"
                         }`}
                     >
                       <div className="flex items-center gap-3">
@@ -512,7 +512,7 @@ function FactorySection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="grid lg:grid-cols-[0.95fr_1.05fr] gap-12 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-primary-light text-sm font-semibold uppercase tracking-wider">
+            <span className="inline-flex items-center gap-2 border border-primary/40 bg-primary/10 px-4 py-2 text-primary-light text-sm font-semibold uppercase tracking-wider">
               <Factory size={16} />
               Nhà xưởng
             </span>
@@ -542,7 +542,7 @@ function FactorySection() {
             />
 
             <div className="space-y-4">
-              <div className="rounded-[2rem] bg-white text-neutral p-7">
+              <div className="bg-white text-neutral p-7">
                 <p className="text-sm font-bold text-primary uppercase tracking-wider">
                   Diện tích xưởng
                 </p>
@@ -569,7 +569,7 @@ function FactorySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: i * 0.08 }}
-              className="rounded-[1.75rem] bg-white/10 border border-white/10 p-6 backdrop-blur"
+              className="bg-white/10 border border-white/10 p-6 backdrop-blur"
             >
               <p className="text-4xl font-extrabold text-primary-light">
                 {stat.value}
@@ -624,9 +624,9 @@ function DocumentationSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: i * 0.08 }}
-                  className="rounded-[2rem] bg-white p-7 border border-black/5 shadow-sm hover:shadow-xl transition-all"
+                  className="bg-white p-7 border border-black/5 shadow-sm hover:shadow-xl transition-all"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-5">
+                  <div className="w-14 h-14 bg-primary/10 flex items-center justify-center mb-5">
                     <Icon className="text-primary" size={27} />
                   </div>
 
@@ -657,7 +657,7 @@ function CTASection() {
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
         >
-          <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-primary/10 flex items-center justify-center mx-auto mb-6">
             <ShieldCheck className="text-primary" size={34} />
           </div>
 
@@ -674,7 +674,7 @@ function CTASection() {
           <div className="mt-9">
             <a
               href="/san-pham"
-              className="inline-flex items-center gap-2 rounded-full bg-primary text-white px-8 py-4 font-semibold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
+              className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 font-semibold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
             >
               Xem sản phẩm
               <ArrowRight size={18} />

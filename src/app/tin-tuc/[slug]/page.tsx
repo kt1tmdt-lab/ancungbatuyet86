@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ArrowLeft, Clock, Calendar, User, Eye, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Eye, Tag, User } from "lucide-react";
 import { notFound } from "next/navigation";
 
 interface PageProps {
@@ -19,12 +19,11 @@ function formatDate(dateStr: Date | string) {
 
 function getReadTime(content: string | null) {
   if (!content) return "2 phút";
-  const words = content.trim().split(/\s+/).length;
-  const time = Math.ceil(words / 200);
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const time = Math.max(1, Math.ceil(words / 200));
   return `${time} phút`;
 }
 
-// 1. Dynamic SEO Metadata Generation
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const post = await prisma.post.findUnique({
@@ -58,44 +57,35 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-// 2. Server Component Implementation
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
 
-  let post;
-  try {
-    // Try to increment views and fetch post
-    post = await prisma.post.update({
-      where: { slug },
+  const post = await prisma.post.findUnique({
+    where: { slug },
+    include: {
+      author: { select: { name: true } },
+      category: true,
+      tags: { include: { tag: true } },
+    },
+  });
+
+  if (!post || post.status !== "PUBLISHED") {
+    notFound();
+  }
+
+  await prisma.post
+    .update({
+      where: { id: post.id },
       data: {
         viewCount: {
           increment: 1,
         },
       },
-      include: {
-        author: { select: { name: true } },
-        category: true,
-        tags: { include: { tag: true } },
-      },
-    });
-  } catch (error) {
-    // Fallback if increment fails or update fails
-    post = await prisma.post.findUnique({
-      where: { slug },
-      include: {
-        author: { select: { name: true } },
-        category: true,
-        tags: { include: { tag: true } },
-      },
-    });
-  }
+    })
+    .catch(() => null);
 
-  // Restrict display: only allow public access to PUBLISHED articles
-  if (!post || post.status !== "PUBLISHED") {
-    notFound();
-  }
+  const currentViewCount = post.viewCount + 1;
 
-  // 3. Fetch Related Posts (Up to 3, same category, excluding self)
   let relatedPosts: any[] = [];
   if (post.categoryId) {
     relatedPosts = await prisma.post.findMany({
@@ -113,108 +103,118 @@ export default async function BlogPostPage({ params }: PageProps) {
     });
   }
 
-  // 4. JSON-LD Structured Data
+  const authorName = post.author?.name || "Ăn Cùng Bà Tuyết";
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "mainEntityOfPage": {
+    mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://ancungbatuyet.vn/tin-tuc/${post.slug}`
+      "@id": `https://ancungbatuyet.vn/tin-tuc/${post.slug}`,
     },
-    "headline": post.title,
-    "description": post.seoDescription || post.excerpt || "",
-    "image": post.coverImageUrl || "",
-    "author": {
+    headline: post.title,
+    description: post.seoDescription || post.excerpt || "",
+    image: post.coverImageUrl || "",
+    author: {
       "@type": "Person",
-      "name": post.author.name
+      name: authorName,
     },
-    "publisher": {
+    publisher: {
       "@type": "Organization",
-      "name": "Ăn Cùng Bà Tuyết",
-      "logo": {
+      name: "Ăn Cùng Bà Tuyết",
+      logo: {
         "@type": "ImageObject",
-        "url": "https://ancungbatuyet.vn/logo.png"
-      }
+        url: "https://ancungbatuyet.vn/logo.png",
+      },
     },
-    "datePublished": post.publishedAt?.toISOString() || post.createdAt.toISOString(),
-    "dateModified": post.updatedAt.toISOString()
+    datePublished: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
   };
 
   return (
     <>
-      {/* Insert JSON-LD into document */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <article className="bg-[#F8FAFC] min-h-screen pt-24 pb-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          {/* Back button */}
+      <article className="min-h-screen bg-[#fbfaf7] pb-20 pt-24 text-slate-950">
+        <header className="border-b border-orange-100 bg-[#fff7ed] px-4 py-8 sm:px-6 lg:px-10">
           <Link
             href="/tin-tuc"
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-orange-500 text-xs sm:text-sm font-bold mb-8 transition-colors"
+            className="mb-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-orange-600 transition hover:text-orange-700"
           >
-            <ArrowLeft size={16} />
-            <span>Tất cả bài viết</span>
+            <ArrowLeft size={15} />
+            Tất cả bài viết
           </Link>
 
-          {/* Article Header Container */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-sm space-y-6">
-            <div className="space-y-4">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+            <div>
               {post.category && (
-                <span className="inline-block bg-orange-500/10 text-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                <span className="mb-4 inline-flex bg-orange-500 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">
                   {post.category.name}
                 </span>
               )}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight">
+              <h1 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
                 {post.title}
               </h1>
-
-              {/* Author & Info bar */}
-              <div className="flex flex-wrap items-center gap-y-2 gap-x-6 pt-4 border-t border-slate-50 text-xs text-slate-400 font-semibold">
-                <span className="flex items-center gap-1.5"><User size={14} className="text-slate-400" /> {post.author.name}</span>
-                <span className="flex items-center gap-1.5"><Calendar size={14} className="text-slate-400" /> {formatDate(post.publishedAt || post.createdAt)}</span>
-                <span className="flex items-center gap-1.5"><Clock size={14} className="text-slate-400" /> {getReadTime(post.content)}</span>
-                <span className="flex items-center gap-1.5"><Eye size={14} className="text-slate-400" /> {post.viewCount} lượt xem</span>
-              </div>
-            </div>
-
-            {/* Cover Image */}
-            {post.coverImageUrl && (
-              <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm relative">
-                <img
-                  src={post.coverImageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            {/* Article Content Body */}
-            <div className="pt-4">
               {post.excerpt && (
-                <p className="text-base sm:text-lg font-semibold text-slate-600 leading-relaxed border-l-4 border-orange-500 pl-4 mb-8">
+                <p className="mt-5 max-w-3xl border-l-4 border-orange-500 pl-5 text-lg font-bold leading-8 text-slate-700">
                   {post.excerpt}
                 </p>
               )}
-
-              <div 
-                className="prose prose-orange max-w-none text-slate-800 text-sm sm:text-base leading-relaxed space-y-6"
-                dangerouslySetInnerHTML={{ __html: post.content || "" }}
-              />
             </div>
 
-            {/* Tag List */}
+            <div className="grid gap-2 border border-orange-100 bg-white p-5 text-xs font-bold text-slate-500 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <span className="flex items-center gap-2">
+                <User size={15} className="text-orange-500" />
+                {authorName}
+              </span>
+              <span className="flex items-center gap-2">
+                <Calendar size={15} className="text-orange-500" />
+                {formatDate(post.publishedAt || post.createdAt)}
+              </span>
+              <span className="flex items-center gap-2">
+                <Clock size={15} className="text-orange-500" />
+                {getReadTime(post.content)} đọc
+              </span>
+              <span className="flex items-center gap-2">
+                <Eye size={15} className="text-orange-500" />
+                {currentViewCount} lượt xem
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {post.coverImageUrl && (
+          <section className="border-b border-orange-100 bg-white px-4 py-6 sm:px-6 lg:px-10">
+            <div className="aspect-[16/7] min-h-[280px] w-full overflow-hidden border border-orange-100 bg-orange-50">
+              <img
+                src={post.coverImageUrl}
+                alt={post.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </section>
+        )}
+
+        <section className="grid gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(280px,0.22fr)] lg:px-10">
+          <div className="border border-orange-100 bg-white p-6 sm:p-8 lg:p-10">
+            <div
+              className="prose prose-orange max-w-none prose-headings:font-black prose-headings:tracking-[-0.03em] prose-p:leading-8 prose-img:border prose-img:border-orange-100 prose-a:font-bold prose-a:text-orange-600 text-slate-800"
+              dangerouslySetInnerHTML={{ __html: post.content || "" }}
+            />
+
             {post.tags && post.tags.length > 0 && (
-              <div className="pt-6 border-t border-slate-100 flex flex-wrap gap-2 items-center">
-                <span className="text-xs font-bold text-slate-400 inline-flex items-center gap-1">
-                  <Tag size={13} /> Thẻ:
+              <div className="mt-10 flex flex-wrap items-center gap-2 border-t border-orange-100 pt-6">
+                <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-slate-400">
+                  <Tag size={13} />
+                  Thẻ
                 </span>
                 {post.tags.map((pt: any) => (
                   <span
                     key={pt.tag.id}
-                    className="bg-slate-100 text-slate-600 hover:text-orange-500 text-xs px-2.5 py-1 rounded-lg font-semibold transition cursor-pointer"
+                    className="bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700"
                   >
                     #{pt.tag.name}
                   </span>
@@ -223,34 +223,52 @@ export default async function BlogPostPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Related Posts Section */}
-          {relatedPosts.length > 0 && (
-            <div className="mt-16 space-y-6">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                Bài viết liên quan
-              </h2>
-              <div className="grid sm:grid-cols-3 gap-6">
-                {relatedPosts.map((rPost) => (
-                  <Link
-                    key={rPost.id}
-                    href={`/tin-tuc/${rPost.slug}`}
-                    className="group flex flex-col bg-white rounded-2xl p-5 border border-slate-150 shadow-sm hover:shadow-md transition-all duration-300 h-full"
-                  >
-                    <span className="text-[10px] font-bold text-orange-500 uppercase tracking-wider mb-2">
-                      {rPost.category?.name || "Tin tức"}
-                    </span>
-                    <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 group-hover:text-orange-500 transition-colors flex-1">
-                      {rPost.title}
-                    </h3>
-                    <div className="mt-4 pt-3 border-t border-slate-50 text-[10px] text-slate-400 font-semibold">
-                      {formatDate(rPost.publishedAt || rPost.createdAt)}
-                    </div>
-                  </Link>
-                ))}
-              </div>
+          <aside className="space-y-5 lg:sticky lg:top-28 lg:h-fit">
+            <div className="border border-orange-100 bg-white p-5">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">
+                Truyền thông thương hiệu
+              </p>
+              <p className="mt-3 text-sm font-medium leading-7 text-slate-600">
+                Nội dung tin tức nên dùng để kể câu chuyện sản phẩm, nhà máy, quy trình và hoạt động thương hiệu một cách có bằng chứng.
+              </p>
+              <Link
+                href="/gioi-thieu"
+                className="mt-5 inline-flex items-center gap-2 bg-orange-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-600"
+              >
+                Về thương hiệu
+              </Link>
             </div>
-          )}
-        </div>
+
+            {relatedPosts.length > 0 && (
+              <div className="border border-orange-100 bg-white p-5">
+                <h2 className="text-lg font-black tracking-[-0.03em] text-slate-950">
+                  Bài viết liên quan
+                </h2>
+                <div className="mt-5 space-y-4">
+                  {relatedPosts.map((rPost) => (
+                    <Link
+                      key={rPost.id}
+                      href={`/tin-tuc/${rPost.slug}`}
+                      className="group block border-b border-orange-100 pb-4 last:border-b-0 last:pb-0"
+                    >
+                      {rPost.category && (
+                        <span className="text-[10px] font-black uppercase tracking-wider text-orange-600">
+                          {rPost.category.name}
+                        </span>
+                      )}
+                      <h3 className="mt-2 line-clamp-2 text-sm font-black leading-6 text-slate-950 transition group-hover:text-orange-600">
+                        {rPost.title}
+                      </h3>
+                      <p className="mt-2 text-[11px] font-semibold text-slate-400">
+                        {formatDate(rPost.publishedAt || rPost.createdAt)}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </aside>
+        </section>
       </article>
     </>
   );

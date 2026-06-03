@@ -249,14 +249,14 @@ export function PostsTable({
             placeholder="Tìm kiếm tiêu đề, trích dẫn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Filter */}
           {!propStatus && (
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 ">
               <Filter size={14} className="text-slate-400" />
               <select
                 value={statusFilter}
@@ -274,7 +274,7 @@ export function PostsTable({
           )}
 
           {/* Category Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 ">
             <Filter size={14} className="text-slate-400" />
             <select
               value={categoryFilter}
@@ -303,7 +303,7 @@ export function PostsTable({
           <p className="text-xs text-slate-400">Hãy thử thay đổi bộ lọc hoặc tạo một bài viết mới.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-100">
+        <div className="overflow-x-auto  border border-slate-100">
           <table className="w-full text-sm text-left text-slate-700">
             <thead className="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-100 font-bold">
               <tr>
@@ -342,7 +342,7 @@ export function PostsTable({
                     </td>
                     <td className="px-5 py-4">
                       {post.category ? (
-                        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 ">
                           {post.category.name}
                         </span>
                       ) : (
@@ -350,13 +350,13 @@ export function PostsTable({
                       )}
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <div className="inline-flex items-center gap-1 text-slate-500 font-medium text-xs bg-slate-100/60 px-2 py-0.5 rounded-lg">
+                      <div className="inline-flex items-center gap-1 text-slate-500 font-medium text-xs bg-slate-100/60 px-2 py-0.5 ">
                         <Eye size={12} />
                         <span>{post.viewCount}</span>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-center">
-                      <span className={`inline-block border text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${statusMeta.style}`}>
+                      <span className={`inline-block border text-[10px] font-extrabold px-2.5 py-0.5  uppercase tracking-wider ${statusMeta.style}`}>
                         {statusMeta.label}
                       </span>
                     </td>
@@ -368,7 +368,7 @@ export function PostsTable({
                           <Link
                             href={`/tin-tuc/${post.slug}`}
                             target="_blank"
-                            className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100  transition"
                             title="Xem trên trang chủ"
                           >
                             <ExternalLink size={15} />
@@ -380,7 +380,7 @@ export function PostsTable({
                           <button
                             onClick={() => handleSendToReview(post.id)}
                             disabled={actionLoading === post.id}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-500 text-white hover:bg-orange-600 rounded-lg text-xs font-bold transition disabled:opacity-50 shadow-sm shadow-orange-500/10"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-500 text-white hover:bg-orange-600  text-xs font-bold transition disabled:opacity-50 shadow-sm shadow-orange-500/10"
                             title="Gửi duyệt"
                           >
                             <Send size={11} />
@@ -394,7 +394,7 @@ export function PostsTable({
                             <button
                               onClick={() => handleApprove(post.id)}
                               disabled={actionLoading === post.id}
-                              className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition disabled:opacity-50 flex items-center justify-center"
+                              className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100  text-xs font-bold transition disabled:opacity-50 flex items-center justify-center"
                               title="Duyệt xuất bản"
                             >
                               {actionLoading === post.id ? <Loader size={14} className="animate-spin" /> : <Check size={14} />}
@@ -402,7 +402,7 @@ export function PostsTable({
                             <button
                               onClick={() => startReject(post.id)}
                               disabled={actionLoading === post.id}
-                              className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition disabled:opacity-50 flex items-center justify-center"
+                              className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100  text-xs font-bold transition disabled:opacity-50 flex items-center justify-center"
                               title="Từ chối bài viết"
                             >
                               <X size={14} />
@@ -414,7 +414,7 @@ export function PostsTable({
                         {(isEditorOrAdmin || (user?.role === "AUTHOR" && isAuthorOwner && (post.status === "DRAFT" || post.status === "REJECTED"))) && (
                           <Link
                             href={`/admin/posts/${post.id}/edit`}
-                            className="p-1.5 text-slate-600 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1.5 text-slate-600 hover:text-orange-500 hover:bg-slate-100  transition"
                             title="Chỉnh sửa bài viết"
                           >
                             <Edit3 size={15} />
@@ -426,7 +426,7 @@ export function PostsTable({
                           <button
                             onClick={() => handleDelete(post.id)}
                             disabled={actionLoading === post.id}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50  transition disabled:opacity-50"
                             title="Xóa bài viết"
                           >
                             <Trash2 size={15} />
@@ -436,7 +436,7 @@ export function PostsTable({
 
                       {/* Inline Rejection Panel */}
                       {rejectingPostId === post.id && (
-                        <div className="mt-3 text-left p-4 bg-red-50 border border-red-200 rounded-xl space-y-2 col-span-full">
+                        <div className="mt-3 text-left p-4 bg-red-50 border border-red-200  space-y-2 col-span-full">
                           <label className="block text-xs font-bold text-red-800">
                             Nhập lý do từ chối bài viết (Bắt buộc):
                           </label>
@@ -445,7 +445,7 @@ export function PostsTable({
                             onChange={(e) => setRejectNote(e.target.value)}
                             rows={2}
                             placeholder="Ví dụ: Bài viết thiếu hình ảnh minh họa, sai lỗi chính tả..."
-                            className="w-full text-xs p-2 bg-white border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                            className="w-full text-xs p-2 bg-white border border-red-300  focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                           />
                           <div className="flex gap-2 justify-end">
                             <button

@@ -342,7 +342,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2  text-xs font-bold transition-all shadow-sm"
           >
             <Eye size={14} />
             <span>Xem trước trực tiếp</span>
@@ -352,7 +352,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
             type="button"
             disabled={loading}
             onClick={handleSubmit}
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 shadow-md shadow-orange-500/10"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-xs font-bold transition-all disabled:opacity-50 shadow-md shadow-orange-500/10"
           >
             {loading ? <Loader className="animate-spin" size={14} /> : <Save size={14} />}
             <span>Lưu thiết kế</span>
@@ -361,14 +361,14 @@ export function PageForm({ pageId }: { pageId?: string }) {
       </div>
 
       {error && (
-        <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 ">
           <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={18} />
           <p className="text-sm text-red-700 font-semibold leading-relaxed">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="flex items-start gap-2.5 p-4 bg-green-50 border border-green-200 rounded-2xl">
+        <div className="flex items-start gap-2.5 p-4 bg-green-50 border border-green-200 ">
           <Check className="text-green-600 mt-0.5 shrink-0" size={18} />
           <p className="text-sm text-green-700 font-semibold leading-relaxed">{success}</p>
         </div>
@@ -377,7 +377,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left Side: Blocks Editor (2/3) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white  border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Cấu trúc các khối nội dung</h2>
@@ -387,7 +387,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
             {/* Block List */}
             {blocks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 p-6 text-center">
+              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-200  bg-slate-50/50 p-6 text-center">
                 <LayoutGrid className="text-slate-350 mb-3" size={36} />
                 <h3 className="text-sm font-bold text-slate-800">Trang chưa có khối nào</h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-[280px]">Hãy nhấn chọn các khối giao diện ở bảng dưới đây để bắt đầu thiết kế.</p>
@@ -399,7 +399,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                   return (
                     <div
                       key={block.id}
-                      className={`border rounded-2xl overflow-hidden transition-all ${
+                      className={`border  overflow-hidden transition-all ${
                         isExpanded ? "border-orange-200 shadow-sm shadow-orange-500/5 bg-white" : "border-slate-200 bg-slate-50/20"
                       }`}
                     >
@@ -409,7 +409,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                           onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
                         >
-                          <div className={`p-1.5 rounded-lg ${
+                          <div className={`p-1.5  ${
                             block.type === "hero" ? "bg-purple-50 text-purple-600" :
                             block.type === "text" ? "bg-blue-50 text-blue-600" :
                             block.type === "features" ? "bg-teal-50 text-teal-600" :
@@ -447,7 +447,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                             type="button"
                             disabled={index === 0}
                             onClick={() => moveBlock(index, "up")}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition disabled:opacity-30"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100  transition disabled:opacity-30"
                             title="Di chuyển lên"
                           >
                             <ArrowUp size={14} />
@@ -456,7 +456,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                             type="button"
                             disabled={index === blocks.length - 1}
                             onClick={() => moveBlock(index, "down")}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition disabled:opacity-30"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100  transition disabled:opacity-30"
                             title="Di chuyển xuống"
                           >
                             <ArrowDown size={14} />
@@ -465,7 +465,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           <button
                             type="button"
                             onClick={() => deleteBlock(block.id)}
-                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50  transition"
                             title="Xóa khối"
                           >
                             <Trash size={14} />
@@ -473,7 +473,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           <button
                             type="button"
                             onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
-                            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition ml-1"
+                            className="p-1 text-slate-400 hover:text-slate-700  transition ml-1"
                           >
                             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </button>
@@ -494,7 +494,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -503,7 +503,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     value={block.data.subtitle}
                                     onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
                                     rows={2}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                   />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
@@ -513,7 +513,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaText}
                                       onChange={(e) => updateBlockData(block.id, { ctaText: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -522,7 +522,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaLink}
                                       onChange={(e) => updateBlockData(block.id, { ctaLink: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
                                   </div>
                                 </div>
@@ -537,9 +537,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       value={block.data.backgroundImage}
                                       onChange={(e) => updateBlockData(block.id, { backgroundImage: e.target.value })}
                                       placeholder="https://..."
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
-                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
+                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
                                       <Upload size={14} className="mr-1" />
                                       Tải lên
                                       <input
@@ -555,7 +555,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   </div>
                                 </div>
                                 {block.data.backgroundImage && (
-                                  <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                                  <div className="relative aspect-video  overflow-hidden border border-slate-200 bg-slate-50">
                                     <img src={block.data.backgroundImage} alt="Background Preview" className="w-full h-full object-cover" />
                                   </div>
                                 )}
@@ -573,7 +573,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   <select
                                     value={block.data.backgroundColor || "cream"}
                                     onChange={(e) => updateBlockData(block.id, { backgroundColor: e.target.value })}
-                                    className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700"
+                                    className="px-2 py-1 bg-slate-50 border border-slate-200  text-xs font-bold text-slate-700"
                                   >
                                     <option value="cream">Vàng kem dịu (Mặc định)</option>
                                     <option value="white">Trắng tinh tế</option>
@@ -586,7 +586,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 onChange={(e) => updateBlockData(block.id, { content: e.target.value })}
                                 placeholder="<h3>Tiêu đề đoạn</h3><p>Nội dung chi tiết...</p>"
                                 rows={8}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200  text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed"
                               />
                               <p className="text-[10px] text-slate-400 italic">Mách nhỏ: Bạn có thể nhập mã HTML thông thường như &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt; để định dạng đẹp đẽ.</p>
                             </div>
@@ -602,7 +602,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   value={block.data.title}
                                   onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
                                   placeholder="Vì sao chọn chúng tôi?"
-                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 />
                               </div>
 
@@ -610,7 +610,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 <label className="block text-xs font-bold text-slate-700">Danh sách tính năng</label>
                                 <div className="space-y-2">
                                   {(block.data.items || []).map((item: any, fIndex: number) => (
-                                    <div key={fIndex} className="flex gap-2 items-start border border-slate-100 p-3 rounded-xl bg-slate-50/50">
+                                    <div key={fIndex} className="flex gap-2 items-start border border-slate-100 p-3  bg-slate-50/50">
                                       <div className="grid grid-cols-1 gap-1 shrink-0 w-24">
                                         <span className="text-[9px] font-bold text-slate-500">Biểu tượng</span>
                                         <select
@@ -620,7 +620,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                             newItems[fIndex] = { ...newItems[fIndex], icon: e.target.value };
                                             updateBlockData(block.id, { items: newItems });
                                           }}
-                                          className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-700"
+                                          className="px-2 py-1 bg-white border border-slate-200  text-[10px] font-semibold text-slate-700"
                                         >
                                           {FEATURE_ICONS.map((i) => (
                                             <option key={i.name} value={i.name}>{i.label}</option>
@@ -639,7 +639,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                               newItems[fIndex] = { ...newItems[fIndex], title: e.target.value };
                                               updateBlockData(block.id, { items: newItems });
                                             }}
-                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 font-bold"
+                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200  text-xs text-slate-900 font-bold"
                                           />
                                         </div>
                                         <div className="space-y-1">
@@ -652,7 +652,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                               newItems[fIndex] = { ...newItems[fIndex], description: e.target.value };
                                               updateBlockData(block.id, { items: newItems });
                                             }}
-                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-750"
+                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200  text-xs text-slate-750"
                                           />
                                         </div>
                                       </div>
@@ -663,7 +663,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                           const newItems = (block.data.items || []).filter((_: any, idx: number) => idx !== fIndex);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
-                                        className="p-1 text-red-500 hover:bg-red-50 rounded-lg shrink-0 mt-1"
+                                        className="p-1 text-red-500 hover:bg-red-50  shrink-0 mt-1"
                                       >
                                         <Trash size={14} />
                                       </button>
@@ -694,7 +694,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -703,7 +703,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     value={block.data.description}
                                     onChange={(e) => updateBlockData(block.id, { description: e.target.value })}
                                     rows={4}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
@@ -713,7 +713,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaText || ""}
                                       onChange={(e) => updateBlockData(block.id, { ctaText: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -722,7 +722,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaLink || ""}
                                       onChange={(e) => updateBlockData(block.id, { ctaLink: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                     />
                                   </div>
                                 </div>
@@ -735,7 +735,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     <select
                                       value={block.data.imagePosition}
                                       onChange={(e) => updateBlockData(block.id, { imagePosition: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-700"
                                     >
                                       <option value="right">Bên phải</option>
                                       <option value="left">Bên trái</option>
@@ -750,9 +750,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       value={block.data.imageUrl}
                                       onChange={(e) => updateBlockData(block.id, { imageUrl: e.target.value })}
                                       placeholder="https://..."
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                     />
-                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-750 px-3 py-2 rounded-xl flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
+                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-750 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
                                       <Upload size={14} className="mr-1" />
                                       Tải lên
                                       <input
@@ -768,7 +768,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   </div>
                                 </div>
                                 {block.data.imageUrl && (
-                                  <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                                  <div className="relative aspect-video  overflow-hidden border border-slate-200 bg-slate-50">
                                     <img src={block.data.imageUrl} alt="Split Image Preview" className="w-full h-full object-cover" />
                                   </div>
                                 )}
@@ -786,7 +786,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -795,7 +795,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.subtitle}
                                     onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                               </div>
@@ -810,13 +810,13 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 ) : productsList.length === 0 ? (
                                   <p className="text-xs italic text-slate-400">Không tìm thấy sản phẩm nào trong hệ thống. Vui lòng thêm sản phẩm trước.</p>
                                 ) : (
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto border border-slate-200 p-4 rounded-2xl bg-slate-50/50">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto border border-slate-200 p-4  bg-slate-50/50">
                                     {productsList.map((product) => {
                                       const isChecked = (block.data.productIds || []).includes(product.id);
                                       return (
                                         <label
                                           key={product.id}
-                                          className={`flex items-center gap-3 p-2 rounded-xl border cursor-pointer select-none bg-white transition-all ${
+                                          className={`flex items-center gap-3 p-2  border cursor-pointer select-none bg-white transition-all ${
                                             isChecked ? "border-orange-500 ring-2 ring-orange-500/10" : "border-slate-100 hover:border-slate-300"
                                           }`}
                                         >
@@ -835,7 +835,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                             }}
                                             className="w-3.5 h-3.5 text-orange-500 border-slate-300 rounded focus:ring-orange-500"
                                           />
-                                          <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-100">
+                                          <div className="w-8 h-8  overflow-hidden shrink-0 border border-slate-100">
                                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                                           </div>
                                           <div className="flex flex-col min-w-0">
@@ -867,7 +867,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("hero")}
-                  className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <ImageIcon size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Hero Banner</span>
@@ -876,7 +876,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("text")}
-                  className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <Type size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Văn Bản</span>
@@ -885,7 +885,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("features")}
-                  className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <LayoutGrid size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Tính Năng</span>
@@ -894,7 +894,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("split")}
-                  className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <Columns size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Ảnh & Chữ</span>
@@ -903,7 +903,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("products")}
-                  className="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600 col-span-2 sm:col-span-1"
+                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600 col-span-2 sm:col-span-1"
                 >
                   <ShoppingBag size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Sản Phẩm</span>
@@ -915,7 +915,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
         {/* Right Side: Page settings & publishing status (1/3) */}
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-6">
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
               <Settings size={15} />
               Cài đặt cấu hình trang
@@ -929,7 +929,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Ví dụ: Khuyến Mãi Hè 2026..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-semibold text-slate-900 focus:outline-none"
                 required
               />
             </div>
@@ -961,7 +961,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as "DRAFT" | "PUBLISHED")}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-bold text-slate-700 focus:outline-none"
               >
                 <option value="DRAFT">Draft (Bản nháp - Chỉ Admin xem)</option>
                 <option value="PUBLISHED">Published (Xuất bản - Mọi người xem)</option>
@@ -969,7 +969,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
             </div>
           </div>
 
-          <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="bg-slate-900 text-white  p-6 shadow-sm space-y-4">
             <h4 className="text-xs font-bold text-orange-400 tracking-wider uppercase">Tóm tắt thiết kế</h4>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between border-b border-slate-800 pb-1.5">
@@ -996,24 +996,24 @@ export function PageForm({ pageId }: { pageId?: string }) {
       {/* FULL SCREEN LIVE PREVIEW DRAWER MODAL */}
       {previewOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end lg:justify-center lg:items-center">
-          <div className="bg-cream w-full h-[90vh] lg:w-[90vw] lg:h-[88vh] lg:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-slide-up">
+          <div className="bg-cream w-full h-[90vh] lg:w-[90vw] lg:h-[88vh] lg: shadow-2xl flex flex-col overflow-hidden animate-slide-up">
             
             {/* Preview Toolbar */}
             <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
               <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                <span className="w-2.5 h-2.5  bg-red-500" />
+                <span className="w-2.5 h-2.5  bg-yellow-500" />
+                <span className="w-2.5 h-2.5  bg-green-500" />
                 <div className="h-4 w-px bg-slate-800 mx-2" />
                 <h3 className="text-sm font-bold tracking-wide">Live Preview: <span className="text-orange-400">{title || "Trang mới"}</span></h3>
               </div>
 
               {/* Device simulation controls */}
-              <div className="hidden sm:flex items-center gap-1 bg-slate-800 p-1 rounded-xl">
+              <div className="hidden sm:flex items-center gap-1 bg-slate-800 p-1 ">
                 <button
                   type="button"
                   onClick={() => setPreviewDevice("desktop")}
-                  className={`p-1.5 rounded-lg transition ${previewDevice === "desktop" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
+                  className={`p-1.5  transition ${previewDevice === "desktop" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
                   title="Desktop View"
                 >
                   <Monitor size={14} />
@@ -1021,7 +1021,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => setPreviewDevice("tablet")}
-                  className={`p-1.5 rounded-lg transition ${previewDevice === "tablet" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
+                  className={`p-1.5  transition ${previewDevice === "tablet" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
                   title="Tablet View"
                 >
                   <Tablet size={14} />
@@ -1029,7 +1029,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => setPreviewDevice("mobile")}
-                  className={`p-1.5 rounded-lg transition ${previewDevice === "mobile" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
+                  className={`p-1.5  transition ${previewDevice === "mobile" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
                   title="Mobile View"
                 >
                   <Smartphone size={14} />
@@ -1039,7 +1039,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
               <button
                 type="button"
                 onClick={() => setPreviewOpen(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-350 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition"
+                className="bg-slate-800 hover:bg-slate-700 text-slate-350 hover:text-white px-3 py-1.5  text-xs font-bold transition"
               >
                 Đóng Xem Trước
               </button>
@@ -1048,7 +1048,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
             {/* Simulated website frame */}
             <div className="flex-1 overflow-y-auto bg-slate-800/20 p-4 sm:p-8 flex justify-center items-start">
               <div
-                className={`bg-cream shadow-xl min-h-[100%] rounded-2xl overflow-hidden border border-slate-100 transition-all duration-300 ${
+                className={`bg-cream shadow-xl min-h-[100%]  overflow-hidden border border-slate-100 transition-all duration-300 ${
                   previewDevice === "desktop" ? "w-full" :
                   previewDevice === "tablet" ? "w-[768px]" :
                   "w-[375px]"
@@ -1057,7 +1057,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 {/* Simulated Header */}
                 <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
                   <div className="flex items-center gap-2">
-                    <img src="/logo-acbt.png" alt="Logo" className="w-8 h-8 rounded-full border border-slate-150" />
+                    <img src="/logo-acbt.png" alt="Logo" className="w-8 h-8  border border-slate-150" />
                     <span className="font-black text-slate-900 text-sm tracking-wide">BÀ TUYẾT</span>
                   </div>
                   <div className="flex gap-4 text-xs font-bold text-slate-600">
@@ -1095,7 +1095,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 </p>
                                 {block.data.ctaText && (
                                   <div className="pt-2">
-                                    <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-6 py-3 rounded-full shadow-md cursor-pointer transition transform hover:scale-105 active:scale-95">
+                                    <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-6 py-3  shadow-md cursor-pointer transition transform hover:scale-105 active:scale-95">
                                       {block.data.ctaText}
                                     </span>
                                   </div>
@@ -1130,8 +1130,8 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                                   {(block.data.items || []).map((item: any, fIdx: number) => {
                                     return (
-                                      <div key={fIdx} className="bg-cream rounded-2xl border border-slate-100/50 p-6 flex flex-col items-center text-center space-y-3 transition transform hover:-translate-y-1">
-                                        <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">
+                                      <div key={fIdx} className="bg-cream  border border-slate-100/50 p-6 flex flex-col items-center text-center space-y-3 transition transform hover:-translate-y-1">
+                                        <div className="w-10 h-10  bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">
                                           {/* Mock icon displaying */}
                                           <Globe size={18} />
                                         </div>
@@ -1154,13 +1154,13 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{block.data.description}</p>
                                   {block.data.ctaText && (
                                     <div className="pt-2">
-                                      <span className="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer shadow transition-all">
+                                      <span className="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5  cursor-pointer shadow transition-all">
                                         {block.data.ctaText}
                                       </span>
                                     </div>
                                   )}
                                 </div>
-                                <div className={`relative aspect-video sm:aspect-square md:aspect-video rounded-3xl overflow-hidden border border-slate-100 shadow-md ${
+                                <div className={`relative aspect-video sm:aspect-square md:aspect-video  overflow-hidden border border-slate-100 shadow-md ${
                                   block.data.imagePosition === "left" ? "md:order-1" : "md:order-2"
                                 }`}>
                                   <img src={block.data.imageUrl || "/uploads/process-preview.jpg"} alt={block.data.title} className="w-full h-full object-cover" />
@@ -1184,10 +1184,10 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   {productsList
                                     .filter(p => (block.data.productIds || []).includes(p.id))
                                     .map(p => (
-                                      <div key={p.id} className="bg-cream rounded-3xl border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition">
+                                      <div key={p.id} className="bg-cream  border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition">
                                         <div className="relative aspect-square overflow-hidden bg-slate-50">
                                           <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                                          <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                          <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1  uppercase tracking-wider">
                                             {p.categoryLabel}
                                           </span>
                                         </div>
@@ -1196,7 +1196,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                             <h3 className="text-xs font-bold text-slate-900 group-hover:text-orange-500 transition line-clamp-1">{p.name}</h3>
                                             <p className="text-xs font-black text-orange-500">{p.price}</p>
                                           </div>
-                                          <span className="w-full text-center bg-slate-900 text-white text-[10px] font-bold py-2 rounded-xl block cursor-pointer transition hover:bg-orange-500">
+                                          <span className="w-full text-center bg-slate-900 text-white text-[10px] font-bold py-2  block cursor-pointer transition hover:bg-orange-500">
                                             Đặt Mua Ngay
                                           </span>
                                         </div>

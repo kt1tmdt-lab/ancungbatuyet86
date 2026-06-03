@@ -28,8 +28,7 @@ export default function Navbar() {
               <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="w-full h-full object-cover" />
             </div>
             <div className="hidden sm:block">
-              <p className="font-bold text-neutral text-sm leading-tight">Ăn Cùng</p>
-              <p className="font-bold text-primary text-sm leading-tight">Bà Tuyết</p>
+              <p className="font-bold text-neutral text-sm leading-tight">Ăn Cùng</p>              <p className="font-bold text-primary text-sm leading-tight">Bà Tuyết</p>
             </div>
           </Link>
 
@@ -40,11 +39,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-primary bg-red-50"
-                      : "text-gray-600 hover:text-primary hover:bg-red-50/50"
-                  }`}
+                  className={`px-3 py-2 rounded-none text-sm font-medium transition-colors ${isActive
+                    ? "text-primary bg-red-50"
+                    : "text-gray-600 hover:text-primary hover:bg-red-50/50"
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -55,7 +53,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <a
               href="tel:0989852948"
-              className="hidden md:flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors"
+              className="hidden md:flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-none text-sm font-semibold hover:bg-primary-dark transition-colors"
             >
               <Phone size={14} />
               <span>0989 852 948</span>
@@ -63,7 +61,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setOpen(!open)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 rounded-none hover:bg-gray-100 transition-colors"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
@@ -82,9 +80,8 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                    isActive ? "text-primary bg-red-50" : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`px-4 py-3 rounded-none text-base font-medium transition-colors ${isActive ? "text-primary bg-red-50" : "text-gray-600 hover:bg-gray-50"
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -92,7 +89,7 @@ export default function Navbar() {
             })}
             <a
               href="tel:0989852948"
-              className="mt-2 flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-lg text-base font-semibold"
+              className="mt-2 flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-none text-base font-semibold"
             >
               <Phone size={16} />
               <span>0989 852 948</span>

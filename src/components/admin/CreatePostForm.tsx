@@ -33,7 +33,7 @@ const POST_TEMPLATES = [
     content: `<h2>[Tên món ăn hấp dẫn]</h2>
 <p><em>Một mô tả ngắn khoảng 2-3 câu giới thiệu món ăn này ngon như thế nào và tại sao độc giả nên thử làm ngay hôm nay.</em></p>
 
-<div class="bg-orange-50 border-l-4 border-orange-500 p-4 my-6 rounded-r-2xl">
+<div class="bg-orange-50 border-l-4 border-orange-500 p-4 my-6 ">
   <p class="font-bold text-orange-900 my-0">⏱️ Thông tin chuẩn bị:</p>
   <ul class="my-1 text-slate-750 text-sm">
     <li><strong>Thời gian chuẩn bị:</strong> 15 phút</li>
@@ -60,7 +60,7 @@ const POST_TEMPLATES = [
 </ol>
 
 <div class="my-6">
-  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80" alt="Thành phẩm món ăn" class="w-full rounded-2xl shadow-sm" />
+  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80" alt="Thành phẩm món ăn" class="w-full  shadow-sm" />
 </div>
 
 <h3>✨ Mẹo nhỏ từ Bà Tuyết</h3>
@@ -84,7 +84,7 @@ const POST_TEMPLATES = [
 </ul>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-  <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-2xl">
+  <div class="bg-green-50 border-l-4 border-green-500 p-4 ">
     <p class="font-bold text-green-900 my-0">👍 Ưu điểm nổi bật:</p>
     <ul class="text-xs text-slate-750 my-1">
       <li>Nguyên liệu sạch sẽ, rõ nguồn gốc</li>
@@ -92,7 +92,7 @@ const POST_TEMPLATES = [
       <li>Giá cả bình dân phù hợp học sinh sinh viên</li>
     </ul>
   </div>
-  <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-2xl">
+  <div class="bg-red-50 border-l-4 border-red-500 p-4 ">
     <p class="font-bold text-red-900 my-0">👎 Điểm cần lưu ý:</p>
     <ul class="text-xs text-slate-750 my-1">
       <li>Khá cay, nên chuẩn bị sẵn nước uống kèm</li>
@@ -112,7 +112,7 @@ const POST_TEMPLATES = [
     content: `<h2>BÙNG NỔ ƯU ĐÃI: [Tên chương trình khuyến mãi]</h2>
 <p><strong>Cơ hội vàng cho các tín đồ ăn vặt!</strong> Ăn Cùng Bà Tuyết xin gửi tới quý khách hàng chương trình khuyến mãi lớn nhất năm với hàng ngàn phần quà và ưu đãi giảm giá sập sàn dưới đây.</p>
 
-<div class="bg-amber-500 text-slate-950 font-black text-center p-3 rounded-xl my-6">
+<div class="bg-amber-500 text-slate-950 font-black text-center p-3  my-6">
   🔥 KHUYẾN MÃI ÁP DỤNG TỪ [Ngày bắt đầu] ĐẾN HẾT NGÀY [Ngày kết thúc] 🔥
 </div>
 
@@ -172,7 +172,7 @@ const POST_TEMPLATES = [
   <li><strong>Ý thứ ba:</strong> Chi tiết phân tích...</li>
 </ul>
 
-<div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6 rounded-r-2xl">
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6 ">
   <p class="font-bold text-blue-900 my-0">💡 Bạn có biết?</p>
   <p class="text-slate-700 text-xs my-1">Nhập một thông tin thú vị hoặc số liệu thống kê liên quan để bài viết thêm phần chuyên nghiệp và tăng sức thuyết phục.</p>
 </div>
@@ -410,7 +410,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Main form (Col-span 2) */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-white  border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
               {postId ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
             </h2>
@@ -423,7 +423,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Nhập tiêu đề hấp dẫn..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold text-slate-900"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200  focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold text-slate-900"
                 required
               />
             </div>
@@ -436,7 +436,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
                 placeholder="duong-dan-bai-viet"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-medium text-slate-700"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm font-medium text-slate-700"
                 required
               />
             </div>
@@ -449,13 +449,13 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Tóm tắt ngắn gọn nội dung bài viết để hiển thị trên trang danh sách tin tức..."
                 rows={3}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-slate-700"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-sm text-slate-700"
               />
             </div>
 
             {/* Quick Content Templates */}
             {!postId && (
-              <div className="bg-orange-50/50 border border-orange-100 p-5 rounded-2xl space-y-3">
+              <div className="bg-orange-50/50 border border-orange-100 p-5  space-y-3">
                 <div className="flex items-center gap-1.5 text-slate-800">
                   <Sparkles className="text-orange-500" size={16} />
                   <span className="text-xs font-bold text-slate-900">Chọn mẫu soạn nhanh bài viết (Blog Templates):</span>
@@ -466,7 +466,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                       key={tmpl.id}
                       type="button"
                       onClick={() => applyTemplate(tmpl)}
-                      className="text-left p-3.5 bg-white border border-slate-100 rounded-2xl hover:border-orange-500 hover:bg-orange-50/10 hover:shadow-sm transition-all select-none group cursor-pointer"
+                      className="text-left p-3.5 bg-white border border-slate-100  hover:border-orange-500 hover:bg-orange-50/10 hover:shadow-sm transition-all select-none group cursor-pointer"
                     >
                       <div className="text-xs font-bold text-slate-900 group-hover:text-orange-650">
                         {tmpl.name}
@@ -484,11 +484,11 @@ export function CreatePostForm({ postId }: { postId?: string }) {
             <div className="space-y-3">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <label className="block text-sm font-bold text-slate-800">Nội dung bài viết (HTML / Text)</label>
-                <div className="flex bg-slate-100 p-1 rounded-lg">
+                <div className="flex bg-slate-100 p-1 ">
                   <button
                     type="button"
                     onClick={() => setActiveTab("write")}
-                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                    className={`px-3 py-1.5  text-xs font-bold transition ${
                       activeTab === "write" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
@@ -497,7 +497,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                   <button
                     type="button"
                     onClick={() => setActiveTab("preview")}
-                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                    className={`px-3 py-1.5  text-xs font-bold transition ${
                       activeTab === "preview" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
                     }`}
                   >
@@ -507,7 +507,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
               </div>
 
               {activeTab === "write" ? (
-                <div className="space-y-2 border border-slate-200 rounded-2xl overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500 transition-all">
+                <div className="space-y-2 border border-slate-200  overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500 transition-all">
                   {/* Text editor formatting toolbar */}
                   <div className="flex flex-wrap gap-1 bg-slate-50 p-2 border-b border-slate-200">
                     <button
@@ -552,7 +552,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => insertFormatting('<img src="https://images.unsplash.com/...?" alt="mô tả ảnh" className="w-full rounded-2xl my-6" />', "")}
+                      onClick={() => insertFormatting('<img src="https://images.unsplash.com/...?" alt="mô tả ảnh" className="w-full  my-6" />', "")}
                       className="p-1.5 text-slate-600 hover:bg-slate-200 rounded transition"
                       title="Chèn ảnh bìa bài viết"
                     >
@@ -586,11 +586,11 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                   />
                 </div>
               ) : (
-                <div className="border border-slate-200 rounded-2xl p-6 bg-cream min-h-[300px] overflow-y-auto max-h-[500px]">
+                <div className="border border-slate-200  p-6 bg-cream min-h-[300px] overflow-y-auto max-h-[500px]">
                   {content ? (
                     <article className="prose prose-orange max-w-none text-slate-800">
                       {coverImageUrl && (
-                        <img src={coverImageUrl} alt="Cover Preview" className="w-full h-auto max-h-[300px] object-cover rounded-2xl mb-6 shadow-sm" />
+                        <img src={coverImageUrl} alt="Cover Preview" className="w-full h-auto max-h-[300px] object-cover  mb-6 shadow-sm" />
                       )}
                       <div dangerouslySetInnerHTML={{ __html: content }} />
                     </article>
@@ -605,7 +605,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
 
         {/* Sidebar settings (Col-span 1) */}
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-6">
             <h2 className="text-md font-bold text-slate-900">Thiết lập bài viết</h2>
 
             {/* Category selection */}
@@ -614,7 +614,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               >
                 <option value="">Chọn chuyên mục...</option>
                 {categories.map((c) => (
@@ -631,7 +631,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="Ví dụ: nhà máy, ăn vặt, chân gà"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
               <p className="text-[10px] text-slate-400">Ngăn cách nhau bằng dấu phẩy (,)</p>
             </div>
@@ -644,10 +644,10 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 value={coverImageUrl}
                 onChange={(e) => setCoverImageUrl(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-750 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-semibold text-slate-750 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
               {coverImageUrl && (
-                <div className="relative aspect-video rounded-xl overflow-hidden border border-slate-100 mt-2">
+                <div className="relative aspect-video  overflow-hidden border border-slate-100 mt-2">
                   <img src={coverImageUrl} alt="Cover Thumbnail" className="w-full h-full object-cover" />
                 </div>
               )}
@@ -655,11 +655,11 @@ export function CreatePostForm({ postId }: { postId?: string }) {
           </div>
 
           {/* SEO Details Card */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-6">
             <h2 className="text-md font-bold text-slate-900">Tối ưu hóa SEO</h2>
 
             {/* SEO Title */}
-            <div className="space-y-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+            <div className="space-y-1 bg-slate-50/50 p-2.5  border border-slate-100">
               <label className="block text-[11px] font-bold text-slate-700">SEO Title</label>
               <input
                 type="text"
@@ -671,7 +671,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
             </div>
 
             {/* SEO Description */}
-            <div className="space-y-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+            <div className="space-y-1 bg-slate-50/50 p-2.5  border border-slate-100">
               <label className="block text-[11px] font-bold text-slate-700">SEO Meta Description</label>
               <textarea
                 value={seoDescription}
@@ -683,7 +683,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
             </div>
 
             {/* SEO Keywords */}
-            <div className="space-y-1 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100">
+            <div className="space-y-1 bg-slate-50/50 p-2.5  border border-slate-100">
               <label className="block text-[11px] font-bold text-slate-700">SEO Keywords</label>
               <input
                 type="text"
@@ -696,16 +696,16 @@ export function CreatePostForm({ postId }: { postId?: string }) {
           </div>
 
           {/* Action buttons box */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-3">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-3">
             {error && (
-              <div className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-200 rounded-xl">
+              <div className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-200 ">
                 <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={16} />
                 <p className="text-xs text-red-700 font-semibold leading-relaxed">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="flex items-start gap-2.5 p-3 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-start gap-2.5 p-3 bg-green-50 border border-green-200 ">
                 <Check className="text-green-600 mt-0.5 shrink-0" size={16} />
                 <p className="text-xs text-green-700 font-semibold leading-relaxed">{success}</p>
               </div>
@@ -717,7 +717,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 type="button"
                 disabled={loading}
                 onClick={() => handleSubmit("DRAFT")}
-                className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-750 py-2.5 rounded-xl text-xs font-bold transition disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-750 py-2.5  text-xs font-bold transition disabled:opacity-50"
               >
                 <Save size={13} />
                 <span>Lưu bản nháp</span>
@@ -728,7 +728,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                 type="button"
                 disabled={loading}
                 onClick={() => handleSubmit("PENDING_REVIEW")}
-                className="w-full inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-xs font-bold transition disabled:opacity-50 shadow-sm shadow-orange-500/10"
+                className="w-full inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5  text-xs font-bold transition disabled:opacity-50 shadow-sm shadow-orange-500/10"
               >
                 <Send size={13} />
                 <span>Gửi xét duyệt</span>
@@ -740,7 +740,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                   type="button"
                   disabled={loading}
                   onClick={() => handleSubmit("PUBLISHED")}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl text-xs font-bold transition disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5  text-xs font-bold transition disabled:opacity-50"
                 >
                   <Check size={13} />
                   <span>Xuất bản trực tiếp</span>

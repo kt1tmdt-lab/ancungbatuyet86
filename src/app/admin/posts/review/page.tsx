@@ -13,7 +13,7 @@ export default function ReviewPage() {
           <p className="text-slate-500 text-sm mt-1">Xem xét, phê duyệt hoặc từ chối bài viết từ ban biên tập.</p>
         </div>
 
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex gap-3 shadow-sm">
+        <div className="bg-orange-50 border border-orange-200  p-4 flex gap-3 shadow-sm">
           <AlertCircle className="text-orange-600 shrink-0 mt-0.5" size={20} />
           <div>
             <p className="text-sm font-bold text-orange-800">Quy định phê duyệt bài viết</p>
@@ -23,7 +23,7 @@ export default function ReviewPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+        <div className="bg-white  border border-slate-100 p-6 shadow-sm">
           <PostsTable status="PENDING_REVIEW" />
         </div>
       </div>

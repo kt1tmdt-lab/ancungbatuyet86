@@ -92,7 +92,7 @@ export default function Footer() {
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold hover:bg-primary transition-colors"
+                  className="w-9 h-9 rounded-none bg-white/10 flex items-center justify-center text-xs font-bold hover:bg-primary transition-colors"
                 >
                   {s.label[0]}
                 </a>

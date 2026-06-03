@@ -98,14 +98,14 @@ export default function AdminPagesList() {
           </div>
           <Link
             href="/admin/pages/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Thêm Trang Mới</span>
           </Link>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
+        <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-4">
           {/* Toolbar */}
           <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-2">
             <div className="flex-1 max-w-md relative">
@@ -115,7 +115,7 @@ export default function AdminPagesList() {
                 placeholder="Tìm tên trang, slug..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
               />
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function AdminPagesList() {
               <p className="text-xs text-slate-400">Nhấp nút "Thêm Trang Mới" để tạo trang tùy biến đầu tiên.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <div className="overflow-x-auto  border border-slate-100">
               <table className="w-full text-sm text-left text-slate-700">
                 <thead className="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-100 font-bold">
                   <tr>
@@ -155,12 +155,12 @@ export default function AdminPagesList() {
                           </span>
                         </td>
                         <td className="px-5 py-4 font-mono text-xs text-slate-500">
-                          <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-lg">
+                          <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 ">
                             /trang/{page.slug}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <span className={`inline-block border text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                          <span className={`inline-block border text-[10px] font-extrabold px-2.5 py-0.5  uppercase tracking-wider ${
                             isDraft
                               ? "bg-slate-100 text-slate-700 border-slate-200"
                               : "bg-green-100 text-green-700 border-green-200"
@@ -177,7 +177,7 @@ export default function AdminPagesList() {
                             <Link
                               href={`/trang/${page.slug}`}
                               target="_blank"
-                              className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                              className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100  transition"
                               title="Xem trang thực tế"
                             >
                               <ExternalLink size={15} />
@@ -186,7 +186,7 @@ export default function AdminPagesList() {
                             {/* Edit */}
                             <Link
                               href={`/admin/pages/${page.id}/edit`}
-                              className="p-1.5 text-slate-650 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                              className="p-1.5 text-slate-650 hover:text-orange-500 hover:bg-slate-100  transition"
                               title="Chỉnh sửa bố cục"
                             >
                               <Edit3 size={15} />
@@ -196,7 +196,7 @@ export default function AdminPagesList() {
                             <button
                               onClick={() => handleDelete(page.id)}
                               disabled={actionLoading === page.id}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50  transition"
                               title="Xóa trang"
                             >
                               <Trash2 size={15} />

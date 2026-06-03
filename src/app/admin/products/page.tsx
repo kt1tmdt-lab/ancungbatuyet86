@@ -100,14 +100,14 @@ export default function AdminProductsPage() {
           </div>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Thêm sản phẩm mới</span>
           </Link>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+        <div className="bg-white  border border-slate-100 p-6 shadow-sm">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <Loader className="animate-spin text-orange-500" size={36} />
@@ -120,7 +120,7 @@ export default function AdminProductsPage() {
               <p className="text-xs text-slate-400">Hãy thêm sản phẩm mới để hiển thị lên website.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <div className="overflow-x-auto  border border-slate-100">
               <table className="w-full text-sm text-left text-slate-700">
                 <thead className="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-100 font-bold">
                   <tr>
@@ -139,7 +139,7 @@ export default function AdminProductsPage() {
                           <img
                             src={prod.image}
                             alt={prod.name}
-                            className="w-12 h-12 object-cover rounded-xl border border-slate-100"
+                            className="w-12 h-12 object-cover  border border-slate-100"
                           />
                           <div className="flex flex-col">
                             <span className="font-bold text-slate-900 leading-tight">
@@ -152,7 +152,7 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5 ">
                           {prod.categoryLabel}
                         </span>
                       </td>
@@ -163,7 +163,7 @@ export default function AdminProductsPage() {
                         <button
                           onClick={() => handleToggleFeatured(prod)}
                           disabled={actionLoading === prod.id}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5  text-xs font-bold transition-all ${
                             prod.featured
                               ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
                               : "bg-slate-100 text-slate-400 hover:bg-slate-200"
@@ -179,14 +179,14 @@ export default function AdminProductsPage() {
                           <a
                             href={`/san-pham/${prod.slug}`}
                             target="_blank"
-                            className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100  transition"
                             title="Xem trang sản phẩm"
                           >
                             <ExternalLink size={15} />
                           </a>
                           <Link
                             href={`/admin/products/${prod.id}/edit`}
-                            className="p-1.5 text-slate-600 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
+                            className="p-1.5 text-slate-600 hover:text-orange-500 hover:bg-slate-100  transition"
                             title="Sửa sản phẩm"
                           >
                             <Edit3 size={15} />
@@ -194,7 +194,7 @@ export default function AdminProductsPage() {
                           <button
                             onClick={() => handleDelete(prod.id)}
                             disabled={actionLoading === prod.id}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50  transition disabled:opacity-50"
                             title="Xóa sản phẩm"
                           >
                             <Trash size={15} />

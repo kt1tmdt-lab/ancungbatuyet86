@@ -169,7 +169,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2  transition"
         >
           <ArrowLeft size={14} />
           <span>Quay lại danh sách</span>
@@ -177,7 +177,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all disabled:opacity-50"
         >
           {loading ? <Loader size={16} className="animate-spin" /> : <Save size={16} />}
           <span>{initialData?.id ? "Lưu thay đổi" : "Tạo sản phẩm"}</span>
@@ -185,7 +185,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200  text-red-700 text-sm">
           <AlertCircle className="shrink-0 mt-0.5" size={18} />
           <span>{error}</span>
         </div>
@@ -194,7 +194,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       <div className="grid md:grid-cols-3 gap-8">
         {/* Left Column: Form Fields */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+          <div className="bg-white  border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
             <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Thông tin cơ bản</h3>
             
             <div className="grid sm:grid-cols-2 gap-4">
@@ -206,7 +206,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ví dụ: Chân Gà Rút Xương"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                 />
               </div>
 
@@ -218,7 +218,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="Ví dụ: chan-ga-rut-xuong"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                 />
               </div>
             </div>
@@ -231,7 +231,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
                 placeholder="Ví dụ: Giòn ngon sần sật, đậm vị ớt hiểm Việt Nam."
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
               />
             </div>
 
@@ -243,7 +243,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Nhập giới thiệu chi tiết về sản phẩm..."
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
               />
             </div>
 
@@ -256,7 +256,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Ví dụ: 89.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                 />
               </div>
 
@@ -267,7 +267,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
                   placeholder="Ví dụ: 45.000đ - 139.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                 />
               </div>
             </div>
@@ -280,7 +280,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={purchaseUrl}
                 onChange={(e) => setPurchaseUrl(e.target.value)}
                 placeholder="Ví dụ: https://shopee.vn/an-vat-ba-tuyet-chan-ga"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
               />
               <p className="text-[11px] text-slate-400 mt-1">Khi khách hàng nhấn "Mua ngay" trên web sẽ tự động mở tab mới dẫn đến link này.</p>
             </div>
@@ -289,7 +289,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
 
         {/* Right Column: Settings & Media */}
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-5">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-5">
             <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại & Đẩy bài</h3>
 
             <div>
@@ -297,7 +297,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
               >
                 <option value="chan-ga">Chân Gà</option>
                 <option value="tam-cay">Tăm Cay</option>
@@ -306,7 +306,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               </select>
             </div>
 
-            <div className="p-4 bg-orange-50/50 rounded-2xl border border-orange-100 flex items-center justify-between">
+            <div className="p-4 bg-orange-50/50  border border-orange-100 flex items-center justify-between">
               <div>
                 <span className="block text-sm font-bold text-orange-950">Push nổi bật</span>
                 <span className="block text-xs text-orange-700">Đẩy lên trang chủ website</span>
@@ -318,12 +318,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   onChange={(e) => setFeatured(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none  peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after: after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
               </label>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-5">
+          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-5">
             <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Hình ảnh & Nguyên liệu</h3>
 
             <div>
@@ -332,12 +332,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               <div className="space-y-3">
                 {/* Image Preview */}
                 {image && (
-                  <div className="relative w-32 h-32 rounded-2xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
+                  <div className="relative w-32 h-32  overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
                     <img src={image} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       type="button"
                       onClick={() => setImage("")}
-                      className="absolute top-1.5 right-1.5 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition shadow-sm"
+                      className="absolute top-1.5 right-1.5 bg-red-500 text-white p-1.5  hover:bg-red-600 transition shadow-sm"
                       title="Xóa ảnh"
                     >
                       <Trash size={12} />
@@ -347,7 +347,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
 
                 {/* File Upload Selector */}
                 <div className="flex items-center gap-3">
-                  <label className="flex-1 cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-orange-300 rounded-2xl p-4 bg-slate-50 hover:bg-orange-50/5 transition-all text-slate-500">
+                  <label className="flex-1 cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-orange-300  p-4 bg-slate-50 hover:bg-orange-50/5 transition-all text-slate-500">
                     <input
                       type="file"
                       accept="image/*"
@@ -379,7 +379,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
                     placeholder="https://images.unsplash.com/..."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                   />
                 </div>
               </div>
@@ -394,25 +394,25 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={newIngredient}
                   onChange={(e) => setNewIngredient(e.target.value)}
                   placeholder="Ví dụ: Ớt hiểm đỏ"
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200  text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
                 />
                 <button
                   type="button"
                   onClick={handleAddIngredient}
-                  className="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition"
+                  className="px-3 py-2 bg-slate-900 text-white  text-xs font-bold hover:bg-slate-800 transition"
                 >
                   <Plus size={14} />
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 border border-dashed border-slate-200 rounded-xl">
+              <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 border border-dashed border-slate-200 ">
                 {ingredients.length === 0 ? (
                   <span className="text-[11px] text-slate-400 italic">Chưa thêm nguyên liệu nào</span>
                 ) : (
                   ingredients.map((ing, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-[11px] font-semibold pl-2.5 pr-1 py-0.5 rounded-lg border border-slate-200"
+                      className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 text-[11px] font-semibold pl-2.5 pr-1 py-0.5  border border-slate-200"
                     >
                       <span>{ing}</span>
                       <button

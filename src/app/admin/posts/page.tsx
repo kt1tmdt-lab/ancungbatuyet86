@@ -16,14 +16,14 @@ export default function PostsPage() {
           </div>
           <Link
             href="/admin/posts/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Viết bài mới</span>
           </Link>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+        <div className="bg-white  border border-slate-100 p-6 shadow-sm">
           <PostsTable />
         </div>
       </div>

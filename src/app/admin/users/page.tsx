@@ -107,7 +107,7 @@ export default function UsersPage() {
     <ProtectedRoute requiredRole="ADMIN">
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-md">
+          <div className="w-10 h-10 bg-slate-900 text-white  flex items-center justify-center shadow-md">
             <Users size={20} />
           </div>
           <div>
@@ -118,21 +118,21 @@ export default function UsersPage() {
 
         {/* Messaging responses */}
         {error && (
-          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl max-w-md">
+          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200  max-w-md">
             <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={16} />
             <p className="text-xs text-red-700 font-semibold leading-normal">{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-xl max-w-md">
+          <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200  max-w-md">
             <Check className="text-green-600 mt-0.5 shrink-0" size={16} />
             <p className="text-xs text-green-700 font-semibold leading-normal">{success}</p>
           </div>
         )}
 
         {/* Users list table */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+        <div className="bg-white  border border-slate-100 p-6 shadow-sm">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-2">
               <Loader className="animate-spin text-orange-500" size={36} />
@@ -144,7 +144,7 @@ export default function UsersPage() {
               <p className="text-sm font-semibold">Chưa có thành viên nào khác</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <div className="overflow-x-auto  border border-slate-100">
               <table className="w-full text-sm text-left text-slate-700">
                 <thead className="text-xs text-slate-450 uppercase bg-slate-50 font-bold border-b border-slate-100">
                   <tr>
@@ -181,14 +181,14 @@ export default function UsersPage() {
                           {new Date(acc.createdAt).toLocaleDateString("vi-VN")}
                         </td>
                         <td className="px-5 py-4 text-center">
-                          <div className="inline-flex items-center gap-1 text-slate-600 font-semibold text-xs bg-slate-100 px-2.5 py-0.5 rounded-full">
+                          <div className="inline-flex items-center gap-1 text-slate-600 font-semibold text-xs bg-slate-100 px-2.5 py-0.5 ">
                             <FileText size={11} />
                             <span>{acc._count?.posts || 0}</span>
                           </div>
                         </td>
                         <td className="px-5 py-4">
                           {isSelf ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1 rounded-xl">
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1 ">
                               <ShieldCheck size={13} />
                               <span>{roleLabels[acc.role]}</span>
                             </span>
@@ -198,7 +198,7 @@ export default function UsersPage() {
                                 value={acc.role}
                                 disabled={updatingId === acc.id}
                                 onChange={(e) => handleRoleChange(acc.id, e.target.value)}
-                                className="bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 cursor-pointer disabled:opacity-50"
+                                className="bg-slate-50 border border-slate-200 px-3 py-1  text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 cursor-pointer disabled:opacity-50"
                               >
                                 <option value="ADMIN">Quản trị viên</option>
                                 <option value="EDITOR">Biên tập viên</option>

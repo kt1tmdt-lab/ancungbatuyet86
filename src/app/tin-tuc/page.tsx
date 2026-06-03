@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Clock, ArrowRight, Search, Calendar, User, BookOpen } from "lucide-react";
-import SectionHeader from "@/components/shared/SectionHeader";
+import { ArrowRight, BookOpen, Calendar, Clock, Search, User } from "lucide-react";
 
 interface Post {
   id: string;
@@ -27,13 +26,17 @@ interface Category {
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("vi-VN", { day: "numeric", month: "long", year: "numeric" });
+  return new Date(dateStr).toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function getReadTime(content: string | null) {
   if (!content) return "2 phút";
-  const words = content.trim().split(/\s+/).length;
-  const time = Math.ceil(words / 200); // 200 words per minute average
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  const time = Math.max(1, Math.ceil(words / 200));
   return `${time} phút`;
 }
 
@@ -57,7 +60,7 @@ export default function BlogPage() {
       const res = await fetch("/api/categories");
       if (res.ok) {
         const data = await res.json();
-        setCategories(data);
+        setCategories(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error("Failed to fetch categories", error);
@@ -72,58 +75,57 @@ export default function BlogPage() {
       if (selectedCategorySlug && selectedCategorySlug !== "all") {
         params.append("categorySlug", selectedCategorySlug);
       }
-      if (searchQuery) {
-        params.append("search", searchQuery);
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
       }
 
       const res = await fetch(`/api/posts?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setPosts(data);
+        setPosts(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error("Failed to fetch posts", error);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // The latest published post is the Featured Post
   const featured = posts.length > 0 ? posts[0] : null;
   const listPosts = posts.length > 1 ? posts.slice(1) : [];
+  const showFeatured = Boolean(featured && !searchQuery && selectedCategorySlug === "all");
+  const gridPosts = showFeatured ? listPosts : posts;
 
   return (
-    <div className="bg-[#F8FAFC] min-h-screen">
-      {/* Page Header */}
-      <section className="pt-24 pb-12 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <span className="inline-block bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Tin tức & Góc chia sẻ
-            </span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-              Ăn Cùng Bà Tuyết Blog
+    <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
+      <section className="border-b border-orange-100 bg-[#fff7ed] px-4 pb-10 pt-28 sm:px-6 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">
+              Tin tức & truyền thông
+            </p>
+            <h1 className="mt-3 max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
+              Câu chuyện sản phẩm, nhà máy và hoạt động thương hiệu.
             </h1>
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-              Cập nhật các thông báo mới nhất, hậu trường thú vị tại xưởng sản xuất, và các công thức biến tấu món ăn vặt độc đáo từ Ăn Cùng Bà Tuyết.
+          </div>
+          <div className="border-l-4 border-orange-500 bg-white p-6">
+            <p className="text-sm font-bold leading-7 text-slate-600 sm:text-base">
+              Trang tin tức nên giống một chuyên trang truyền thông: có ảnh, chuyên mục, ngày đăng và nội dung rõ ràng để tăng niềm tin cho khách hàng, đại lý và đối tác.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Filter and Search Bar */}
-      <section className="py-6 bg-white border-b border-slate-100 sticky top-16 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          {/* Category Tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+      <section className="sticky top-16 z-30 border-b border-orange-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
             <button
               onClick={() => setSelectedCategorySlug("all")}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-                selectedCategorySlug === "all"
-                  ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className={`shrink-0 border px-4 py-2 text-xs font-black uppercase tracking-wider transition ${selectedCategorySlug === "all"
+                  ? "border-orange-500 bg-orange-500 text-white"
+                  : "border-orange-100 bg-[#fffaf3] text-slate-600 hover:border-orange-300"
+                }`}
             >
               Tất cả
             </button>
@@ -131,173 +133,173 @@ export default function BlogPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategorySlug(cat.slug)}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
-                  selectedCategorySlug === cat.slug
-                    ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
+                className={`shrink-0 border px-4 py-2 text-xs font-black uppercase tracking-wider transition ${selectedCategorySlug === cat.slug
+                    ? "border-orange-500 bg-orange-500 text-white"
+                    : "border-orange-100 bg-[#fffaf3] text-slate-600 hover:border-orange-300"
+                  }`}
               >
                 {cat.name}
               </button>
             ))}
           </div>
 
-          {/* Search Box */}
-          <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+          <div className="relative w-full lg:max-w-sm">
+            <Search className="absolute left-3 top-3 text-slate-400" size={16} />
             <input
               type="text"
-              placeholder="Tìm bài viết..."
+              placeholder="Tìm bài viết, sản phẩm, nhà máy..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-250 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+              className="w-full border border-orange-100 bg-[#fffaf3] py-3 pl-10 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:bg-white"
             />
           </div>
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="px-4 py-10 sm:px-6 lg:px-10">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="flex flex-col items-center justify-center border border-orange-100 bg-white py-24">
             <Clock className="animate-spin text-orange-500" size={36} />
-            <p className="text-sm font-semibold text-slate-500">Đang tải bài viết...</p>
+            <p className="mt-3 text-sm font-semibold text-slate-500">Đang tải bài viết...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-20 text-slate-500 space-y-3">
-            <BookOpen size={48} className="mx-auto text-slate-300" />
-            <p className="text-lg font-bold text-slate-700">Không tìm thấy bài viết nào</p>
-            <p className="text-sm text-slate-400">Hãy thử nhập từ khóa khác hoặc chọn chuyên mục khác.</p>
+          <div className="border border-dashed border-orange-200 bg-white py-20 text-center text-slate-500">
+            <BookOpen size={48} className="mx-auto text-orange-300" />
+            <p className="mt-3 text-lg font-black text-slate-800">Không tìm thấy bài viết nào</p>
+            <p className="mt-1 text-sm text-slate-500">Hãy thử từ khóa khác hoặc chọn chuyên mục khác.</p>
           </div>
         ) : (
-          <div className="space-y-12">
-            {/* Featured Post Render */}
-            {featured && !searchQuery && selectedCategorySlug === "all" && (
+          <div className="space-y-10">
+            {showFeatured && featured && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 22 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.4 }}
               >
                 <Link
                   href={`/tin-tuc/${featured.slug}`}
-                  className="group block rounded-3xl overflow-hidden bg-white hover:shadow-xl border border-slate-100/80 transition-all duration-300"
+                  className="group block border border-orange-100 bg-white transition hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
                 >
-                  <div className="grid md:grid-cols-2 gap-0">
-                    <div className="aspect-video md:aspect-auto bg-slate-800 relative min-h-[300px] overflow-hidden">
+                  <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className="relative min-h-[360px] overflow-hidden border-b border-orange-100 bg-orange-50 lg:border-b-0 lg:border-r">
                       {featured.coverImageUrl ? (
                         <img
                           src={featured.coverImageUrl}
                           alt={featured.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="h-full min-h-[360px] w-full object-cover transition duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-800 text-white font-extrabold text-6xl">
+                        <div className="flex h-full min-h-[360px] items-center justify-center bg-orange-100 text-6xl font-black text-orange-500">
                           BT
                         </div>
                       )}
-                      <span className="absolute top-4 left-4 bg-orange-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                        Nổi bật
+                      <span className="absolute left-5 top-5 bg-orange-500 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                        Bài nổi bật
                       </span>
                     </div>
-                    <div className="p-8 sm:p-12 flex flex-col justify-center space-y-4">
+
+                    <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
                       {featured.category && (
-                        <span className="bg-orange-500/10 text-orange-600 text-xs font-bold px-3 py-1 rounded-full w-fit">
+                        <span className="mb-4 w-fit bg-orange-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                           {featured.category.name}
                         </span>
                       )}
-                      <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight group-hover:text-orange-500 transition-colors">
+                      <h2 className="text-3xl font-black leading-tight tracking-[-0.05em] text-slate-950 transition group-hover:text-orange-600 sm:text-4xl">
                         {featured.title}
                       </h2>
-                      <p className="text-slate-500 text-sm sm:text-base leading-relaxed line-clamp-3">
+                      <p className="mt-4 line-clamp-3 text-sm font-medium leading-7 text-slate-600 sm:text-base">
                         {featured.excerpt}
                       </p>
-                      <div className="flex items-center gap-6 pt-4 border-t border-slate-50 text-xs text-slate-400 font-semibold">
-                        <span className="flex items-center gap-1.5"><User size={14} /> {featured.author.name}</span>
-                        <span className="flex items-center gap-1.5"><Calendar size={14} /> {formatDate(featured.createdAt)}</span>
-                        <span className="flex items-center gap-1.5"><Clock size={14} /> {getReadTime(featured.content)}</span>
+                      <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 border-t border-orange-100 pt-5 text-xs font-bold text-slate-500">
+                        <span className="inline-flex items-center gap-1.5">
+                          <User size={14} className="text-orange-500" />
+                          {featured.author.name}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar size={14} className="text-orange-500" />
+                          {formatDate(featured.createdAt)}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock size={14} className="text-orange-500" />
+                          {getReadTime(featured.content)}
+                        </span>
                       </div>
+                      <span className="mt-7 inline-flex w-fit items-center gap-2 bg-orange-500 px-5 py-3 text-xs font-black uppercase tracking-wider text-white">
+                        Đọc bài viết
+                        <ArrowRight size={15} />
+                      </span>
                     </div>
                   </div>
                 </Link>
               </motion.div>
             )}
 
-            {/* Grid Posts */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* If we are searching or filtering, show all posts in grid, otherwise list rest */}
-              {(searchQuery || selectedCategorySlug !== "all" ? posts : listPosts).map((post, i) => (
-                <motion.div
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {gridPosts.map((post, i) => (
+                <motion.article
                   key={post.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                  transition={{ duration: 0.35, delay: i * 0.04 }}
                 >
                   <Link
                     href={`/tin-tuc/${post.slug}`}
-                    className="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-lg border border-slate-100/80 transition-all duration-300"
+                    className="group flex h-full flex-col border border-orange-100 bg-white transition hover:border-orange-300 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
                   >
-                    <div className="aspect-video bg-slate-800 overflow-hidden relative">
+                    <div className="relative aspect-[4/3] overflow-hidden border-b border-orange-100 bg-orange-50">
                       {post.coverImageUrl ? (
                         <img
                           src={post.coverImageUrl}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-slate-800 text-slate-200 font-extrabold text-3xl">
+                        <div className="flex h-full items-center justify-center bg-orange-100 text-3xl font-black text-orange-500">
                           BÀ TUYẾT
                         </div>
                       )}
                       {post.category && (
-                        <span className="absolute bottom-3 left-3 bg-slate-900/85 backdrop-blur-sm text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider">
+                        <span className="absolute bottom-4 left-4 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-orange-600 shadow-sm">
                           {post.category.name}
                         </span>
                       )}
                     </div>
-                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                      <div className="space-y-2">
-                        <h3 className="font-extrabold text-slate-900 text-base sm:text-lg leading-snug line-clamp-2 group-hover:text-orange-500 transition-colors">
+
+                    <div className="flex flex-1 flex-col justify-between p-6">
+                      <div>
+                        <h3 className="line-clamp-2 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950 transition group-hover:text-orange-600">
                           {post.title}
                         </h3>
-                        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed line-clamp-3">
+                        <p className="mt-3 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
                           {post.excerpt}
                         </p>
                       </div>
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-50 text-[11px] text-slate-400 font-semibold">
-                        <span className="flex items-center gap-1"><User size={12} /> {post.author.name}</span>
-                        <span className="flex items-center gap-1"><Clock size={12} /> {getReadTime(post.content)}</span>
+
+                      <div className="mt-6 border-t border-orange-100 pt-4">
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-bold text-slate-400">
+                          <span className="inline-flex items-center gap-1">
+                            <Calendar size={13} />
+                            {formatDate(post.createdAt)}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <Clock size={13} />
+                            {getReadTime(post.content)}
+                          </span>
+                        </div>
+                        <span className="mt-4 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wider text-orange-600">
+                          Xem thêm
+                          <ArrowRight size={14} className="transition group-hover:translate-x-1" />
+                        </span>
                       </div>
                     </div>
                   </Link>
-                </motion.div>
+                </motion.article>
               ))}
             </div>
           </div>
         )}
       </section>
-
-      {/* Newsletter */}
-      <section className="py-16 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 text-center space-y-4 relative z-10">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Đăng ký nhận tin từ Bà Tuyết</h2>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
-            Nhận thông báo tin tức nóng hổi, khuyến mãi đặc biệt và bí quyết chế biến món ăn ngon nhất.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 pt-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Email của bạn"
-              className="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-            />
-            <button className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-xs shadow-md shadow-orange-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-1">
-              <span>Đăng ký</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+    </main>
   );
 }

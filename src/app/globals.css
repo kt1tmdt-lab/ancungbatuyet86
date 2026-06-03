@@ -13,7 +13,7 @@
   --color-neutral-light: #334155;
   --color-cream: #F8FAFC;
   --color-warm-gray: #F1F5F9;
-  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans: "Be Vietnam Pro", system-ui, sans-serif;
 }
 
 * {
@@ -21,7 +21,7 @@
 }
 
 body {
-  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-family: "Be Vietnam Pro", system-ui, sans-serif;
   background: var(--color-cream);
   color: #2B2D42;
 }

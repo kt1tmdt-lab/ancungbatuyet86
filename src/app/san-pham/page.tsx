@@ -1,350 +1,320 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ArrowRight, 
-  ChevronRight, 
-  Award, 
-  ShieldCheck, 
-  Factory, 
-  Loader, 
-  AlertCircle, 
-  Flame, 
-  Star, 
-  Sparkles, 
-  ShoppingBag, 
-  CheckCircle2, 
-  TrendingUp, 
-  Zap 
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
+  ArrowRight,
+  Award,
+  CheckCircle2,
+  ChevronRight,
+  Factory,
+  Loader,
+  PackageCheck,
+  ShieldCheck,
+  ShoppingBag,
+  Star,
 } from "lucide-react";
-import SectionHeader from "@/components/shared/SectionHeader";
 
-// Card component with interactive cursor light effect (Magnetic Glow)
-function MagneticGlowCard({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const [pos, setPos] = useState({ x: 50, y: 50 });
+type Product = {
+  id: string | number;
+  slug?: string;
+  name?: string;
+  image?: string;
+  category?: string;
+  categoryLabel?: string;
+  tagline?: string;
+  description?: string;
+  price?: string;
+  priceRange?: string;
+  purchaseUrl?: string;
+  stats?: { label: string; value: string }[];
+};
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPos({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
-  }
+const categories = [
+  { id: "all", label: "Tất cả sản phẩm", note: "Dòng chủ lực" },
+  { id: "chan-ga", label: "Chân gà", note: "Best seller" },
+  { id: "tam-cay", label: "Tăm cay", note: "Dòng sản phẩm" },
+  { id: "banh-trang", label: "Bánh tráng", note: "Dòng sản phẩm" },
+  { id: "khac", label: "Sản phẩm khác", note: "Mở rộng menu" },
+];
 
+function StatPill({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
   return (
-    <div
-      onMouseMove={handleMouseMove}
-      className={`group relative overflow-hidden transition-all duration-500 ${className}`}
-    >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(circle at ${pos.x}% ${pos.y}%, rgba(249,115,22,0.18), transparent 32%)`,
-        }}
-      />
-      <div className="relative z-10 h-full flex flex-col justify-between">{children}</div>
-    </div>
-  );
-}
-
-// Flame levels rendering
-function FlameSpiceIndicator({ level }: { level: number }) {
-  if (level === 0) return (
-    <div className="flex items-center gap-1.5 bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-bold w-fit">
-      <span className="text-[10px] uppercase tracking-wider">Không cay</span>
-    </div>
-  );
-  return (
-    <div className="flex items-center gap-1 bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-bold w-fit">
-      <span className="text-[10px] uppercase tracking-wider text-red-500">Cấp độ cay:</span>
-      <div className="flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <Flame 
-            key={i} 
-            size={12} 
-            className={i < level ? "text-red-500 fill-red-500" : "text-slate-200"} 
-          />
-        ))}
+    <div className="border border-orange-100 bg-white p-5">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center bg-orange-500 text-white">
+        <Icon size={22} />
       </div>
+      <p className="text-sm font-black uppercase tracking-wider text-slate-950">{title}</p>
+      <p className="mt-2 text-xs font-medium leading-5 text-slate-500">{desc}</p>
     </div>
   );
 }
 
 export default function ProductsPage() {
-  const [productsList, setProductsList] = useState<any[]>([]);
+  const [productsList, setProductsList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("all");
-
-  const categories = [
-    { id: "all", label: "Tất cả chủ lực 🍲" },
-    { id: "chan-ga", label: "Chân Gà Rút Xương 🔥" },
-    { id: "tam-cay", label: "Tăm Cay Hạng Nhất 🌶️" },
-    { id: "banh-trang", label: "Bánh Tráng Giòn 🍘" },
-    { id: "khac", label: "Ăn Vặt Khác 🍿" }
-  ];
-
-  const mainProducts = productsList.filter((p) => p.category !== "khac");
-  const otherProductsList = productsList.filter((p) => p.category === "khac");
-
-  const displayedProducts = activeCategory === "all"
-    ? mainProducts
-    : activeCategory === "khac"
-      ? otherProductsList
-      : mainProducts.filter((p) => p.category === activeCategory);
 
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          setProductsList(data);
-        } else {
-          setProductsList([]);
-        }
+        setProductsList(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load products", err);
+        setProductsList([]);
         setLoading(false);
       });
   }, []);
 
-  // Helper properties extraction
-  const getSpiceLevel = (product: any) => {
-    const variants = Array.isArray(product.variants) ? product.variants : [];
-    const levels = variants.map((v: any) => v.spiceLevel).filter((l: any) => l !== undefined);
-    if (levels.length === 0) {
-      if (product.category === "chan-ga") return 3;
-      if (product.category === "tam-cay") return 3;
-      if (product.category === "banh-trang") return 2;
-      return 0;
-    }
-    return Math.max(...levels);
-  };
+  const mainProducts = useMemo(
+    () => productsList.filter((p) => p.category !== "khac"),
+    [productsList]
+  );
 
-  const getRating = (product: any) => {
+  const otherProductsList = useMemo(
+    () => productsList.filter((p) => p.category === "khac"),
+    [productsList]
+  );
+
+  const displayedProducts = useMemo(() => {
+    if (activeCategory === "all") return mainProducts;
+    if (activeCategory === "khac") return otherProductsList;
+    return mainProducts.filter((p) => p.category === activeCategory);
+  }, [activeCategory, mainProducts, otherProductsList]);
+
+
+  const getRating = (product: Product) => {
     const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find((s: any) => s.label.includes("Đánh giá"));
-    return stat ? stat.value : "4.8★";
+    const stat = stats.find((s) => s.label.includes("Đánh giá"));
+    return stat?.value || "4.8★";
   };
 
-  const getSales = (product: any) => {
+  const getSales = (product: Product) => {
     const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find((s: any) => s.label.includes("Đơn đã bán") || s.label.includes("Đơn thành công"));
-    return stat ? stat.value : "100.000+";
+    const stat = stats.find(
+      (s) => s.label.includes("Đơn đã bán") || s.label.includes("Đơn thành công")
+    );
+    return stat?.value || "Đang cập nhật";
   };
 
-  const getBadges = (product: any) => {
-    if (product.category === "chan-ga") return "Best-Seller";
-    if (product.category === "tam-cay") return "Cực Cay Tê";
-    if (product.category === "banh-trang") return "Thơm Giòn";
-    return "Mới";
+  const getBadge = (product: Product) => {
+    if (product.category === "chan-ga") return "Sản phẩm chủ lực";
+    if (product.category === "tam-cay") return "Dòng sản phẩm nổi bật";
+    if (product.category === "banh-trang") return "Dòng sản phẩm đóng gói";
+    return "Sản phẩm mở rộng";
   };
 
   return (
-    <div className="bg-[#FDFBF7] min-h-screen">
-      {/* Page Header */}
-      <section className="pt-32 pb-20 bg-[#04111d] text-white relative overflow-hidden">
-        {/* Spicy Ambient Glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-20%] left-[20%] w-[500px] h-[500px] rounded-full bg-orange-600/20 blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-20%] right-[10%] w-[600px] h-[600px] rounded-full bg-red-600/15 blur-[130px]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)] bg-[size:48px_48px]" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center space-y-6">
-          <span className="inline-flex items-center gap-1.5 bg-orange-500/25 border border-orange-500/30 text-orange-400 text-xs font-black px-4.5 py-1.5 rounded-full uppercase tracking-wider shadow-[0_0_25px_rgba(249,115,22,0.15)]">
-            <Sparkles size={12} className="animate-pulse text-amber-400" />
-            Thế giới ăn vặt quốc dân
-          </span>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-none">
-            Ngon đỉnh cao,{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-red-400 drop-shadow-[0_0_20px_rgba(249,115,22,0.2)]">
-              Cay tê mê vị!
-            </span>
-          </h1>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto font-medium">
-            Mỗi gói đồ ăn vặt Bà Tuyết là một kiệt tác ẩm thực đường phố — tuyển chọn nguyên liệu tươi sạch, ướp gia vị tự nhiên độc bản, cam kết an toàn sạch sẽ tuyệt đối.
-          </p>
-          
-          {/* Trust Badges in Hero */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 pt-6 text-[11px] font-bold text-slate-400 border-t border-white/10 max-w-xl mx-auto">
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <ShieldCheck size={14} className="text-orange-500" />
-              <span>Bảo hiểm trách nhiệm PVI 10 tỷ</span>
-            </div>
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Factory size={14} className="text-orange-500" />
-              <span>Nhà máy 3.300m² đạt chuẩn HACCP</span>
-            </div>
-            <div className="flex items-center gap-1.5 hover:text-white transition-colors">
-              <Award size={14} className="text-orange-500" />
-              <span>Top 1 TikTok Shop Ngành Ăn Vặt</span>
-            </div>
+    <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
+      <section className="border-b border-orange-100 bg-[#fff7ed] px-4 pb-10 pt-28 sm:px-6 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
+          <div>
+            <Link
+              href="/"
+              className="mb-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-orange-600 transition hover:text-orange-700"
+            >
+              Ăn Cùng Bà Tuyết
+              <ChevronRight size={14} />
+            </Link>
+
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-orange-600">
+              Danh mục sản phẩm
+            </p>
+            <h1 className="max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
+              Sản phẩm ăn vặt được trình bày rõ hình ảnh, rõ quy cách, rõ kênh mua.
+            </h1>
+            <p className="mt-5 max-w-3xl text-base font-medium leading-8 text-slate-600">
+              Trang sản phẩm không chỉ để bán hàng. Đây là nơi khách hàng hiểu nhanh từng dòng sản phẩm, quy cách đóng gói, giá tham khảo và các cam kết an toàn của thương hiệu.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatPill
+              icon={ShieldCheck}
+              title="An tâm"
+              desc="Thông tin chất lượng, bảo hiểm và tiêu chuẩn được đặt cạnh sản phẩm."
+            />
+            <StatPill
+              icon={Factory}
+              title="Sản xuất"
+              desc="Nhấn mạnh quy trình, nhà máy và khả năng cung ứng ổn định."
+            />
+            <StatPill
+              icon={Award}
+              title="Truyền thông"
+              desc="Bố cục giống hồ sơ thương hiệu, không chỉ là catalog bán hàng."
+            />
           </div>
         </div>
       </section>
 
-      {/* Interactive Category Selector */}
-      <section className="pt-12 pb-6 max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-wrap justify-center gap-2 md:gap-3 bg-orange-50/50 p-2 rounded-3xl border border-orange-100/40 w-fit mx-auto shadow-sm backdrop-blur-sm">
+      <section className="sticky top-16 z-30 border-b border-orange-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`relative rounded-2xl px-5 py-2.5 text-xs sm:text-sm font-black transition-all duration-300 select-none ${
-                activeCategory === cat.id
-                  ? "text-white shadow-md shadow-orange-500/20"
-                  : "text-slate-600 hover:text-orange-500 hover:bg-orange-50/60"
-              }`}
+              className={`shrink-0 border px-5 py-3 text-left transition ${activeCategory === cat.id
+                ? "border-orange-500 bg-orange-500 text-white"
+                : "border-orange-100 bg-[#fffaf3] text-slate-700 hover:border-orange-300 hover:bg-orange-50"
+                }`}
             >
-              {activeCategory === cat.id && (
-                <motion.div
-                  layoutId="activeCategoryPill"
-                  className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl -z-10"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
-              {cat.label}
+              <span className="block text-xs font-black uppercase tracking-wider">{cat.label}</span>
+              <span
+                className={`mt-1 block text-[10px] font-bold ${activeCategory === cat.id ? "text-white/80" : "text-slate-400"
+                  }`}
+              >
+                {cat.note}
+              </span>
             </button>
           ))}
         </div>
       </section>
 
-      {/* Main Products List */}
-      <section className="py-8 max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="px-4 py-10 sm:px-6 lg:px-10">
+        <div className="mb-6 flex flex-col gap-2 border-b border-orange-100 pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">
+              Đang hiển thị
+            </p>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
+              {displayedProducts.length} sản phẩm trong danh mục
+            </h2>
+          </div>
+          <p className="max-w-xl text-sm font-medium leading-6 text-slate-500">
+            Ưu tiên ảnh thật, mô tả ngắn, quy cách và giá từ để khách hàng ra quyết định nhanh.
+          </p>
+        </div>
+
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <Loader className="animate-spin text-orange-500" size={40} />
-            <p className="text-xs font-semibold text-slate-400">Đang tải sản phẩm siêu ngon...</p>
+          <div className="flex flex-col items-center justify-center border border-orange-100 bg-white py-24">
+            <Loader className="animate-spin text-orange-500" size={38} />
+            <p className="mt-3 text-sm font-semibold text-slate-500">Đang tải danh sách sản phẩm...</p>
           </div>
         ) : displayedProducts.length === 0 ? (
-          <div className="text-center py-20 text-slate-400 space-y-3 bg-white rounded-[2.5rem] border border-orange-100/30 shadow-sm">
-            <AlertCircle size={48} className="mx-auto text-orange-300" />
-            <p className="text-sm font-bold text-slate-650">Chưa có sản phẩm nào được hiển thị trong mục này</p>
+          <div className="border border-dashed border-orange-200 bg-white py-20 text-center text-slate-500">
+            <AlertCircle size={46} className="mx-auto text-orange-300" />
+            <p className="mt-3 text-sm font-bold text-slate-700">
+              Chưa có sản phẩm nào trong mục này.
+            </p>
           </div>
         ) : (
-          <div className="space-y-10">
+          <div className="space-y-6">
             <AnimatePresence mode="popLayout">
               {displayedProducts.map((product, i) => {
                 const rating = getRating(product);
                 const sales = getSales(product);
-                const spiceLevel = getSpiceLevel(product);
-                const badgeText = getBadges(product);
+                const badgeText = getBadge(product);
 
                 return (
-                  <motion.div
-                    key={product.id}
+                  <motion.article
+                    key={product.id || product.slug || i}
                     layout
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 22 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                    exit={{ opacity: 0, y: 12 }}
+                    transition={{ duration: 0.35, delay: i * 0.03 }}
+                    className="group border border-orange-100 bg-white transition hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
                   >
-                    <MagneticGlowCard
-                      className="group relative rounded-[2.5rem] overflow-hidden border border-orange-100/40 hover:border-orange-200/80 bg-white hover:shadow-[0_24px_50px_rgba(249,115,22,0.12)] hover:-translate-y-1 transition-all duration-500"
-                    >
-                      <div className="grid md:grid-cols-12 gap-0 items-stretch">
-                        {/* Text Details Column */}
-                        <div className="p-8 sm:p-12 md:col-span-7 flex flex-col justify-center space-y-5">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <span className="bg-orange-500/10 text-orange-600 text-xs font-black px-3.5 py-1 rounded-full uppercase tracking-wider">
-                              {product.categoryLabel}
+                    <div className="grid lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr]">
+                      <Link
+                        href={`/san-pham/${product.slug || product.id}`}
+                        className="relative min-h-[220px] overflow-hidden border-b border-orange-100 bg-orange-50 p-5 lg:min-h-[260px] lg:border-b-0 lg:border-r"
+                      >
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.name || "Sản phẩm"}
+                            className="mx-auto h-full max-h-[220px] min-h-[180px] w-full object-contain transition duration-700 group-hover:scale-105 lg:max-h-[240px]"
+                          />
+                        ) : (
+                          <div className="flex h-full min-h-[220px] items-center justify-center bg-orange-100 text-4xl font-black text-orange-500">
+                            BT
+                          </div>
+                        )}
+                        <div className="absolute left-5 top-5 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600 shadow-sm">
+                          {badgeText}
+                        </div>
+                      </Link>
+
+                      <div className="flex flex-col justify-between p-5 sm:p-6 lg:p-8">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="bg-orange-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
+                              {product.categoryLabel || "Ăn vặt"}
                             </span>
-                            <span className="bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider">
-                              {badgeText}
-                            </span>
-                            <div className="flex items-center gap-1 text-amber-500 bg-amber-50 px-2.5 py-0.5 rounded-full text-xs font-extrabold">
+                            <span className="inline-flex items-center gap-1 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-600">
                               <Star size={12} fill="currentColor" />
-                              <span>{rating} ({sales} đã bán)</span>
-                            </div>
+                              {rating}
+                            </span>
+                            <span className="bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                              {sales}
+                            </span>
                           </div>
 
-                          <h2 className="text-2xl sm:text-4.5xl font-black text-slate-900 tracking-tight group-hover:text-orange-500 transition-colors leading-tight">
-                            {product.name}
-                          </h2>
-                          <p className="text-lg sm:text-xl text-orange-500 font-extrabold leading-snug">
-                            {product.tagline}
-                          </p>
-                          <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
-                            {product.description}
-                          </p>
+                          <h3 className="mt-4 text-2xl font-black leading-tight tracking-[-0.05em] text-slate-950 transition group-hover:text-orange-600 sm:text-3xl">
+                            {product.name || "Sản phẩm Bà Tuyết"}
+                          </h3>
+                          {product.tagline && (
+                            <p className="mt-3 max-w-3xl text-lg font-black leading-7 text-orange-600">
+                              {product.tagline}
+                            </p>
+                          )}
+                          {product.description && (
+                            <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-slate-600 line-clamp-3">
+                              {product.description}
+                            </p>
+                          )}
 
-                          {/* Ingredient & Trust Points */}
-                          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-600 pt-1">
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 size={14} className="text-emerald-500" />
-                              <span>Không phẩm màu độc hại</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 size={14} className="text-emerald-500" />
-                              <span>100% Sạch tự nhiên</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle2 size={14} className="text-emerald-500" />
-                              <span>Chuẩn kiểm định ATTP</span>
-                            </div>
-                          </div>
-
-                          {/* Spice Level Indicator */}
-                          <div className="pt-1">
-                            <FlameSpiceIndicator level={spiceLevel} />
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-4 pt-5 border-t border-slate-100">
-                            <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Giá từ</p>
-                              <span className="text-xl sm:text-2xl font-black text-slate-950">
-                                {product.priceRange || product.price}
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2.5 sm:ml-auto">
-                              <Link
-                                href={`/san-pham/${product.slug}`}
-                                className="inline-flex items-center justify-center gap-1.5 text-xs font-black text-slate-700 hover:text-orange-500 transition-all bg-slate-100 hover:bg-orange-50/50 px-5 py-3 rounded-2xl border border-slate-200/60"
-                              >
-                                <span>Xem chi tiết</span> 
-                                <ChevronRight size={14} />
-                              </Link>
-                              {product.purchaseUrl && (
-                                <a
-                                  href={product.purchaseUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="group/btn inline-flex items-center justify-center gap-2 text-xs font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-650 hover:to-amber-650 transition-all px-6 py-3 rounded-2xl shadow-md shadow-orange-500/10 hover:shadow-orange-500/25 hover:-translate-y-0.5 animate-pulse-subtle"
-                                >
-                                  <ShoppingBag size={14} />
-                                  <span>Đặt Mua Ngay</span>
-                                  <ArrowRight size={13} className="group-hover/btn:translate-x-0.5 transition-transform" />
-                                </a>
-                              )}
-                            </div>
+                          <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-slate-600">
+                            <span className="inline-flex items-center gap-1 border border-emerald-100 bg-emerald-50 px-3 py-2 text-emerald-700">
+                              <CheckCircle2 size={14} /> Chính hãng
+                            </span>
+                            <span className="inline-flex items-center gap-1 border border-orange-100 bg-orange-50 px-3 py-2 text-orange-700">
+                              <PackageCheck size={14} /> Đóng gói rõ quy cách
+                            </span>
                           </div>
                         </div>
 
-                        {/* Image Column */}
-                        <div className="aspect-[4/3] md:aspect-auto md:col-span-5 relative overflow-hidden bg-orange-50/20 flex items-center justify-center p-6 border-t md:border-t-0 md:border-l border-slate-100">
-                          <div className="w-full h-full min-h-[260px] md:min-h-[340px] rounded-[2rem] overflow-hidden shadow-lg relative border border-slate-150 bg-white">
-                            <img 
-                              src={product.image} 
-                              alt={product.name} 
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                            />
-                            {/* Visual Spicy overlay filter on card image */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-orange-950/20 via-transparent to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                              Giá từ
+                            </p>
+                            <p className="mt-1 text-2xl font-black text-slate-950">
+                              {product.priceRange || product.price || "Liên hệ"}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-3">
+                            <Link
+                              href={`/san-pham/${product.slug || product.id}`}
+                              className="inline-flex items-center justify-center gap-2 border border-slate-200 bg-white px-6 py-3 text-xs font-black uppercase tracking-wider text-slate-800 transition hover:border-orange-300 hover:text-orange-600"
+                            >
+                              Xem hồ sơ sản phẩm
+                              <ChevronRight size={15} />
+                            </Link>
+                            {product.purchaseUrl && (
+                              <a
+                                href={product.purchaseUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-orange-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-600"
+                              >
+                                <ShoppingBag size={15} />
+                                Mua chính hãng
+                                <ArrowRight size={15} />
+                              </a>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </MagneticGlowCard>
-                  </motion.div>
+                    </div>
+                  </motion.article>
                 );
               })}
             </AnimatePresence>
@@ -352,116 +322,62 @@ export default function ProductsPage() {
         )}
       </section>
 
-      {/* Accessories / Other Products List */}
       {activeCategory === "all" && otherProductsList.length > 0 && (
-        <section className="py-20 bg-white border-t border-slate-100/80">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <SectionHeader 
-              label="Thế giới ăn vặt" 
-              title="Sản phẩm đặc sắc khác từ Bà Tuyết" 
-              description="Đa dạng hương vị với chất lượng nguyên liệu đạt chuẩn an toàn vệ sinh thực phẩm." 
-            />
-            
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 mt-12">
-              {otherProductsList.map((product, i) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
-                  className="group bg-[#FDFBF7] hover:bg-white border border-orange-100/30 hover:border-orange-200/60 rounded-[2rem] p-4 text-center hover:shadow-lg hover:shadow-orange-500/5 hover:-translate-y-1 transition-all duration-350 flex flex-col justify-between"
+        <section className="border-t border-orange-100 bg-white px-4 py-14 sm:px-6 lg:px-10">
+          <div className="mb-8 grid gap-4 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">
+                Mở rộng menu
+              </p>
+              <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
+                Sản phẩm ăn vặt khác
+              </h2>
+            </div>
+            <p className="text-sm font-medium leading-7 text-slate-500">
+              Các dòng phụ nên trình bày gọn như một catalog phụ, không cần hiệu ứng quá mạnh để tránh cảm giác thương mại điện tử thuần túy.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {otherProductsList.map((product, i) => (
+              <motion.div
+                key={product.id || product.slug || i}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: i * 0.04 }}
+              >
+                <Link
+                  href={`/san-pham/${product.slug || product.id}`}
+                  className="group block h-full border border-orange-100 bg-[#fffaf3] p-3 transition hover:border-orange-300 hover:bg-white"
                 >
-                  <div>
-                    <Link href={`/san-pham/${product.slug}`} className="block">
-                      <div className="aspect-square w-full rounded-2xl overflow-hidden mb-3 border border-slate-100 relative bg-white">
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                  <div className="aspect-square overflow-hidden border border-orange-100 bg-white">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name || "Sản phẩm"}
+                        className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-orange-50 text-xl font-black text-orange-500">
+                        BT
                       </div>
-                      <div className="flex items-center justify-center gap-1 mb-1 text-amber-500 text-[10px] font-black">
-                        <Star size={10} fill="currentColor" />
-                        <span>4.8</span>
-                      </div>
-                      <h3 className="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-orange-500 transition-colors line-clamp-1">{product.name}</h3>
-                    </Link>
-                  </div>
-                  <div className="mt-3 space-y-2">
-                    <p className="text-orange-500 font-black text-xs sm:text-sm">{product.price}</p>
-                    {product.purchaseUrl && (
-                      <a
-                        href={product.purchaseUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-1 text-[10px] font-black text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-650 hover:to-amber-650 transition px-2.5 py-2 rounded-xl shadow-sm shadow-orange-500/10"
-                      >
-                        <ShoppingBag size={10} />
-                        <span>Mua ngay</span>
-                      </a>
                     )}
                   </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="text-center mt-14">
-              <Link 
-                href="/san-pham/bo-suu-tap" 
-                className="group inline-flex items-center gap-2 bg-slate-950 hover:bg-orange-500 hover:-translate-y-0.5 text-white px-6 py-3 rounded-2xl text-xs font-black transition-all shadow"
-              >
-                <span>Xem tất cả bộ sưu tập</span> 
-                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
+                  <div className="pt-4">
+                    <p className="line-clamp-2 text-sm font-black leading-5 text-slate-950 group-hover:text-orange-600">
+                      {product.name}
+                    </p>
+                    <p className="mt-2 text-xs font-black text-orange-600">
+                      {product.priceRange || product.price || "Liên hệ"}
+                    </p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </section>
       )}
-
-      {/* Product Comparison Section */}
-      {!loading && mainProducts.length > 0 && (
-        <section className="py-24 max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 space-y-2">
-            <span className="text-orange-500 text-xs font-black uppercase tracking-wider">Lựa chọn thông thái</span>
-            <h3 className="text-2.5xl sm:text-3.5xl font-black text-slate-900 tracking-tight">So sánh sản phẩm chủ lực</h3>
-          </div>
-          
-          <div className="overflow-x-auto rounded-[2.5rem] border border-orange-100/40 shadow-sm bg-white">
-            <table className="w-full text-sm text-slate-700">
-              <thead>
-                <tr className="border-b border-orange-50/80 bg-orange-50/20 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
-                  <th className="py-5 px-6 text-left font-black text-slate-500">Tiêu chí</th>
-                  {mainProducts.map((p) => (
-                    <th key={p.id} className="py-5 px-6 text-center font-black text-slate-900 text-xs sm:text-sm">{p.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-orange-50/30">
-                {[
-                  { label: "Giá bán từ", key: "price" },
-                  { label: "Hương vị", values: mainProducts.map((p) => p.category === "chan-ga" ? "6 vị đa dạng" : p.category === "tam-cay" ? "6 vị đậm đà" : "4 vị giòn rụm") },
-                  { label: "Độ cay chủ đạo", values: mainProducts.map((p) => p.category === "chan-ga" ? "Vị cay siêu cấp ớt hiểm" : p.category === "tam-cay" ? "Vị tiêu đen thơm nồng" : "Vị muối ớt truyền thống") },
-                  { label: "Chất bảo quản", values: mainProducts.map(() => "Hoàn toàn không") },
-                  { label: "Bảo hiểm trách nhiệm PVI", values: mainProducts.map(() => "100% Bảo hiểm") },
-                  { label: "Chứng nhận an toàn", values: mainProducts.map(() => "HACCP + ATTP") },
-                ].map((row, i) => (
-                  <tr key={i} className="hover:bg-orange-50/10 transition-colors">
-                    <td className="py-4 px-6 font-bold text-slate-550 text-xs sm:text-sm">{row.label}</td>
-                    {row.key === "price"
-                      ? mainProducts.map((p) => (
-                          <td key={p.id} className="py-4 px-6 text-center font-black text-orange-500 text-xs sm:text-sm">{p.price}</td>
-                        ))
-                      : row.values?.map((v, vi) => (
-                          <td key={vi} className="py-4 px-6 text-center text-slate-700 text-xs font-semibold">{v}</td>
-                        ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
-    </div>
+    </main>
   );
 }

@@ -29,9 +29,9 @@ export function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral to-neutral-light p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+      <div className="bg-white  shadow-xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12  bg-primary flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold">BT</span>
           </div>
           <h1 className="text-2xl font-bold text-neutral">Quản lý Bài Viết</h1>
@@ -48,7 +48,7 @@ export function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@acbt.local"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300  focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
@@ -63,14 +63,14 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300  focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
           </div>
 
           {error && (
-            <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 ">
               <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={18} />
               <p className="text-sm text-red-600">{error}</p>
             </div>
@@ -79,13 +79,13 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary hover:bg-primary-dark text-white py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            className="w-full bg-primary hover:bg-primary-dark text-white py-2  font-semibold transition-colors disabled:opacity-50"
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+        <div className="mt-6 p-4 bg-blue-50 ">
           <p className="text-xs text-gray-600">
             <strong>Test accounts:</strong><br />
             Admin: admin@acbt.local / 123456<br />
