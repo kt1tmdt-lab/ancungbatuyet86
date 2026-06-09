@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  AlertCircle,
+  ArrowLeft,
   ArrowRight,
   Award,
   CheckCircle2,
@@ -15,369 +16,495 @@ import {
   ShieldCheck,
   ShoppingBag,
   Star,
+  Leaf,
+  Truck,
+  BadgeCheck,
 } from "lucide-react";
 
 type Product = {
-  id: string | number;
-  slug?: string;
-  name?: string;
-  image?: string;
-  category?: string;
-  categoryLabel?: string;
-  tagline?: string;
-  description?: string;
-  price?: string;
+  id: string;
+  slug: string;
+  name: string;
+  image: string;
+  heroImage?: string;
+  category: string;
+  categoryLabel: string;
+  tagline: string;
+  description: string;
+  price: string;
   priceRange?: string;
   purchaseUrl?: string;
+  ingredients?: string[];
+  specs?: { label: string; value: string }[];
+  variants?: { name: string; weight?: string; price: string; spiceLevel?: number; image?: string }[];
   stats?: { label: string; value: string }[];
+  processSteps?: { step: number; title: string; description: string }[];
+  story?: string;
 };
 
-const categories = [
-  { id: "all", label: "Tất cả sản phẩm", note: "Dòng chủ lực" },
-  { id: "chan-ga", label: "Chân gà", note: "Best seller" },
-  { id: "tam-cay", label: "Tăm cay", note: "Dòng sản phẩm" },
-  { id: "banh-trang", label: "Bánh tráng", note: "Dòng sản phẩm" },
-  { id: "khac", label: "Sản phẩm khác", note: "Mở rộng menu" },
-];
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
-function StatPill({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
-  return (
-    <div className="border border-orange-100 bg-white p-5">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center bg-orange-500 text-white">
-        <Icon size={22} />
-      </div>
-      <p className="text-sm font-black uppercase tracking-wider text-slate-950">{title}</p>
-      <p className="mt-2 text-xs font-medium leading-5 text-slate-500">{desc}</p>
-    </div>
-  );
-}
-
-export default function ProductsPage() {
-  const [productsList, setProductsList] = useState<Product[]>([]);
+export default function ProductDetailPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [error, setError] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetch("/api/products")
-      .then((res) => res.json())
-      .then((data) => {
-        setProductsList(Array.isArray(data) ? data : []);
-        setLoading(false);
+    if (!slug) return;
+    setLoading(true);
+    fetch(`/api/products/slug/${slug}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
       })
-      .catch((err) => {
-        console.error("Failed to load products", err);
-        setProductsList([]);
+      .then((data) => {
+        setProduct(data);
+        setLoading(false);
+        // Fetch related products
+        fetch("/api/products")
+          .then((r) => r.json())
+          .then((all) => {
+            const related = (Array.isArray(all) ? all : [])
+              .filter((p: Product) => p.slug !== slug && p.category === data.category)
+              .slice(0, 4);
+            setRelatedProducts(related);
+          });
+      })
+      .catch(() => {
+        setError(true);
         setLoading(false);
       });
-  }, []);
+  }, [slug]);
 
-  const mainProducts = useMemo(
-    () => productsList.filter((p) => p.category !== "khac"),
-    [productsList]
-  );
-
-  const otherProductsList = useMemo(
-    () => productsList.filter((p) => p.category === "khac"),
-    [productsList]
-  );
-
-  const displayedProducts = useMemo(() => {
-    if (activeCategory === "all") return mainProducts;
-    if (activeCategory === "khac") return otherProductsList;
-    return mainProducts.filter((p) => p.category === activeCategory);
-  }, [activeCategory, mainProducts, otherProductsList]);
-
-
-  const getRating = (product: Product) => {
-    const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find((s) => s.label.includes("Đánh giá"));
-    return stat?.value || "4.8★";
-  };
-
-  const getSales = (product: Product) => {
-    const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find(
-      (s) => s.label.includes("Đơn đã bán") || s.label.includes("Đơn thành công")
+  if (loading) {
+    return (
+      <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#fbfaf7]">
+        <Loader className="animate-spin text-orange-500" size={42} />
+        <p className="mt-4 text-sm font-semibold text-slate-500">Đang tải sản phẩm...</p>
+      </main>
     );
-    return stat?.value || "Đang cập nhật";
-  };
+  }
 
-  const getBadge = (product: Product) => {
-    if (product.category === "chan-ga") return "Sản phẩm chủ lực";
-    if (product.category === "tam-cay") return "Dòng sản phẩm nổi bật";
-    if (product.category === "banh-trang") return "Dòng sản phẩm đóng gói";
-    return "Sản phẩm mở rộng";
-  };
+  if (error || !product) {
+    return (
+      <main className="flex min-h-[60vh] flex-col items-center justify-center bg-[#fbfaf7] px-4">
+        <div className="text-center">
+          <p className="text-6xl font-black text-orange-500">404</p>
+          <h1 className="mt-4 text-2xl font-black text-slate-950">Không tìm thấy sản phẩm</h1>
+          <p className="mt-3 text-sm text-slate-500">Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+          <Link
+            href="/san-pham"
+            className="mt-8 inline-flex items-center gap-2 bg-orange-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-orange-600"
+          >
+            <ArrowLeft size={16} />
+            Quay lại danh sách sản phẩm
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const stats = Array.isArray(product.stats) ? product.stats : [];
+  const ingredients = Array.isArray(product.ingredients) ? product.ingredients : [];
+  const specs = Array.isArray(product.specs) ? product.specs : [];
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  const processSteps = Array.isArray(product.processSteps) ? product.processSteps : [];
 
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
-      <section className="border-b border-orange-100 bg-[#fff7ed] px-4 pb-10 pt-28 sm:px-6 lg:px-10">
-        <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
-          <div>
-            <Link
-              href="/"
-              className="mb-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-orange-600 transition hover:text-orange-700"
+      {/* Breadcrumb */}
+      <div className="border-b border-orange-100 bg-[#fff7ed] px-4 pt-24 pb-4 sm:px-6 lg:px-10">
+        <nav className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <Link href="/" className="transition hover:text-orange-600">Trang chủ</Link>
+          <ChevronRight size={12} />
+          <Link href="/san-pham" className="transition hover:text-orange-600">Sản phẩm</Link>
+          <ChevronRight size={12} />
+          <span className="text-orange-600">{product.name}</span>
+        </nav>
+      </div>
+
+      {/* Hero Section */}
+      <section className="border-b border-orange-100 bg-[#fff7ed] px-4 pb-14 pt-8 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+            {/* Product Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="relative"
             >
-              Ăn Cùng Bà Tuyết
-              <ChevronRight size={14} />
-            </Link>
+              <div className="relative overflow-hidden border border-orange-100 bg-white p-6 shadow-[0_20px_60px_rgba(249,115,22,0.08)] sm:p-10">
+                <div className="absolute left-4 top-4 z-10 bg-orange-500 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-md">
+                  {product.categoryLabel || product.category}
+                </div>
+                <img
+                  src={product.image || product.heroImage}
+                  alt={product.name}
+                  className="mx-auto max-h-[420px] w-full object-contain transition duration-700 hover:scale-105"
+                />
+              </div>
+            </motion.div>
 
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-orange-600">
-              Danh mục sản phẩm
-            </p>
-            <h1 className="max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
-              Sản phẩm ăn vặt được trình bày rõ hình ảnh, rõ quy cách, rõ kênh mua.
-            </h1>
-            <p className="mt-5 max-w-3xl text-base font-medium leading-8 text-slate-600">
-              Trang sản phẩm không chỉ để bán hàng. Đây là nơi khách hàng hiểu nhanh từng dòng sản phẩm, quy cách đóng gói, giá tham khảo và các cam kết an toàn của thương hiệu.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <StatPill
-              icon={ShieldCheck}
-              title="An tâm"
-              desc="Thông tin chất lượng, bảo hiểm và tiêu chuẩn được đặt cạnh sản phẩm."
-            />
-            <StatPill
-              icon={Factory}
-              title="Sản xuất"
-              desc="Nhấn mạnh quy trình, nhà máy và khả năng cung ứng ổn định."
-            />
-            <StatPill
-              icon={Award}
-              title="Truyền thông"
-              desc="Bố cục giống hồ sơ thương hiệu, không chỉ là catalog bán hàng."
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="sticky top-16 z-30 border-b border-orange-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`shrink-0 border px-5 py-3 text-left transition ${activeCategory === cat.id
-                ? "border-orange-500 bg-orange-500 text-white"
-                : "border-orange-100 bg-[#fffaf3] text-slate-700 hover:border-orange-300 hover:bg-orange-50"
-                }`}
+            {/* Product Info */}
+            <motion.div
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
             >
-              <span className="block text-xs font-black uppercase tracking-wider">{cat.label}</span>
-              <span
-                className={`mt-1 block text-[10px] font-bold ${activeCategory === cat.id ? "text-white/80" : "text-slate-400"
-                  }`}
-              >
-                {cat.note}
+              <span className="mb-3 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
+                <Award size={12} />
+                {product.categoryLabel}
               </span>
-            </button>
-          ))}
+
+              <h1 className="mt-3 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-4xl lg:text-5xl">
+                {product.name}
+              </h1>
+
+              {product.tagline && (
+                <p className="mt-4 text-lg font-bold leading-8 text-orange-600">
+                  {product.tagline}
+                </p>
+              )}
+
+              {product.description && (
+                <p className="mt-5 text-sm font-medium leading-7 text-slate-600 sm:text-base">
+                  {product.description}
+                </p>
+              )}
+
+              {/* Stats */}
+              {stats.length > 0 && (
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {stats.map((s, i) => (
+                    <div key={i} className="border border-orange-100 bg-white p-4">
+                      <p className="text-xl font-black text-orange-600">{s.value}</p>
+                      <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Price & CTA */}
+              <div className="mt-8 flex flex-col gap-4 border-t border-orange-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Giá từ</p>
+                  <p className="mt-1 text-3xl font-black text-slate-950">
+                    {product.priceRange || product.price || "Liên hệ"}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {product.purchaseUrl && (
+                    <a
+                      href={product.purchaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 bg-orange-500 px-7 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg"
+                    >
+                      <ShoppingBag size={18} />
+                      Mua ngay
+                      <ArrowRight size={16} />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <span className="inline-flex items-center gap-1.5 border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
+                  <CheckCircle2 size={14} /> 100% Chính hãng
+                </span>
+                <span className="inline-flex items-center gap-1.5 border border-orange-100 bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700">
+                  <PackageCheck size={14} /> Đóng gói chuẩn
+                </span>
+                <span className="inline-flex items-center gap-1.5 border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
+                  <Truck size={14} /> Giao toàn quốc
+                </span>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      <section className="px-4 py-10 sm:px-6 lg:px-10">
-        <div className="mb-6 flex flex-col gap-2 border-b border-orange-100 pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">
-              Đang hiển thị
-            </p>
-            <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
-              {displayedProducts.length} sản phẩm trong danh mục
-            </h2>
-          </div>
-          <p className="max-w-xl text-sm font-medium leading-6 text-slate-500">
-            Ưu tiên ảnh thật, mô tả ngắn, quy cách và giá từ để khách hàng ra quyết định nhanh.
-          </p>
-        </div>
+      {/* Details Tabs */}
+      <section className="px-4 py-14 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 lg:grid-cols-[1fr_0.4fr]">
+            {/* Left Column - Details */}
+            <div className="space-y-10">
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center border border-orange-100 bg-white py-24">
-            <Loader className="animate-spin text-orange-500" size={38} />
-            <p className="mt-3 text-sm font-semibold text-slate-500">Đang tải danh sách sản phẩm...</p>
-          </div>
-        ) : displayedProducts.length === 0 ? (
-          <div className="border border-dashed border-orange-200 bg-white py-20 text-center text-slate-500">
-            <AlertCircle size={46} className="mx-auto text-orange-300" />
-            <p className="mt-3 text-sm font-bold text-slate-700">
-              Chưa có sản phẩm nào trong mục này.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <AnimatePresence mode="popLayout">
-              {displayedProducts.map((product, i) => {
-                const rating = getRating(product);
-                const sales = getSales(product);
-                const badgeText = getBadge(product);
+              {/* Ingredients */}
+              {ingredients.length > 0 && (
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center bg-green-500 text-white">
+                      <Leaf size={20} />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">Thành phần</h2>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {ingredients.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 border border-orange-100 bg-white p-4 transition hover:border-orange-300">
+                        <CheckCircle2 size={16} className="shrink-0 text-green-500" />
+                        <span className="text-sm font-semibold text-slate-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
-                return (
-                  <motion.article
-                    key={product.id || product.slug || i}
-                    layout
-                    initial={{ opacity: 0, y: 22 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 12 }}
-                    transition={{ duration: 0.35, delay: i * 0.03 }}
-                    className="group border border-orange-100 bg-white transition hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
-                  >
-                    <div className="grid lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr]">
-                      <Link
-                        href={`/san-pham/${product.slug || product.id}`}
-                        className="relative min-h-[220px] overflow-hidden border-b border-orange-100 bg-orange-50 p-5 lg:min-h-[260px] lg:border-b-0 lg:border-r"
+              {/* Specs */}
+              {specs.length > 0 && (
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center bg-blue-500 text-white">
+                      <BadgeCheck size={20} />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">Thông số sản phẩm</h2>
+                  </div>
+                  <div className="overflow-hidden border border-orange-100 bg-white">
+                    {specs.map((item, i) => (
+                      <div
+                        key={i}
+                        className={`grid grid-cols-[160px_1fr] ${i % 2 === 0 ? "bg-white" : "bg-orange-50/50"}`}
                       >
-                        {product.image ? (
-                          <img
-                            src={product.image}
-                            alt={product.name || "Sản phẩm"}
-                            className="mx-auto h-full max-h-[220px] min-h-[180px] w-full object-contain transition duration-700 group-hover:scale-105 lg:max-h-[240px]"
-                          />
+                        <div className="border-b border-r border-orange-100 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-slate-500">
+                          {item.label}
+                        </div>
+                        <div className="border-b border-orange-100 px-5 py-3.5 text-sm font-semibold text-slate-800">
+                          {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Variants */}
+              {variants.length > 0 && (
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center bg-orange-500 text-white">
+                      <PackageCheck size={20} />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">Phân loại sản phẩm</h2>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {variants.map((v, i) => (
+                      <div key={i} className="group flex items-center gap-4 border border-orange-100 bg-white p-4 transition hover:border-orange-300 hover:shadow-md">
+                        {v.image ? (
+                          <img src={v.image} alt={v.name} className="h-16 w-16 shrink-0 object-contain" />
                         ) : (
-                          <div className="flex h-full min-h-[220px] items-center justify-center bg-orange-100 text-4xl font-black text-orange-500">
-                            BT
+                          <div className="flex h-16 w-16 shrink-0 items-center justify-center bg-orange-50 text-xs font-black text-orange-500">
+                            {v.weight || "VỊ"}
                           </div>
                         )}
-                        <div className="absolute left-5 top-5 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600 shadow-sm">
-                          {badgeText}
-                        </div>
-                      </Link>
-
-                      <div className="flex flex-col justify-between p-5 sm:p-6 lg:p-8">
                         <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="bg-orange-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
-                              {product.categoryLabel || "Ăn vặt"}
-                            </span>
-                            <span className="inline-flex items-center gap-1 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-600">
-                              <Star size={12} fill="currentColor" />
-                              {rating}
-                            </span>
-                            <span className="bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                              {sales}
-                            </span>
-                          </div>
-
-                          <h3 className="mt-4 text-2xl font-black leading-tight tracking-[-0.05em] text-slate-950 transition group-hover:text-orange-600 sm:text-3xl">
-                            {product.name || "Sản phẩm Bà Tuyết"}
-                          </h3>
-                          {product.tagline && (
-                            <p className="mt-3 max-w-3xl text-lg font-black leading-7 text-orange-600">
-                              {product.tagline}
-                            </p>
+                          <p className="text-sm font-black text-slate-950 group-hover:text-orange-600">
+                            {v.name} {v.weight ? `(${v.weight})` : ""}
+                          </p>
+                          <p className="mt-1 text-lg font-black text-orange-600">{v.price}</p>
+                          {v.spiceLevel !== undefined && v.spiceLevel > 0 && (
+                            <p className="text-[10px] text-orange-600 font-bold mt-1">Độ cay: {"🔥".repeat(v.spiceLevel)}</p>
                           )}
-                          {product.description && (
-                            <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-slate-600 line-clamp-3">
-                              {product.description}
-                            </p>
-                          )}
-
-                          <div className="mt-5 flex flex-wrap gap-3 text-xs font-bold text-slate-600">
-                            <span className="inline-flex items-center gap-1 border border-emerald-100 bg-emerald-50 px-3 py-2 text-emerald-700">
-                              <CheckCircle2 size={14} /> Chính hãng
-                            </span>
-                            <span className="inline-flex items-center gap-1 border border-orange-100 bg-orange-50 px-3 py-2 text-orange-700">
-                              <PackageCheck size={14} /> Đóng gói rõ quy cách
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                              Giá từ
-                            </p>
-                            <p className="mt-1 text-2xl font-black text-slate-950">
-                              {product.priceRange || product.price || "Liên hệ"}
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-3">
-                            <Link
-                              href={`/san-pham/${product.slug || product.id}`}
-                              className="inline-flex items-center justify-center gap-2 border border-slate-200 bg-white px-6 py-3 text-xs font-black uppercase tracking-wider text-slate-800 transition hover:border-orange-300 hover:text-orange-600"
-                            >
-                              Xem hồ sơ sản phẩm
-                              <ChevronRight size={15} />
-                            </Link>
-                            {product.purchaseUrl && (
-                              <a
-                                href={product.purchaseUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-2 bg-orange-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-600"
-                              >
-                                <ShoppingBag size={15} />
-                                Mua chính hãng
-                                <ArrowRight size={15} />
-                              </a>
-                            )}
-                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Process Steps */}
+              {processSteps.length > 0 && (
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center bg-slate-800 text-white">
+                      <Factory size={20} />
                     </div>
-                  </motion.article>
-                );
-              })}
-            </AnimatePresence>
+                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">Quy trình sản xuất</h2>
+                  </div>
+                  <div className="space-y-4">
+                    {processSteps.map((s, i) => (
+                      <div key={i} className="flex gap-5 border border-orange-100 bg-white p-5 transition hover:border-orange-300">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-500 text-sm font-black text-white">
+                          {s.step || (i + 1)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-black text-slate-950">{s.title}</p>
+                          <p className="mt-1 text-sm font-medium leading-6 text-slate-500">{s.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Story */}
+              {product.story && product.story.length > 5 && (
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true }}
+                >
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="flex h-10 w-10 items-center justify-center bg-amber-500 text-white">
+                      <Star size={20} />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-[-0.04em] text-slate-950">Câu chuyện sản phẩm</h2>
+                  </div>
+                  <div className="border border-orange-100 bg-white p-6 sm:p-8">
+                    <p className="text-sm font-medium leading-7 text-slate-600 whitespace-pre-line">
+                      {product.story}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+              {/* Quick Buy Card */}
+              <div className="border border-orange-200 bg-[#fff7ed] p-6">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600 mb-4">Mua sản phẩm</p>
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="mx-auto mb-4 h-40 w-auto object-contain"
+                />
+                <h3 className="text-lg font-black text-slate-950">{product.name}</h3>
+                <p className="mt-2 text-2xl font-black text-orange-600">{product.priceRange || product.price}</p>
+
+                {product.purchaseUrl ? (
+                  <a
+                    href={product.purchaseUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 flex w-full items-center justify-center gap-2 bg-orange-500 py-4 text-sm font-black text-white transition hover:bg-orange-600"
+                  >
+                    <ShoppingBag size={18} />
+                    Đặt mua ngay
+                  </a>
+                ) : (
+                  <Link
+                    href="/lien-he"
+                    className="mt-4 flex w-full items-center justify-center gap-2 bg-slate-950 py-4 text-sm font-black text-white transition hover:bg-slate-800"
+                  >
+                    Liên hệ đặt hàng
+                  </Link>
+                )}
+              </div>
+
+              {/* Safety Badges */}
+              <div className="space-y-3">
+                {[
+                  { icon: ShieldCheck, title: "An toàn thực phẩm", desc: "Đạt tiêu chuẩn VSATTP", color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
+                  { icon: Factory, title: "Nhà máy đạt chuẩn", desc: "Quy trình khép kín, sạch", color: "text-blue-600 bg-blue-50 border-blue-100" },
+                  { icon: Truck, title: "Giao hàng toàn quốc", desc: "Ship COD, nhanh 1-3 ngày", color: "text-orange-600 bg-orange-50 border-orange-100" },
+                ].map((badge, i) => (
+                  <div key={i} className={`flex items-start gap-3 border p-4 ${badge.color}`}>
+                    <badge.icon size={20} className="mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-black">{badge.title}</p>
+                      <p className="mt-0.5 text-[11px] font-medium opacity-75">{badge.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </section>
 
-      {activeCategory === "all" && otherProductsList.length > 0 && (
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
         <section className="border-t border-orange-100 bg-white px-4 py-14 sm:px-6 lg:px-10">
-          <div className="mb-8 grid gap-4 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">
-                Mở rộng menu
-              </p>
-              <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
-                Sản phẩm ăn vặt khác
-              </h2>
-            </div>
-            <p className="text-sm font-medium leading-7 text-slate-500">
-              Các dòng phụ nên trình bày gọn như một catalog phụ, không cần hiệu ứng quá mạnh để tránh cảm giác thương mại điện tử thuần túy.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {otherProductsList.map((product, i) => (
-              <motion.div
-                key={product.id || product.slug || i}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: i * 0.04 }}
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-600">Cùng danh mục</p>
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">Sản phẩm liên quan</h2>
+              </div>
+              <Link
+                href="/san-pham"
+                className="hidden items-center gap-2 text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:inline-flex"
               >
-                <Link
-                  href={`/san-pham/${product.slug || product.id}`}
-                  className="group block h-full border border-orange-100 bg-[#fffaf3] p-3 transition hover:border-orange-300 hover:bg-white"
+                Xem tất cả <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {relatedProducts.map((rp, i) => (
+                <motion.div
+                  key={rp.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35, delay: i * 0.05 }}
                 >
-                  <div className="aspect-square overflow-hidden border border-orange-100 bg-white">
-                    {product.image ? (
+                  <Link
+                    href={`/san-pham/${rp.slug}`}
+                    className="group block h-full border border-orange-100 bg-[#fffaf3] p-3 transition hover:border-orange-300 hover:bg-white hover:shadow-md"
+                  >
+                    <div className="aspect-square overflow-hidden border border-orange-100 bg-white">
                       <img
-                        src={product.image}
-                        alt={product.name || "Sản phẩm"}
-                        className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
+                        src={rp.image}
+                        alt={rp.name}
+                        className="h-full w-full object-contain p-3 transition duration-500 group-hover:scale-105"
                       />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-orange-50 text-xl font-black text-orange-500">
-                        BT
-                      </div>
-                    )}
-                  </div>
-                  <div className="pt-4">
-                    <p className="line-clamp-2 text-sm font-black leading-5 text-slate-950 group-hover:text-orange-600">
-                      {product.name}
-                    </p>
-                    <p className="mt-2 text-xs font-black text-orange-600">
-                      {product.priceRange || product.price || "Liên hệ"}
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                    </div>
+                    <div className="pt-4">
+                      <p className="line-clamp-2 text-sm font-black leading-5 text-slate-950 group-hover:text-orange-600">
+                        {rp.name}
+                      </p>
+                      <p className="mt-2 text-xs font-black text-orange-600">
+                        {rp.priceRange || rp.price || "Liên hệ"}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </section>
       )}
+
+      {/* Back to products */}
+      <section className="border-t border-orange-100 bg-[#fbfaf7] px-4 py-10 text-center sm:px-6">
+        <Link
+          href="/san-pham"
+          className="inline-flex items-center gap-2 border border-orange-200 bg-white px-8 py-4 text-sm font-black text-slate-700 transition hover:border-orange-400 hover:text-orange-600"
+        >
+          <ArrowLeft size={16} />
+          Quay lại danh sách sản phẩm
+        </Link>
+      </section>
     </main>
   );
 }

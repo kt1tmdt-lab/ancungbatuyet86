@@ -2,6 +2,9 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Clock, Eye, Tag, User } from "lucide-react";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/auth";
+import { normalizeContentAssetUrls } from "@/lib/content-assets";
 
 interface PageProps {
   params: Promise<{
@@ -30,10 +33,32 @@ export async function generateMetadata({ params }: PageProps) {
     where: { slug },
   });
 
-  if (!post || post.status !== "PUBLISHED") {
+  if (!post) {
     return {
       title: "Bài viết không tìm thấy",
     };
+  }
+
+  let isPreview = false;
+  if (post.status !== "PUBLISHED") {
+    try {
+      const cookieStore = await cookies();
+      const token = cookieStore.get("auth_token")?.value;
+      if (token) {
+        const payload = verifyToken(token);
+        if (payload && (payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
+          isPreview = true;
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    if (!isPreview) {
+      return {
+        title: "Bài viết không tìm thấy",
+      };
+    }
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
@@ -63,28 +88,51 @@ export default async function BlogPostPage({ params }: PageProps) {
   const post = await prisma.post.findUnique({
     where: { slug },
     include: {
-      author: { select: { name: true } },
+      author: { select: { id: true, name: true } },
       category: true,
       tags: { include: { tag: true } },
     },
   });
 
-  if (!post || post.status !== "PUBLISHED") {
+  if (!post) {
     notFound();
   }
 
-  await prisma.post
-    .update({
-      where: { id: post.id },
-      data: {
-        viewCount: {
-          increment: 1,
-        },
-      },
-    })
-    .catch(() => null);
+  let isPreview = false;
+  if (post.status !== "PUBLISHED") {
+    try {
+      const cookieStore = await cookies();
+      const token = cookieStore.get("auth_token")?.value;
+      if (token) {
+        const payload = verifyToken(token);
+        if (payload && (payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
+          isPreview = true;
+        }
+      }
+    } catch (e) {
+      // Ignore
+    }
 
-  const currentViewCount = post.viewCount + 1;
+    if (!isPreview) {
+      notFound();
+    }
+  }
+
+  if (!isPreview) {
+    await prisma.post
+      .update({
+        where: { id: post.id },
+        data: {
+          viewCount: {
+            increment: 1,
+          },
+        },
+      })
+      .catch(() => null);
+  }
+
+  const currentViewCount = post.viewCount + (isPreview ? 0 : 1);
+  const postContent = normalizeContentAssetUrls(post.content);
 
   let relatedPosts: any[] = [];
   if (post.categoryId) {
@@ -138,6 +186,12 @@ export default async function BlogPostPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {isPreview && (
+        <div className="sticky top-16 z-40 bg-amber-400 border-b border-amber-750 px-6 py-2.5 text-center text-xs font-black uppercase tracking-wider text-slate-950 shadow-md">
+          PREVIEW MODE — Bạn đang xem trước bài viết ở trạng thái [{post.status}] vì đã đăng nhập quyền quản trị.
+        </div>
+      )}
+
       <article className="min-h-screen bg-[#fbfaf7] pb-20 pt-24 text-slate-950">
         <header className="border-b border-orange-100 bg-[#fff7ed] px-4 py-8 sm:px-6 lg:px-10">
           <Link
@@ -176,7 +230,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               </span>
               <span className="flex items-center gap-2">
                 <Clock size={15} className="text-orange-500" />
-                {getReadTime(post.content)} đọc
+                {getReadTime(postContent)} đọc
               </span>
               <span className="flex items-center gap-2">
                 <Eye size={15} className="text-orange-500" />
@@ -202,7 +256,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="border border-orange-100 bg-white p-6 sm:p-8 lg:p-10">
             <div
               className="prose prose-orange max-w-none prose-headings:font-black prose-headings:tracking-[-0.03em] prose-p:leading-8 prose-img:border prose-img:border-orange-100 prose-a:font-bold prose-a:text-orange-600 text-slate-800"
-              dangerouslySetInnerHTML={{ __html: post.content || "" }}
+              dangerouslySetInnerHTML={{ __html: postContent }}
             />
 
             {post.tags && post.tags.length > 0 && (

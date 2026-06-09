@@ -1,23 +1,23 @@
-import { NextResponse, NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
+import { NextRequest } from "next/server";
+import { ProductStatus } from "@prisma/client";
+import { getProductBySlug } from "@/features/products/queries";
+import { jsonError, jsonOk } from "@/lib/api-response";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  _req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
     const { slug } = await params;
-    const product = await prisma.product.findUnique({
-      where: { slug },
-    });
+    const product = await getProductBySlug(slug);
 
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    if (!product || product.status !== ProductStatus.PUBLISHED) {
+      return jsonError("Product not found", 404);
     }
 
-    return NextResponse.json(product);
+    return jsonOk(product);
   } catch (error) {
     console.error("GET Product Slug Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return jsonError("Internal Server Error", 500);
   }
 }

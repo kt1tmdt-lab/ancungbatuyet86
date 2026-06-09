@@ -16,7 +16,7 @@ export default function PostsPage() {
           </div>
           <Link
             href="/admin/posts/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
+            className="acbt-btn acbt-btn--admin acbt-btn--md self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Viết bài mới</span>
@@ -30,3 +30,4 @@ export default function PostsPage() {
     </ProtectedRoute>
   );
 }
+

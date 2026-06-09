@@ -6,7 +6,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
-  role: "ADMIN" | "EDITOR" | "AUTHOR" | "USER";
+  role: "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "AUTHOR" | "MARKETING" | "SUPPORT" | "USER";
 }
 
 interface AuthContext {
@@ -24,15 +24,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("auth_token");
-    const storedUser = localStorage.getItem("auth_user");
-    if (stored && storedUser) {
-      setToken(stored);
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+          setToken("cookie-auth");
+        }
+      } catch (error) {
+        console.error("Failed to fetch user session", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -43,17 +50,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (!res.ok) throw new Error("Login failed");
     const data = await res.json();
-    setToken(data.token);
     setUser(data.user);
-    localStorage.setItem("auth_token", data.token);
-    localStorage.setItem("auth_user", JSON.stringify(data.user));
+    setToken("cookie-auth");
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
     setUser(null);
     setToken(null);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
   };
 
   return (

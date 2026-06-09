@@ -31,8 +31,8 @@ export const products: Product[] = [
     categoryLabel: "Chân Gà",
     price: "89.000đ",
     priceRange: "45.000đ - 189.000đ",
-    image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&auto=format&fit=crop&q=80",
-    heroImage: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=1200&auto=format&fit=crop&q=80",
+    image: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
+    heroImage: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "2.000.000+" },
@@ -86,8 +86,8 @@ export const products: Product[] = [
     categoryLabel: "Tăm Cay",
     price: "35.000đ",
     priceRange: "15.000đ - 99.000đ",
-    image: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&auto=format&fit=crop&q=80",
-    heroImage: "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=1200&auto=format&fit=crop&q=80",
+    image: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
+    heroImage: "/uploads/1780482061970-tan-cay-tieu-den.png",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "1.500.000+" },
@@ -140,8 +140,8 @@ export const products: Product[] = [
     categoryLabel: "Bánh Tráng",
     price: "29.000đ",
     priceRange: "12.000đ - 79.000đ",
-    image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80",
-    heroImage: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=1200&auto=format&fit=crop&q=80",
+    image: "/uploads/1780481989589-snack-nem-nuong-ba-tuyet-2k.png",
+    heroImage: "/uploads/1780481698378-snack-bia-carton.png",
     featured: true,
     stats: [
       { label: "Đơn đã bán", value: "800.000+" },
@@ -185,12 +185,12 @@ export const products: Product[] = [
 ];
 
 export const otherProducts = [
-  { id: "k-01", name: "Snack Đùi Gà Phô Mai", price: "39.000đ", image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&auto=format&fit=crop&q=80" },
-  { id: "k-02", name: "Snack Bò Kobe", price: "35.000đ", image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=500&auto=format&fit=crop&q=80" },
-  { id: "k-03", name: "Snack Sashimi", price: "32.000đ", image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=500&auto=format&fit=crop&q=80" },
-  { id: "k-04", name: "Snack Bìa Cát Tông", price: "25.000đ", image: "https://images.unsplash.com/photo-1599490659213-e2b9527b0876?w=500&auto=format&fit=crop&q=80" },
-  { id: "k-05", name: "Bim Bim Que", price: "20.000đ", image: "https://images.unsplash.com/photo-1618449840665-9ed506d73a34?w=500&auto=format&fit=crop&q=80" },
-  { id: "k-06", name: "Quẩy Que", price: "22.000đ", image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=80" },
+  { id: "k-01", name: "Snack Đùi Gà Phô Mai", price: "39.000đ", image: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png" },
+  { id: "k-02", name: "Snack Bò Kobe", price: "35.000đ", image: "/uploads/1780482013661-dui-ga-pho-mai-700g.png" },
+  { id: "k-03", name: "Snack Sashimi", price: "32.000đ", image: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png" },
+  { id: "k-04", name: "Snack Bìa Cát Tông", price: "25.000đ", image: "/uploads/1780482061970-tan-cay-tieu-den.png" },
+  { id: "k-05", name: "Bim Bim Que", price: "20.000đ", image: "/uploads/1780481989589-snack-nem-nuong-ba-tuyet-2k.png" },
+  { id: "k-06", name: "Quẩy Que", price: "22.000đ", image: "/uploads/1780481698378-snack-bia-carton.png" },
 ];
 
 export function getProductBySlug(slug: string): Product | undefined {

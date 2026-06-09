@@ -12,6 +12,7 @@ import {
   Loader,
   ShoppingBag,
 } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 interface Block {
   id: string;
@@ -169,13 +170,15 @@ export default function CustomDynamicPage({
                     )}
                   </div>
 
+                  {data.backgroundImage && (
                   <div className="min-h-[260px] overflow-hidden border border-orange-100 bg-white">
                     <img
-                      src={data.backgroundImage || "/hero-bg-default.jpg"}
+                      src={data.backgroundImage}
                       alt={data.title || page.title}
                       className="h-full min-h-[260px] w-full object-cover"
                     />
                   </div>
+                  )}
                 </div>
               </section>
             )}
@@ -191,7 +194,7 @@ export default function CustomDynamicPage({
                       ? "prose-invert text-slate-200"
                       : "text-slate-800"
                     }`}
-                  dangerouslySetInnerHTML={{ __html: data.content || "" }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.content || "") }}
                 />
               </section>
             )}
@@ -270,6 +273,7 @@ export default function CustomDynamicPage({
                     )}
                   </motion.div>
 
+                  {data.imageUrl && (
                   <motion.div
                     initial={{ opacity: 0, x: data.imagePosition === "left" ? -24 : 24 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -279,11 +283,12 @@ export default function CustomDynamicPage({
                       }`}
                   >
                     <img
-                      src={data.imageUrl || "/uploads/process-preview.jpg"}
+                      src={data.imageUrl}
                       alt={data.title || "Hình ảnh"}
                       className="h-full min-h-[320px] w-full object-cover"
                     />
                   </motion.div>
+                  )}
                 </div>
               </section>
             )}

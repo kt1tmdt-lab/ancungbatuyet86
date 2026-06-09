@@ -1,105 +1,60 @@
-import { NextResponse, NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
-import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { NextRequest } from "next/server";
+import { ProductStatus } from "@prisma/client";
+import { createProduct } from "@/features/products/mutations";
+import { listProducts } from "@/features/products/queries";
+import { getErrorMessage, jsonError, jsonOk } from "@/lib/api-response";
+import { getAuthErrorStatus, requireRole } from "@/lib/authz";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const featured = searchParams.get("featured");
-    const category = searchParams.get("category");
+    const statusParam = searchParams.get("status");
+    const isAdminList = statusParam === "ALL";
 
-    const where: any = {};
-    if (featured === "true") {
-      where.featured = true;
+    if (isAdminList) {
+      requireRole(req, ["ADMIN", "EDITOR"]);
     }
-    if (category) {
-      where.category = category;
-    }
-
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
+    
+    const products = await listProducts({
+      featured: searchParams.get("featured") === "true",
+      category: searchParams.get("category"),
+      status: isAdminList ? null : ProductStatus.PUBLISHED,
     });
 
-    return NextResponse.json(products);
-  } catch (error: any) {
+    return jsonOk(products);
+  } catch (error) {
     console.error("GET Products Error:", error);
-    return NextResponse.json({ 
-      error: "Internal Server Error", 
-      message: error?.message || String(error), 
-      stack: error?.stack 
-    }, { status: 500 });
+    return jsonError("Internal Server Error", 500, getErrorMessage(error));
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const token = getTokenFromReq(req);
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const viewer = requireRole(req, ["ADMIN", "EDITOR"]);
+    const product = await createProduct(await req.json());
 
-    const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const body = await req.json();
-    const {
-      name,
-      slug,
-      tagline,
-      description,
-      category,
-      categoryLabel,
-      price,
-      priceRange,
-      image,
-      heroImage,
-      featured,
-      purchaseUrl,
-      ingredients,
-      specs,
-      variants,
-      stats,
-      processSteps,
-      story,
-    } = body;
-
-    if (!name || !slug || !category || !image) {
-      return NextResponse.json({ error: "Name, slug, category, and image are required" }, { status: 400 });
-    }
-
-    // Check slug uniqueness
-    const existing = await prisma.product.findUnique({ where: { slug } });
-    if (existing) {
-      return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
-    }
-
-    const product = await prisma.product.create({
-      data: {
-        name,
-        slug,
-        tagline: tagline || "",
-        description: description || "",
-        category,
-        categoryLabel: categoryLabel || category,
-        price: price || "0đ",
-        priceRange: priceRange || price || null,
-        image,
-        heroImage: heroImage || null,
-        featured: !!featured,
-        purchaseUrl: purchaseUrl || "",
-        ingredients: Array.isArray(ingredients) ? ingredients : [],
-        specs: specs || null,
-        variants: variants || null,
-        stats: stats || null,
-        processSteps: processSteps || null,
-        story: story || "",
-      },
+    await logAudit({
+      userId: viewer.id,
+      action: "CREATE_PRODUCT",
+      entityType: "Product",
+      entityId: product.id,
+      details: { name: product.name, slug: product.slug }
     });
 
-    return NextResponse.json(product, { status: 201 });
+    return jsonOk(product, { status: 201 });
   } catch (error) {
     console.error("POST Product Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    const message = getErrorMessage(error);
+
+    if (message === "Unauthorized" || message === "Forbidden") {
+      return jsonError(message, getAuthErrorStatus(error));
+    }
+
+    if (message.includes("required") || message.includes("exists")) {
+      return jsonError(message, 400);
+    }
+
+    return jsonError("Internal Server Error", 500);
   }
 }

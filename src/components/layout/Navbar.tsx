@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Button from "@/components/ui/Button";
 
-const navLinks = [
+const DEFAULT_NAV_LINKS = [
   { href: "/", label: "Trang chủ" },
   { href: "/san-pham", label: "Sản phẩm" },
   { href: "/quy-trinh", label: "Quy trình" },
@@ -15,9 +16,10 @@ const navLinks = [
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ initialLinks }: { initialLinks?: { href: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const navLinks = Array.isArray(initialLinks) && initialLinks.length > 0 ? initialLinks : DEFAULT_NAV_LINKS;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
@@ -40,8 +42,8 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={`px-3 py-2 rounded-none text-sm font-medium transition-colors ${isActive
-                    ? "text-primary bg-red-50"
-                    : "text-gray-600 hover:text-primary hover:bg-red-50/50"
+                    ? "bg-primary-light text-primary-dark"
+                    : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
                     }`}
                 >
                   {link.label}
@@ -51,17 +53,19 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <a
+            <Button
               href="tel:0989852948"
-              className="hidden md:flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-none text-sm font-semibold hover:bg-primary-dark transition-colors"
+              variant="primary"
+              size="sm"
+              className="hidden md:flex"
+              leftIcon={<Phone size={14} />}
             >
-              <Phone size={14} />
-              <span>0989 852 948</span>
-            </a>
+              0989 852 948
+            </Button>
 
             <button
               onClick={() => setOpen(!open)}
-              className="lg:hidden p-2 rounded-none hover:bg-gray-100 transition-colors"
+              className="acbt-icon-btn lg:hidden p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
@@ -80,23 +84,26 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className={`px-4 py-3 rounded-none text-base font-medium transition-colors ${isActive ? "text-primary bg-red-50" : "text-gray-600 hover:bg-gray-50"
+                  className={`px-4 py-3 rounded-none text-base font-medium transition-colors ${isActive ? "bg-primary-light text-primary-dark" : "text-gray-600 hover:bg-primary-light"
                     }`}
                 >
                   {link.label}
                 </Link>
               );
             })}
-            <a
+            <Button
               href="tel:0989852948"
-              className="mt-2 flex items-center justify-center gap-2 bg-primary text-white px-4 py-3 rounded-none text-base font-semibold"
+              variant="primary"
+              size="lg"
+              className="mt-2 w-full"
+              leftIcon={<Phone size={16} />}
             >
-              <Phone size={16} />
-              <span>0989 852 948</span>
-            </a>
+              0989 852 948
+            </Button>
           </nav>
         </div>
       )}
     </header>
   );
 }
+

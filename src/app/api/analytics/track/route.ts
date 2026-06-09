@@ -5,7 +5,7 @@ import crypto from "crypto";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { path } = body;
+    const { path, referrer } = body;
 
     if (!path) {
       return NextResponse.json({ error: "Path is required" }, { status: 400 });
@@ -36,12 +36,12 @@ export async function POST(req: NextRequest) {
       .update(ip + "acbt-salt-2026")
       .digest("hex");
 
-    // Log the visit to the database
     await prisma.visit.create({
       data: {
         ipHash,
         path,
-      },
+        referrer,
+      } as any,
     });
 
     return NextResponse.json({ success: true });

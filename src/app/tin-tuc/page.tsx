@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import CurtainHover from "@/components/shared/CurtainHover";
+import Button from "@/components/ui/Button";
 import { ArrowRight, BookOpen, Calendar, Clock, Search, User } from "lucide-react";
 
 interface Post {
@@ -120,26 +122,24 @@ export default function BlogPage() {
       <section className="sticky top-16 z-30 border-b border-orange-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
-            <button
+            <Button
               onClick={() => setSelectedCategorySlug("all")}
-              className={`shrink-0 border px-4 py-2 text-xs font-black uppercase tracking-wider transition ${selectedCategorySlug === "all"
-                  ? "border-orange-500 bg-orange-500 text-white"
-                  : "border-orange-100 bg-[#fffaf3] text-slate-600 hover:border-orange-300"
-                }`}
+              variant={selectedCategorySlug === "all" ? "primary" : "outline"}
+              size="sm"
+              className="shrink-0 text-xs uppercase tracking-wider"
             >
               Tất cả
-            </button>
+            </Button>
             {categories.map((cat) => (
-              <button
+              <Button
                 key={cat.id}
                 onClick={() => setSelectedCategorySlug(cat.slug)}
-                className={`shrink-0 border px-4 py-2 text-xs font-black uppercase tracking-wider transition ${selectedCategorySlug === cat.slug
-                    ? "border-orange-500 bg-orange-500 text-white"
-                    : "border-orange-100 bg-[#fffaf3] text-slate-600 hover:border-orange-300"
-                  }`}
+                variant={selectedCategorySlug === cat.slug ? "primary" : "outline"}
+                size="sm"
+                className="shrink-0 text-xs uppercase tracking-wider"
               >
                 {cat.name}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -150,7 +150,7 @@ export default function BlogPage() {
               placeholder="Tìm bài viết, sản phẩm, nhà máy..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full border border-orange-100 bg-[#fffaf3] py-3 pl-10 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-orange-400 focus:bg-white"
+              className="w-full rounded-none border border-[#fed7aa] bg-white py-3 pl-10 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#FF7A1A] focus:bg-white focus:ring-4 focus:ring-[#FF7A1A]/15"
             />
           </div>
         </div>
@@ -182,18 +182,28 @@ export default function BlogPage() {
                 >
                   <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
                     <div className="relative min-h-[360px] overflow-hidden border-b border-orange-100 bg-orange-50 lg:border-b-0 lg:border-r">
-                      {featured.coverImageUrl ? (
-                        <img
-                          src={featured.coverImageUrl}
-                          alt={featured.title}
-                          className="h-full min-h-[360px] w-full object-cover transition duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full min-h-[360px] items-center justify-center bg-orange-100 text-6xl font-black text-orange-500">
-                          BT
-                        </div>
-                      )}
-                      <span className="absolute left-5 top-5 bg-orange-500 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                      <CurtainHover
+                        overlayMode="partial"
+                        overlayContent={
+                          <span className="flex items-center gap-1">
+                            Đọc tiếp <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                          </span>
+                        }
+                        className="w-full h-full"
+                      >
+                        {featured.coverImageUrl ? (
+                          <img
+                            src={featured.coverImageUrl}
+                            alt={featured.title}
+                            className="h-full min-h-[360px] w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                          />
+                        ) : (
+                          <div className="flex h-full min-h-[360px] items-center justify-center bg-orange-100 text-6xl font-black text-orange-500">
+                            BT
+                          </div>
+                        )}
+                      </CurtainHover>
+                      <span className="absolute left-5 top-5 bg-orange-500 px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-white z-30">
                         Bài nổi bật
                       </span>
                     </div>
@@ -224,7 +234,7 @@ export default function BlogPage() {
                           {getReadTime(featured.content)}
                         </span>
                       </div>
-                      <span className="mt-7 inline-flex w-fit items-center gap-2 bg-orange-500 px-5 py-3 text-xs font-black uppercase tracking-wider text-white">
+                      <span className="acbt-btn acbt-btn--primary acbt-btn--sm mt-7 w-fit uppercase tracking-wider">
                         Đọc bài viết
                         <ArrowRight size={15} />
                       </span>
@@ -248,19 +258,29 @@ export default function BlogPage() {
                     className="group flex h-full flex-col border border-orange-100 bg-white transition hover:border-orange-300 hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden border-b border-orange-100 bg-orange-50">
-                      {post.coverImageUrl ? (
-                        <img
-                          src={post.coverImageUrl}
-                          alt={post.title}
-                          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-orange-100 text-3xl font-black text-orange-500">
-                          BÀ TUYẾT
-                        </div>
-                      )}
+                      <CurtainHover
+                        overlayMode="partial"
+                        overlayContent={
+                          <span className="flex items-center gap-1">
+                            Đọc tiếp <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                          </span>
+                        }
+                        className="w-full h-full"
+                      >
+                        {post.coverImageUrl ? (
+                          <img
+                            src={post.coverImageUrl}
+                            alt={post.title}
+                            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.015]"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-orange-100 text-3xl font-black text-orange-500">
+                            BÀ TUYẾT
+                          </div>
+                        )}
+                      </CurtainHover>
                       {post.category && (
-                        <span className="absolute bottom-4 left-4 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-orange-600 shadow-sm">
+                        <span className="absolute bottom-4 left-4 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-orange-600 shadow-sm z-30">
                           {post.category.name}
                         </span>
                       )}
@@ -303,3 +323,5 @@ export default function BlogPage() {
     </main>
   );
 }
+
+

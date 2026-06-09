@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
+import { PageStatus } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(
   req: NextRequest,
@@ -91,8 +93,16 @@ export async function PUT(
         title,
         slug: cleanSlug,
         content: content || [],
-        status: status || "DRAFT",
+        status: status === PageStatus.PUBLISHED ? PageStatus.PUBLISHED : PageStatus.DRAFT,
       },
+    });
+
+    await logAudit({
+      userId: payload.id,
+      action: "UPDATE_PAGE",
+      entityType: "Page",
+      entityId: id,
+      details: { title: updatedPage.title, slug: updatedPage.slug }
     });
 
     return NextResponse.json(updatedPage);
@@ -128,6 +138,14 @@ export async function DELETE(
 
     // 2. Delete page
     await prisma.page.delete({ where: { id } });
+
+    await logAudit({
+      userId: payload.id,
+      action: "DELETE_PAGE",
+      entityType: "Page",
+      entityId: id,
+      details: { title: existingPage.title, slug: existingPage.slug }
+    });
 
     return NextResponse.json({ message: "Xóa trang thành công" });
   } catch (error: any) {

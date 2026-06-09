@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { reviewPost } from "@/features/posts/mutations";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(req: Request) {
   try {
@@ -19,50 +21,21 @@ export async function POST(req: Request) {
     const { postId, action, note } = body; // action: approve | reject
     if (!postId || !action) return NextResponse.json({ error: "Missing" }, { status: 400 });
 
-    if (action === "approve") {
-      const post = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          status: "PUBLISHED",
-          reviewerId: payload.id,
-          publishedAt: new Date(),
-          rejectedReason: null,
-        }
-      });
+    try {
+      const post = await reviewPost(postId, action, payload.id, note);
 
-      await prisma.postReviewLog.create({
-        data: {
-          postId,
-          reviewerId: payload.id,
-          action: "APPROVE",
-          note: note || "Duyệt bài viết xuất bản",
-        }
+      await logAudit({
+        userId: payload.id,
+        action: action === "approve" ? "APPROVE_POST" : "REJECT_POST",
+        entityType: "Post",
+        entityId: postId,
+        details: { title: post.title, slug: post.slug, note }
       });
 
       return NextResponse.json(post);
-    } else if (action === "reject") {
-      const rejectReason = note || "Bị từ chối bởi ban biên tập";
-      const post = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          status: "REJECTED",
-          reviewerId: payload.id,
-          rejectedReason: rejectReason,
-        }
-      });
-
-      await prisma.postReviewLog.create({
-        data: {
-          postId,
-          reviewerId: payload.id,
-          action: "REJECT",
-          note: rejectReason,
-        }
-      });
-
-      return NextResponse.json(post);
-    } else {
-      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    } catch (err: any) {
+      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      return NextResponse.json({ error: err.message }, { status: 400 });
     }
   } catch (error) {
     console.error("Approve API Error:", error);

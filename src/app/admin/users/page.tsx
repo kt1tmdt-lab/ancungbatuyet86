@@ -165,7 +165,7 @@ export default function UsersPage() {
                           <div className="flex items-center gap-2">
                             <span>{acc.name || "Không tên"}</span>
                             {isSelf && (
-                              <span className="bg-orange-500/10 text-orange-600 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-200">
+                              <span className="bg-primary/10 text-orange-600 text-[9px] font-bold px-2 py-0.5 rounded border border-orange-200">
                                 BẠN
                               </span>
                             )}
@@ -223,3 +223,4 @@ export default function UsersPage() {
     </ProtectedRoute>
   );
 }
+

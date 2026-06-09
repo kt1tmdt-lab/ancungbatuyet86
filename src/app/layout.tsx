@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import MainLayoutWrapper from "@/components/layout/MainLayoutWrapper";
 import { AuthProvider } from "@/lib/auth-context";
 import AnalyticsTracker from "@/components/layout/AnalyticsTracker";
 
@@ -28,9 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen flex flex-col font-sans bg-cream text-gray-900 antialiased" suppressHydrationWarning>
         <AuthProvider>
           <AnalyticsTracker />
-          <Navbar />
-          <main className="flex-1 pt-16 lg:pt-18">{children}</main>
-          <Footer />
+          <MainLayoutWrapper>{children}</MainLayoutWrapper>
         </AuthProvider>
       </body>
     </html>

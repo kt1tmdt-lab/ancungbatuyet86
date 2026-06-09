@@ -1,7 +1,129 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
+const { locations, onlineChannels } = require("../src/data/locations");
 
 const prisma = new PrismaClient();
+
+const onlineChannelsSeed = [
+  {
+    name: "TikTok Shop",
+    description: "KÃªnh bÃ¡n hÃ ng chÃ­nh â€” Livestream má»—i ngÃ y",
+    url: "https://tiktok.com/@batuyethanhvi",
+    icon: "tiktok",
+    followers: "3.2M+",
+    color: "#000000",
+    sortOrder: 1,
+  },
+  {
+    name: "Shopee",
+    description: "Giao hÃ ng nhanh â€” Nhiá»u voucher giáº£m giÃ¡",
+    url: "https://shopee.vn/nmtvlog99",
+    icon: "shopee",
+    followers: "200K+",
+    color: "#EE4D2D",
+    sortOrder: 2,
+  },
+  {
+    name: "Lazada",
+    description: "Äáº·t hÃ ng dá»… dÃ ng â€” Tráº£ gÃ³p 0%",
+    url: "https://www.lazada.vn/shop/an-cung-ba-tuyet",
+    icon: "lazada",
+    followers: "50K+",
+    color: "#0F1689",
+    sortOrder: 3,
+  },
+];
+
+const locationsSeed = [
+  {
+    name: "Trá»¥ sá»Ÿ chÃ­nh & NhÃ  mÃ¡y",
+    type: "chi-nhanh",
+    address: "Khu cÃ´ng nghiá»‡p SÃ´ng CÃ´ng, ThÃ¡i NguyÃªn",
+    province: "ThÃ¡i NguyÃªn",
+    phone: "0989 852 948",
+    hours: "8:00 - 17:00 (T2 - T7)",
+    lat: 21.4735,
+    lng: 105.849,
+    sortOrder: 1,
+  },
+  {
+    name: "Chi nhÃ¡nh HÃ  Ná»™i",
+    type: "chi-nhanh",
+    address: "Sá»‘ 45, ÄÆ°á»ng Tráº§n Duy HÆ°ng, Cáº§u Giáº¥y, HÃ  Ná»™i",
+    province: "HÃ  Ná»™i",
+    phone: "0989 852 949",
+    hours: "8:00 - 21:00 (HÃ ng ngÃ y)",
+    lat: 21.0105,
+    lng: 105.7985,
+    sortOrder: 2,
+  },
+  {
+    name: "Äáº¡i lÃ½ Báº¯c Ninh",
+    type: "dai-ly",
+    address: "Sá»‘ 12, ÄÆ°á»ng LÃ½ ThÃ¡i Tá»•, TP Báº¯c Ninh",
+    province: "Báº¯c Ninh",
+    phone: "0912 345 678",
+    hours: "8:00 - 20:00 (HÃ ng ngÃ y)",
+    lat: 21.1861,
+    lng: 106.0763,
+    sortOrder: 3,
+  },
+  {
+    name: "Äáº¡i lÃ½ Háº£i PhÃ²ng",
+    type: "dai-ly",
+    address: "Sá»‘ 88, ÄÆ°á»ng Láº¡ch Tray, NgÃ´ Quyá»n, Háº£i PhÃ²ng",
+    province: "Háº£i PhÃ²ng",
+    phone: "0923 456 789",
+    hours: "8:00 - 20:00 (HÃ ng ngÃ y)",
+    lat: 20.8449,
+    lng: 106.6881,
+    sortOrder: 4,
+  },
+  {
+    name: "Äáº¡i lÃ½ Nghá»‡ An",
+    type: "dai-ly",
+    address: "Sá»‘ 56, ÄÆ°á»ng LÃª Lá»£i, TP Vinh, Nghá»‡ An",
+    province: "Nghá»‡ An",
+    phone: "0934 567 890",
+    hours: "8:00 - 20:00 (HÃ ng ngÃ y)",
+    lat: 18.6796,
+    lng: 105.6813,
+    sortOrder: 5,
+  },
+  {
+    name: "Äáº¡i lÃ½ ÄÃ  Náºµng",
+    type: "dai-ly",
+    address: "Sá»‘ 123, ÄÆ°á»ng Nguyá»…n VÄƒn Linh, Háº£i ChÃ¢u, ÄÃ  Náºµng",
+    province: "ÄÃ  Náºµng",
+    phone: "0945 678 901",
+    hours: "8:00 - 21:00 (HÃ ng ngÃ y)",
+    lat: 16.0544,
+    lng: 108.2022,
+    sortOrder: 6,
+  },
+  {
+    name: "Chi nhÃ¡nh TP.HCM",
+    type: "chi-nhanh",
+    address: "Sá»‘ 200, ÄÆ°á»ng Nguyá»…n Thá»‹ Minh Khai, Quáº­n 3, TP.HCM",
+    province: "TP.HCM",
+    phone: "0989 852 950",
+    hours: "8:00 - 21:00 (HÃ ng ngÃ y)",
+    lat: 10.7769,
+    lng: 106.6869,
+    sortOrder: 7,
+  },
+  {
+    name: "Äáº¡i lÃ½ Cáº§n ThÆ¡",
+    type: "dai-ly",
+    address: "Sá»‘ 78, ÄÆ°á»ng 30 ThÃ¡ng 4, Ninh Kiá»u, Cáº§n ThÆ¡",
+    province: "Cáº§n ThÆ¡",
+    phone: "0956 789 012",
+    hours: "8:00 - 20:00 (HÃ ng ngÃ y)",
+    lat: 10.0341,
+    lng: 105.7222,
+    sortOrder: 8,
+  },
+];
 
 async function hashPassword(password: string) {
   return bcrypt.hash(password, 10);
@@ -17,6 +139,8 @@ async function main() {
   await prisma.post.deleteMany({});
   await prisma.category.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.location.deleteMany({});
+  await prisma.onlineChannel.deleteMany({});
 
   // 1. Hash passwords
   const passwordHash = await hashPassword("123456");
@@ -79,6 +203,21 @@ async function main() {
 
   console.log("Categories seeded successfully.");
 
+  await prisma.onlineChannel.createMany({
+    data: onlineChannels.map((channel: any, index: number) => ({
+      ...channel,
+      sortOrder: index + 1,
+    })),
+  });
+  await prisma.location.createMany({
+    data: locations.map((location: any, index: number) => ({
+      ...location,
+      sortOrder: index + 1,
+    })),
+  });
+
+  console.log("Sales channels seeded successfully.");
+
   // 4. Create Tags
   const tagNhaMay = await prisma.tag.create({ data: { name: "Nhà máy", slug: "nha-may" } });
   const tagAnVat = await prisma.tag.create({ data: { name: "Ăn vặt", slug: "an-vat" } });
@@ -99,7 +238,7 @@ async function main() {
 <h3>Trang thiết bị hiện đại bậc nhất</h3>
 <p>Chúng tôi đã đầu tư hàng chục tỷ đồng để nhập khẩu máy móc tự động hóa từ nước ngoài, hạn chế tối đa sự can thiệp thủ công nhằm đảm bảo độ đồng đều và vệ sinh cho từng sản phẩm như chân gà rút xương, tăm cay và snack các loại.</p>
 <p>Phát biểu tại buổi lễ, đại diện thương hiệu chia sẻ: <em>"Nhà máy Thái Nguyên không chỉ giúp tăng sản lượng lên gấp 3 lần mà còn là lời cam kết của Ăn Cùng Bà Tuyết về một thương hiệu đồ ăn vặt sạch, chất lượng cao, phục vụ hàng triệu người tiêu dùng Việt Nam."</em></p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
       status: "PUBLISHED",
       authorId: author.id,
       reviewerId: admin.id,
@@ -121,7 +260,7 @@ async function main() {
       content: `<h2>Lễ ký kết bảo hiểm trách nhiệm sản phẩm</h2>
 <p>Ăn Cùng Bà Tuyết vừa thực hiện lễ ký kết hợp đồng bảo hiểm trách nhiệm sản phẩm với Tổng công ty Bảo hiểm PVI. Theo đó, tất cả khách hàng mua sản phẩm chính hãng của chúng tôi đều được bảo vệ quyền lợi tối đa khi gặp các vấn đề liên quan đến chất lượng sản phẩm.</p>
 <p>Đây là một bước đi đột phá chưa từng có trong ngành đồ ăn vặt tại Việt Nam, chứng minh sự tự tin tuyệt đối của thương hiệu đối với quy trình sản xuất và nguồn gốc nguyên liệu đầu vào sạch.</p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
       status: "PUBLISHED",
       authorId: author.id,
       reviewerId: editor.id,
@@ -143,7 +282,7 @@ async function main() {
       content: `<h2>Bắt đầu từ khâu kiểm định nguyên liệu lúc sáng sớm</h2>
 <p>Mỗi ngày, hàng tấn chân gà tươi sạch được vận chuyển trực tiếp từ các trang trại chăn nuôi đạt chuẩn VietGAP đến nhà máy. Tại đây, bộ phận KCS sẽ kiểm tra kỹ lưỡng nhiệt độ và độ tươi của từng lô hàng trước khi đưa vào dây chuyền rút xương.</p>
 <p>Từng chiếc chân gà được làm sạch bằng công nghệ sục ozone, sau đó được luộc chín trong phòng vô trùng và tiến hành rút xương thủ công bởi những công nhân lành nghề đeo găng tay kháng khuẩn.</p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
       status: "PENDING_REVIEW",
       authorId: author.id,
       categoryId: catHauTruong.id,
@@ -164,7 +303,7 @@ async function main() {
 <p>Một gói mì gói ăn liền luộc chín, trộn với nước sốt chua ngọt và một ít tăm cay Bà Tuyết cắt khúc nhỏ. Thêm xúc xích và hành lá, bạn sẽ có ngay một đĩa mì trộn giòn cay, thơm ngon lạ miệng.</p>
 <h2>2. Chân gà rút xương trộn cơm cháy</h2>
 <p>Bẻ nhỏ cơm cháy, trộn đều với chân gà rút xương vị ớt hiểm cùng với xoài xanh băm sợi và rau răm. Món gỏi trộn này cực kỳ thích hợp cho các buổi tụ họp bạn bè dịp cuối tuần.</p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780482061970-tan-cay-tieu-den.png",
       status: "DRAFT",
       authorId: author.id,
       categoryId: catCongThuc.id,
@@ -182,7 +321,7 @@ async function main() {
       slug: "mv-an-cung-ba-tuyet-x-tuan-cry",
       excerpt: "MV âm nhạc đầu tiên của thương hiệu đồ ăn vặt Việt Nam, kể câu chuyện từ người nông dân đến thương hiệu quốc dân.",
       content: `<p>Mới đây, Ăn Cùng Bà Tuyết chính thức phát hành MV ca nhạc cùng tên hợp tác cùng nam nghệ sĩ trẻ Tuấn Cry. MV mang màu sắc tươi sáng, âm nhạc sôi động kể lại hành trình gian nan từ những ngày đầu khởi nghiệp vất vả của thương hiệu cho đến khi trở thành món ăn vặt được yêu thích trên khắp cả nước.</p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780481989589-snack-nem-nuong-ba-tuyet-2k.png",
       status: "REJECTED",
       authorId: author.id,
       reviewerId: editor.id,
@@ -201,7 +340,7 @@ async function main() {
       content: `<h2>Bứt phá doanh số trên nền tảng số</h2>
 <p>Nhờ chiến lược truyền thông gần gũi, hài hước thông qua các video của Bà Tuyết và đội ngũ sáng tạo nội dung, Ăn Cùng Bà Tuyết tiếp tục duy trì vị thế độc tôn với vị trí Top 1 ngành hàng ăn vặt trên TikTok Shop Việt Nam suốt 4 quý liên tiếp.</p>
 <p>Sản phẩm chân gà rút xương vị ớt hiểm và tăm cay truyền thống liên tục rơi vào tình trạng cháy hàng mỗi khi livestream. Đây là minh chứng rõ nét cho sự chuyển đổi số thành công của một thương hiệu ẩm thực Việt.</p>`,
-      coverImageUrl: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&auto=format&fit=crop&q=60",
+      coverImageUrl: "/uploads/1780481698378-snack-bia-carton.png",
       status: "PUBLISHED",
       authorId: admin.id,
       reviewerId: admin.id,

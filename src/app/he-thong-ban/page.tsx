@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -10,14 +11,35 @@ import {
   MapPin,
   Navigation,
   Phone,
-  Search,
   ShieldCheck,
   ShoppingBag,
   Store,
   Truck,
   Users,
 } from "lucide-react";
-import { locations, onlineChannels, provinces } from "@/data/locations";
+
+type Location = {
+  id: string;
+  name: string;
+  type: "chi-nhanh" | "dai-ly" | "sieu-thi" | "online";
+  address: string;
+  province: string;
+  phone: string;
+  hours: string;
+  lat: number;
+  lng: number;
+  isActive: boolean;
+};
+
+type OnlineChannel = {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  icon: string;
+  followers: string;
+  color: string;
+};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 18 },
@@ -51,7 +73,13 @@ function getTypeClass(type: string) {
   return "border-amber-500 bg-amber-50 text-amber-700";
 }
 
-function PageIntro({ totalLocations }: { totalLocations: number }) {
+function PageIntro({
+  totalLocations,
+  totalOnlineChannels,
+}: {
+  totalLocations: number;
+  totalOnlineChannels: number;
+}) {
   return (
     <section className="border-b border-orange-100 bg-[#fff7ed] px-4 pb-8 pt-24 sm:px-6 lg:px-10">
       <motion.div
@@ -86,7 +114,7 @@ function PageIntro({ totalLocations }: { totalLocations: number }) {
 
           <div className="mt-5 grid grid-cols-3 border border-orange-100 bg-white">
             {[
-              { value: `${onlineChannels.length}+`, label: "kênh online" },
+              { value: `${totalOnlineChannels}+`, label: "kênh online" },
               { value: `${totalLocations}`, label: "điểm bán" },
               { value: "24/7", label: "tra cứu" },
             ].map((item) => (
@@ -162,7 +190,7 @@ function BuyingMessageStrip() {
   );
 }
 
-function OnlineChannelsSection() {
+function OnlineChannelsSection({ onlineChannels }: { onlineChannels: OnlineChannel[] }) {
   return (
     <section className="bg-[#fbfaf7] px-4 py-12 sm:px-6 lg:px-10">
       <div className="mb-7 grid gap-5 border-b border-slate-200 pb-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
@@ -239,12 +267,14 @@ function LocationsSection({
   selectedType,
   setSelectedType,
   filtered,
+  provinces,
 }: {
   selectedProvince: string;
   setSelectedProvince: (value: string) => void;
   selectedType: string;
   setSelectedType: (value: string) => void;
-  filtered: typeof locations;
+  filtered: Location[];
+  provinces: string[];
 }) {
   return (
     <section className="bg-white px-4 py-12 sm:px-6 lg:px-10">
@@ -443,21 +473,21 @@ function DealerSection() {
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a
+          <Link
             href="/lien-he"
             className="inline-flex items-center justify-center gap-2 bg-white px-7 py-4 text-sm font-black uppercase tracking-wider text-orange-700 transition hover:bg-orange-50"
           >
             Liên hệ hợp tác
             <ExternalLink size={16} />
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/san-pham"
             className="inline-flex items-center justify-center gap-2 border border-white/30 px-7 py-4 text-sm font-black uppercase tracking-wider text-white transition hover:bg-white/10"
           >
             Xem sản phẩm
             <ArrowRight size={16} />
-          </a>
+          </Link>
         </div>
       </div>
     </section>
@@ -467,10 +497,34 @@ function DealerSection() {
 export default function LocationsPage() {
   const [selectedProvince, setSelectedProvince] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [onlineChannels, setOnlineChannels] = useState<OnlineChannel[]>([]);
+  const [provinces, setProvinces] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/locations")
+      .then((res) => res.json())
+      .then((data) => {
+        const nextLocations = Array.isArray(data.locations) ? data.locations : [];
+        setLocations(nextLocations);
+        setOnlineChannels(Array.isArray(data.onlineChannels) ? data.onlineChannels : []);
+        setProvinces(
+          Array.isArray(data.provinces)
+            ? data.provinces
+            : [...new Set(nextLocations.map((location: Location) => location.province))]
+        );
+      })
+      .catch((error) => {
+        console.error("Failed to load locations from DB", error);
+        setLocations([]);
+        setOnlineChannels([]);
+        setProvinces([]);
+      });
+  }, []);
 
   const activeLocations = useMemo(() => {
     return locations.filter((loc) => loc.isActive);
-  }, []);
+  }, [locations]);
 
   const filtered = useMemo(() => {
     return activeLocations.filter((loc) => {
@@ -488,15 +542,19 @@ export default function LocationsPage() {
 
   return (
     <main className="bg-white antialiased selection:bg-orange-600 selection:text-white">
-      <PageIntro totalLocations={activeLocations.length} />
+      <PageIntro
+        totalLocations={activeLocations.length}
+        totalOnlineChannels={onlineChannels.length}
+      />
       <BuyingMessageStrip />
-      <OnlineChannelsSection />
+      <OnlineChannelsSection onlineChannels={onlineChannels} />
       <LocationsSection
         selectedProvince={selectedProvince}
         setSelectedProvince={setSelectedProvince}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
         filtered={filtered}
+        provinces={provinces}
       />
       <DealerSection />
     </main>

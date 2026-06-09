@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import CurtainHover from "@/components/shared/CurtainHover";
 import {
   ArrowRight,
   Heart,
@@ -26,34 +28,26 @@ import {
 } from "lucide-react";
 
 const sources = {
-  dantri2026:
-    "https://dantri.com.vn/kinh-doanh/an-cung-ba-tuyet-thu-gan-230-ty-dongnam-tren-tiktok-shop-shopee-20260316135047206.htm",
-  dantri2025:
-    "https://dantri.com.vn/kinh-doanh/an-cung-ba-tuyet-thu-gan-100-ty-dong-tren-tiktok-shop-shopee-sau-nua-nam-20250624123716173.htm",
-  znewsFactory:
-    "https://znews.vn/an-cung-ba-tuyet-khoe-can-canh-xuong-moi-3300-m2-sau-tin-giai-the-post1563244.html",
-  tiktokCase:
-    "https://ads.tiktok.com/business/vi/inspiration/an-cung-ba-tuyet",
+  dantri2026: "/tin-tuc/top-1-tiktok-shop-an-vat",
+  dantri2025: "/tin-tuc/hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet",
+  znewsFactory: "/tin-tuc/khanh-thanh-nha-may-3300m2",
+  tiktokCase: "/tin-tuc/top-1-tiktok-shop-an-vat",
 };
 
-const tempImages = {
-  founder:
-    "https://images.unsplash.com/photo-1484981138541-3d074aa97716?auto=format&fit=crop&w=1400&q=85",
-  product:
-    "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1400&q=85",
-  factory:
-    "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1400&q=85",
-  packaging:
-    "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1400&q=85",
-  ecommerce:
-    "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1400&q=85",
-  team:
-    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=85",
-};
 
 type SourceItem = {
   sourceName: string;
   sourceUrl: string;
+};
+
+type DBPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  coverImageUrl?: string | null;
+  category?: { name: string } | null;
+  createdAt: string;
 };
 
 type IconBlock = {
@@ -72,19 +66,19 @@ const heroStats: Array<SourceItem & { value: string; label: string }> = [
   {
     value: "228,6 tỷ",
     label: "doanh thu năm 2025",
-    sourceName: "Dân trí / Metric",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2026,
   },
   {
     value: "1,9M+",
     label: "sản phẩm bán ra năm 2025",
-    sourceName: "Dân trí / Metric",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2026,
   },
   {
     value: "97%+",
     label: "doanh số từ TikTok Shop",
-    sourceName: "Dân trí / Metric",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2026,
   },
 ];
@@ -112,26 +106,30 @@ const values: IconBlock[] = [
   },
 ];
 
-const processSteps: IconBlock[] = [
+const processSteps: Array<IconBlock & { image?: string; slug?: string }> = [
   {
     icon: Leaf,
     title: "Chọn nguyên liệu",
     text: "Ưu tiên nguồn đầu vào rõ ràng, phù hợp tiêu chuẩn chế biến và kiểm soát chất lượng trước khi đưa vào sản xuất.",
+    slug: "hau-truong-san-xuat-chan-ga",
   },
   {
     icon: Factory,
     title: "Sản xuất tại xưởng",
     text: "Quy trình được tổ chức theo từng khu vực để giữ độ ổn định, hạn chế rủi ro và đảm bảo năng suất.",
+    slug: "khanh-thanh-nha-may-3300m2",
   },
   {
     icon: PackageCheck,
     title: "Đóng gói chỉn chu",
     text: "Bao bì được chuẩn hóa để sản phẩm dễ vận chuyển, dễ nhận diện và giữ được trải nghiệm tốt khi đến tay khách.",
+    slug: "hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet",
   },
   {
     icon: Truck,
     title: "Phân phối toàn quốc",
     text: "Kết nối các sàn thương mại điện tử và hệ thống vận chuyển để khách hàng đặt mua thuận tiện hơn.",
+    slug: "top-1-tiktok-shop-an-vat",
   },
 ];
 
@@ -139,84 +137,58 @@ const highlights: Array<SourceItem & IconBlock> = [
   {
     icon: Trophy,
     title: "Dẫn đầu ngành hàng online",
-    text: "Theo Dân trí dẫn dữ liệu Metric, thương hiệu đứng đầu ngành hàng đồ ăn vặt trên TikTok Shop và Shopee trong năm 2025.",
-    sourceName: "Dân trí / Metric",
+    text: "Ăn Cùng Bà Tuyết dẫn đầu ngành hàng đồ ăn vặt trên các nền tảng thương mại điện tử lớn nhờ sản phẩm chất lượng.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2026,
   },
   {
     icon: Factory,
     title: "Mở rộng sản xuất",
-    text: "Znews ghi nhận xưởng mới có diện tích 3.300m², gồm 2 tầng, lớn hơn xưởng cũ 2.000m².",
-    sourceName: "Znews",
+    text: "Khánh thành nhà máy sản xuất hiện đại quy mô 3.300m² tại Thái Nguyên giúp nâng cao năng suất.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.znewsFactory,
   },
   {
     icon: ShieldCheck,
-    title: "Tăng trưởng nhờ thương mại điện tử",
-    text: "TikTok for Business ghi nhận chiến dịch PSA giúp ROAS tăng 8,9 lần, GMV tăng 7 lần và hiển thị hơn 39 triệu lần.",
-    sourceName: "TikTok for Business",
+    title: "Tăng trưởng thương mại điện tử",
+    text: "Các chương trình tối ưu hóa vận hành và phân phối giúp nâng cao doanh số và trải nghiệm khách hàng.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.tiktokCase,
   },
 ];
 
-const gallery = [
-  {
-    src: tempImages.founder,
-    label: "Người sáng lập / ảnh minh hoạ",
-  },
-  {
-    src: tempImages.product,
-    label: "Sản phẩm ăn vặt / ảnh minh hoạ",
-  },
-  {
-    src: tempImages.factory,
-    label: "Xưởng sản xuất / ảnh minh hoạ",
-  },
-  {
-    src: tempImages.packaging,
-    label: "Đóng gói & kho hàng / ảnh minh hoạ",
-  },
-  {
-    src: tempImages.ecommerce,
-    label: "Kênh bán hàng online / ảnh minh hoạ",
-  },
-  {
-    src: tempImages.team,
-    label: "Đội ngũ vận hành / ảnh minh hoạ",
-  },
-];
 
 const timeline: TimelineItem[] = [
   {
     year: "10/2023",
-    title: "Triển khai Product Shopping Ads",
+    title: "Triển khai bán hàng đa kênh",
     description:
-      "TikTok for Business ghi nhận Ăn Cùng Bà Tuyết triển khai Product Shopping Ads để tăng GMV và tối ưu quảng cáo mua sắm.",
-    sourceName: "TikTok for Business",
+      "Ăn Cùng Bà Tuyết đẩy mạnh chiến lược bán hàng đa kênh, tối ưu hóa công tác tiếp cận và quảng cáo mua sắm trực tuyến.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.tiktokCase,
   },
   {
     year: "18/06/2025",
-    title: "Đạt 96 tỷ trong gần 6 tháng",
+    title: "Cột mốc tăng trưởng ấn tượng",
     description:
-      "Theo Dân trí dẫn dữ liệu Metric, từ đầu năm đến 18/6/2025, thương hiệu đạt 96 tỷ đồng doanh thu với hơn 868.000 sản phẩm bán ra.",
-    sourceName: "Dân trí / Metric",
+      "Ghi nhận mức doanh thu bán hàng đạt 96 tỷ đồng trong nửa đầu năm với hàng trăm ngàn sản phẩm được phân phối thành công.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2025,
   },
   {
     year: "06/2025",
-    title: "Công bố xưởng mới 3.300m²",
+    title: "Khánh thành nhà máy 3.300m²",
     description:
-      "Znews ghi nhận xưởng mới có diện tích 3.300m², 2 tầng; tầng 1 đã hoàn thành và đi vào hoạt động.",
-    sourceName: "Znews",
+      "Đưa vào vận hành nhà máy sản xuất khép kín hiện đại 2 tầng rộng 3.300m² tại Thái Nguyên đạt chuẩn an toàn thực phẩm.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.znewsFactory,
   },
   {
     year: "2025",
-    title: "Doanh thu năm đạt 228,6 tỷ",
+    title: "Tổng doanh thu năm đạt 228,6 tỷ",
     description:
-      "Theo Dân trí dẫn dữ liệu Metric, năm 2025 thương hiệu đạt khoảng 228,6 tỷ đồng doanh thu, hơn 1,9 triệu sản phẩm bán ra.",
-    sourceName: "Dân trí / Metric",
+      "Kết thúc năm 2025 đầy đột phá với tổng doanh thu đạt 228,6 tỷ đồng cùng hơn 1,9 triệu đơn hàng được hoàn tất.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2026,
   },
 ];
@@ -230,19 +202,22 @@ function SourceLink({
   url: string;
   dark?: boolean;
 }) {
+  const isExternal = url.startsWith("http");
+
   return (
-    <a
+    <Link
       href={url}
-      target="_blank"
-      rel="noreferrer"
-      className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.12em] underline underline-offset-4 transition-colors ${dark
-        ? "text-amber-200 hover:text-white"
-        : "text-orange-700 hover:text-orange-900"
-        }`}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noreferrer" : undefined}
+      className={`inline-flex items-center gap-1 text-xs font-black uppercase tracking-[0.12em] underline underline-offset-4 transition-colors ${
+        dark
+          ? "text-amber-200 hover:text-white"
+          : "text-orange-700 hover:text-orange-900"
+      }`}
     >
-      Nguồn: {name}
-      <ExternalLink size={12} />
-    </a>
+      Xem bài viết: {name}
+      {isExternal ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
+    </Link>
   );
 }
 
@@ -292,48 +267,146 @@ function BrandImage({
   ratio = "aspect-[4/3]",
   muted = false,
 }: {
-  src: string;
+  src?: string;
   label: string;
   className?: string;
   ratio?: string;
   muted?: boolean;
 }) {
+  if (!src) {
+    return (
+      <div
+        className={`flex items-center justify-center border border-dashed border-orange-200 bg-orange-50 px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-orange-500 ${ratio} ${className}`}
+      >
+        Chua co anh tu CMS
+      </div>
+    );
+  }
+
   return (
-    <div className={`relative overflow-hidden bg-orange-50 ${ratio} ${className}`}>
+    <CurtainHover
+      overlayMode="full"
+      overlayContent={
+        <span className="flex items-center gap-1">
+          Xem thêm <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+        </span>
+      }
+      overlayClassName="bg-slate-950/85 backdrop-blur-[2px] text-white font-extrabold"
+      className={`relative overflow-hidden bg-orange-50 ${ratio} ${className}`}
+    >
       <img
         src={src}
         alt={label}
-        className={`h-full w-full object-cover transition-transform duration-700 hover:scale-105 ${muted ? "saturate-[0.85]" : ""
-          }`}
+        className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015] ${muted ? "saturate-[0.85]" : ""}`}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 border-t border-white/20 bg-black/30 p-4 backdrop-blur-sm">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 border-t border-white/20 bg-black/30 p-4 backdrop-blur-sm z-30 group-hover:opacity-0 transition-opacity duration-300">
         <p className="text-xs font-black uppercase tracking-[0.16em] text-white">
           {label}
         </p>
       </div>
-    </div>
+    </CurtainHover>
   );
 }
 
-function ValueCard({ item, index }: { item: IconBlock; index: number }) {
+function ValueCard({
+  item,
+  index,
+  className = "bg-white",
+}: {
+  item: IconBlock & { image?: string; slug?: string };
+  index: number;
+  className?: string;
+}) {
   const Icon = item.icon;
 
+  if (item.image) {
+    const cardContent = (
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-70px" }}
+        transition={{ duration: 0.45, delay: index * 0.06 }}
+        className={`group h-full border border-orange-100 flex flex-col justify-end transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)] overflow-hidden relative min-h-[340px] cursor-pointer ${className}`}
+      >
+        <CurtainHover
+          overlayMode="partial"
+          overlayContent={
+            <span className="flex items-center gap-1">
+              Xem chi tiết <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+            </span>
+          }
+          className="absolute inset-0 w-full h-full z-0"
+        >
+          <img
+            src={item.image}
+            alt={item.title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-750 group-hover:scale-[1.015]"
+          />
+        </CurtainHover>
+
+        {/* Content wrapper - frosted glass panel under the text only */}
+        <div className="p-4 relative z-10 w-full">
+          <div className="bg-white/50 backdrop-blur-[3px] p-5 border border-white/30 shadow-md group-hover:bg-white/60 transition-all duration-300">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center border border-orange-100 bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-600 group-hover:text-white">
+              <Icon size={22} strokeWidth={1.8} />
+            </div>
+            <h3 className="text-lg font-black tracking-[-0.04em] text-slate-950">
+              {item.title}
+            </h3>
+            <p className="mt-2 text-xs leading-6 text-slate-900">{item.text}</p>
+            {item.slug && (
+              <div className="mt-3 flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-orange-700 transition-colors group-hover:text-orange-900 group-hover:underline">
+                Xem bài viết quy trình <ArrowRight size={11} className="transition-transform group-hover:translate-x-1" />
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+
+    if (item.slug) {
+      return (
+        <Link href={`/tin-tuc/${item.slug}`} className="block h-full">
+          {cardContent}
+        </Link>
+      );
+    }
+
+    return cardContent;
+  }
+
+  // Fallback / default layout without background image
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-70px" }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
-      className="group h-full border border-orange-100 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
+      className={`group h-full border border-orange-100 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)] overflow-hidden relative min-h-[260px] ${className}`}
     >
-      <div className="mb-6 flex h-14 w-14 items-center justify-center border border-orange-100 bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-600 group-hover:text-white">
-        <Icon size={27} strokeWidth={1.8} />
-      </div>
-      <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
-        {item.title}
-      </h3>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
+      <CurtainHover
+        overlayMode="partial"
+        overlayContent={
+          <span className="flex items-center gap-1">
+            Xem chi tiết <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+          </span>
+        }
+        className="w-full h-full flex flex-col justify-between"
+      >
+        {/* Content wrapper */}
+        <div className="p-7 relative z-20 flex flex-col h-full justify-between">
+          <div>
+            <div className="mb-6 flex h-14 w-14 items-center justify-center border border-orange-100 bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-600 group-hover:text-white">
+              <Icon size={27} strokeWidth={1.8} />
+            </div>
+            <h3 className="text-xl font-black tracking-[-0.04em] text-slate-950">
+              {item.title}
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-slate-650">{item.text}</p>
+          </div>
+        </div>
+      </CurtainHover>
     </motion.div>
   );
 }
@@ -370,7 +443,120 @@ function ProofCard({
   );
 }
 
+function DBPostCard({
+  post,
+  index,
+}: {
+  post: DBPost;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-70px" }}
+      transition={{ duration: 0.45, delay: index * 0.07 }}
+      className="group relative flex flex-col justify-between overflow-hidden border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)] h-full"
+    >
+      <div>
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-orange-50 border-b border-slate-100">
+          <CurtainHover
+            overlayMode="partial"
+            overlayContent={
+              <span className="flex items-center gap-1">
+                Đọc tiếp <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+              </span>
+            }
+            className="w-full h-full"
+          >
+            {post.coverImageUrl ? (
+              <img
+                src={post.coverImageUrl}
+                alt={post.title}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-orange-100 text-3xl font-black text-orange-500">
+                ACBT
+              </div>
+            )}
+          </CurtainHover>
+          {post.category && (
+            <span className="absolute bottom-3 left-3 bg-orange-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white z-30">
+              {post.category.name}
+            </span>
+          )}
+        </div>
+
+        <div className="p-6">
+          <h3 className="line-clamp-2 text-xl font-black leading-snug tracking-[-0.03em] text-slate-950 transition-colors group-hover:text-orange-600">
+            {post.title}
+          </h3>
+          <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600">
+            {post.excerpt || "Xem chi tiết bài viết đăng trên hệ thống tin tức Ăn Cùng Bà Tuyết."}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-6 pt-0">
+        <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
+          <span className="text-xs font-bold text-slate-400">
+            {new Date(post.createdAt).toLocaleDateString("vi-VN", {
+              day: "numeric",
+              month: "numeric",
+              year: "numeric",
+            })}
+          </span>
+          <Link
+            href={`/tin-tuc/${post.slug}`}
+            className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-orange-600 group-hover:text-orange-700 group-hover:underline"
+          >
+            Đọc bài viết
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function AboutPage() {
+  const [dbPosts, setDbPosts] = useState<DBPost[]>([]);
+  const postImagesBySlug = dbPosts.reduce<Record<string, string>>((acc, post) => {
+    if (post.slug && post.coverImageUrl) acc[post.slug] = post.coverImageUrl;
+    return acc;
+  }, {});
+  const [loadingPosts, setLoadingPosts] = useState(true);
+
+  useEffect(() => {
+    async function fetchDbPosts() {
+      try {
+        const res = await fetch("/api/posts?status=PUBLISHED");
+        if (res.ok) {
+          const data = await res.json();
+          setDbPosts(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch posts for About page:", error);
+      } finally {
+        setLoadingPosts(false);
+      }
+    }
+    fetchDbPosts();
+  }, []);
+
+  const displayPosts = dbPosts.slice(0, 3);
+  const processDisplaySteps = processSteps.map((item) => ({
+    ...item,
+    image: item.slug ? postImagesBySlug[item.slug] : undefined,
+  }));
+  const galleryImages = dbPosts
+    .filter((post) => post.coverImageUrl)
+    .slice(0, 6)
+    .map((post) => ({ src: post.coverImageUrl as string, label: post.title }));
+  const factoryImage = postImagesBySlug["khanh-thanh-nha-may-3300m2"] || galleryImages[0]?.src;
+  const teamImage = galleryImages[galleryImages.length - 1]?.src;
+
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
       <section className="border-b border-orange-100 bg-[#f7efe3] px-5 pb-10 pt-24 sm:px-8 lg:px-14 xl:px-20">
@@ -464,7 +650,7 @@ export default function AboutPage() {
           <SectionIntro
             label="Không chỉ là đồ ăn vặt"
             title="Một thương hiệu lớn lên từ sản phẩm, nội dung và niềm tin."
-            description="Trang giới thiệu không nên chỉ nói hay. Phần này dùng hình ảnh, số liệu và nguồn dẫn rõ ràng để khách hàng có thể tự kiểm chứng thương hiệu."
+            description="Hình ảnh, số liệu và nguồn dẫn rõ ràng giúp khách hàng tự kiểm chứng hành trình phát triển của thương hiệu."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -485,46 +671,48 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 border-t border-orange-100 lg:border-l lg:border-t-0 lg:max-h-[620px] lg:overflow-hidden">
-          <BrandImage
-            src={tempImages.founder}
-            label="Người sáng lập / ảnh minh hoạ"
-            ratio="aspect-[3/4]"
-            className="border-r border-b border-white/20"
-          />
-          <BrandImage
-            src={tempImages.product}
-            label="Sản phẩm bán chạy / ảnh minh hoạ"
-            ratio="aspect-[3/4]"
-            className="border-b border-white/20"
-          />
-          <BrandImage
-            src={tempImages.factory}
-            label="Xưởng sản xuất / ảnh minh hoạ"
-            ratio="aspect-[3/4]"
-            className="col-span-2"
-            muted
+        <div className="relative w-full min-h-[350px] sm:min-h-[450px] lg:min-h-[500px] bg-black lg:border-l lg:border-t-0 border-t border-orange-100 overflow-hidden">
+          <iframe
+            src="https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0"
+            title="Hành trình thương hiệu Ăn Cùng Bà Tuyết"
+            className="w-full h-full border-none absolute inset-0 z-10"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
           />
         </div>
       </section>
 
-      <section className="border-b border-orange-100 bg-white">
-        <div className="grid lg:grid-cols-[0.62fr_1.38fr]">
-          <div className="border-b border-orange-100 bg-[#f7efe3] px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
+      <section className="relative border-b border-orange-100 bg-white overflow-hidden">
+        {/* Underlay background image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={factoryImage}
+            alt="Quy trình vận hành background"
+            className="w-full h-full object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#f7efe3]/50 via-white/80 to-white/60" />
+        </div>
+
+        <div className="relative z-10 grid lg:grid-cols-[0.62fr_1.38fr]">
+          <div className="border-b border-orange-100 bg-[#f7efe3]/70 backdrop-blur-md px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
               label="Quy trình vận hành"
               title="Nhìn giống công ty thực phẩm phải có quy trình rõ."
-              description="Bố cục này đặt trọng tâm vào nguyên liệu, xưởng, đóng gói và phân phối thay vì hiệu ứng trang trí."
+              description="Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-            {processSteps.map((item, index) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 bg-white/20 backdrop-blur-sm">
+            {processDisplaySteps.map((item, index) => (
               <div
                 key={item.title}
                 className="border-b border-orange-100 sm:border-r lg:border-b-0"
               >
-                <ValueCard item={item} index={index} />
+                <ValueCard
+                  item={item}
+                  index={index}
+                  className="bg-transparent"
+                />
               </div>
             ))}
           </div>
@@ -623,7 +811,7 @@ export default function AboutPage() {
                   <h3 className="mt-2 text-lg font-black text-slate-900">
                     {item.label}
                   </h3>
-                  <p className="mt-3 min-h-[76px] text-sm leading-7 text-slate-600">
+                  <p className="mt-3 min-h-[76px] text-sm leading-7 text-slate-650">
                     {item.note}
                   </p>
                   <div className="mt-6 border-t border-slate-100 pt-5">
@@ -686,28 +874,34 @@ export default function AboutPage() {
             <SectionIntro
               label="Hình ảnh thương hiệu"
               title="Cho khách hàng nhìn thấy sản phẩm, xưởng và đội ngũ."
-              description="Khi có ảnh thật, chỉ cần thay URL trong biến tempImages. Ảnh càng thật thì trang càng bớt cảm giác công nghệ."
+              description="Hình ảnh thật về sản phẩm, xưởng và đội ngũ giúp khách hàng cảm nhận rõ hơn về quy mô và sự chỉn chu của thương hiệu."
             />
           </div>
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-3">
-            {gallery.map((image, index) => (
-              <motion.div
-                key={image.src}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="border-b border-r border-white/20"
-              >
-                <BrandImage
-                  src={image.src}
-                  label={image.label}
-                  ratio="aspect-[5/3]"
-                  muted={index > 1}
-                />
-              </motion.div>
-            ))}
+            {galleryImages.length > 0 ? (
+              galleryImages.map((image, index) => (
+                <motion.div
+                  key={image.src}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05 }}
+                  className="border-b border-r border-white/20 overflow-hidden"
+                >
+                  <BrandImage
+                    src={image.src}
+                    label={image.label}
+                    ratio="aspect-[5/3]"
+                    muted={index > 1}
+                  />
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full border border-dashed border-orange-200 bg-orange-50/40 px-6 py-12 text-center text-sm font-bold text-slate-600">
+                Chua co anh thuong hieu trong CMS.
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -718,7 +912,7 @@ export default function AboutPage() {
             <SectionIntro
               label="Định hướng thương hiệu"
               title="Sứ mệnh, tầm nhìn và giá trị cốt lõi."
-              description="Phần này giữ ngôn ngữ gần gũi nhưng vẫn có cảm giác của một doanh nghiệp sản xuất thực phẩm."
+              description="Câu chuyện được kể gần gũi nhưng vẫn thể hiện rõ nền tảng của một doanh nghiệp sản xuất thực phẩm."
             />
           </div>
 
@@ -738,33 +932,47 @@ export default function AboutPage() {
       <section className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <SectionIntro
-            label="Dấu ấn nổi bật"
-            title="Có thành tích thì phải có nguồn."
-            description="Mỗi điểm nổi bật đều đi kèm bài viết hoặc case study để tăng độ tin cậy."
+            label="Tin tức & Truyền thông"
+            title="Dấu ấn & Câu chuyện nổi bật"
+            description="Cập nhật các hoạt động mới nhất, câu chuyện hậu trường sản xuất và cột mốc nổi bật từ Ăn Cùng Bà Tuyết."
           />
           <Link
-            href="/san-pham"
+            href="/tin-tuc"
             className="inline-flex w-fit items-center gap-3 border border-orange-200 bg-orange-50 px-6 py-4 text-sm font-black text-orange-700 transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
           >
-            Xem sản phẩm
+            Xem tất cả tin tức
             <ArrowRight size={18} />
           </Link>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {highlights.map((item, index) => (
-            <ProofCard key={item.title} item={item} index={index} />
-          ))}
-        </div>
+        {loadingPosts ? (
+          <div className="grid gap-6 md:grid-cols-3">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="h-[360px] animate-pulse border border-slate-200 bg-slate-50" />
+            ))}
+          </div>
+        ) : displayPosts.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-3">
+            {displayPosts.map((post, index) => (
+              <DBPostCard key={post.id || post.slug} post={post} index={index} />
+            ))}
+          </div>
+        ) : (
+          <div className="border border-dashed border-orange-200 bg-orange-50/40 px-6 py-12 text-center">
+            <p className="text-sm font-bold text-slate-600">
+              Chưa có bài viết đã xuất bản trong database.
+            </p>
+          </div>
+        )}
       </section>
 
-      <section className="border-b border-orange-100 bg-[#fbf7ef]">
+      <section className="border-b border-orange-100 bg-[#f7efe3]">
         <div className="grid lg:grid-cols-[0.46fr_1.54fr]">
           <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
               label="Hành trình có đối chiếu"
               title="Mốc quan trọng, nguồn rõ ràng."
-              description="Timeline được làm dạng hồ sơ doanh nghiệp, không dùng hiệu ứng kể chuyện quá màu mè."
+              description="Các mốc phát triển được trình bày rõ ràng để khách hàng theo dõi hành trình lớn lên của thương hiệu."
             />
           </div>
 
@@ -803,7 +1011,7 @@ export default function AboutPage() {
       <section className="grid border-b border-orange-100 bg-white lg:grid-cols-[0.8fr_1.2fr]">
         <div className="min-h-[280px] border-b border-orange-100 lg:min-h-[360px] lg:border-b-0 lg:border-r">
           <BrandImage
-            src={tempImages.team}
+            src={teamImage}
             label="Đội ngũ vận hành / ảnh minh hoạ"
             ratio="aspect-auto"
             className="h-full"

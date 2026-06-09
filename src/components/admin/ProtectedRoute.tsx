@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { AuthRole } from "@/lib/auth";
 
 export function ProtectedRoute({
   children,
@@ -10,8 +11,8 @@ export function ProtectedRoute({
   allowedRoles,
 }: {
   children: React.ReactNode;
-  requiredRole?: "ADMIN" | "EDITOR" | "AUTHOR" | "USER";
-  allowedRoles?: ("ADMIN" | "EDITOR" | "AUTHOR" | "USER")[];
+  requiredRole?: AuthRole;
+  allowedRoles?: AuthRole[];
 }) {
   const { user, loading } = useAuth();
   const router = useRouter();

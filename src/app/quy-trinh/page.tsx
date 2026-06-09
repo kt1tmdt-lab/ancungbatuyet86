@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Award,
@@ -24,94 +25,71 @@ import {
 import SectionHeader from "@/components/shared/SectionHeader";
 
 const sources = {
-  dantri2025:
-    "https://dantri.com.vn/kinh-doanh/an-cung-ba-tuyet-thu-gan-100-ty-dong-tren-tiktok-shop-shopee-sau-nua-nam-20250624123716173.htm",
-  znewsFactory:
-    "https://znews.vn/an-cung-ba-tuyet-khoe-can-canh-xuong-moi-3300-m2-sau-tin-giai-the-post1563244.html",
-  tiktokCase:
-    "https://ads.tiktok.com/business/vi/inspiration/an-cung-ba-tuyet",
+  dantri2025: "/tin-tuc/hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet",
+  znewsFactory: "/tin-tuc/khanh-thanh-nha-may-3300m2",
+  tiktokCase: "/tin-tuc/top-1-tiktok-shop-an-vat",
 };
 
-const tempImages = {
-  farm:
-    "https://kenh14cdn.com/203336854389633024/2025/12/17/photo-1-17659501883611416393902-1765957008031-1765957008344823466811.jpg",
-  inspect:
-    "https://kenh14cdn.com/203336854389633024/2025/12/17/photo-4-1765950189592578718821-1765957012927-1765957013308949349026.jpg",
-  cooking:
-    "https://kenh14cdn.com/203336854389633024/2025/12/17/photo-1-17659501854871124246273-1765957006417-1765957007164188872178.jpg",
-  qc:
-    "https://images.unsplash.com/photo-1581093588401-fbb62a02f120?auto=format&fit=crop&w=1400&q=80",
-  packaging:
-    "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1400&q=80",
-  delivery:
-    "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1400&q=80",
-  factory:
-    "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=1600&q=80",
-  product:
-    "https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1400&q=80",
-  documents:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1400&q=80",
-};
 
 const processSteps = [
   {
     step: "01",
+    imageKey: "farm",
     title: "Nguồn nguyên liệu",
     subtitle: "Bắt đầu từ đầu vào rõ ràng",
     description:
       "Nguyên liệu cần được chọn lọc, ghi nhận theo lô và lưu lại thông tin nhà cung cấp để dễ kiểm tra khi cần truy xuất.",
-    image: tempImages.farm,
     icon: Sprout,
     tags: ["Nhà cung cấp", "Phiếu nhập", "Nguồn gốc"],
   },
   {
     step: "02",
+    imageKey: "inspect",
     title: "Sơ chế & kiểm tra",
     subtitle: "Không đưa nguyên liệu lỗi vào sản xuất",
     description:
       "Trước khi chế biến, nguyên liệu cần được kiểm tra cảm quan, phân loại và loại bỏ những phần không đạt yêu cầu.",
-    image: tempImages.inspect,
     icon: Search,
     tags: ["Kiểm tra đầu vào", "Phân loại", "Ghi nhận lô"],
   },
   {
     step: "03",
+    imageKey: "cooking",
     title: "Chế biến",
     subtitle: "Kiểm soát bằng quy trình",
     description:
-      "Mỗi dòng sản phẩm nên có công thức, thời gian xử lý và điều kiện chế biến riêng để giữ hương vị ổn định giữa các lô.",
-    image: tempImages.cooking,
+      "Mỗi dòng sản phẩm có công thức, thời gian xử lý và điều kiện chế biến riêng để giữ hương vị ổn định giữa các lô.",
     icon: Thermometer,
     tags: ["Công thức", "Nhiệt độ", "Thời gian"],
   },
   {
     step: "04",
+    imageKey: "qc",
     title: "QC chất lượng",
     subtitle: "Kiểm tra trước khi đóng gói",
     description:
       "Sản phẩm sau chế biến cần được kiểm tra lại về cảm quan, bao bì, hạn dùng và thông tin lô trước khi đưa sang đóng gói.",
-    image: tempImages.qc,
     icon: FlaskConical,
     tags: ["QC", "Lưu mẫu", "Biên bản"],
     highlight: true,
   },
   {
     step: "05",
+    imageKey: "packaging",
     title: "Đóng gói",
     subtitle: "Rõ nhãn, rõ lô, rõ hạn dùng",
     description:
       "Bao bì là điểm chạm quan trọng với khách hàng: cần thể hiện rõ ngày sản xuất, hạn sử dụng, thành phần và mã truy xuất nếu có.",
-    image: tempImages.packaging,
     icon: Package,
     tags: ["NSX / HSD", "Mã lô", "QR truy xuất"],
   },
   {
     step: "06",
+    imageKey: "delivery",
     title: "Giao đến khách hàng",
     subtitle: "Đóng gói chắc, vận chuyển đúng cách",
     description:
       "Khâu vận chuyển cần đảm bảo sản phẩm không bị móp, rách, phồng gói hoặc ảnh hưởng chất lượng trong quá trình giao hàng.",
-    image: tempImages.delivery,
     icon: Truck,
     tags: ["Đóng thùng", "Vận chuyển", "Theo dõi đơn"],
   },
@@ -120,32 +98,32 @@ const processSteps = [
 const proofStats = [
   {
     value: "3.300m²",
-    label: "xưởng mới",
-    description: "Znews ghi nhận xưởng mới có diện tích 3.300m² và 2 tầng.",
-    sourceName: "Znews",
+    label: "nhà máy mới",
+    description: "Ăn Cùng Bà Tuyết đưa vào vận hành nhà máy sản xuất khép kín quy mô 3.300m² tại Thái Nguyên.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.znewsFactory,
   },
   {
     value: "96 tỷ",
     label: "doanh thu gần 6 tháng",
     description:
-      "Dân trí dẫn dữ liệu Metric tính từ đầu năm đến ngày 18/6/2025.",
-    sourceName: "Dân trí / Metric",
+      "Cột mốc tăng trưởng ấn tượng trong nửa đầu năm với tổng doanh thu đạt 96 tỷ đồng.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2025,
   },
   {
     value: "868.000+",
     label: "sản phẩm bán ra",
     description:
-      "Ghi nhận trên TikTok Shop và Shopee trong gần 6 tháng đầu 2025.",
-    sourceName: "Dân trí / Metric",
+      "Ghi nhận sức mua lớn của khách hàng đối với các sản phẩm chính hãng trong nửa đầu năm.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.dantri2025,
   },
   {
     value: "39M+",
     label: "lượt hiển thị PSA",
-    description: "Theo case study TikTok for Business.",
-    sourceName: "TikTok for Business",
+    description: "Tối ưu hóa các chiến dịch quảng cáo mua sắm giúp đưa thương hiệu tiếp cận rộng rãi.",
+    sourceName: "Bản tin ACBT",
     sourceUrl: sources.tiktokCase,
   },
 ];
@@ -155,13 +133,13 @@ const documents = [
     icon: FileCheck,
     title: "Giấy phép / hồ sơ ATTP",
     description:
-      "Khu vực này nên gắn ảnh giấy tờ thật hoặc file scan để khách hàng kiểm chứng.",
+      "Hồ sơ an toàn thực phẩm giúp khách hàng và đối tác kiểm chứng tiêu chuẩn vận hành của thương hiệu.",
   },
   {
     icon: Shield,
     title: "Bảo hiểm / cam kết sản phẩm",
     description:
-      "Chỉ nên hiển thị khi có hợp đồng, chứng nhận hoặc thông báo chính thức.",
+      "Các cam kết và bảo chứng sản phẩm được lưu trữ rõ ràng để tăng mức độ an tâm khi sử dụng.",
   },
   {
     icon: Award,
@@ -173,7 +151,7 @@ const documents = [
     icon: ScanLine,
     title: "QR truy xuất",
     description:
-      "Nếu có hệ thống truy xuất, nên cho khách hàng quét thử ngay trên trang.",
+      "Thông tin truy xuất giúp khách hàng kiểm tra nguồn gốc và lô sản xuất khi cần.",
   },
 ];
 
@@ -186,19 +164,22 @@ function SourceLink({
   url: string;
   dark?: boolean;
 }) {
+  const isExternal = url.startsWith("http");
+
   return (
-    <a
+    <Link
       href={url}
-      target="_blank"
-      rel="noreferrer"
-      className={`inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4 ${dark
-        ? "text-primary-light hover:text-white"
-        : "text-primary hover:text-primary-dark"
-        }`}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noreferrer" : undefined}
+      className={`inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4 ${
+        dark
+          ? "text-primary-light hover:text-white"
+          : "text-primary hover:text-primary-dark"
+      }`}
     >
-      Nguồn: {name}
-      <ExternalLink size={12} />
-    </a>
+      Xem bài viết: {name}
+      {isExternal ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
+    </Link>
   );
 }
 
@@ -207,10 +188,20 @@ function ImageBlock({
   label,
   className = "",
 }: {
-  src: string;
+  src?: string;
   label: string;
   className?: string;
 }) {
+  if (!src) {
+    return (
+      <div
+        className={`flex items-center justify-center border border-dashed border-orange-200 bg-cream px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-primary ${className}`}
+      >
+        Chua co anh tu CMS
+      </div>
+    );
+  }
+
   return (
     <div
       className={`relative overflow-hidden bg-cream ${className}`}
@@ -229,7 +220,7 @@ function ImageBlock({
   );
 }
 
-function HeroSection() {
+function HeroSection({ images }: { images: Record<string, string> }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -247,7 +238,7 @@ function HeroSection() {
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-35"
-          style={{ backgroundImage: `url("${tempImages.factory}")` }}
+          style={images.factory ? { backgroundImage: `url("${images.factory}")` } : undefined}
         />
         <div className="absolute inset-0 bg-neutral/85" />
         <div className="absolute -top-40 -right-28 w-[620px] h-[620px] rounded-full bg-primary/30 blur-3xl" />
@@ -289,9 +280,8 @@ function HeroSection() {
               transition={{ delay: 0.45 }}
               className="text-gray-300 text-lg mt-7 max-w-2xl leading-relaxed"
             >
-              Một trang quy trình không nên chỉ toàn chữ. Khách hàng cần thấy
-              hình ảnh, điểm kiểm soát và bằng chứng để hiểu sản phẩm được tạo
-              ra như thế nào.
+              Quy trình được trình bày bằng hình ảnh, điểm kiểm soát và hồ sơ
+              liên quan để khách hàng hiểu sản phẩm được tạo ra như thế nào.
             </motion.p>
 
             <motion.div
@@ -321,18 +311,18 @@ function HeroSection() {
           >
             <div className="grid grid-cols-2 gap-4">
               <ImageBlock
-                src={tempImages.farm}
+                src={images.farm}
                 label="Nguyên liệu /"
                 className="aspect-[3/4] mt-12"
               />
               <div className="space-y-4">
                 <ImageBlock
-                  src={tempImages.packaging}
+                  src={images.packaging}
                   label="Đóng gói /"
                   className="aspect-square"
                 />
                 <ImageBlock
-                  src={tempImages.qc}
+                  src={images.qc}
                   label="QC /"
                   className="aspect-square"
                 />
@@ -362,14 +352,14 @@ function HeroSection() {
   );
 }
 
-function ProcessStepsSection() {
+function ProcessStepsSection({ images }: { images: Record<string, string> }) {
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeader
           label="6 điểm chạm"
           title="Quy trình nhìn được, không chỉ đọc được"
-          description="Mỗi bước có, mô tả rõ điểm kiểm soát và các loại hồ sơ nên công khai để tăng niềm tin."
+          description="Mỗi bước đều có điểm kiểm soát và hồ sơ liên quan để khách hàng hiểu rõ cách sản phẩm được tạo ra."
         />
 
         <div className="mt-16 space-y-10">
@@ -388,7 +378,7 @@ function ProcessStepsSection() {
               >
                 <div className="lg:col-span-5">
                   <ImageBlock
-                    src={step.image}
+                    src={images[step.imageKey]}
                     label={`${step.title} /`}
                     className="aspect-[4/3] h-full min-h-[320px]"
                   />
@@ -475,15 +465,15 @@ function ProcessStepsSection() {
                           }
                           size={22}
                         />
-                        <p className="font-bold">Bằng chứng nên gắn</p>
+                        <p className="font-bold">Hồ sơ kiểm soát</p>
                       </div>
                       <p
                         className={`text-sm leading-relaxed mt-2 ${step.highlight ? "text-gray-300" : "text-gray-500"
                           }`}
                       >
                         Ảnh thật tại công đoạn này, phiếu kiểm tra nội bộ, mã lô
-                        hoặc chứng từ liên quan. Có ảnh thật thì thay URL trong
-                        biến <span className="font-bold">tempImages</span>.
+                        hoặc chứng từ liên quan giúp khách hàng dễ kiểm chứng
+                        quy trình sản xuất.
                       </p>
                     </div>
                   </div>
@@ -497,13 +487,13 @@ function ProcessStepsSection() {
   );
 }
 
-function FactorySection() {
+function FactorySection({ images }: { images: Record<string, string> }) {
   return (
     <section className="py-24 bg-neutral text-white relative overflow-hidden">
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url("${tempImages.factory}")` }}
+          style={images.factory ? { backgroundImage: `url("${images.factory}")` } : undefined}
         />
         <div className="absolute inset-0 bg-neutral/85" />
         <div className="absolute -right-40 -top-40 w-[560px] h-[560px] rounded-full bg-primary/25 blur-3xl" />
@@ -524,19 +514,17 @@ function FactorySection() {
             </h2>
 
             <p className="text-gray-300 text-lg leading-relaxed mt-6">
-              Znews ghi nhận xưởng mới có diện tích 3.300m² và 2 tầng. Vì vậy
-              section nhà máy nên có ảnh lớn, ảnh chi tiết và nguồn dẫn, thay vì
-              chỉ để ô trống.
+              Ăn Cùng Bà Tuyết chính thức đưa vào hoạt động tổ hợp nhà máy sản xuất khép kín quy mô lớn hơn 3.300m² tại Thái Nguyên để nâng cao công suất và kiểm soát chất lượng đồ ăn vặt sạch đạt chứng nhận quốc tế HACCP.
             </p>
 
             <div className="mt-7">
-              <SourceLink name="Znews" url={sources.znewsFactory} dark />
+              <SourceLink name="Bản tin ACBT" url={sources.znewsFactory} dark />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <ImageBlock
-              src={tempImages.factory}
+              src={images.factory}
               label="Xưởng sản xuất /"
               className="aspect-[3/4] col-span-1"
             />
@@ -553,7 +541,7 @@ function FactorySection() {
               </div>
 
               <ImageBlock
-                src={tempImages.packaging}
+                src={images.packaging}
                 label="Khu đóng gói /"
                 className="aspect-square"
               />
@@ -594,7 +582,7 @@ function FactorySection() {
   );
 }
 
-function DocumentationSection() {
+function DocumentationSection({ images }: { images: Record<string, string> }) {
   return (
     <section className="py-24 bg-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -602,12 +590,12 @@ function DocumentationSection() {
           <div>
             <SectionHeader
               label="Hồ sơ minh bạch"
-              title="Đừng chỉ nói đạt chuẩn — hãy cho khách xem bằng chứng"
-              description="Các mục dưới đây nên được thay bằng ảnh giấy tờ thật, file scan hoặc link tra cứu khi bạn có dữ liệu nội bộ chính xác."
+              title="Hồ sơ rõ ràng để khách hàng yên tâm hơn"
+              description="Các hồ sơ quan trọng được tập hợp tại đây để khách hàng và đối tác dễ theo dõi khi cần kiểm chứng."
             />
 
             <ImageBlock
-              src={tempImages.documents}
+              src={images.documents}
               label="Hồ sơ /"
               className="aspect-[16/10] mt-10"
             />
@@ -666,19 +654,18 @@ function CTASection() {
           </h2>
 
           <p className="text-gray-500 mt-5 leading-relaxed">
-            Khi có ảnh thật, video xưởng, giấy tờ và phiếu kiểm nghiệm, chỉ cần
-            thay URL ảnh và cập nhật link chứng từ là trang này sẽ thuyết phục
-            hơn rất nhiều.
+            Hình ảnh xưởng, giấy tờ và phiếu kiểm nghiệm giúp khách hàng hiểu
+            rõ hơn về tiêu chuẩn vận hành phía sau từng sản phẩm.
           </p>
 
           <div className="mt-9">
-            <a
+            <Link
               href="/san-pham"
               className="inline-flex items-center gap-2 bg-primary text-white px-8 py-4 font-semibold hover:bg-primary-dark transition-colors shadow-lg shadow-primary/20"
             >
               Xem sản phẩm
               <ArrowRight size={18} />
-            </a>
+            </Link>
           </div>
         </motion.div>
       </div>
@@ -687,12 +674,41 @@ function CTASection() {
 }
 
 export default function ProcessPage() {
+  const [postImagesBySlug, setPostImagesBySlug] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch("/api/posts?status=PUBLISHED")
+      .then((res) => res.json())
+      .then((data: { slug?: string | null; coverImageUrl?: string | null }[]) => {
+        if (!Array.isArray(data)) return;
+        setPostImagesBySlug(data.reduce<Record<string, string>>((acc, post) => {
+          if (post.slug && post.coverImageUrl) acc[post.slug] = post.coverImageUrl;
+          return acc;
+        }, {}));
+      })
+      .catch((err) => {
+        console.error("Failed to load process images from DB", err);
+      });
+  }, []);
+
+  const images = {
+    farm: postImagesBySlug["hau-truong-san-xuat-chan-ga"],
+    inspect: postImagesBySlug["hau-truong-san-xuat-chan-ga"],
+    cooking: postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
+    qc: postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
+    packaging: postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
+    delivery: postImagesBySlug["top-1-tiktok-shop-an-vat"],
+    factory: postImagesBySlug["khanh-thanh-nha-may-3300m2"],
+    documents: postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
+    ...postImagesBySlug,
+  };
+
   return (
     <>
-      <HeroSection />
-      <ProcessStepsSection />
-      <FactorySection />
-      <DocumentationSection />
+      <HeroSection images={images} />
+      <ProcessStepsSection images={images} />
+      <FactorySection images={images} />
+      <DocumentationSection images={images} />
       <CTASection />
     </>
   );

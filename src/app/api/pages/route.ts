@@ -1,9 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
+import { PageStatus } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
+    const token = getTokenFromReq(req);
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const payload = verifyToken(token);
+    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const pages = await prisma.page.findMany({
       orderBy: { updatedAt: "desc" },
     });
@@ -55,8 +65,16 @@ export async function POST(req: NextRequest) {
         title,
         slug: cleanSlug,
         content: content || [],
-        status: status || "DRAFT",
+        status: status === PageStatus.PUBLISHED ? PageStatus.PUBLISHED : PageStatus.DRAFT,
       },
+    });
+
+    await logAudit({
+      userId: payload.id,
+      action: "CREATE_PAGE",
+      entityType: "Page",
+      entityId: page.id,
+      details: { title: page.title, slug: page.slug }
     });
 
     return NextResponse.json(page, { status: 201 });

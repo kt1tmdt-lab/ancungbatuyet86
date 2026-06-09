@@ -1,59 +1,36 @@
-import { NextResponse, NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
-import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { NextRequest } from "next/server";
+import { createCategory } from "@/features/categories/mutations";
+import { listCategories } from "@/features/categories/queries";
+import { getErrorMessage, jsonError, jsonOk } from "@/lib/api-response";
+import { getAuthErrorStatus, requireRole } from "@/lib/authz";
 
 export async function GET() {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        _count: {
-          select: { posts: true },
-        },
-      },
-    });
-    return NextResponse.json(categories);
+    return jsonOk(await listCategories());
   } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("GET Categories Error:", error);
+    return jsonError("Internal Server Error", 500);
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const token = getTokenFromReq(req);
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    requireRole(req, ["ADMIN", "EDITOR"]);
+    const category = await createCategory(await req.json());
 
-    const payload = verifyToken(token);
-    if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // Check roles: Only ADMIN and EDITOR can manage categories
-    if (payload.role !== "ADMIN" && payload.role !== "EDITOR") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const body = await req.json();
-    const { name, slug, description } = body;
-
-    if (!name || !slug) {
-      return NextResponse.json({ error: "Name and Slug are required" }, { status: 400 });
-    }
-
-    // Check slug uniqueness
-    const existing = await prisma.category.findUnique({ where: { slug } });
-    if (existing) {
-      return NextResponse.json({ error: "Category slug already exists" }, { status: 400 });
-    }
-
-    const category = await prisma.category.create({
-      data: {
-        name,
-        slug: slug.toLowerCase().trim().replace(/\s+/g, "-"),
-        description: description || null,
-      },
-    });
-
-    return NextResponse.json(category, { status: 201 });
+    return jsonOk(category, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("POST Category Error:", error);
+    const message = getErrorMessage(error);
+
+    if (message === "Unauthorized" || message === "Forbidden") {
+      return jsonError(message, getAuthErrorStatus(error));
+    }
+
+    if (message.includes("required") || message.includes("exists")) {
+      return jsonError(message, 400);
+    }
+
+    return jsonError("Internal Server Error", 500);
   }
 }

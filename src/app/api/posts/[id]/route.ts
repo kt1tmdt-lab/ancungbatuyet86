@@ -1,6 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { updatePost } from "@/features/posts/mutations";
+import { revalidatePath } from "next/cache";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -16,6 +19,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    if (post.status !== "PUBLISHED") {
+      const token = getTokenFromReq(req);
+      if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const payload = verifyToken(token);
+      if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+      if (payload.role !== "ADMIN" && payload.role !== "EDITOR" && post.authorId !== payload.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     return NextResponse.json(post);
@@ -57,122 +71,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const body = await req.json();
-    const {
-      title,
-      slug,
-      excerpt,
-      content,
-      coverImageUrl,
-      categoryId,
-      tags,
-      seoTitle,
-      seoDescription,
-      seoKeywords,
-      status
-    } = body;
 
-    if (!title || !slug) {
-      return NextResponse.json({ error: "Title and slug are required" }, { status: 400 });
-    }
-
-    // Check slug uniqueness (excluding current post)
-    const duplicateSlug = await prisma.post.findFirst({
-      where: {
-        slug,
-        NOT: { id }
-      }
-    });
-    if (duplicateSlug) {
-      return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
-    }
-
-    // Determine final status
-    let finalStatus = existingPost.status;
-    if (status) {
-      if (payload.role === "AUTHOR") {
-        // Author can transition to DRAFT or PENDING_REVIEW
-        if (status === "DRAFT" || status === "PENDING_REVIEW") {
-          finalStatus = status;
-        } else if (status === "PUBLISHED") {
-          return NextResponse.json({ error: "Authors cannot publish posts directly" }, { status: 403 });
-        }
-      } else {
-        // ADMIN / EDITOR can set any status
-        finalStatus = status;
-      }
-    }
-
-    // Process tags (re-link tags)
-    let tagRelations = undefined;
-    if (tags !== undefined && typeof tags === "string") {
-      // Delete existing relations
-      await prisma.postTag.deleteMany({ where: { postId: id } });
-
-      const tagNames = tags.split(",").map(t => t.trim()).filter(Boolean);
-      const tempTagRelations = [];
-      for (const tagName of tagNames) {
-        const tagSlug = tagName
-          .toLowerCase()
-          .replace(/\s+/g, "-")
-          .replace(/[^\w-]/g, "");
-        if (tagSlug) {
-          const tag = await prisma.tag.upsert({
-            where: { slug: tagSlug },
-            update: { name: tagName },
-            create: { name: tagName, slug: tagSlug },
-          });
-          tempTagRelations.push({ tagId: tag.id });
-        }
-      }
-      tagRelations = {
-        create: tempTagRelations
-      };
-    }
-
-    const updateData: any = {
-      title,
-      slug,
-      excerpt: excerpt !== undefined ? excerpt : existingPost.excerpt,
-      content: content !== undefined ? content : existingPost.content,
-      coverImageUrl: coverImageUrl !== undefined ? coverImageUrl : existingPost.coverImageUrl,
-      status: finalStatus as any,
-      categoryId: categoryId !== undefined ? categoryId : existingPost.categoryId,
-      seoTitle: seoTitle !== undefined ? seoTitle : existingPost.seoTitle,
-      seoDescription: seoDescription !== undefined ? seoDescription : existingPost.seoDescription,
-      seoKeywords: seoKeywords !== undefined ? seoKeywords : existingPost.seoKeywords,
-    };
-
-    if (finalStatus === "PUBLISHED" && !existingPost.publishedAt) {
-      updateData.publishedAt = new Date();
-    }
-
-    if (tagRelations) {
-      updateData.tags = tagRelations;
-    }
-
-    const post = await prisma.post.update({
-      where: { id },
-      data: updateData,
-      include: {
-        author: { select: { id: true, name: true, email: true } },
-        category: true,
-        tags: { include: { tag: true } }
-      }
-    });
-
-    // Log submitting for review if author changed status to PENDING_REVIEW
-    if (finalStatus === "PENDING_REVIEW" && existingPost.status !== "PENDING_REVIEW") {
-      await prisma.postReviewLog.create({
-        data: {
-          postId: id,
-          reviewerId: payload.id,
-          action: "SUBMIT",
-          note: "Gửi duyệt bài viết chỉnh sửa",
-        }
+    try {
+      const post = await updatePost(id, body, payload);
+      
+      await logAudit({
+        userId: payload.id,
+        action: "UPDATE_POST",
+        entityType: "Post",
+        entityId: post.id,
+        details: { title: post.title, slug: post.slug }
       });
-    }
 
-    return NextResponse.json(post);
+      return NextResponse.json(post);
+    } catch (err: any) {
+      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      if (err.message === "Forbidden: Not your post" || err.message === "Authors cannot publish posts directly") {
+        return NextResponse.json({ error: err.message }, { status: 403 });
+      }
+      return NextResponse.json({ error: err.message }, { status: 400 });
+    }
   } catch (error) {
     console.error("PUT Post Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -205,9 +123,21 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Delete post (relations will cascade delete for PostTag and PostReviewLog in our schema)
-    await prisma.post.delete({ where: { id } });
+    // Soft Delete post by setting status to DELETED
+    await prisma.post.update({ 
+      where: { id },
+      data: { status: "DELETED" }
+    });
 
+    await logAudit({
+      userId: payload.id,
+      action: "DELETE_POST",
+      entityType: "Post",
+      entityId: id,
+      details: { title: existingPost.title, slug: existingPost.slug }
+    });
+
+    revalidatePath("/", "layout");
     return NextResponse.json({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("DELETE Post Error:", error);

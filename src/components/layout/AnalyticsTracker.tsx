@@ -16,7 +16,10 @@ export default function AnalyticsTracker() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ path: pathname }),
+          body: JSON.stringify({
+            path: pathname,
+            referrer: typeof document !== "undefined" ? document.referrer : "",
+          }),
         });
       } catch (err) {
         console.error("Failed to send analytics tracking event:", err);

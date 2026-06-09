@@ -16,9 +16,11 @@ model User {
   posts         Post[]          @relation("AuthoredPosts")
   reviewedPosts Post[]          @relation("ReviewedPosts")
   reviews       PostReviewLog[] @relation("UserReviews")
+  media         Media[]         @relation("UploadedMedia")
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @default(now()) @updatedAt
 }
+
 
 model Post {
   id             String          @id @default(cuid())
@@ -44,6 +46,10 @@ model Post {
   updatedAt      DateTime        @updatedAt
   tags           PostTag[]
   reviewLogs     PostReviewLog[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([categoryId])
 }
 
 model Category {
@@ -84,9 +90,12 @@ model PostReviewLog {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   EDITOR
   AUTHOR
+  MARKETING
+  SUPPORT
   USER
 }
 
@@ -96,6 +105,8 @@ enum PostStatus {
   PUBLISHED
   REJECTED
   ARCHIVED
+  SCHEDULED
+  DELETED
 }
 
 enum PostReviewAction {
@@ -106,10 +117,23 @@ enum PostReviewAction {
   RESTORE
 }
 
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
 model Visit {
   id        String   @id @default(cuid())
   ipHash    String
   path      String
+  referrer  String?
   createdAt DateTime @default(now())
 }
 
@@ -133,8 +157,15 @@ model Product {
   stats         Json?
   processSteps  Json?
   story         String   @default("")
+  shortDescription String?
+  status        ProductStatus @default(PUBLISHED)
+  sortOrder     Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([featured])
 }
 
 model Page {
@@ -142,8 +173,80 @@ model Page {
   title     String
   slug      String   @unique
   content   Json
-  status    String   @default("DRAFT") // DRAFT, PUBLISHED
+  status    PageStatus @default(DRAFT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Media {
+  id         String   @id @default(cuid())
+  fileName   String
+  url        String   @unique
+  size       Int
+  mimeType   String
+  uploader   User     @relation("UploadedMedia", fields: [uploaderId], references: [id])
+  uploaderId String
+  createdAt  DateTime @default(now())
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  address   String
+  province  String
+  phone     String
+  hours     String
+  lat       Float
+  lng       Float
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OnlineChannel {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  url         String
+  icon        String
+  followers   String
+  color       String
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteConfig {
+  id        String   @id @default("global")
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  content   String
+  source    String?
+  status    String   @default("NEW")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType, entityId])
+}

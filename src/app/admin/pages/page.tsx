@@ -91,14 +91,14 @@ export default function AdminPagesList() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              <Globe className="text-orange-500" size={28} />
+              <Globe className="text-primary-dark" size={28} />
               Quản lý Trang động
             </h1>
             <p className="text-slate-500 text-sm mt-1">Dựng Landing Page, trang sự kiện, hoặc các trang phụ tùy biến với Block Builder.</p>
           </div>
           <Link
             href="/admin/pages/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all self-start sm:self-auto"
+            className="acbt-btn acbt-btn--admin acbt-btn--md self-start sm:self-auto"
           >
             <Plus size={16} />
             <span>Thêm Trang Mới</span>
@@ -115,7 +115,7 @@ export default function AdminPagesList() {
                 placeholder="Tìm tên trang, slug..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function AdminPagesList() {
           {/* Listing */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Loader className="animate-spin text-orange-500" size={36} />
+              <Loader className="animate-spin text-primary-dark" size={36} />
               <p className="text-xs font-semibold text-slate-400">Đang tải danh sách trang...</p>
             </div>
           ) : filteredPages.length === 0 ? (
@@ -177,7 +177,7 @@ export default function AdminPagesList() {
                             <Link
                               href={`/trang/${page.slug}`}
                               target="_blank"
-                              className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-slate-100  transition"
+                              className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-slate-100 hover:text-primary-dark"
                               title="Xem trang thực tế"
                             >
                               <ExternalLink size={15} />
@@ -186,7 +186,7 @@ export default function AdminPagesList() {
                             {/* Edit */}
                             <Link
                               href={`/admin/pages/${page.id}/edit`}
-                              className="p-1.5 text-slate-650 hover:text-orange-500 hover:bg-slate-100  transition"
+                              className="acbt-icon-btn p-1.5 text-slate-600 hover:bg-slate-100 hover:text-primary-dark"
                               title="Chỉnh sửa bố cục"
                             >
                               <Edit3 size={15} />
@@ -196,7 +196,7 @@ export default function AdminPagesList() {
                             <button
                               onClick={() => handleDelete(page.id)}
                               disabled={actionLoading === page.id}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50  transition"
+                              className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                               title="Xóa trang"
                             >
                               <Trash2 size={15} />
@@ -215,3 +215,4 @@ export default function AdminPagesList() {
     </ProtectedRoute>
   );
 }
+

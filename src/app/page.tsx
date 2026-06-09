@@ -30,11 +30,14 @@ type Product = {
   slug?: string;
   name?: string;
   image?: string;
+  heroImage?: string | null;
   category?: string;
   categoryLabel?: string;
   tagline?: string;
   priceRange?: string;
   price?: string;
+  purchaseUrl?: string;
+  shortDescription?: string | null;
 };
 
 type HeroProduct = Product & {
@@ -43,6 +46,26 @@ type HeroProduct = Product & {
   proof?: string;
   facts?: string[];
   stats?: { label: string; value: string }[];
+};
+
+type PostItem = {
+  id?: string;
+  slug?: string;
+  title?: string;
+  excerpt?: string | null;
+  coverImageUrl?: string | null;
+  createdAt?: string;
+  category?: { name?: string; slug?: string } | null;
+};
+
+type NewsEvidenceItem = {
+  icon: LucideIcon;
+  name?: string;
+  title: string;
+  desc: string;
+  image?: string;
+  href: string;
+  label?: string;
 };
 
 const fadeUp = {
@@ -72,7 +95,8 @@ const showcaseHeroProductsFallback: HeroProduct[] = [
     image: "/hero/chan-ga-plate.png",
     orbitImage: "/hero/chan-ga-plate.png",
     purchaseUrl: "https://shopee.vn/nmtvlog99",
-    proof: "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
+    proof:
+      "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
     stats: [{ label: "Đơn đã bán", value: "2.000.000+" }],
     facts: ["Sản phẩm chủ lực", "Đóng gói tiện lợi", "Có hồ sơ kiểm soát"],
   },
@@ -86,7 +110,8 @@ const showcaseHeroProductsFallback: HeroProduct[] = [
     image: "/hero/chan-ga-poster.png",
     orbitImage: "/hero/chan-ga-poster.png",
     purchaseUrl: "https://shopee.vn/nmtvlog99",
-    proof: "Minh chứng bằng bao bì, hình ảnh sản phẩm và nội dung truyền thông.",
+    proof:
+      "Minh chứng bằng bao bì, hình ảnh sản phẩm và nội dung truyền thông.",
     stats: [{ label: "Sản phẩm", value: "Nổi bật" }],
     facts: ["Bao bì rõ thương hiệu", "Dễ trưng bày", "Phù hợp bán lẻ"],
   },
@@ -108,7 +133,8 @@ const showcaseHeroProductsFallback: HeroProduct[] = [
     slug: "tam-cay",
     category: "tam-cay",
     name: "Tăm Cay Bà Tuyết",
-    tagline: "Vị cay mạnh, bao bì nổi bật, phù hợp nhóm khách trẻ thích ăn vặt.",
+    tagline:
+      "Vị cay mạnh, bao bì nổi bật, phù hợp nhóm khách trẻ thích ăn vặt.",
     price: "35.000đ",
     priceRange: "15.000đ - 99.000đ",
     image: "/hero/tam-cay-pack.png",
@@ -146,7 +172,11 @@ function SectionTitle({
   align?: "left" | "center";
 }) {
   return (
-    <div className={align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl"}>
+    <div
+      className={
+        align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl"
+      }
+    >
       <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
         {label}
       </p>
@@ -162,11 +192,81 @@ function SectionTitle({
   );
 }
 
-function InfoStrip({ children, className = "" }: { children: ReactNode; className?: string }) {
+function InfoStrip({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={`border border-orange-100 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] ${className}`}>
+    <div
+      className={`border border-orange-100 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,0.06)] ${className}`}
+    >
       {children}
     </div>
+  );
+}
+
+function CurtainAction({
+  href,
+  children,
+  icon,
+  variant = "orange",
+  className = "",
+}: {
+  href: string;
+  children?: ReactNode;
+  icon?: ReactNode;
+  variant?: "orange" | "dark" | "white";
+  className?: string;
+}) {
+  const isExternal = href.startsWith("http");
+  const baseClass = `group/button relative isolate inline-flex overflow-hidden items-center justify-center gap-3 rounded-full border px-8 py-4 text-sm font-black shadow-sm outline-none transition-all duration-300 hover:-translate-y-1 focus-visible:-translate-y-1 ${className}`;
+  const variantClass =
+    variant === "dark"
+      ? "border-slate-950 bg-slate-950 text-white hover:border-orange-600"
+      : variant === "white"
+        ? "border-orange-200 bg-white text-slate-950 hover:border-orange-600"
+        : "border-orange-600 bg-orange-600 text-white hover:border-orange-700";
+  const curtainClass =
+    variant === "white" || variant === "dark"
+      ? "bg-orange-600"
+      : "bg-slate-950";
+  const textClass =
+    variant === "white"
+      ? "relative z-10 inline-flex items-center gap-3 transition-colors duration-300 group-hover/button:text-white group-focus-visible/button:text-white"
+      : "relative z-10 inline-flex items-center gap-3 text-white";
+
+  const content = (
+    <>
+      <span
+        className={`absolute inset-0 z-0 translate-y-full ${curtainClass} transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/button:translate-y-0 group-focus-visible/button:translate-y-0`}
+      />
+      <span className={textClass}>
+        {children}
+        {icon}
+      </span>
+    </>
+  );
+
+  if (isExternal) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${baseClass} ${variantClass}`}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={`${baseClass} ${variantClass}`}>
+      {content}
+    </Link>
   );
 }
 
@@ -174,50 +274,91 @@ function getProductKey(product?: HeroProduct | Product) {
   return String(product?.slug || product?.id || product?.name || "");
 }
 
-function mergeFeaturedProducts(data: HeroProduct[]) {
-  return showcaseHeroProductsFallback.map((fallback) => {
-    const matched = data.find((p) => {
-      const bySlug = p.slug && p.slug === fallback.slug;
-      const byCategory = p.category && p.category === fallback.category;
-      const byName =
-        p.name &&
-        fallback.name &&
-        p.name.toLowerCase().includes(fallback.name.toLowerCase());
-
-      return bySlug || byCategory || byName;
-    });
-
-    return {
-      ...fallback,
-      ...(matched || {}),
-      image: fallback.image,
-      orbitImage: fallback.orbitImage,
-      tagline: matched?.tagline || fallback.tagline,
-      price: matched?.price || fallback.price,
-      priceRange: matched?.priceRange || fallback.priceRange,
-      purchaseUrl: matched?.purchaseUrl || fallback.purchaseUrl,
-      proof: matched?.proof || fallback.proof,
-      facts: matched?.facts || fallback.facts,
-    };
-  });
+function getProductImage(product?: Product | HeroProduct) {
+  return product?.image || product?.heroImage || "";
 }
 
+function toHeroProduct(product: HeroProduct): HeroProduct {
+  const image = getProductImage(product);
+
+  return {
+    ...product,
+    image,
+    orbitImage:
+      product.orbitImage || product.heroImage || product.image || image,
+    tagline:
+      product.tagline ||
+      "Sản phẩm ăn vặt đóng gói chỉn chu, có thông tin rõ ràng từ CMS.",
+    proof:
+      product.proof ||
+      "Dữ liệu sản phẩm được lấy trực tiếp từ hệ thống quản trị.",
+    facts:
+      product.facts && product.facts.length > 0
+        ? product.facts
+        : ["Dữ liệu CMS", "Ảnh sản phẩm thật", "Thông tin cập nhật"],
+  };
+}
+
+async function fetchHomeProducts() {
+  const featuredResponse = await fetch("/api/products?featured=true");
+  const featuredData = await featuredResponse.json();
+
+  if (Array.isArray(featuredData) && featuredData.length > 0) {
+    return featuredData as HeroProduct[];
+  }
+
+  const allResponse = await fetch("/api/products");
+  const allData = await allResponse.json();
+
+  return Array.isArray(allData) ? (allData as HeroProduct[]) : [];
+}
+
+async function fetchHomePosts() {
+  const response = await fetch("/api/posts");
+  const data = await response.json();
+
+  return Array.isArray(data) ? (data as PostItem[]) : [];
+}
+
+function buildNewsEvidenceItems(posts: PostItem[]) {
+  const icons = [BadgeCheck, ClipboardCheck, Store, Truck];
+
+  return posts.slice(0, 4).map(
+    (post, index): NewsEvidenceItem => ({
+      icon: icons[index] || BadgeCheck,
+      title: post.title || "Tin tức từ CMS",
+      desc:
+        post.excerpt ||
+        "Bài viết đang được xuất bản từ CMS tin tức của website.",
+      image: post.coverImageUrl || undefined,
+      href: post.slug ? `/tin-tuc/${post.slug}` : "/tin-tuc",
+      label: post.category?.name || "Tin tức",
+    }),
+  );
+}
 // ==========================================
-// 1. HERO SECTION - FOOD COMPANY STYLE
+// 1. HERO SECTION - BRAND STORY STYLE
 // ==========================================
 function HeroSection() {
-  const [products, setProducts] = useState<HeroProduct[]>(showcaseHeroProductsFallback);
-  const [activeProduct, setActiveProduct] = useState<HeroProduct>(showcaseHeroProductsFallback[0]);
+  const [products, setProducts] = useState<HeroProduct[]>(
+    showcaseHeroProductsFallback,
+  );
+  const [activeProduct, setActiveProduct] = useState<HeroProduct>(
+    showcaseHeroProductsFallback[0],
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/products?featured=true")
-      .then((res) => res.json())
+    fetchHomeProducts()
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const mergedProducts = mergeFeaturedProducts(data);
-          setProducts(mergedProducts);
-          setActiveProduct(mergedProducts[0]);
+        if (data.length > 0) {
+          const dbProducts = data.map(toHeroProduct);
+          const withImages = dbProducts.filter((product) =>
+            getProductImage(product),
+          );
+          const nextProducts = withImages.length > 0 ? withImages : dbProducts;
+          setProducts(nextProducts);
+          setActiveProduct(nextProducts[0]);
           setLoading(false);
           return;
         }
@@ -235,138 +376,204 @@ function HeroSection() {
   }, []);
 
   const displayProducts = useMemo(() => products.slice(0, 5), [products]);
-
-  const activeFacts = Array.isArray(activeProduct?.facts)
-    ? activeProduct.facts
-    : ["Có hồ sơ sản phẩm", "Nguồn gốc rõ ràng", "Đóng gói chỉn chu"];
-
+  const activeImage =
+    activeProduct?.orbitImage || getProductImage(activeProduct);
   const activeStat = activeProduct?.stats?.[0];
 
   return (
-    <section className="relative overflow-hidden bg-[#fff8ed] pt-14 text-slate-950 sm:pt-16 lg:pt-18">
-      <div className="absolute inset-x-0 top-0 h-2 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#16a34a_100%)]" />
-      <div className="absolute left-0 top-28 hidden h-40 w-32 bg-orange-200/45 lg:block" />
-      <div className="absolute right-0 bottom-24 hidden h-56 w-40 bg-green-100 lg:block" />
+    <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
+      <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#166534_100%)]" />
+      <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-green-50/55 lg:block" />
+      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
+      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-green-200/25 blur-3xl" />
+      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-green-300/50 xl:block" />
 
-      <div className="relative z-10 grid min-h-0 w-full grid-cols-1 items-stretch gap-0 pb-0 lg:grid-cols-[0.82fr_1.18fr]">
-        <motion.div variants={stagger} initial="hidden" animate="show" className="px-5 py-8 sm:px-8 sm:py-9 lg:flex lg:flex-col lg:justify-center lg:px-14 lg:py-10 xl:px-20">
-          <motion.div variants={fadeUp} className="mb-4 inline-flex items-center gap-3 border border-orange-200 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-orange-700 shadow-sm">
-            <Factory size={16} />
-            Công ty thực phẩm ăn vặt Việt Nam
+      <div className="relative mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+          className="relative z-20 pt-2 lg:pr-4 xl:pr-8"
+        >
+          <motion.div
+            variants={fadeUp}
+            className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
+          >
+            <Leaf size={14} />
+            {loading ? "Đang tải sản phẩm" : "Thương hiệu ăn vặt Việt"}
           </motion.div>
 
-          <motion.h1 variants={fadeUp} className="text-5xl font-black leading-[1.02] tracking-[-0.055em] text-slate-950 sm:text-6xl lg:text-[4.8rem]">
-            Sản xuất đồ ăn vặt sạch,
-            <span className="block text-orange-600">chuẩn vị Bà Tuyết</span>
+          <motion.h1
+            variants={fadeUp}
+            className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[4.2rem] xl:text-[5.25rem]"
+          >
+            Biến món ăn vặt
+            <span className="block text-orange-600">thành câu chuyện</span>
+            thương hiệu.
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mt-5 max-w-2xl text-base font-medium leading-8 text-slate-600 sm:text-lg">
-            Ăn Cùng Bà Tuyết tập trung vào sản phẩm ăn vặt đóng gói, quy trình kiểm soát rõ ràng, hình ảnh thương hiệu gần gũi và hệ thống phân phối qua TikTok Shop, Shopee.
+          <motion.p
+            variants={fadeUp}
+            className="mt-8 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg xl:max-w-2xl"
+          >
+            Ăn Cùng Bà Tuyết không chỉ giới thiệu sản phẩm. Trang chủ cần truyền
+            được cảm giác gần gũi, sạch sẽ, có quy trình và có niềm tin - để
+            khách nhớ đến nhân vật, nhớ món ăn và tin vào thương hiệu.
           </motion.p>
 
-          <motion.div variants={fadeUp} className="mt-6 grid max-w-2xl gap-3 sm:grid-cols-3">
+          <motion.div
+            variants={fadeUp}
+            className="mt-10 flex flex-col gap-4 sm:flex-row"
+          >
+            <CurtainAction
+              href="/san-pham"
+              icon={<ArrowRight size={18} />}
+              variant="orange"
+              className="shadow-[0_20px_45px_rgba(234,88,12,0.25)]"
+            >
+              Xem sản phẩm nổi bật
+            </CurtainAction>
+
+            <CurtainAction
+              href={activeProduct?.purchaseUrl || "https://shopee.vn/nmtvlog99"}
+              icon={<ShoppingBag size={17} />}
+              variant="white"
+              className="shadow-[0_14px_36px_rgba(15,23,42,0.08)]"
+            >
+              Mua hàng chính hãng
+            </CurtainAction>
+          </motion.div>
+
+          <motion.div
+            variants={fadeUp}
+            className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
+          >
             {[
-              { label: "Nhà máy", value: "3.300m²", icon: Factory },
-              { label: "Bảo chứng", value: "PVI", icon: ShieldCheck },
+              { label: "Không gian sản xuất", value: "3.300m²", icon: Factory },
+              { label: "Bảo chứng sản phẩm", value: "PVI", icon: ShieldCheck },
               { label: "Phân phối", value: "Toàn quốc", icon: Truck },
             ].map((item) => {
               const Icon = item.icon;
               return (
-                <InfoStrip key={item.label}>
-                  <Icon size={24} className="text-orange-600" strokeWidth={1.8} />
-                  <p className="mt-4 text-2xl font-black tracking-[-0.04em] text-slate-950">{item.value}</p>
-                  <p className="mt-1 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{item.label}</p>
-                </InfoStrip>
+                <div
+                  key={item.label}
+                  className="border-b border-orange-100 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
+                >
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                    <Icon size={20} strokeWidth={1.8} />
+                  </div>
+                  <p className="text-2xl font-black tracking-[-0.04em] text-slate-950">
+                    {item.value}
+                  </p>
+                  <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                    {item.label}
+                  </p>
+                </div>
               );
             })}
           </motion.div>
-
-          <motion.div variants={fadeUp} className="mt-6 flex flex-col gap-4 sm:flex-row">
-            <Link href="/san-pham" className="inline-flex items-center justify-center gap-3 bg-orange-600 px-8 py-4 text-sm font-black text-white shadow-[0_14px_32px_rgba(234,88,12,0.24)] transition-all hover:-translate-y-1 hover:bg-orange-700">
-              Xem danh mục sản phẩm
-              <ArrowRight size={18} />
-            </Link>
-
-            <a href={activeProduct?.purchaseUrl || "https://shopee.vn/nmtvlog99"} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 border border-orange-200 bg-white px-8 py-4 text-sm font-black text-orange-700 shadow-sm transition-all hover:-translate-y-1 hover:border-orange-400">
-              Mua sản phẩm đang chọn
-              <ShoppingBag size={17} />
-            </a>
-          </motion.div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }} className="relative min-h-full">
-          <div className="h-full border-y border-l border-orange-200 bg-white p-0 shadow-[0_30px_80px_rgba(15,23,42,0.12)]">
-            <div className="grid h-full gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="relative min-h-[390px] overflow-hidden bg-[#f7ead8] p-6 sm:min-h-[430px] lg:min-h-[560px]">
-                <div className="absolute left-0 top-0 h-full w-6 bg-orange-600" />
-                <div className="absolute bottom-0 right-0 h-40 w-48 bg-green-100" />
-                <div className="absolute left-10 top-5 border border-orange-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
-                  Hình ảnh thương hiệu
-                </div>
-                <img src={HERO_CHARACTER_IMAGE} alt="Nhân vật Bà Tuyết" className="absolute bottom-0 left-1/2 z-10 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_28px_40px_rgba(15,23,42,0.22)] sm:h-[400px] lg:h-[455px]" />
-              </div>
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65 }}
+          className="relative z-10 min-h-[700px] overflow-visible sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
+        >
+          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.20)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]" />
+          <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-[2rem] border border-green-300/60 bg-green-100/30 xl:block" />
 
-              <div className="flex min-h-[390px] flex-col justify-between border-y border-l border-orange-100 bg-[#fffaf3] p-5 sm:min-h-[430px] lg:min-h-[560px] lg:p-6">
+          <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-[1.4rem] bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
+              Thông điệp thương hiệu
+            </p>
+            <p className="mt-3 text-lg font-black leading-6 text-slate-950">
+              Ngon từ nguyên liệu, sạch từ quy trình.
+            </p>
+          </div>
+
+          <div className="absolute right-0 top-[14%] z-30 rounded-[1.35rem] border border-green-200 bg-green-50 px-5 py-4 text-center shadow-[0_24px_60px_rgba(22,101,52,0.12)] sm:right-4 xl:right-2 xl:px-6 xl:py-5">
+            <p className="text-2xl font-black tracking-[-0.05em] text-green-700 xl:text-3xl">
+              {activeStat?.value || "5.000.000+"}
+            </p>
+            <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
+              {activeStat?.label || "Đơn đã bán"}
+            </p>
+          </div>
+
+          <img
+            src={HERO_CHARACTER_IMAGE}
+            alt="Nhân vật Bà Tuyết"
+            className="absolute left-1/2 top-[8%] z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] lg:top-[8%] xl:top-[7%] xl:h-[500px]"
+          />
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={getProductKey(activeProduct)}
+              initial={{ opacity: 0, y: 26, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -18, scale: 0.96 }}
+              transition={{ duration: 0.35 }}
+              className="absolute bottom-32 left-1/2 z-30 w-[min(100%,440px)] -translate-x-1/2 rounded-[1.7rem] bg-white/94 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur sm:bottom-36 sm:w-[min(100%,500px)] xl:bottom-40 xl:w-[min(92vw,530px)]"
+            >
+              <div className="grid gap-4 sm:grid-cols-[125px_1fr] sm:items-center xl:grid-cols-[145px_1fr]">
+                <div className="rounded-[1.2rem] bg-orange-50 p-4">
+                  {activeImage ? (
+                    <img
+                      src={activeImage}
+                      alt={activeProduct?.name || "Sản phẩm"}
+                      className="h-24 w-full object-contain xl:h-28"
+                    />
+                  ) : (
+                    <div className="flex h-28 items-center justify-center text-2xl font-black text-orange-500">
+                      BT
+                    </div>
+                  )}
+                </div>
                 <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-                        {loading ? "Đang lấy dữ liệu" : "Sản phẩm tiêu biểu"}
-                      </p>
-                      <h3 className="mt-3 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950">
-                        {activeProduct?.name}
-                      </h3>
-                    </div>
-
-                    {activeStat && (
-                      <div className="border border-green-200 bg-green-50 px-3 py-2 text-right">
-                        <p className="text-lg font-black text-green-700">{activeStat.value}</p>
-                        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-green-700">{activeStat.label}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-center border border-orange-100 bg-white p-4">
-                    <img src={activeProduct?.orbitImage || activeProduct?.image} alt={activeProduct?.name || "Sản phẩm"} className="h-44 w-full object-contain sm:h-52" />
-                  </div>
-
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{activeProduct?.tagline}</p>
-
-                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    {activeFacts.slice(0, 3).map((fact) => (
-                      <div key={fact} className="border border-orange-100 bg-white px-3 py-2 text-[11px] font-bold leading-5 text-slate-700">
-                        {fact}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 border-t border-orange-100 pt-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Giá tham khảo</p>
-                  <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-2xl font-black text-orange-700">{activeProduct?.priceRange || activeProduct?.price || "Liên hệ"}</p>
-                    <Link href={activeProduct?.slug ? `/san-pham/${activeProduct.slug}` : "/san-pham"} className="inline-flex items-center justify-center gap-2 bg-slate-950 px-5 py-3 text-xs font-black text-white transition hover:bg-orange-700">
-                      Xem chi tiết
-                      <ArrowRight size={14} />
-                    </Link>
-                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
+                    Sản phẩm đại diện
+                  </p>
+                  <h3 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.04em] text-slate-950 xl:text-2xl">
+                    {activeProduct?.name}
+                  </h3>
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                    {activeProduct?.tagline}
+                  </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
+          </AnimatePresence>
 
-            <div className="grid gap-0 border-t border-orange-100 sm:grid-cols-5">
-              {displayProducts.map((product) => {
-                const isActive = getProductKey(activeProduct) === getProductKey(product);
-                return (
-                  <button key={getProductKey(product)} type="button" onMouseEnter={() => setActiveProduct(product)} onFocus={() => setActiveProduct(product)} onClick={() => setActiveProduct(product)} className={`border-x border-b p-3 text-left transition-all ${isActive ? "border-orange-500 bg-orange-50" : "border-orange-100 bg-white hover:border-orange-300"}`}>
-                    <div className="mb-2 h-16 bg-[#fff8ed] p-2">
-                      <img src={product.orbitImage || product.image} alt={product.name || "Sản phẩm"} className="h-full w-full object-contain" />
-                    </div>
-                    <p className="line-clamp-2 text-xs font-black leading-5 text-slate-900">{product.name}</p>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="absolute bottom-3 left-1/2 z-40 flex w-full -translate-x-1/2 gap-2 overflow-x-auto rounded-[1.4rem] bg-white/95 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur sm:bottom-4 xl:w-[min(94vw,680px)]">
+            {displayProducts.map((product) => {
+              const isActive =
+                getProductKey(activeProduct) === getProductKey(product);
+              const image = product.orbitImage || getProductImage(product);
+              return (
+                <button
+                  key={getProductKey(product)}
+                  type="button"
+                  onMouseEnter={() => setActiveProduct(product)}
+                  onFocus={() => setActiveProduct(product)}
+                  onClick={() => setActiveProduct(product)}
+                  className={`min-w-[118px] rounded-[1rem] border p-2 text-left transition-all ${isActive ? "border-orange-600 bg-orange-600 text-white shadow-[0_14px_30px_rgba(234,88,12,0.24)]" : "border-orange-100 bg-white text-slate-950 hover:border-orange-300"}`}
+                >
+                  <div className="mb-2 h-12 rounded-xl bg-white/80 p-1">
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={product.name || "Sản phẩm"}
+                        className="h-full w-full object-contain"
+                      />
+                    ) : null}
+                  </div>
+                  <p className="line-clamp-2 text-[10px] font-black leading-4">
+                    {product.name}
+                  </p>
+                </button>
+              );
+            })}
           </div>
         </motion.div>
       </div>
@@ -384,42 +591,47 @@ function StatsSection() {
     desc: string;
     icon: LucideIcon;
   }[] = [
-      {
-        value: "3.2M+",
-        label: "Followers TikTok",
-        desc: "Cộng đồng người dùng theo dõi nội dung ăn vặt của thương hiệu.",
-        icon: Users,
-      },
-      {
-        value: "6.2M+",
-        label: "Đơn thành công",
-        desc: "Số liệu bán hàng dùng làm minh chứng năng lực phân phối.",
-        icon: TrendingUp,
-      },
-      {
-        value: "3.300m²",
-        label: "Khu sản xuất",
-        desc: "Không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
-        icon: Factory,
-      },
-      {
-        value: "PVI",
-        label: "Bảo hiểm sản phẩm",
-        desc: "Tăng mức độ an tâm cho khách hàng khi sử dụng sản phẩm.",
-        icon: ShieldCheck,
-      },
-    ];
+    {
+      value: "3.2M+",
+      label: "Followers TikTok",
+      desc: "Cộng đồng người dùng theo dõi nội dung ăn vặt của thương hiệu.",
+      icon: Users,
+    },
+    {
+      value: "6.2M+",
+      label: "Đơn thành công",
+      desc: "Số liệu bán hàng dùng làm minh chứng năng lực phân phối.",
+      icon: TrendingUp,
+    },
+    {
+      value: "3.300m²",
+      label: "Khu sản xuất",
+      desc: "Không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
+      icon: Factory,
+    },
+    {
+      value: "PVI",
+      label: "Bảo hiểm sản phẩm",
+      desc: "Tăng mức độ an tâm cho khách hàng khi sử dụng sản phẩm.",
+      icon: ShieldCheck,
+    },
+  ];
 
   return (
     <section className="bg-white px-0 py-0">
       <div className="w-full">
         <div className="flex flex-col gap-4 border-b border-orange-100 px-5 py-10 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-16">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">Năng lực thương hiệu</p>
-            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">Con số dùng để chứng minh, không nói suông</h2>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+              Năng lực thương hiệu
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">
+              Con số dùng để chứng minh, không nói suông
+            </h2>
           </div>
           <p className="max-w-xl text-sm leading-7 text-slate-600">
-            Phần số liệu nên được đối chiếu với hồ sơ nội bộ, kênh bán hàng hoặc tài liệu pháp lý trước khi đưa lên website chính thức.
+            Phần số liệu nên được đối chiếu với hồ sơ nội bộ, kênh bán hàng hoặc
+            tài liệu pháp lý trước khi đưa lên website chính thức.
           </p>
         </div>
 
@@ -427,11 +639,24 @@ function StatsSection() {
           {stats.map((stat, i) => {
             const Icon = stat.icon;
             return (
-              <motion.div key={stat.label} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ delay: i * 0.08 }} className="border-r border-b border-orange-100 bg-[#fffaf3] p-7 transition-all duration-300 hover:border-orange-300 lg:p-9">
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: i * 0.08 }}
+                className="border-r border-b border-orange-100 bg-[#fffaf3] p-7 transition-all duration-300 hover:border-orange-300 lg:p-9"
+              >
                 <Icon size={30} className="text-orange-600" strokeWidth={1.8} />
-                <p className="mt-8 text-4xl font-black tracking-[-0.05em] text-slate-950">{stat.value}</p>
-                <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-800">{stat.label}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{stat.desc}</p>
+                <p className="mt-8 text-4xl font-black tracking-[-0.05em] text-slate-950">
+                  {stat.value}
+                </p>
+                <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-slate-800">
+                  {stat.label}
+                </p>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {stat.desc}
+                </p>
               </motion.div>
             );
           })}
@@ -471,18 +696,34 @@ function TrustSection() {
   return (
     <section className="bg-[#fff8ed] py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
-        <SectionTitle label="Niềm tin thực phẩm" title="Website công ty thực phẩm cần nhìn thấy quy trình, không chỉ nhìn thấy hiệu ứng" description="Phần này thay cho các mảng glow, orbit và card tối. Người xem sẽ hiểu thương hiệu có nhà máy, quy trình và sản phẩm thật." align="center" />
+        <SectionTitle
+          label="Niềm tin thực phẩm"
+          title="Website công ty thực phẩm cần nhìn thấy quy trình, không chỉ nhìn thấy hiệu ứng"
+          description="Phần này thay cho các mảng glow, orbit và card tối. Người xem sẽ hiểu thương hiệu có nhà máy, quy trình và sản phẩm thật."
+          align="center"
+        />
 
         <div className="mt-10 grid gap-0 md:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item, i) => {
             const Icon = item.icon;
             return (
-              <motion.div key={item.title} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ delay: i * 0.08 }} className="border-r border-b border-orange-100 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.05)] lg:p-9">
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: i * 0.08 }}
+                className="border-r border-b border-orange-100 bg-white p-7 shadow-[0_18px_50px_rgba(15,23,42,0.05)] lg:p-9"
+              >
                 <div className="mb-7 flex h-14 w-14 items-center justify-center border border-orange-200 bg-orange-50 text-orange-700">
                   <Icon size={27} strokeWidth={1.8} />
                 </div>
-                <h3 className="text-xl font-black tracking-[-0.03em] text-slate-950">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.desc}</p>
+                <h3 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  {item.desc}
+                </p>
               </motion.div>
             );
           })}
@@ -497,18 +738,59 @@ function TrustSection() {
 // ==========================================
 function ProductCard({ product, index }: { product: Product; index: number }) {
   const href = `/san-pham/${product.slug || product.id || ""}`;
+  const image = getProductImage(product);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-70px" }} transition={{ duration: 0.55, delay: index * 0.08 }} className="h-full">
-      <Link href={href} className="group block h-full border-r border-b border-orange-100 bg-white shadow-sm transition-all duration-300 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
-        <div className="relative bg-[#fff8ed] p-5 lg:p-7">
-          <div className="aspect-[4/3] bg-white p-5 lg:p-7">
-            <img src={product.image || "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=900&auto=format&fit=crop&q=85"} alt={product.name || "Sản phẩm"} className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" />
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -10 }}
+      viewport={{ once: true, margin: "-70px" }}
+      transition={{ duration: 0.55, delay: index * 0.08 }}
+      className="h-full"
+    >
+      <Link
+        href={href}
+        className="group block h-full overflow-hidden border-r border-b border-orange-100 bg-white shadow-sm outline-none transition-all duration-300 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] focus-visible:border-orange-400"
+      >
+        <div className="relative overflow-hidden bg-[#fff8ed] p-5 lg:p-7">
+          <div className="relative aspect-[4/3] overflow-hidden bg-white p-5 lg:p-7">
+            {image ? (
+              <img
+                src={image}
+                alt={product.name || "Sản phẩm"}
+                className="relative z-10 h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
+              />
+            ) : (
+              <div className="relative z-10 flex h-full items-center justify-center text-3xl font-black text-orange-500">
+                BT
+              </div>
+            )}
+
+            <div className="pointer-events-none absolute inset-0 z-20 flex translate-y-full items-end bg-orange-600/95 p-6 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-focus-visible:translate-y-0">
+              <div className="translate-y-5 opacity-0 transition-all delay-100 duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]">
+                  Xem sản phẩm
+                  <ArrowRight
+                    size={14}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+                <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-orange-50">
+                  {product.tagline ||
+                    "Xem chi tiết sản phẩm, giá bán và kênh mua hàng chính hãng."}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="absolute left-5 top-5 flex gap-2">
-            <span className="bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">{product.categoryLabel || "Ăn vặt"}</span>
-            <span className="bg-green-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">Có sẵn</span>
+          <div className="absolute left-5 top-5 z-30 flex gap-2">
+            <span className="bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-sm">
+              {product.categoryLabel || "Ăn vặt"}
+            </span>
+            <span className="bg-green-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-sm">
+              Có sẵn
+            </span>
           </div>
         </div>
 
@@ -519,14 +801,23 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             ))}
           </div>
 
-          <h3 className="line-clamp-1 text-xl font-black tracking-[-0.03em] text-slate-950 transition-colors group-hover:text-orange-600">{product.name || "Sản phẩm nổi bật"}</h3>
+          <h3 className="line-clamp-1 text-xl font-black tracking-[-0.03em] text-slate-950 transition-colors group-hover:text-orange-600">
+            {product.name || "Sản phẩm nổi bật"}
+          </h3>
 
-          <p className="mt-2 line-clamp-2 min-h-[48px] text-sm leading-6 text-slate-600">{product.tagline || "Món ăn vặt đóng gói chỉn chu, vị ngon rõ ràng và phù hợp bán lẻ toàn quốc."}</p>
+          <p className="mt-2 line-clamp-2 min-h-[48px] text-sm leading-6 text-slate-600">
+            {product.tagline ||
+              "Món ăn vặt đóng gói chỉn chu, vị ngon rõ ràng và phù hợp bán lẻ toàn quốc."}
+          </p>
 
           <div className="mt-5 flex items-center justify-between border-t border-orange-100 pt-5">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">Giá từ</p>
-              <p className="text-lg font-black text-slate-950">{product.priceRange || product.price || "Liên hệ"}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                Giá từ
+              </p>
+              <p className="text-lg font-black text-slate-950">
+                {product.priceRange || product.price || "Liên hệ"}
+              </p>
             </div>
 
             <div className="flex h-11 w-11 items-center justify-center bg-slate-950 text-white transition-all duration-300 group-hover:bg-orange-600">
@@ -544,10 +835,9 @@ function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/products?featured=true")
-      .then((res) => res.json())
+    fetchHomeProducts()
       .then((data) => {
-        setFeaturedProducts(Array.isArray(data) ? data : []);
+        setFeaturedProducts(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -557,37 +847,250 @@ function FeaturedProducts() {
   }, []);
 
   const displayProducts = useMemo(() => {
-    const fromDb = featuredProducts.filter((p) => p.category !== "khac").slice(0, 3);
-    return fromDb.length > 0 ? fromDb : showcaseHeroProductsFallback.slice(0, 3);
+    const fromDb = featuredProducts.filter(
+      (p) => p.category !== "khac" && getProductImage(p),
+    );
+    return fromDb.length > 0 ? fromDb : showcaseHeroProductsFallback;
   }, [featuredProducts]);
 
-  return (
-    <section className="relative overflow-hidden bg-white py-0">
-      <div className="w-full px-5 sm:px-8 lg:px-16">
-        <div className="flex flex-col gap-6 border-b border-orange-100 px-5 py-10 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
-          <SectionTitle label="Danh mục bán chạy" title="Sản phẩm ăn vặt đóng gói" description="Tập trung vào hình ảnh sản phẩm thật, thông tin giá và danh mục rõ ràng để nhìn giống thương hiệu thực phẩm hơn." />
+  const loopProducts = useMemo(() => {
+    let repeated = [...displayProducts];
+    if (repeated.length > 0) {
+      while (repeated.length < 10) {
+        repeated = [...repeated, ...displayProducts];
+      }
+    }
+    return repeated;
+  }, [displayProducts]);
 
-          <Link href="/san-pham" className="inline-flex w-fit items-center gap-2 border border-orange-200 bg-white px-5 py-3 text-sm font-black text-orange-700 shadow-sm transition-all hover:-translate-y-1 hover:border-orange-400">
+  return (
+    <section className="relative overflow-hidden bg-white py-12">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        @keyframes marqueeScroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-50% - 12px)); }
+        }
+        .marquee-container:hover .marquee-track-animation {
+          animation-play-state: paused;
+        }
+      `,
+        }}
+      />
+
+      <div className="w-full px-5 sm:px-8 lg:px-16">
+        <div className="flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
+          <SectionTitle
+            label="Danh mục bán chạy"
+            title="Sản phẩm ăn vặt đóng gói"
+            description="Tập trung vào hình ảnh sản phẩm thật, thông tin giá và danh mục rõ ràng để nhìn giống thương hiệu thực phẩm hơn."
+          />
+
+          <CurtainAction
+            href="/san-pham"
+            icon={<ArrowRight size={16} />}
+            variant="white"
+            className="w-fit rounded-none px-5 py-3 text-orange-700"
+          >
             Xem tất cả sản phẩm
-            <ArrowRight size={16} />
-          </Link>
+          </CurtainAction>
         </div>
 
-        <AnimatePresence mode="wait">
-          {loading && featuredProducts.length === 0 ? (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid gap-0 md:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-[520px] animate-pulse border-r border-b border-orange-100 bg-[#fff8ed]" />
-              ))}
-            </motion.div>
-          ) : (
-            <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid gap-0 md:grid-cols-3">
-              {displayProducts.map((product, i) => (
-                <ProductCard key={product.id || product.slug || i} product={product} index={i} />
-              ))}
-            </motion.div>
+        <div className="relative mt-10 w-full overflow-hidden marquee-container">
+          <AnimatePresence mode="wait">
+            {loading && displayProducts.length === 0 ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex gap-6 w-full"
+              >
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-[520px] w-[350px] shrink-0 animate-pulse border border-orange-100 bg-[#fff8ed]"
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="products"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex"
+              >
+                <div
+                  className="flex gap-6 marquee-track-animation"
+                  style={{
+                    animation: "marqueeScroll 35s linear infinite",
+                    width: "max-content",
+                  }}
+                >
+                  {/* First set of items */}
+                  {loopProducts.map((product, i) => (
+                    <div
+                      key={`set1-${product.id || product.slug || ""}-${i}`}
+                      className="w-[310px] sm:w-[350px] shrink-0 h-full"
+                    >
+                      <ProductCard product={product} index={i} />
+                    </div>
+                  ))}
+
+                  {/* Second duplicate set of items for seamless looping */}
+                  {loopProducts.map((product, i) => (
+                    <div
+                      key={`set2-${product.id || product.slug || ""}-${i}`}
+                      className="w-[310px] sm:w-[350px] shrink-0 h-full"
+                    >
+                      <ProductCard product={product} index={i} />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyChooseUsFromDb() {
+  const [items, setItems] = useState<NewsEvidenceItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHomePosts()
+      .then((posts) => {
+        setItems(buildNewsEvidenceItems(posts));
+      })
+      .catch((error) => {
+        console.error("Failed to load news evidence section from DB", error);
+        setItems([]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <section className="bg-white py-0">
+      <div className="w-full px-5 sm:px-8 lg:px-16">
+        <SectionTitle
+          label="Tin tức & bằng chứng"
+          title="Từ sản phẩm thật đến hệ thống phân phối thật"
+          description="Phần này lấy bài viết đã xuất bản từ CMS tin tức để kể câu chuyện thương hiệu, phân phối và bằng chứng truyền thông."
+          align="center"
+        />
+
+        <div className="mt-10 grid gap-0 md:grid-cols-2">
+          {loading &&
+            items.length === 0 &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="grid min-h-[320px] animate-pulse overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] lg:grid-cols-[0.95fr_1.05fr]"
+              >
+                <div className="bg-orange-50" />
+                <div className="p-7">
+                  <div className="h-9 w-9 bg-orange-100" />
+                  <div className="mt-16 h-6 w-2/3 bg-orange-100" />
+                  <div className="mt-4 h-4 w-full bg-orange-100" />
+                  <div className="mt-3 h-4 w-4/5 bg-orange-100" />
+                </div>
+              </div>
+            ))}
+
+          {!loading && items.length === 0 && (
+            <div className="col-span-full border border-orange-100 bg-[#fffaf3] p-8 text-center">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-orange-700">
+                Chưa có tin tức CMS
+              </p>
+              <p className="mt-3 text-slate-600">
+                Hãy xuất bản bài viết trong CMS để section này tự hiển thị tin
+                tức thật.
+              </p>
+            </div>
           )}
-        </AnimatePresence>
+
+          {items.map((item, i) => {
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={item.href}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ delay: i * 0.08 }}
+              >
+                <Link
+                  href={item.href}
+                  className="group/news relative grid h-full overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] shadow-sm outline-none transition-all hover:border-orange-300 hover:bg-white focus-visible:border-orange-400 lg:grid-cols-[0.95fr_1.05fr]"
+                >
+                  <div className="relative min-h-[260px] bg-slate-100">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/news:scale-[1.035] group-focus-visible/news:scale-[1.035]"
+                      />
+                    ) : (
+                      <div className="flex h-full min-h-[260px] items-center justify-center bg-orange-50 text-4xl font-black text-orange-500">
+                        NEWS
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative z-10 flex flex-col justify-between p-7">
+                    <Icon
+                      size={34}
+                      className="text-orange-600 transition-colors duration-300 group-hover/news:text-orange-700"
+                      strokeWidth={1.8}
+                    />
+                    <div className="mt-10">
+                      {item.label && (
+                        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
+                          {item.label}
+                        </p>
+                      )}
+                      <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 leading-7 text-slate-600">
+                        {item.desc}
+                      </p>
+                      <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
+                        Đọc bài viết
+                        <ArrowRight
+                          size={14}
+                          className="transition-transform group-hover/news:translate-x-1"
+                        />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pointer-events-none absolute inset-0 z-30 flex translate-y-full items-end bg-orange-600/96 p-7 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/news:translate-y-0 group-focus-visible/news:translate-y-0">
+                    <div className="translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-100">
+                        {item.label || "Tin tức"}
+                      </p>
+                      <h3 className="mt-3 max-w-xl text-2xl font-black tracking-[-0.04em] text-white">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 line-clamp-3 max-w-xl text-sm font-semibold leading-7 text-orange-50">
+                        {item.desc}
+                      </p>
+                      <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
+                        Đọc bài viết
+                        <ArrowRight size={14} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -607,94 +1110,59 @@ function FactoryProofSection() {
   return (
     <section className="bg-[#fff8ed] py-0">
       <div className="grid w-full gap-0 lg:grid-cols-[1.1fr_0.9fr] lg:items-stretch">
-        <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-80px" }} className="h-full border-y border-r border-orange-200 bg-white p-0 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+        <motion.div
+          initial={{ opacity: 0, x: -24 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          className="h-full border-y border-r border-orange-200 bg-white p-0 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
+        >
           <div className="relative min-h-[560px] overflow-hidden bg-slate-100 lg:min-h-[680px]">
-            <img src="/bento/bento-factory.png" alt="Nhà máy sản xuất Bà Tuyết" className="absolute inset-0 h-full w-full object-cover" />
+            <img
+              src="/bento/bento-factory.png"
+              alt="Nhà máy sản xuất Bà Tuyết"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
             <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">Nhà máy / khu sản xuất</p>
-              <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">Không gian sản xuất 3.300m²</h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600">Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+                Nhà máy / khu sản xuất
+              </p>
+              <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
+                Không gian sản xuất 3.300m²
+              </h3>
+              <p className="mt-2 text-sm leading-7 text-slate-600">
+                Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty
+                thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.
+              </p>
             </div>
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-80px" }} className="p-5 sm:p-8 lg:p-16">
-          <SectionTitle label="Bằng chứng thương hiệu" title="Nói về năng lực sản xuất trước, rồi mới nói về bán hàng" description="Khách vào website công ty thực phẩm cần thấy nơi sản xuất, quy trình, chứng nhận và cách đóng gói. Các yếu tố viral nên để sau." />
+        <motion.div
+          initial={{ opacity: 0, x: 24 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          className="p-5 sm:p-8 lg:p-16"
+        >
+          <SectionTitle
+            label="Bằng chứng thương hiệu"
+            title="Nói về năng lực sản xuất trước, rồi mới nói về bán hàng"
+            description="Khách vào website công ty thực phẩm cần thấy nơi sản xuất, quy trình, chứng nhận và cách đóng gói. Các yếu tố viral nên để sau."
+          />
 
           <div className="mt-8 grid gap-0">
             {proofs.map((proof, index) => (
-              <div key={proof} className="flex gap-4 border-x border-b border-orange-100 bg-white p-5 lg:p-6">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-600 text-sm font-black text-white">{index + 1}</div>
+              <div
+                key={proof}
+                className="flex gap-4 border-x border-b border-orange-100 bg-white p-5 lg:p-6"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-600 text-sm font-black text-white">
+                  {index + 1}
+                </div>
                 <p className="leading-7 text-slate-600">{proof}</p>
               </div>
             ))}
           </div>
         </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ==========================================
-// 6. WHY CHOOSE US - NON TECH GRID
-// ==========================================
-function WhyChooseUs() {
-  const items: {
-    icon: LucideIcon;
-    title: string;
-    desc: string;
-    image: string;
-  }[] = [
-      {
-        icon: Factory,
-        title: "Sản xuất có quy trình",
-        desc: "Từ nguyên liệu, sơ chế, chế biến đến đóng gói đều cần có nội dung thể hiện rõ trên website.",
-        image: "/bento/bento-factory.png",
-      },
-      {
-        icon: ShieldCheck,
-        title: "Bảo hiểm PVI",
-        desc: "Đây là điểm tạo niềm tin, nên đặt ở khu vực uy tín thay vì chỉ là một con số nhỏ.",
-        image: "https://i1-kinhdoanh.vnecdn.net/2026/01/16/image001-1768540826-4943-1768546422.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=j8zJ3SO1pwM6HuyS29eXNA",
-      },
-      {
-        icon: Leaf,
-        title: "Nguyên liệu rõ ràng",
-        desc: "Hình ảnh nguyên liệu, bàn sơ chế và đóng gói giúp website ra chất thực phẩm hơn.",
-        image: "https://i1-giadinh.vnecdn.net/2024/09/18/image005-2758-1726648418.jpg?w=680&h=0&q=100&dpr=1&fit=crop&s=N26-G4ejmoopy5vA3-J2pw",
-      },
-      {
-        icon: Store,
-        title: "Phân phối đa kênh",
-        desc: "TikTok Shop, Shopee và các kênh bán hàng nên được trình bày như hệ thống phân phối.",
-        image: "/bento/bento-tiktok.png",
-      },
-    ];
-
-  return (
-    <section className="bg-white py-0">
-      <div className="w-full px-5 sm:px-8 lg:px-16">
-        <SectionTitle label="Lý do chọn chúng tôi" title="Từ sản phẩm thật đến hệ thống phân phối thật" description="Không dùng bento tối kiểu startup nữa. Phần này chuyển sang dạng hồ sơ năng lực công ty thực phẩm: ảnh thật, thông tin rõ, ít hiệu ứng." align="center" />
-
-        <div className="mt-10 grid gap-0 md:grid-cols-2">
-          {items.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <motion.div key={item.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ delay: i * 0.08 }} className="grid overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] shadow-sm transition-all hover:border-orange-300 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="relative min-h-[260px] bg-slate-100">
-                  <img src={item.image} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
-                </div>
-                <div className="flex flex-col justify-between p-7">
-                  <Icon size={34} className="text-orange-600" strokeWidth={1.8} />
-                  <div className="mt-10">
-                    <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
-                    <p className="mt-3 leading-7 text-slate-600">{item.desc}</p>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );
@@ -737,23 +1205,39 @@ function ProcessSection() {
               Quy trình sản xuất
             </p>
 
-            <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl">Từ nguyên liệu đến sản phẩm đóng gói</h2>
+            <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl">
+              Từ nguyên liệu đến sản phẩm đóng gói
+            </h2>
 
-            <p className="mt-5 text-lg leading-8 text-slate-600">Bố cục quy trình giúp người xem hiểu đây là doanh nghiệp sản xuất thực phẩm, không chỉ là shop bán hàng hoặc landing page quảng cáo.</p>
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              Bố cục quy trình giúp người xem hiểu đây là doanh nghiệp sản xuất
+              thực phẩm, không chỉ là shop bán hàng hoặc landing page quảng cáo.
+            </p>
           </div>
 
           <div className="grid gap-0">
             {steps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <motion.div key={step.title} initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-80px" }} transition={{ delay: i * 0.08 }} className="grid gap-5 border-b border-orange-100 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:grid-cols-[auto_1fr] lg:p-8">
+                <motion.div
+                  key={step.title}
+                  initial={{ opacity: 0, x: 24 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ delay: i * 0.08 }}
+                  className="grid gap-5 border-b border-orange-100 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:grid-cols-[auto_1fr] lg:p-8"
+                >
                   <div className="flex h-16 w-16 items-center justify-center bg-orange-600 text-white">
                     <Icon size={28} />
                   </div>
 
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Bước 0{i + 1}</p>
-                    <h3 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">{step.title}</h3>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
+                      Bước 0{i + 1}
+                    </p>
+                    <h3 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                      {step.title}
+                    </h3>
                     <p className="mt-2 leading-7 text-slate-600">{step.desc}</p>
                   </div>
                 </motion.div>
@@ -777,11 +1261,13 @@ function BrandStory() {
     },
     {
       year: "2023",
-      event: "Phát triển thương hiệu Ăn Cùng Bà Tuyết với định hướng đồ ăn vặt sạch.",
+      event:
+        "Phát triển thương hiệu Ăn Cùng Bà Tuyết với định hướng đồ ăn vặt sạch.",
     },
     {
       year: "2024",
-      event: "Mở rộng trên TikTok Shop, xây dựng cộng đồng khách hàng trung thành.",
+      event:
+        "Mở rộng trên TikTok Shop, xây dựng cộng đồng khách hàng trung thành.",
     },
     {
       year: "2025",
@@ -791,28 +1277,51 @@ function BrandStory() {
 
   return (
     <section id="brand-story" className="bg-white py-0">
-      <div className="grid w-full gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid w-full gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
         <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:h-fit lg:min-h-[520px] lg:p-16">
           <span className="mb-5 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
             <BadgeCheck size={14} />
             Câu chuyện thương hiệu
           </span>
 
-          <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">Từ món ăn quen thuộc đến thương hiệu có quy trình</h2>
+          <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+            Từ món ăn quen thuộc đến thương hiệu có quy trình
+          </h2>
 
-          <p className="mt-6 text-lg leading-8 text-slate-600">Câu chuyện thương hiệu nên đi cùng hình ảnh sản phẩm thật, nhà máy thật và các mốc phát triển rõ ràng để tạo cảm giác doanh nghiệp thực phẩm lâu dài.</p>
+          <p className="mt-6 text-lg leading-8 text-slate-600">
+            Câu chuyện thương hiệu nên đi cùng hình ảnh sản phẩm thật, nhà máy
+            thật và các mốc phát triển rõ ràng để tạo cảm giác doanh nghiệp thực
+            phẩm lâu dài.
+          </p>
 
-          <Link href="/gioi-thieu" className="mt-8 inline-flex items-center gap-3 border-b-2 border-orange-600 pb-1 text-sm font-black text-slate-950 transition-colors hover:text-orange-700">
-            Đọc toàn bộ câu chuyện
-            <ArrowRight size={17} />
-          </Link>
+          <div className="mt-8">
+            <CurtainAction
+              href="/gioi-thieu"
+              icon={<ArrowRight size={17} />}
+              variant="white"
+              className="rounded-none px-6 py-3"
+            >
+              Đọc toàn bộ câu chuyện
+            </CurtainAction>
+          </div>
         </div>
 
         <div className="grid gap-0">
           {milestones.map((item, i) => (
-            <motion.div key={item.year} initial={{ opacity: 0, x: 22 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-90px" }} transition={{ duration: 0.5, delay: i * 0.08 }} className="grid border-b border-orange-100 bg-white p-7 transition-all hover:border-orange-300 sm:grid-cols-[140px_1fr] sm:items-center lg:p-9">
-              <p className="text-5xl font-black tracking-[-0.08em] text-orange-600">{item.year}</p>
-              <p className="mt-4 text-base font-semibold leading-8 text-slate-700 sm:mt-0">{item.event}</p>
+            <motion.div
+              key={item.year}
+              initial={{ opacity: 0, x: 22 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-90px" }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="grid border-b border-orange-100 bg-white p-7 transition-all hover:border-orange-300 sm:grid-cols-[140px_1fr] sm:items-center lg:p-9"
+            >
+              <p className="text-5xl font-black tracking-[-0.08em] text-orange-600">
+                {item.year}
+              </p>
+              <p className="mt-4 text-base font-semibold leading-8 text-slate-700 sm:mt-0">
+                {item.event}
+              </p>
             </motion.div>
           ))}
         </div>
@@ -834,29 +1343,50 @@ function CTASection() {
             Mua sản phẩm chính hãng
           </p>
 
-          <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">Đặt hàng qua kênh phân phối chính thức</h2>
+          <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">
+            Đặt hàng qua kênh phân phối chính thức
+          </h2>
 
-          <p className="mt-6 max-w-xl text-base font-medium leading-8 text-slate-600 sm:text-lg">Sản phẩm đóng gói chỉn chu, có thông tin rõ ràng và giao hàng toàn quốc qua các nền tảng quen thuộc.</p>
+          <p className="mt-6 max-w-xl text-base font-medium leading-8 text-slate-600 sm:text-lg">
+            Sản phẩm đóng gói chỉn chu, có thông tin rõ ràng và giao hàng toàn
+            quốc qua các nền tảng quen thuộc.
+          </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <a href="https://tiktok.com/@batuyethanhvi" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 bg-slate-950 px-8 py-5 text-sm font-black text-white transition-all hover:-translate-y-1 hover:bg-orange-700">
+            <CurtainAction
+              href="https://tiktok.com/@batuyethanhvi"
+              icon={<Play size={15} className="fill-white" />}
+              variant="dark"
+              className="rounded-none px-8 py-5"
+            >
               Mua qua TikTok Shop
-              <Play size={15} className="fill-white" />
-            </a>
+            </CurtainAction>
 
-            <a href="https://shopee.vn/nmtvlog99" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-3 border border-orange-200 bg-orange-600 px-8 py-5 text-sm font-black text-white transition-all hover:-translate-y-1 hover:bg-orange-700">
+            <CurtainAction
+              href="https://shopee.vn/nmtvlog99"
+              icon={<ArrowRight size={18} />}
+              variant="orange"
+              className="rounded-none px-8 py-5"
+            >
               Đặt hàng Shopee
-              <ArrowRight size={18} />
-            </a>
+            </CurtainAction>
           </div>
         </div>
 
         <div className="relative min-h-[420px] bg-[#f7ead8] p-8 lg:min-h-[520px]">
           <div className="absolute left-0 top-0 h-full w-8 bg-orange-600" />
-          <img src="/hero/chan-ga-plate.png" alt="Sản phẩm Bà Tuyết" className="absolute bottom-12 left-1/2 h-64 w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_45px_rgba(15,23,42,0.22)]" />
+          <img
+            src="/hero/chan-ga-plate.png"
+            alt="Sản phẩm Bà Tuyết"
+            className="absolute bottom-12 left-1/2 h-64 w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_45px_rgba(15,23,42,0.22)]"
+          />
           <div className="absolute bottom-0 right-0 bg-white p-5">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">Ăn Cùng Bà Tuyết</p>
-            <p className="mt-1 text-sm font-bold text-slate-700">Sản phẩm ăn vặt đóng gói</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+              Ăn Cùng Bà Tuyết
+            </p>
+            <p className="mt-1 text-sm font-bold text-slate-700">
+              Sản phẩm ăn vặt đóng gói
+            </p>
           </div>
         </div>
       </div>
@@ -875,7 +1405,7 @@ export default function HomePage() {
       <TrustSection />
       <FeaturedProducts />
       <FactoryProofSection />
-      <WhyChooseUs />
+      <WhyChooseUsFromDb />
       <ProcessSection />
       <BrandStory />
       <CTASection />

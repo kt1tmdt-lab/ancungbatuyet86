@@ -1,7 +1,56 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 
-export default function Footer() {
+interface FooterLink {
+  href: string;
+  label: string;
+}
+
+interface FooterContact {
+  phone?: string;
+  email?: string;
+  address?: string;
+  workingHours?: string;
+  shopeeUrl?: string;
+  tiktokUrl?: string;
+  facebookUrl?: string;
+}
+
+const DEFAULT_FOOTER_EXPLORE = [
+  { href: "/quy-trinh", label: "Quy trình sản xuất" },
+  { href: "/he-thong-ban", label: "Hệ thống điểm bán" },
+  { href: "/gioi-thieu", label: "Về chúng tôi" },
+  { href: "/tin-tuc", label: "Tin tức" },
+  { href: "/lien-he", label: "Liên hệ" },
+];
+
+const DEFAULT_FOOTER_PRODUCTS = [
+  { href: "/san-pham/chan-ga", label: "Chân Gà Rút Xương" },
+  { href: "/san-pham/tam-cay", label: "Tăm Cay" },
+  { href: "/san-pham/banh-trang", label: "Snack Bánh Tráng" },
+  { href: "/san-pham/bo-suu-tap", label: "Sản Phẩm Khác" },
+];
+
+export default function Footer({
+  initialLinks,
+  initialContact,
+}: {
+  initialLinks?: { products?: FooterLink[]; explore?: FooterLink[] };
+  initialContact?: FooterContact;
+}) {
+  const productLinks = initialLinks?.products || DEFAULT_FOOTER_PRODUCTS;
+  const exploreLinks = initialLinks?.explore || DEFAULT_FOOTER_EXPLORE;
+
+  const contact = {
+    phone: initialContact?.phone || "0989 852 948",
+    email: initialContact?.email || "ancungbatuyet@gmail.com",
+    address: initialContact?.address || "Thái Nguyên, Việt Nam",
+    workingHours: initialContact?.workingHours || "T2 - T7: 8:00 - 17:00",
+    shopeeUrl: initialContact?.shopeeUrl || "https://shopee.vn/nmtvlog99",
+    tiktokUrl: initialContact?.tiktokUrl || "https://tiktok.com/@batuyethanhvi",
+    facebookUrl: initialContact?.facebookUrl || "https://facebook.com/ancungbatuyet",
+  };
+
   return (
     <footer className="bg-neutral text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
@@ -24,12 +73,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider mb-4 text-gray-300">Sản phẩm</h3>
             <ul className="space-y-2">
-              {[
-                { href: "/san-pham/chan-ga", label: "Chân Gà Rút Xương" },
-                { href: "/san-pham/tam-cay", label: "Tăm Cay" },
-                { href: "/san-pham/banh-trang", label: "Snack Bánh Tráng" },
-                { href: "/san-pham/bo-suu-tap", label: "Sản Phẩm Khác" },
-              ].map((link) => (
+              {productLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">
                     {link.label}
@@ -42,13 +86,7 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-sm uppercase tracking-wider mb-4 text-gray-300">Khám phá</h3>
             <ul className="space-y-2">
-              {[
-                { href: "/quy-trinh", label: "Quy trình sản xuất" },
-                { href: "/he-thong-ban", label: "Hệ thống điểm bán" },
-                { href: "/gioi-thieu", label: "Về chúng tôi" },
-                { href: "/tin-tuc", label: "Tin tức" },
-                { href: "/lien-he", label: "Liên hệ" },
-              ].map((link) => (
+              {exploreLinks.map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">
                     {link.label}
@@ -63,29 +101,31 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Phone size={16} className="text-primary-light mt-0.5 shrink-0" />
-                <a href="tel:0989852948" className="text-gray-400 hover:text-white text-sm">0989 852 948</a>
+                <a href={`tel:${contact.phone.replace(/\s+/g, "")}`} className="text-gray-400 hover:text-white text-sm">
+                  {contact.phone}
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <Mail size={16} className="text-primary-light mt-0.5 shrink-0" />
-                <a href="mailto:ancungbatuyet@gmail.com" className="text-gray-400 hover:text-white text-sm">
-                  ancungbatuyet@gmail.com
+                <a href={`mailto:${contact.email}`} className="text-gray-400 hover:text-white text-sm">
+                  {contact.email}
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin size={16} className="text-primary-light mt-0.5 shrink-0" />
-                <span className="text-gray-400 text-sm">Thái Nguyên, Việt Nam</span>
+                <span className="text-gray-400 text-sm">{contact.address}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Clock size={16} className="text-primary-light mt-0.5 shrink-0" />
-                <span className="text-gray-400 text-sm">T2 - T7: 8:00 - 17:00</span>
+                <span className="text-gray-400 text-sm">{contact.workingHours}</span>
               </li>
             </ul>
 
             <div className="flex gap-3 mt-6">
               {[
-                { label: "TikTok", url: "https://tiktok.com/@batuyethanhvi" },
-                { label: "Facebook", url: "https://facebook.com/ancungbatuyet" },
-                { label: "Shopee", url: "https://shopee.vn/nmtvlog99" },
+                { label: "TikTok", url: contact.tiktokUrl },
+                { label: "Facebook", url: contact.facebookUrl },
+                { label: "Shopee", url: contact.shopeeUrl },
               ].map((s) => (
                 <a
                   key={s.label}

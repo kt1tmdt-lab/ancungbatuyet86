@@ -1,11 +1,16 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
-import { join } from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { fileTypeFromBuffer } from "file-type";
+import prisma from "@/lib/prisma";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { isR2Configured, uploadToR2 } from "@/lib/r2-storage";
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify authentication token
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const { success } = await rateLimit(`upload_${ip}`, 30, 60);
+    if (!success) return rateLimitResponse();
+
     const token = getTokenFromReq(req);
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,58 +21,70 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // 2. Parse request payload
+    if (!isR2Configured()) {
+      return NextResponse.json({ error: "Chưa cấu hình Cloudflare R2" }, { status: 500 });
+    }
+
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     if (!file) {
       return NextResponse.json({ error: "Không tìm thấy file tải lên" }, { status: 400 });
     }
 
-    // Validate size limit (5MB)
-    const MAX_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
       return NextResponse.json({ error: "Kích thước ảnh vượt quá giới hạn 5MB" }, { status: 400 });
     }
 
-    // Validate mime-type
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Chỉ được phép tải lên tệp hình ảnh" }, { status: 400 });
-    }
-
-    // 3. Convert file to buffer and normalize file name
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    const typeInfo = await fileTypeFromBuffer(buffer);
+    if (!typeInfo || !typeInfo.mime.startsWith("image/")) {
+      return NextResponse.json({ error: "Chỉ được phép tải lên tệp hình ảnh hợp lệ" }, { status: 400 });
+    }
+
     const timestamp = Date.now();
-    const safeName = file.name
+    const safeNameWithExtension = file.name
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[đĐ]/g, "d")
       .replace(/[^a-z0-9.]/g, "-")
       .replace(/-+/g, "-")
-      .trim();
-    const finalKey = `${timestamp}-${safeName}`;
+      .replace(/^-|-$/g, "");
+    const safeName = safeNameWithExtension.replace(/\.[a-z0-9]+$/, "") || "image";
+    const finalKey = `media/${timestamp}-${safeName}.${typeInfo.ext}`;
 
-    // 4. Save file locally inside public/uploads
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    
-    // Ensure the directory exists
-    await mkdir(uploadDir, { recursive: true });
-    
-    // Write buffer to file
-    const filePath = join(uploadDir, finalKey);
-    await writeFile(filePath, buffer);
+    const fileUrl = await uploadToR2({
+      key: finalKey,
+      body: buffer,
+      contentType: typeInfo.mime,
+    });
 
-    // 5. Construct public local URL (Next.js automatically serves files inside public/)
-    const fileUrl = `/uploads/${finalKey}`;
+    try {
+      await prisma.media.create({
+        data: {
+          fileName: file.name,
+          url: fileUrl,
+          size: file.size,
+          mimeType: typeInfo.mime,
+          uploaderId: payload.id,
+        },
+      });
+    } catch (dbError) {
+      console.warn("Media record save failed:", dbError);
+    }
 
     return NextResponse.json({ url: fileUrl }, { status: 200 });
   } catch (error: any) {
-    console.error("Local Upload API Error:", error);
-    return NextResponse.json({ 
-      error: "Lỗi hệ thống khi lưu ảnh cục bộ", 
-      message: error?.message || String(error) 
-    }, { status: 500 });
+    console.error("R2 Upload API Error:", error);
+    return NextResponse.json(
+      {
+        error: "Lỗi hệ thống khi lưu ảnh lên Cloudflare R2",
+        message: error?.message || String(error),
+      },
+      { status: 500 },
+    );
   }
 }

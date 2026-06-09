@@ -21,6 +21,14 @@ interface ProductData {
   featured: boolean;
   purchaseUrl: string;
   ingredients: string[];
+  specs?: { label: string; value: string }[];
+  variants?: { name: string; weight: string; price: string; spiceLevel?: number }[];
+  stats?: { label: string; value: string }[];
+  processSteps?: { step: number; title: string; description: string }[];
+  story?: string;
+  status?: string;
+  sortOrder?: number;
+  shortDescription?: string;
 }
 
 export function ProductForm({ initialData }: { initialData?: ProductData }) {
@@ -36,14 +44,50 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [heroImage, setHeroImage] = useState(initialData?.heroImage || "");
   const [purchaseUrl, setPurchaseUrl] = useState(initialData?.purchaseUrl || "");
   const [featured, setFeatured] = useState(initialData?.featured || false);
+  const [status, setStatus] = useState(initialData?.status || "PUBLISHED");
+  const [sortOrder, setSortOrder] = useState(initialData?.sortOrder || 0);
+  const [shortDescription, setShortDescription] = useState(initialData?.shortDescription || "");
   const [ingredients, setIngredients] = useState<string[]>(initialData?.ingredients || []);
   const [newIngredient, setNewIngredient] = useState("");
+
+  // Specs state
+  const [specs, setSpecs] = useState<{ label: string; value: string }[]>(
+    initialData?.specs || []
+  );
+  const [newSpecLabel, setNewSpecLabel] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
+
+  // Variants state
+  const [variants, setVariants] = useState<
+    { name: string; weight: string; price: string; spiceLevel?: number }[]
+  >(initialData?.variants || []);
+  const [newVariantName, setNewVariantName] = useState("");
+  const [newVariantWeight, setNewVariantWeight] = useState("");
+  const [newVariantPrice, setNewVariantPrice] = useState("");
+  const [newVariantSpice, setNewVariantSpice] = useState(0);
+
+  // Process steps state
+  const [processSteps, setProcessSteps] = useState<
+    { step: number; title: string; description: string }[]
+  >(initialData?.processSteps || []);
+  const [newStepTitle, setNewStepTitle] = useState("");
+  const [newStepDesc, setNewStepDesc] = useState("");
+
+  // Stats state
+  const [stats, setStats] = useState<{ label: string; value: string }[]>(
+    initialData?.stats || []
+  );
+  const [newStatLabel, setNewStatLabel] = useState("");
+  const [newStatValue, setNewStatValue] = useState("");
+
+  // Story state
+  const [story, setStory] = useState(initialData?.story || "");
 
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { token } = useAuth();
+
   const router = useRouter();
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,9 +103,6 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
     try {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         body: formData,
       });
 
@@ -134,6 +175,14 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       featured,
       purchaseUrl,
       ingredients,
+      specs,
+      variants,
+      processSteps,
+      stats,
+      story,
+      status,
+      sortOrder,
+      shortDescription,
     };
 
     try {
@@ -144,7 +193,6 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -177,7 +225,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-orange-500/10 hover:shadow-lg transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-5 py-2.5  text-sm font-bold shadow-md shadow-primary/10 hover:shadow-lg transition-all disabled:opacity-50"
         >
           {loading ? <Loader size={16} className="animate-spin" /> : <Save size={16} />}
           <span>{initialData?.id ? "Lưu thay đổi" : "Tạo sản phẩm"}</span>
@@ -206,7 +254,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ví dụ: Chân Gà Rút Xương"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
               </div>
 
@@ -218,7 +266,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder="Ví dụ: chan-ga-rut-xuong"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
               </div>
             </div>
@@ -231,7 +279,18 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
                 placeholder="Ví dụ: Giòn ngon sần sật, đậm vị ớt hiểm Việt Nam."
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mô tả ngắn (SEO & Card)</label>
+              <textarea
+                rows={2}
+                value={shortDescription}
+                onChange={(e) => setShortDescription(e.target.value)}
+                placeholder="Mô tả tóm tắt hiển thị ngoài trang chủ và thẻ SEO..."
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
             </div>
 
@@ -243,7 +302,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Nhập giới thiệu chi tiết về sản phẩm..."
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
             </div>
 
@@ -256,7 +315,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Ví dụ: 89.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
               </div>
 
@@ -267,7 +326,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
                   placeholder="Ví dụ: 45.000đ - 139.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
               </div>
             </div>
@@ -280,9 +339,283 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 value={purchaseUrl}
                 onChange={(e) => setPurchaseUrl(e.target.value)}
                 placeholder="Ví dụ: https://shopee.vn/an-vat-ba-tuyet-chan-ga"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
               <p className="text-[11px] text-slate-400 mt-1">Khi khách hàng nhấn "Mua ngay" trên web sẽ tự động mở tab mới dẫn đến link này.</p>
+            </div>
+          </div>
+
+          {/* Advanced Details Sections */}
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Thông số sản phẩm</h3>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={newSpecLabel}
+                onChange={(e) => setNewSpecLabel(e.target.value)}
+                placeholder="Tên thông số (ví dụ: Hạn sử dụng)"
+                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <input
+                type="text"
+                value={newSpecValue}
+                onChange={(e) => setNewSpecValue(e.target.value)}
+                placeholder="Giá trị (ví dụ: 6 tháng)"
+                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newSpecLabel.trim() && newSpecValue.trim()) {
+                    setSpecs([...specs, { label: newSpecLabel.trim(), value: newSpecValue.trim() }]);
+                    setNewSpecLabel("");
+                    setNewSpecValue("");
+                  }
+                }}
+                className="px-4 py-2 bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition"
+              >
+                Thêm
+              </button>
+            </div>
+
+            <div className="divide-y divide-slate-100 border border-slate-200">
+              {specs.length === 0 ? (
+                <div className="p-4 text-sm text-slate-400 italic text-center">Chưa có thông số nào</div>
+              ) : (
+                specs.map((spec, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition">
+                    <div className="grid grid-cols-[150px_1fr] gap-4 text-sm">
+                      <span className="font-bold text-slate-500 uppercase text-xs tracking-wider">{spec.label}</span>
+                      <span className="text-slate-800 font-semibold">{spec.value}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSpecs(specs.filter((_, i) => i !== idx))}
+                      className="p-1 hover:bg-slate-200 text-slate-400 hover:text-red-500 transition"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại sản phẩm</h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={newVariantName}
+                onChange={(e) => setNewVariantName(e.target.value)}
+                placeholder="Tên phân loại (ví dụ: Vị cay truyền thống)"
+                className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <input
+                type="text"
+                value={newVariantWeight}
+                onChange={(e) => setNewVariantWeight(e.target.value)}
+                placeholder="Trọng lượng (ví dụ: 52g)"
+                className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <input
+                type="text"
+                value={newVariantPrice}
+                onChange={(e) => setNewVariantPrice(e.target.value)}
+                placeholder="Giá (ví dụ: 45.000đ)"
+                className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <div className="flex gap-3">
+                <select
+                  value={newVariantSpice}
+                  onChange={(e) => setNewVariantSpice(Number(e.target.value))}
+                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                >
+                  <option value={0}>Không cay</option>
+                  <option value={1}>Cay nhẹ (1 🔥)</option>
+                  <option value={2}>Cay vừa (2 🔥)</option>
+                  <option value={3}>Cay mạnh (3 🔥)</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newVariantName.trim() && newVariantPrice.trim()) {
+                      setVariants([
+                        ...variants,
+                        {
+                          name: newVariantName.trim(),
+                          weight: newVariantWeight.trim(),
+                          price: newVariantPrice.trim(),
+                          spiceLevel: newVariantSpice,
+                        },
+                      ]);
+                      setNewVariantName("");
+                      setNewVariantWeight("");
+                      setNewVariantPrice("");
+                      setNewVariantSpice(0);
+                    }
+                  }}
+                  className="px-4 py-2 bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition"
+                >
+                  Thêm
+                </button>
+              </div>
+            </div>
+
+            <div className="divide-y divide-slate-100 border border-slate-200">
+              {variants.length === 0 ? (
+                <div className="p-4 text-sm text-slate-400 italic text-center">Chưa có phân loại nào</div>
+              ) : (
+                variants.map((v, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition">
+                    <div className="text-sm">
+                      <p className="font-bold text-slate-900">{v.name} {v.weight && `(${v.weight})`}</p>
+                      <p className="text-xs text-primary-dark font-semibold mt-0.5">{v.price} {v.spiceLevel ? `| 🔥 x ${v.spiceLevel}` : ""}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setVariants(variants.filter((_, i) => i !== idx))}
+                      className="p-1 hover:bg-slate-200 text-slate-400 hover:text-red-500 transition"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Quy trình sản xuất</h3>
+            <div className="grid gap-3">
+              <input
+                type="text"
+                value={newStepTitle}
+                onChange={(e) => setNewStepTitle(e.target.value)}
+                placeholder="Tên bước (ví dụ: Sơ chế sạch)"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <textarea
+                rows={2}
+                value={newStepDesc}
+                onChange={(e) => setNewStepDesc(e.target.value)}
+                placeholder="Mô tả quy trình chi tiết của bước này..."
+                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newStepTitle.trim() && newStepDesc.trim()) {
+                    const nextStepNum = processSteps.length + 1;
+                    setProcessSteps([
+                      ...processSteps,
+                      { step: nextStepNum, title: newStepTitle.trim(), description: newStepDesc.trim() },
+                    ]);
+                    setNewStepTitle("");
+                    setNewStepDesc("");
+                  }
+                }}
+                className="px-4 py-2 bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition justify-self-end"
+              >
+                Thêm bước quy trình
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {processSteps.length === 0 ? (
+                <div className="p-4 border border-slate-200 text-sm text-slate-400 italic text-center bg-white">Chưa thêm bước nào</div>
+              ) : (
+                processSteps.map((step, idx) => (
+                  <div key={idx} className="flex gap-4 p-4 border border-slate-200 bg-white hover:bg-slate-50 transition relative group">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-primary text-sm font-black text-white">
+                      {step.step}
+                    </div>
+                    <div className="text-sm flex-1 pr-6">
+                      <p className="font-bold text-slate-900">{step.title}</p>
+                      <p className="text-slate-500 mt-1 text-xs leading-5">{step.description}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filtered = processSteps.filter((_, i) => i !== idx);
+                        const reindexed = filtered.map((s, i) => ({ ...s, step: i + 1 }));
+                        setProcessSteps(reindexed);
+                      }}
+                      className="absolute top-4 right-4 p-1 hover:bg-slate-200 text-slate-400 hover:text-red-500 transition opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Chỉ số nổi bật</h3>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={newStatLabel}
+                onChange={(e) => setNewStatLabel(e.target.value)}
+                placeholder="Tên chỉ số (ví dụ: Đơn đã bán)"
+                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <input
+                type="text"
+                value={newStatValue}
+                onChange={(e) => setNewStatValue(e.target.value)}
+                placeholder="Giá trị (ví dụ: 2.000.000+)"
+                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (newStatLabel.trim() && newStatValue.trim()) {
+                    setStats([...stats, { label: newStatLabel.trim(), value: newStatValue.trim() }]);
+                    setNewStatLabel("");
+                    setNewStatValue("");
+                  }
+                }}
+                className="px-4 py-2 bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition"
+              >
+                Thêm
+              </button>
+            </div>
+
+            <div className="divide-y divide-slate-100 border border-slate-200">
+              {stats.length === 0 ? (
+                <div className="p-4 text-sm text-slate-400 italic text-center">Chưa có chỉ số nào</div>
+              ) : (
+                stats.map((stat, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition">
+                    <div className="text-sm">
+                      <span className="font-bold text-primary-dark text-base mr-3">{stat.value}</span>
+                      <span className="text-slate-500 font-bold text-xs uppercase tracking-wider">{stat.label}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStats(stats.filter((_, i) => i !== idx))}
+                      className="p-1 hover:bg-slate-200 text-slate-400 hover:text-red-500 transition"
+                    >
+                      <Trash size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Câu chuyện sản phẩm</h3>
+            <div>
+              <textarea
+                rows={4}
+                value={story}
+                onChange={(e) => setStory(e.target.value)}
+                placeholder="Nhập câu chuyện sản phẩm, ý nghĩa hoặc nguồn gốc..."
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
             </div>
           </div>
         </div>
@@ -297,7 +630,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               >
                 <option value="chan-ga">Chân Gà</option>
                 <option value="tam-cay">Tăm Cay</option>
@@ -318,8 +651,32 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   onChange={(e) => setFeatured(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none  peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after: after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none  peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after: after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
               </label>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Trạng thái hiển thị</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              >
+                <option value="PUBLISHED">Hiển thị (Đang bán)</option>
+                <option value="DRAFT">Ẩn (Bản nháp/Ngừng bán)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thứ tự ưu tiên (Sắp xếp)</label>
+              <input
+                type="number"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(Number(e.target.value))}
+                placeholder="Ví dụ: 1"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">Số nhỏ hơn sẽ hiển thị trước (0, 1, 2...)</p>
             </div>
           </div>
 
@@ -347,7 +704,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
 
                 {/* File Upload Selector */}
                 <div className="flex items-center gap-3">
-                  <label className="flex-1 cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-orange-300  p-4 bg-slate-50 hover:bg-orange-50/5 transition-all text-slate-500">
+                  <label className="flex-1 cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-slate-200 hover:border-primary  p-4 bg-slate-50 hover:bg-orange-50/5 transition-all text-slate-500">
                     <input
                       type="file"
                       accept="image/*"
@@ -356,12 +713,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                       className="hidden"
                     />
                     {uploading ? (
-                      <div className="flex items-center gap-2 text-xs font-bold text-orange-500">
+                      <div className="flex items-center gap-2 text-xs font-bold text-primary-dark">
                         <Loader size={16} className="animate-spin" />
                         <span>Đang tải lên Cloudflare R2...</span>
                       </div>
                     ) : (
-                      <span className="text-xs font-bold text-orange-600">Chọn tệp ảnh từ thiết bị</span>
+                      <span className="text-xs font-bold text-primary-dark">Chọn tệp ảnh từ thiết bị</span>
                     )}
                   </label>
                 </div>
@@ -378,8 +735,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                     required
                     value={image}
                     onChange={(e) => setImage(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                    placeholder="https://cdn.example.com/product-image.png"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                   />
                 </div>
               </div>
@@ -394,7 +751,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   value={newIngredient}
                   onChange={(e) => setNewIngredient(e.target.value)}
                   placeholder="Ví dụ: Ớt hiểm đỏ"
-                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200  text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all text-slate-800"
+                  className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200  text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
                 <button
                   type="button"
@@ -433,3 +790,5 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
     </form>
   );
 }
+
+

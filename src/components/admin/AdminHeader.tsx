@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe } from "lucide-react";
+import { LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList } from "lucide-react";
 import { useState } from "react";
 
 export function AdminHeader() {
@@ -18,25 +18,67 @@ export function AdminHeader() {
   };
 
   const roleLabels: Record<string, string> = {
+    SUPER_ADMIN: "👑 Quản trị tối cao",
     ADMIN: "👨‍💼 Quản trị viên",
     EDITOR: "✍️ Biên tập viên",
     AUTHOR: "📝 Tác giả",
+    MARKETING: "📢 Tiếp thị",
+    SUPPORT: "🛠️ Hỗ trợ",
     USER: "👤 Thành viên",
   };
 
-  const navItems = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/posts", label: "Bài viết", icon: FileText },
-    ...((user?.role === "ADMIN" || user?.role === "EDITOR")
-      ? [
-          { href: "/admin/posts/review", label: "Bài chờ duyệt", icon: ClipboardCheck },
-          { href: "/admin/categories", label: "Danh mục", icon: FolderKanban },
-          { href: "/admin/products", label: "Sản phẩm", icon: FolderPlus },
-          { href: "/admin/pages", label: "Trang", icon: Globe },
-        ]
-      : []),
-    ...(user?.role === "ADMIN" ? [{ href: "/admin/users", label: "Thành viên", icon: Users }] : []),
+  const isAdminOrEditor = user?.role === "ADMIN" || user?.role === "EDITOR";
+  const isMarketingAllowed = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" || user?.role === "MARKETING" || user?.role === "EDITOR";
+  const isSettingsAllowed = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" || user?.role === "MARKETING";
+  const isAdminOrSuperAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+  const groupedNavItems = [
+    {
+      group: "Tổng quan",
+      items: [
+        { href: "/admin", label: "Dashboard", icon: LayoutDashboard, show: true },
+      ],
+    },
+    {
+      group: "Nội dung",
+      items: [
+        { href: "/admin/posts", label: "Bài viết", icon: FileText, show: true },
+        { href: "/admin/posts/review", label: "Bài chờ duyệt", icon: ClipboardCheck, show: isAdminOrEditor },
+        { href: "/admin/categories", label: "Danh mục", icon: FolderKanban, show: isAdminOrEditor },
+        { href: "/admin/pages", label: "Trang", icon: Globe, show: isAdminOrEditor },
+        { href: "/admin/media", label: "Thư viện ảnh", icon: ImagePlus, show: isAdminOrEditor },
+      ],
+    },
+    {
+      group: "Cửa hàng",
+      items: [
+        { href: "/admin/products", label: "Sản phẩm", icon: FolderPlus, show: isAdminOrEditor },
+        { href: "/admin/sales-channels", label: "Hệ thống bán", icon: Store, show: isAdminOrEditor },
+      ],
+    },
+    {
+      group: "Marketing & CSKH",
+      items: [
+        { href: "/admin/marketing", label: "Quản lý Marketing", icon: Megaphone, show: isMarketingAllowed },
+        { href: "/admin/contacts", label: "Liên hệ", icon: Users, show: isAdminOrEditor },
+      ],
+    },
+    {
+      group: "Hệ thống",
+      items: [
+        { href: "/admin/settings", label: "Cấu hình Web", icon: Globe, show: isSettingsAllowed },
+        { href: "/admin/activity-logs", label: "Nhật ký hoạt động", icon: ClipboardList, show: isAdminOrSuperAdmin },
+        { href: "/admin/users", label: "Thành viên", icon: Users, show: isAdminOrSuperAdmin },
+      ],
+    },
   ];
+
+  const visibleGroups = groupedNavItems
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((item) => item.show),
+    }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <>
@@ -84,32 +126,41 @@ export function AdminHeader() {
 
         {/* Mobile sidebar list */}
         {sidebarOpen && (
-          <div className="lg:hidden bg-slate-900 border-t border-slate-800 shadow-xl py-3 px-4 animate-fade-in">
+          <div className="lg:hidden bg-slate-900 border-t border-slate-800 shadow-xl py-3 px-4 animate-fade-in max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="sm:hidden pb-3 mb-3 border-b border-slate-800 flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-slate-200">{user?.name || user?.email}</span>
                 <span className="text-xs text-orange-400">{roleLabels[user?.role || ""]}</span>
               </div>
             </div>
-            <nav className="space-y-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-2.5  text-sm font-semibold transition ${
-                      isActive
-                        ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
-                    }`}
-                  >
-                    <item.icon size={18} />
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <nav className="space-y-4">
+              {visibleGroups.map((group) => (
+                <div key={group.group} className="space-y-1">
+                  <span className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 mt-3 first:mt-0">
+                    {group.group}
+                  </span>
+                  <div className="space-y-1">
+                    {group.items.map((item) => {
+                      const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-3 px-4 py-2 text-sm font-semibold transition ${
+                            isActive
+                              ? "bg-orange-500 text-white shadow-md shadow-orange-500/10"
+                              : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+                          }`}
+                        >
+                          <item.icon size={18} />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </nav>
             <div className="mt-4 pt-3 border-t border-slate-800">
               <button
@@ -126,8 +177,8 @@ export function AdminHeader() {
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:fixed left-0 top-16 bottom-0 w-64 bg-slate-900 border-r border-slate-800 p-4 z-30 flex-col justify-between">
-        <div className="space-y-6">
-          <div className="px-3 py-2 bg-slate-800/40  border border-slate-800/60 flex items-center gap-3">
+        <div className="space-y-6 flex flex-col min-h-0">
+          <div className="px-3 py-2 bg-slate-800/40  border border-slate-800/60 flex items-center gap-3 shrink-0">
             <div className="w-10 h-10  bg-slate-800 flex items-center justify-center text-slate-300 font-bold border border-slate-700">
               {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
             </div>
@@ -139,24 +190,33 @@ export function AdminHeader() {
             </div>
           </div>
 
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3  text-sm font-semibold transition-all ${
-                    isActive
-                      ? "bg-orange-500 text-white shadow-md shadow-orange-500/10 translate-x-1"
-                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
-                  }`}
-                >
-                  <item.icon size={18} className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-100"} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+          <nav className="space-y-5 overflow-y-auto pr-1 flex-1 scrollbar-thin scrollbar-thumb-slate-800">
+            {visibleGroups.map((group) => (
+              <div key={group.group} className="space-y-1">
+                <span className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1 mt-3 first:mt-0">
+                  {group.group}
+                </span>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-3 px-4 py-2.5  text-sm font-semibold transition-all ${
+                          isActive
+                            ? "bg-orange-500 text-white shadow-md shadow-orange-500/10 translate-x-1"
+                            : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-100"
+                        }`}
+                      >
+                        <item.icon size={18} className={isActive ? "text-white" : "text-slate-400 group-hover:text-slate-100"} />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
 

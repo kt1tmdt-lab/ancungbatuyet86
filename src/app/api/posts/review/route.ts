@@ -1,6 +1,9 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
+import { reviewPost } from "@/features/posts/mutations";
+import { logAudit } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,60 +25,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Post ID and action are required" }, { status: 400 });
     }
 
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    try {
+      const updatedPost = await reviewPost(postId, action, payload.id, note);
+
+      await logAudit({
+        userId: payload.id,
+        action: action === "approve" ? "APPROVE_POST" : "REJECT_POST",
+        entityType: "Post",
+        entityId: postId,
+        details: { title: updatedPost.title, slug: updatedPost.slug, note }
+      });
+
+      return NextResponse.json(updatedPost);
+    } catch (err: any) {
+      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      if (err.message === "Rejection reason (note) is required") return NextResponse.json({ error: err.message }, { status: 400 });
+      return NextResponse.json({ error: err.message }, { status: 400 });
     }
-
-    let updatedPost;
-    if (action === "approve") {
-      updatedPost = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          status: "PUBLISHED",
-          reviewerId: payload.id,
-          publishedAt: new Date(),
-          rejectedReason: null, // Clear any previous rejection reason
-        },
-      });
-
-      // Log review action
-      await prisma.postReviewLog.create({
-        data: {
-          postId,
-          reviewerId: payload.id,
-          action: "APPROVE",
-          note: note || "Duyệt bài viết xuất bản",
-        },
-      });
-    } else if (action === "reject") {
-      if (!note || note.trim() === "") {
-        return NextResponse.json({ error: "Rejection reason (note) is required" }, { status: 400 });
-      }
-
-      updatedPost = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          status: "REJECTED",
-          reviewerId: payload.id,
-          rejectedReason: note,
-        },
-      });
-
-      // Log review action
-      await prisma.postReviewLog.create({
-        data: {
-          postId,
-          reviewerId: payload.id,
-          action: "REJECT",
-          note: note,
-        },
-      });
-    } else {
-      return NextResponse.json({ error: "Invalid action. Must be 'approve' or 'reject'" }, { status: 400 });
-    }
-
-    return NextResponse.json(updatedPost);
   } catch (error) {
     console.error("POST Review Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

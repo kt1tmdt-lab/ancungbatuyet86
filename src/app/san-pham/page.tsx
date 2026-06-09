@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import CurtainHover from "@/components/shared/CurtainHover";
+import Button from "@/components/ui/Button";
 import {
   AlertCircle,
   ArrowRight,
@@ -156,13 +158,12 @@ export default function ProductsPage() {
       <section className="sticky top-16 z-30 border-b border-orange-100 bg-white/95 px-4 py-4 backdrop-blur sm:px-6 lg:px-10">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {categories.map((cat) => (
-            <button
+            <Button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`shrink-0 border px-5 py-3 text-left transition ${activeCategory === cat.id
-                ? "border-orange-500 bg-orange-500 text-white"
-                : "border-orange-100 bg-[#fffaf3] text-slate-700 hover:border-orange-300 hover:bg-orange-50"
-                }`}
+              variant={activeCategory === cat.id ? "primary" : "outline"}
+              size="md"
+              className="shrink-0 px-5 py-3 text-left"
             >
               <span className="block text-xs font-black uppercase tracking-wider">{cat.label}</span>
               <span
@@ -171,7 +172,7 @@ export default function ProductsPage() {
               >
                 {cat.note}
               </span>
-            </button>
+            </Button>
           ))}
         </div>
       </section>
@@ -224,20 +225,30 @@ export default function ProductsPage() {
                     <div className="grid lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr]">
                       <Link
                         href={`/san-pham/${product.slug || product.id}`}
-                        className="relative min-h-[220px] overflow-hidden border-b border-orange-100 bg-orange-50 p-5 lg:min-h-[260px] lg:border-b-0 lg:border-r"
+                        className="relative min-h-[220px] overflow-hidden border-b border-orange-100 bg-orange-50 p-5 lg:min-h-[260px] lg:border-b-0 lg:border-r block"
                       >
-                        {product.image ? (
-                          <img
-                            src={product.image}
-                            alt={product.name || "Sản phẩm"}
-                            className="mx-auto h-full max-h-[220px] min-h-[180px] w-full object-contain transition duration-700 group-hover:scale-105 lg:max-h-[240px]"
-                          />
-                        ) : (
-                          <div className="flex h-full min-h-[220px] items-center justify-center bg-orange-100 text-4xl font-black text-orange-500">
-                            BT
-                          </div>
-                        )}
-                        <div className="absolute left-5 top-5 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600 shadow-sm">
+                        <CurtainHover
+                          overlayMode="partial"
+                          overlayContent={
+                            <span className="flex items-center gap-1">
+                              Xem sản phẩm <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                            </span>
+                          }
+                          className="w-full h-full"
+                        >
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name || "Sản phẩm"}
+                              className="mx-auto h-full max-h-[220px] min-h-[180px] w-full object-contain transition duration-700 group-hover:scale-[1.015] lg:max-h-[240px]"
+                            />
+                          ) : (
+                            <div className="flex h-full min-h-[220px] items-center justify-center bg-orange-100 text-4xl font-black text-orange-500">
+                              BT
+                            </div>
+                          )}
+                        </CurtainHover>
+                        <div className="absolute left-5 top-5 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-orange-600 shadow-sm z-30">
                           {badgeText}
                         </div>
                       </Link>
@@ -291,24 +302,28 @@ export default function ProductsPage() {
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-3">
-                            <Link
+                            <Button
                               href={`/san-pham/${product.slug || product.id}`}
-                              className="inline-flex items-center justify-center gap-2 border border-slate-200 bg-white px-6 py-3 text-xs font-black uppercase tracking-wider text-slate-800 transition hover:border-orange-300 hover:text-orange-600"
+                              variant="outline"
+                              size="md"
+                              className="px-6 py-3 text-xs uppercase tracking-wider"
                             >
                               Xem hồ sơ sản phẩm
                               <ChevronRight size={15} />
-                            </Link>
+                            </Button>
                             {product.purchaseUrl && (
-                              <a
+                              <Button
                                 href={product.purchaseUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-2 bg-orange-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-600"
+                                variant="primary"
+                                size="md"
+                                className="px-6 py-3 text-xs uppercase tracking-wider"
                               >
                                 <ShoppingBag size={15} />
                                 Mua chính hãng
                                 <ArrowRight size={15} />
-                              </a>
+                              </Button>
                             )}
                           </div>
                         </div>
@@ -351,19 +366,27 @@ export default function ProductsPage() {
                   href={`/san-pham/${product.slug || product.id}`}
                   className="group block h-full border border-orange-100 bg-[#fffaf3] p-3 transition hover:border-orange-300 hover:bg-white"
                 >
-                  <div className="aspect-square overflow-hidden border border-orange-100 bg-white">
+                  <CurtainHover
+                    overlayMode="partial"
+                    overlayContent={
+                      <span className="flex items-center gap-1">
+                        Xem sản phẩm <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                      </span>
+                    }
+                    className="aspect-square overflow-hidden border border-orange-100 bg-white"
+                  >
                     {product.image ? (
                       <img
                         src={product.image}
                         alt={product.name || "Sản phẩm"}
-                        className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-105"
+                        className="h-full w-full object-contain p-2 transition duration-500 group-hover:scale-[1.015]"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center bg-orange-50 text-xl font-black text-orange-500">
                         BT
                       </div>
                     )}
-                  </div>
+                  </CurtainHover>
                   <div className="pt-4">
                     <p className="line-clamp-2 text-sm font-black leading-5 text-slate-950 group-hover:text-orange-600">
                       {product.name}
