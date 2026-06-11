@@ -47,6 +47,18 @@ function formatDate(dateStr: string) {
   });
 }
 
+function getPublicMediaUrl(url: string) {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  if (typeof window === "undefined") {
+    return url;
+  }
+
+  return `${window.location.origin}${url}`;
+}
+
 export default function MediaLibraryPage() {
   const { token } = useAuth();
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -178,14 +190,16 @@ export default function MediaLibraryPage() {
   };
 
   const handleCopy = async (url: string, id: string) => {
+    const publicUrl = getPublicMediaUrl(url);
+
     try {
-      await navigator.clipboard.writeText(window.location.origin + url);
+      await navigator.clipboard.writeText(publicUrl);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
       // Fallback
       const textArea = document.createElement("textarea");
-      textArea.value = window.location.origin + url;
+      textArea.value = publicUrl;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
@@ -434,7 +448,7 @@ export default function MediaLibraryPage() {
               <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center gap-2">
                 <input
                   readOnly
-                  value={window.location.origin + previewItem.url}
+                  value={getPublicMediaUrl(previewItem.url)}
                   className="flex-1 px-3 py-2 bg-white border border-slate-200 text-xs font-mono text-slate-600"
                 />
                 <button
