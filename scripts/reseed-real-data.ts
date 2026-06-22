@@ -200,7 +200,7 @@ const realProducts = [
     image: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
     heroImage: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
     featured: true,
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [
       "Bột mì",
       "Bột ngô",
@@ -245,7 +245,7 @@ const realProducts = [
     image: "/uploads/1780481989589-snack-nem-nuong-ba-tuyet-2k.png",
     heroImage: "/uploads/1780481989589-snack-nem-nuong-ba-tuyet-2k.png",
     featured: false,
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [
       "Bột mì",
       "Sốt nướng BBQ",
@@ -289,7 +289,7 @@ const realProducts = [
     image: "/uploads/1780481777960-gan-rong-new.png",
     heroImage: "/uploads/1780481777960-gan-rong-new.png",
     featured: false,
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [
       "Bột đậu nành",
       "Bột mì",
@@ -333,7 +333,7 @@ const realProducts = [
     image: "/uploads/1780482029143-bo-kobe.png",
     heroImage: "/uploads/1780482029143-bo-kobe.png",
     featured: false,
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [
       "Bột mì",
       "Tinh bột ngô",
@@ -373,7 +373,7 @@ const realProducts = [
     image: "/uploads/1780481698378-snack-bia-carton.png",
     heroImage: "/uploads/1780481698378-snack-bia-carton.png",
     featured: false,
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [
       "Bột mì tẩm gia vị",
       "Ớt bột siêu cay chấu",

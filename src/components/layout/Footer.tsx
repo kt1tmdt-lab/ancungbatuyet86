@@ -46,7 +46,7 @@ export default function Footer({
     email: initialContact?.email || "ancungbatuyet@gmail.com",
     address: initialContact?.address || "Thái Nguyên, Việt Nam",
     workingHours: initialContact?.workingHours || "T2 - T7: 8:00 - 17:00",
-    shopeeUrl: initialContact?.shopeeUrl || "https://shopee.vn/nmtvlog99",
+    shopeeUrl: initialContact?.shopeeUrl || "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     tiktokUrl: initialContact?.tiktokUrl || "https://tiktok.com/@batuyethanhvi",
     facebookUrl: initialContact?.facebookUrl || "https://facebook.com/ancungbatuyet",
   };

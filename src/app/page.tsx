@@ -86,77 +86,60 @@ const HERO_CHARACTER_IMAGE = "/hero/ba-tuyet-character.png";
 
 const showcaseHeroProductsFallback: HeroProduct[] = [
   {
-    slug: "chan-ga-rut-xuong",
-    category: "chan-ga",
-    name: "Chân Gà Rút Xương",
-    tagline: "Giòn sần sật, vị cay đậm, đóng gói tiện lợi cho khách ăn vặt.",
-    price: "89.000đ",
-    priceRange: "45.000đ - 189.000đ",
-    image: "/hero/chan-ga-plate.png",
-    orbitImage: "/hero/chan-ga-plate.png",
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
-    proof:
-      "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
-    stats: [{ label: "Đơn đã bán", value: "2.000.000+" }],
-    facts: ["Sản phẩm chủ lực", "Đóng gói tiện lợi", "Có hồ sơ kiểm soát"],
-  },
-  {
-    slug: "chan-ga-ba-tuyet",
-    category: "chan-ga",
-    name: "Chân Gà Bà Tuyết",
-    tagline: "Dòng sản phẩm nhận diện thương hiệu, phù hợp bán lẻ và combo.",
-    price: "Liên hệ",
-    priceRange: "Theo combo",
-    image: "/hero/chan-ga-poster.png",
-    orbitImage: "/hero/chan-ga-poster.png",
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
-    proof:
-      "Minh chứng bằng bao bì, hình ảnh sản phẩm và nội dung truyền thông.",
-    stats: [{ label: "Sản phẩm", value: "Nổi bật" }],
-    facts: ["Bao bì rõ thương hiệu", "Dễ trưng bày", "Phù hợp bán lẻ"],
-  },
-  {
     slug: "dui-ga-pho-mai",
     category: "dui-ga",
-    name: "Đùi Gà Phô Mai",
-    tagline: "Vị béo thơm, màu sắc bắt mắt, đóng hũ gọn và dễ vận chuyển.",
-    price: "Liên hệ",
-    priceRange: "Theo hũ",
-    image: "/hero/dui-ga-pho-mai.png",
-    orbitImage: "/hero/dui-ga-pho-mai.png",
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    name: "Snack Đùi Gà Phô Mai Đóng Hũ",
+    tagline: "Đùi gà giòn phồng thơm ngậy vị bột phô mai lắc.",
+    price: "39.000đ",
+    priceRange: "39.000đ - 75.000đ",
+    image: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
+    orbitImage: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     proof: "Thông tin in trên bao bì và hồ sơ sản phẩm.",
-    stats: [{ label: "Dạng", value: "Hũ tiện lợi" }],
+    stats: [{ label: "Đơn đã bán", value: "900.000+" }],
     facts: ["Vị phô mai", "Đóng hũ", "Dễ bảo quản"],
+  },
+  {
+    slug: "banh-trang",
+    category: "banh-trang",
+    name: "Snack Bánh Tráng Vị Sa Tế Bò",
+    tagline: "Giòn tan rôm rốp đậm đà vị sa tế bò nướng.",
+    price: "15.000đ",
+    priceRange: "15.000đ - 79.000đ",
+    image: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
+    orbitImage: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
+    proof: "Thông tin bao bì, hồ sơ sản phẩm và quy cách đóng gói.",
+    stats: [{ label: "Đơn đã bán", value: "2.500.000+" }],
+    facts: ["Giòn tan", "Sa tế bò", "Đóng gói sạch"],
   },
   {
     slug: "tam-cay",
     category: "tam-cay",
     name: "Tăm Cay Bà Tuyết",
-    tagline:
-      "Vị cay mạnh, bao bì nổi bật, phù hợp nhóm khách trẻ thích ăn vặt.",
-    price: "35.000đ",
-    priceRange: "15.000đ - 99.000đ",
-    image: "/hero/tam-cay-pack.png",
-    orbitImage: "/hero/tam-cay-pack.png",
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
+    tagline: "Snack tăm cay giòn ngon, cay nồng khơi lại hương vị tuổi thơ.",
+    price: "10.000đ",
+    priceRange: "10.000đ - 99.000đ",
+    image: "/uploads/1780481867397-bimbim-tam-cay-10k.png",
+    orbitImage: "/uploads/1780481867397-bimbim-tam-cay-10k.png",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     proof: "Hồ sơ sản phẩm, hình ảnh bao bì và thông tin bán hàng.",
-    stats: [{ label: "Đơn đã bán", value: "1.500.000+" }],
+    stats: [{ label: "Đơn đã bán", value: "4.000.000+" }],
     facts: ["Vị cay đặc trưng", "Bao bì dễ nhận diện", "Dễ bán theo combo"],
   },
   {
-    slug: "banh-trang-rong-bien",
-    category: "banh-trang",
-    name: "Snack Bánh Tráng Vị Rong Biển",
-    tagline: "Giòn thơm, vị rong biển dễ ăn, bao bì sáng và sạch.",
-    price: "29.000đ",
-    priceRange: "12.000đ - 79.000đ",
-    image: "/hero/banh-trang-rong-bien.png",
-    orbitImage: "/hero/banh-trang-rong-bien.png",
-    purchaseUrl: "https://shopee.vn/nmtvlog99",
-    proof: "Thông tin bao bì, hồ sơ sản phẩm và quy cách đóng gói.",
-    stats: [{ label: "Đơn đã bán", value: "800.000+" }],
-    facts: ["Vị rong biển", "Giòn thơm", "Đóng gói sạch"],
+    slug: "chan-ga",
+    category: "chan-ga",
+    name: "Chân Gà Rút Xương Vị Cay Tê",
+    tagline: "Giòn sần sật, vị cay tê đậm đà chuẩn vị ăn vặt Bà Tuyết.",
+    price: "15.000đ",
+    priceRange: "15.000đ - 180.000đ",
+    image: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
+    orbitImage: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
+    proof: "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
+    stats: [{ label: "Đơn đã bán", value: "5.000.000+" }],
+    facts: ["Sản phẩm chủ lực", "Đóng gói tiện lợi", "Có hồ sơ kiểm soát"],
   },
 ];
 
@@ -344,7 +327,7 @@ function HeroSection() {
     showcaseHeroProductsFallback,
   );
   const [activeProduct, setActiveProduct] = useState<HeroProduct>(
-    showcaseHeroProductsFallback[0],
+    showcaseHeroProductsFallback[2],
   );
   const [loading, setLoading] = useState(true);
 
@@ -358,19 +341,20 @@ function HeroSection() {
           );
           const nextProducts = withImages.length > 0 ? withImages : dbProducts;
           setProducts(nextProducts);
-          setActiveProduct(nextProducts[0]);
+          const tamCay = nextProducts.find((p) => p.slug === "tam-cay");
+          setActiveProduct(tamCay || nextProducts[0]);
           setLoading(false);
           return;
         }
 
         setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[0]);
+        setActiveProduct(showcaseHeroProductsFallback[2]);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load hero products from DB", err);
         setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[0]);
+        setActiveProduct(showcaseHeroProductsFallback[2]);
         setLoading(false);
       });
   }, []);
@@ -407,18 +391,15 @@ function HeroSection() {
             variants={fadeUp}
             className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[4.2rem] xl:text-[5.25rem]"
           >
-            Biến món ăn vặt
-            <span className="block text-orange-600">thành câu chuyện</span>
-            thương hiệu.
+            Ăn vặt thì phải
+            <span className="block text-orange-600">Ăn Cùng Bà Tuyết</span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
             className="mt-8 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg xl:max-w-2xl"
           >
-            Ăn Cùng Bà Tuyết không chỉ giới thiệu sản phẩm. Trang chủ cần truyền
-            được cảm giác gần gũi, sạch sẽ, có quy trình và có niềm tin - để
-            khách nhớ đến nhân vật, nhớ món ăn và tin vào thương hiệu.
+            Thương hiệu đồ ăn vặt Việt Nam. Bắt đầu từ 2022. Trở thành thương hiệu ăn vặt dẫn đầu trên Thương mại điện tử từ 2023 đến nay.
           </motion.p>
 
           <motion.div
@@ -431,16 +412,16 @@ function HeroSection() {
               variant="orange"
               className="shadow-[0_20px_45px_rgba(234,88,12,0.25)]"
             >
-              Xem sản phẩm nổi bật
+              SẢN PHẨM
             </CurtainAction>
 
             <CurtainAction
-              href={activeProduct?.purchaseUrl || "https://shopee.vn/nmtvlog99"}
+              href={activeProduct?.purchaseUrl || "https://shopee.vn/an-vat-ba-tuyet-tam-cay"}
               icon={<ShoppingBag size={17} />}
               variant="white"
               className="shadow-[0_14px_36px_rgba(15,23,42,0.08)]"
             >
-              Mua hàng chính hãng
+              VỀ CHÚNG TÔI
             </CurtainAction>
           </motion.div>
 
@@ -449,9 +430,9 @@ function HeroSection() {
             className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
           >
             {[
-              { label: "Không gian sản xuất", value: "3.300m²", icon: Factory },
-              { label: "Bảo chứng sản phẩm", value: "PVI", icon: ShieldCheck },
-              { label: "Phân phối", value: "Toàn quốc", icon: Truck },
+              { label: "Không gian sản xuất", value: "5.000+m²", icon: Factory },
+              { label: "Bảo hiểm trách nhiệm sản phẩm", value: "PVI", icon: ShieldCheck },
+              { label: "Sản phẩm hiện có mặt", value: "Toàn quốc", icon: Truck },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -494,7 +475,7 @@ function HeroSection() {
 
           <div className="absolute right-0 top-[14%] z-30 rounded-[1.35rem] border border-green-200 bg-green-50 px-5 py-4 text-center shadow-[0_24px_60px_rgba(22,101,52,0.12)] sm:right-4 xl:right-2 xl:px-6 xl:py-5">
             <p className="text-2xl font-black tracking-[-0.05em] text-green-700 xl:text-3xl">
-              {activeStat?.value || "5.000.000+"}
+              {activeStat?.value || "4.000.000+"}
             </p>
             <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
               {activeStat?.label || "Đơn đã bán"}
@@ -592,27 +573,27 @@ function StatsSection() {
     icon: LucideIcon;
   }[] = [
     {
-      value: "3.2M+",
-      label: "Followers TikTok",
-      desc: "Cộng đồng người dùng theo dõi nội dung ăn vặt của thương hiệu.",
+      value: "10M+",
+      label: "Followers",
+      desc: "Là số lượng người theo dõi Bà Tuyết và Ăn Cùng Bà Tuyết trên các nền tảng mạng xã hội như TikTok, Youtube, Facebook.",
       icon: Users,
     },
     {
-      value: "6.2M+",
-      label: "Đơn thành công",
-      desc: "Số liệu bán hàng dùng làm minh chứng năng lực phân phối.",
+      value: "8M+",
+      label: "Đơn hàng TikTok Shop",
+      desc: "Chỉ tính riêng trên nền tảng TikTok Shop, chưa tính các nền tảng thương mại điện tử khác.",
       icon: TrendingUp,
     },
     {
-      value: "3.300m²",
-      label: "Khu sản xuất",
-      desc: "Không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
+      value: "5.000+m²",
+      label: "Diện tích nhà máy",
+      desc: "Thể hiện năng lực sản xuất, đáp ứng hàng triệu đơn hàng với không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
       icon: Factory,
     },
     {
       value: "PVI",
       label: "Bảo hiểm sản phẩm",
-      desc: "Tăng mức độ an tâm cho khách hàng khi sử dụng sản phẩm.",
+      desc: "Thể hiện trách nhiệm của thương hiệu với sức khoẻ khách hàng và chất lượng sản phẩm.",
       icon: ShieldCheck,
     },
   ];
@@ -623,15 +604,14 @@ function StatsSection() {
         <div className="flex flex-col gap-4 border-b border-orange-100 px-5 py-10 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-16">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              Năng lực thương hiệu
+              Vì sao khách hàng tin tưởng và lựa chọn chúng tôi?
             </p>
             <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">
-              Con số dùng để chứng minh, không nói suông
+              Những con số tiêu biểu
             </h2>
           </div>
           <p className="max-w-xl text-sm leading-7 text-slate-600">
-            Phần số liệu nên được đối chiếu với hồ sơ nội bộ, kênh bán hàng hoặc
-            tài liệu pháp lý trước khi đưa lên website chính thức.
+            Những con số thể hiện năng lực của thương hiệu, điều tạo ra những sản phẩm hấp dẫn và thuyết phục khác hàng.
           </p>
         </div>
 
@@ -697,9 +677,9 @@ function TrustSection() {
     <section className="bg-[#fff8ed] py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
-          label="Niềm tin thực phẩm"
-          title="Website công ty thực phẩm cần nhìn thấy quy trình, không chỉ nhìn thấy hiệu ứng"
-          description="Phần này thay cho các mảng glow, orbit và card tối. Người xem sẽ hiểu thương hiệu có nhà máy, quy trình và sản phẩm thật."
+          label="Sứ mệnh"
+          title="Thay đổi định kiến về ăn vặt"
+          description="Ăn ngon và vui thôi chưa đủ, phải sạch sẽ đảm bảo sức khoẻ."
           align="center"
         />
 
@@ -883,8 +863,8 @@ function FeaturedProducts() {
         <div className="flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
           <SectionTitle
             label="Danh mục bán chạy"
-            title="Sản phẩm ăn vặt đóng gói"
-            description="Tập trung vào hình ảnh sản phẩm thật, thông tin giá và danh mục rõ ràng để nhìn giống thương hiệu thực phẩm hơn."
+            title="Sản phẩm"
+            description="Những món đồ ăn vặt thơm ngon đang chờ bạn khám phá."
           />
 
           <CurtainAction
@@ -1127,7 +1107,7 @@ function FactoryProofSection() {
                 Nhà máy / khu sản xuất
               </p>
               <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
-                Không gian sản xuất 3.300m²
+                Không gian sản xuất 5.000+m²
               </h3>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty
@@ -1363,7 +1343,7 @@ function CTASection() {
             </CurtainAction>
 
             <CurtainAction
-              href="https://shopee.vn/nmtvlog99"
+              href="https://shopee.vn/an-vat-ba-tuyet-tam-cay"
               icon={<ArrowRight size={18} />}
               variant="orange"
               className="rounded-none px-8 py-5"
