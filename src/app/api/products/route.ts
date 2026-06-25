@@ -25,7 +25,13 @@ export async function GET(req: NextRequest) {
     return jsonOk(products);
   } catch (error) {
     console.error("GET Products Error:", error);
-    return jsonError("Internal Server Error", 500, getErrorMessage(error));
+    const message = getErrorMessage(error);
+
+    if (message === "Unauthorized" || message === "Forbidden") {
+      return jsonError(message, getAuthErrorStatus(error));
+    }
+
+    return jsonError("Internal Server Error", 500, message);
   }
 }
 

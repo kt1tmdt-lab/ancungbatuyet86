@@ -37,8 +37,12 @@ export default function AdminProductsPage() {
   }, [token]);
 
   const fetchProducts = async () => {
+    if (!token) return;
+
     try {
-      const res = await fetch("/api/products?status=ALL");
+      const res = await fetch("/api/products?status=ALL", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.ok) setProducts(await res.json());
     } catch (err) {} 
     finally { setLoading(false); }
