@@ -19,6 +19,7 @@ import {
   Calendar,
   User,
   Settings,
+  ShieldCheck,
   Image as ImageIcon,
   ImagePlus,
   Link2,
@@ -32,6 +33,7 @@ import {
   type FeedbackItem,
   type PageAssetItem,
   type PressItem,
+  type TrustSectionItem,
   type VideoItem,
 } from "@/lib/marketing-config";
 
@@ -118,7 +120,7 @@ function MarketingPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "assets">(
+  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets">(
     searchParams.get("tab") === "assets" ? "assets" : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
@@ -129,6 +131,7 @@ function MarketingPageContent() {
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
+  const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
 
   useEffect(() => {
     if (searchParams.get("tab") === "assets") {
@@ -151,6 +154,7 @@ function MarketingPageContent() {
         setFeedbackList(config.feedback);
         setVideoList(config.videos);
         setAssetList(config.pageAssets);
+        setTrustList(config.trustSections);
       })
       .catch((error) => {
         if (cancelled) return;
@@ -180,6 +184,7 @@ function MarketingPageContent() {
           feedback: feedbackList,
           videos: videoList,
           pageAssets: assetList,
+          trustSections: trustList,
         }),
       });
 
@@ -190,6 +195,7 @@ function MarketingPageContent() {
       setFeedbackList(config.feedback);
       setVideoList(config.videos);
       setAssetList(config.pageAssets);
+      setTrustList(config.trustSections);
       toast.success("Đã lưu tài sản truyền thông thành công!");
     } catch (error) {
       console.error("Failed to save marketing settings", error);
@@ -244,6 +250,19 @@ function MarketingPageContent() {
     setAssetList([...assetList, newItem]);
   };
 
+  const addTrustSection = () => {
+    const newItem: TrustSectionItem = {
+      id: Date.now().toString(),
+      key: `custom_${Date.now()}`,
+      title: "",
+      description: "",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+    };
+    setTrustList([...trustList, newItem]);
+  };
+
   // Remove Item Helpers
   const removePress = (id: string) => {
     setPressList(pressList.filter((item) => item.id !== id));
@@ -259,6 +278,10 @@ function MarketingPageContent() {
 
   const removeAsset = (id: string) => {
     setAssetList(assetList.filter((item) => item.id !== id));
+  };
+
+  const removeTrustSection = (id: string) => {
+    setTrustList(trustList.filter((item) => item.id !== id));
   };
 
   // Update Field Helpers
@@ -292,6 +315,14 @@ function MarketingPageContent() {
 
   const updateAsset = (id: string, field: keyof PageAssetItem, val: string) => {
     setAssetList(assetList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+  };
+
+  const updateTrustSection = (
+    id: string,
+    field: keyof TrustSectionItem,
+    val: string | boolean,
+  ) => {
+    setTrustList(trustList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
   return (
@@ -349,6 +380,17 @@ function MarketingPageContent() {
           >
             <Video size={16} />
             Video truyền thông ({videoList.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("trust")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === "trust"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            <ShieldCheck size={16} />
+            Uy tin ({trustList.filter((item) => item.enabled).length})
           </button>
           <button
             onClick={() => setActiveTab("assets")}
@@ -630,6 +672,133 @@ function MarketingPageContent() {
               </div>
             )}
 
+            {activeTab === "trust" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Noi dung the hien uy tin</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Quan ly cac khoi nhu giay ve sinh an toan thuc pham, bao hiem PVI, lich su cong ty, thanh tich, quy trinh, cau chuyen, su menh va tam nhin.
+                    </p>
+                  </div>
+                  <button
+                    onClick={addTrustSection}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
+                  >
+                    <Plus size={14} />
+                    Them muc
+                  </button>
+                </div>
+
+                <div className="grid gap-4">
+                  {trustList.map((item, index) => (
+                    <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[150px_1fr_auto]">
+                      <div className="overflow-hidden border border-slate-200 bg-white">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                        ) : (
+                          <div className="flex h-32 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
+                            Chon anh
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+                            #{index + 1}
+                          </span>
+                          <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={item.enabled}
+                              onChange={(e) => updateTrustSection(item.id, "enabled", e.target.checked)}
+                              className="h-4 w-4 accent-orange-500"
+                            />
+                            Hien thi ngoai website
+                          </label>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-[0.8fr_1.2fr]">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ma muc</label>
+                            <input
+                              type="text"
+                              value={item.key}
+                              onChange={(e) => updateTrustSection(item.id, "key", e.target.value)}
+                              className="w-full border border-slate-300 bg-white p-2 text-xs font-mono font-bold outline-none focus:border-orange-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tieu de</label>
+                            <input
+                              type="text"
+                              value={item.title}
+                              onChange={(e) => updateTrustSection(item.id, "title", e.target.value)}
+                              className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mo ta</label>
+                          <textarea
+                            value={item.description}
+                            onChange={(e) => updateTrustSection(item.id, "description", e.target.value)}
+                            rows={3}
+                            className="w-full resize-none border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                          />
+                        </div>
+
+                        <div className="grid gap-4 xl:grid-cols-2">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                              <ImageIcon size={11} /> URL anh
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={item.imageUrl}
+                                onChange={(e) => updateTrustSection(item.id, "imageUrl", e.target.value)}
+                                className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setMediaPickerAssetId(item.id)}
+                                className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                              >
+                                <ImagePlus size={14} />
+                                Thu vien
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                              <Link2 size={11} /> URL link
+                            </label>
+                            <input
+                              type="text"
+                              value={item.linkUrl}
+                              onChange={(e) => updateTrustSection(item.id, "linkUrl", e.target.value)}
+                              className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => removeTrustSection(item.id)}
+                        className="flex h-fit items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 lg:self-center"
+                      >
+                        <Trash2 size={16} />
+                        Xoa
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {activeTab === "assets" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
@@ -899,7 +1068,11 @@ function MarketingPageContent() {
           onClose={() => setMediaPickerAssetId(null)}
           onSelect={(url) => {
             if (mediaPickerAssetId) {
-              updateAsset(mediaPickerAssetId, "imageUrl", url);
+              if (activeTab === "trust") {
+                updateTrustSection(mediaPickerAssetId, "imageUrl", url);
+              } else {
+                updateAsset(mediaPickerAssetId, "imageUrl", url);
+              }
             }
             setMediaPickerAssetId(null);
           }}

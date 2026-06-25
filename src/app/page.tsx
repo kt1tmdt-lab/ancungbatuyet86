@@ -1264,6 +1264,83 @@ function MarketingAssetsSection() {
   );
 }
 
+function TrustEvidenceSections() {
+  const [config, setConfig] = useState<MarketingConfigData>(DEFAULT_MARKETING_CONFIG);
+
+  useEffect(() => {
+    fetchHomeMarketingConfig()
+      .then(setConfig)
+      .catch((error) => {
+        console.error("Failed to load trust sections from DB", error);
+        setConfig(DEFAULT_MARKETING_CONFIG);
+      });
+  }, []);
+
+  const items = config.trustSections.filter((item) => item.enabled);
+  if (items.length === 0) return null;
+
+  return (
+    <section id="uy-tin" className="scroll-mt-24 border-y border-orange-100 bg-white">
+      <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
+        <div className="border-b border-orange-100 bg-[#fff8ed] px-5 py-14 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
+          <SectionTitle
+            label="Nang luc & uy tin"
+            title="Ho so minh bach de khach hang an tam."
+            description="Cac chung nhan, cau chuyen, quy trinh va dinh huong thuong hieu duoc quan ly truc tiep tu CMS Marketing."
+          />
+        </div>
+
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4">
+          {items.map((item, index) => {
+            const card = (
+              <article className="group h-full border-b border-r border-orange-100 bg-white transition hover:bg-orange-50">
+                <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-orange-500">
+                      <ShieldCheck size={36} />
+                    </div>
+                  )}
+                </div>
+                <div className="p-5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
+                    Ho so 0{index + 1}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 line-clamp-4 text-sm font-medium leading-6 text-slate-600">
+                    {item.description}
+                  </p>
+                  {item.linkUrl && (
+                    <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
+                      Xem chi tiet
+                      <ArrowRight size={14} />
+                    </span>
+                  )}
+                </div>
+              </article>
+            );
+
+            if (!item.linkUrl) return <div key={item.id}>{card}</div>;
+
+            return (
+              <Link key={item.id} href={item.linkUrl} className="block h-full">
+                {card}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ==========================================
 // 5. FACTORY PROOF SECTION
 // ==========================================
@@ -1629,6 +1706,7 @@ export default function HomePage() {
       <FactoryProofSection />
       <WhyChooseUsFromDb />
       <MarketingAssetsSection />
+      <TrustEvidenceSections />
       <ProcessSection />
       <BrandStory />
       <CTASection />

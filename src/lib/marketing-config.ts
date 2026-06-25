@@ -30,11 +30,22 @@ export type PageAssetItem = {
   linkUrl: string;
 };
 
+export type TrustSectionItem = {
+  id: string;
+  key: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  linkUrl: string;
+  enabled: boolean;
+};
+
 export type MarketingConfigData = {
   press: PressItem[];
   feedback: FeedbackItem[];
   videos: VideoItem[];
   pageAssets: PageAssetItem[];
+  trustSections: TrustSectionItem[];
 };
 
 export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
@@ -227,6 +238,80 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   feedback: [],
   videos: [],
   pageAssets: DEFAULT_PAGE_ASSETS,
+  trustSections: [
+    {
+      id: "default-food-safety",
+      key: "food_safety_certificate",
+      title: "Giấy vệ sinh an toàn thực phẩm",
+      description: "Khu vực dành cho giấy chứng nhận, hồ sơ pháp lý và tiêu chuẩn an toàn thực phẩm của thương hiệu.",
+      imageUrl: "/bento/bento-insurance.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+    {
+      id: "default-pvi-insurance",
+      key: "pvi_insurance",
+      title: "Bảo hiểm PVI",
+      description: "Thể hiện cam kết bảo vệ người tiêu dùng và trách nhiệm của doanh nghiệp với sản phẩm đưa ra thị trường.",
+      imageUrl: "/bento/bento-insurance.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+    {
+      id: "default-company-history",
+      key: "company_history",
+      title: "Lịch sử hình thành công ty",
+      description: "Tóm tắt hành trình phát triển, các mốc quan trọng và bước chuyển từ căn bếp nhỏ đến vận hành bài bản.",
+      imageUrl: "/hero/ba-tuyet-character.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+    {
+      id: "default-achievements",
+      key: "achievements",
+      title: "Thành tích đáng tự hào",
+      description: "Khu vực trưng bày cúp, giải thưởng, dấu mốc kinh doanh và những ghi nhận nổi bật của thương hiệu.",
+      imageUrl: "/bento/bento-tiktok.png",
+      linkUrl: "/tin-tuc",
+      enabled: true,
+    },
+    {
+      id: "default-production-process",
+      key: "production_process",
+      title: "Quy trình sản xuất",
+      description: "Mô tả các bước chọn nguyên liệu, sơ chế, kiểm soát chất lượng, đóng gói và phân phối.",
+      imageUrl: "/bento/bento-factory.png",
+      linkUrl: "/quy-trinh",
+      enabled: true,
+    },
+    {
+      id: "default-brand-story",
+      key: "brand_story",
+      title: "Câu chuyện thương hiệu",
+      description: "Câu chuyện về con người, sản phẩm và tinh thần gần gũi làm nên Ăn Cùng Bà Tuyết.",
+      imageUrl: "/hero/chan-ga-poster.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+    {
+      id: "default-mission",
+      key: "mission",
+      title: "Sứ mệnh",
+      description: "Mang đến các món ăn vặt sạch, ngon, dễ tiếp cận và có thông tin minh bạch cho khách hàng.",
+      imageUrl: "/hero/chan-ga-plate.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+    {
+      id: "default-vision",
+      key: "vision",
+      title: "Tầm nhìn",
+      description: "Trở thành thương hiệu đồ ăn vặt Việt Nam có quy trình, uy tín và được yêu thích rộng rãi.",
+      imageUrl: "/bento/bento-ingredients.png",
+      linkUrl: "/gioi-thieu",
+      enabled: true,
+    },
+  ],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -337,6 +422,41 @@ function normalizePageAssets(input: unknown): PageAssetItem[] {
     .filter((item): item is PageAssetItem => Boolean(item));
 }
 
+function normalizeTrustSections(input: unknown): TrustSectionItem[] {
+  if (!Array.isArray(input)) return DEFAULT_MARKETING_CONFIG.trustSections;
+
+  const items = input
+    .map((item) => {
+      if (!isRecord(item)) return null;
+      const key = stringValue(item.key);
+      const title = stringValue(item.title);
+      const description = stringValue(item.description);
+      const imageUrl = stringValue(item.imageUrl);
+      const linkUrl = stringValue(item.linkUrl);
+
+      if (!key && !title && !description && !imageUrl && !linkUrl) return null;
+
+      return {
+        id: itemId(item.id),
+        key,
+        title,
+        description,
+        imageUrl,
+        linkUrl,
+        enabled: item.enabled !== false,
+      };
+    })
+    .filter((item): item is TrustSectionItem => Boolean(item));
+
+  const byKey = new Map(items.map((item) => [item.key, item]));
+
+  return DEFAULT_MARKETING_CONFIG.trustSections.map((defaultItem) => ({
+    ...defaultItem,
+    ...(byKey.get(defaultItem.key) || {}),
+    id: byKey.get(defaultItem.key)?.id || defaultItem.id,
+  })).concat(items.filter((item) => item.key && !DEFAULT_MARKETING_CONFIG.trustSections.some((defaultItem) => defaultItem.key === item.key)));
+}
+
 function withDefaultPageAssets(items: PageAssetItem[]) {
   const byKey = new Map(items.map((item) => [item.key, item]));
 
@@ -356,5 +476,6 @@ export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
     feedback: normalizeFeedback(source.feedback),
     videos: normalizeVideos(source.videos),
     pageAssets: withDefaultPageAssets(pageAssets),
+    trustSections: normalizeTrustSections(source.trustSections),
   };
 }

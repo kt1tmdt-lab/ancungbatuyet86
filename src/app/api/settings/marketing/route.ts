@@ -58,6 +58,7 @@ export async function PUT(req: NextRequest) {
         feedbackCount: data.feedback.length,
         videoCount: data.videos.length,
         pageAssetCount: data.pageAssets.length,
+        trustSectionCount: data.trustSections.length,
       },
     });
 
