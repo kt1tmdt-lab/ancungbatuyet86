@@ -13,7 +13,7 @@
   --color-neutral-light: #334155;
   --color-cream: #FFFFFF;
   --color-warm-gray: #F1F5F9;
-  --font-sans: Arial, "Helvetica Neue", system-ui, sans-serif;
+  --font-sans: var(--font-mulish), system-ui, sans-serif;
   --font-script: "Segoe Script", "Brush Script MT", cursive;
 }
 
@@ -22,7 +22,7 @@
 }
 
 body {
-  font-family: Arial, "Helvetica Neue", system-ui, sans-serif;
+  font-family: var(--font-mulish), system-ui, sans-serif;
   background: var(--color-cream);
   color: #2B2D42;
   top: 0 !important;
