@@ -191,7 +191,7 @@ export default function AchievementsPage() {
                       {activeTrustItem.description}
                     </p>
                     <div className="mt-6 space-y-4 border-t border-white/10 pt-6 text-sm leading-7 text-white/70">
-                      {(activeTrustItem.detailContent || "Nội dung chi tiết hồ sơ sẽ được cập nhật động từ hệ thống quản trị.")
+                      {(activeTrustItem.detailContent || "Thông tin chi tiết về hồ sơ này đang được cập nhật. Vui lòng liên hệ trực tiếp với chúng tôi để được cung cấp đầy đủ.")}
                         .split(/\n+/)
                         .filter(Boolean)
                         .map((paragraph, index) => (

@@ -199,7 +199,7 @@ function ImageBlock({
       <div
         className={`flex items-center justify-center border border-dashed border-orange-200 bg-cream px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-primary ${className}`}
       >
-        Chua co anh tu CMS
+        Chưa có hình ảnh
       </div>
     );
   }
