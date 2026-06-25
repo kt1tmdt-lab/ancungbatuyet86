@@ -4,6 +4,14 @@ import { verifyPassword, signToken } from "@/lib/auth";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
 
+function shouldUseSecureCookie() {
+  if (process.env.AUTH_COOKIE_SECURE) {
+    return process.env.AUTH_COOKIE_SECURE === "true";
+  }
+
+  return Boolean(process.env.NEXT_PUBLIC_SITE_URL?.startsWith("https://"));
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
   const { email, password } = body;
@@ -40,7 +48,7 @@ export async function POST(req: Request) {
     name: "auth_token",
     value: token,
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: shouldUseSecureCookie(),
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60,
     path: "/",
