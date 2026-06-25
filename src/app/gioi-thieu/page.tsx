@@ -319,7 +319,7 @@ function BrandImage({
     >
       <img
         src={src}
-        alt={label}
+        alt={linkUrl ? "" : label}
         className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.015] ${muted ? "saturate-[0.85]" : ""}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10" />
@@ -623,7 +623,7 @@ export default function AboutPage() {
     .filter((post) => post.coverImageUrl)
     .slice(0, 6)
     .map((post) => ({ src: post.coverImageUrl as string, label: post.title, linkUrl: `/tin-tuc/${post.slug}` }));
-  const galleryImages = configuredGalleryImages.length > 0 ? configuredGalleryImages : fallbackGalleryImages;
+  const galleryImages = (configuredGalleryImages.length > 0 ? configuredGalleryImages : fallbackGalleryImages).slice(0, 4);
   const factoryImage = assetByKey.about_process_background?.imageUrl || postImagesBySlug["khanh-thanh-nha-may-3300m2"] || galleryImages[0]?.src;
   const teamImage = assetByKey.about_team_quote?.imageUrl || galleryImages[galleryImages.length - 1]?.src;
   const teamLink = assetByKey.about_team_quote?.linkUrl;
@@ -651,12 +651,6 @@ export default function AboutPage() {
       title: "Quy trình rõ ràng từ bếp đến tay khách",
       icon: Factory,
       keys: ["production_process", "brand_story"],
-    },
-    {
-      label: "Định hướng thương hiệu",
-      title: "Đi đường dài bằng sứ mệnh rõ ràng",
-      icon: Target,
-      keys: ["mission", "vision"],
     },
   ]
     .map((group) => ({
@@ -1021,8 +1015,8 @@ export default function AboutPage() {
             <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
               <SectionIntro
                 label="Hồ sơ uy tín"
-                title="Mỗi bằng chứng được đặt đúng chỗ để người xem dễ tin hơn."
-                description="Thay vì dồn tất cả vào một mảng thông tin nặng nề, phần giới thiệu chia rõ chứng nhận, bảo hiểm, lịch sử, thành tích, quy trình và định hướng thương hiệu thành từng nhóm dễ theo dõi."
+                title="Chứng nhận, bảo hiểm và quy trình được tách thành từng nhóm dễ kiểm chứng."
+                description="Phần này chỉ giữ các bằng chứng cần xem nhanh: hồ sơ pháp lý, bảo hiểm, dấu mốc phát triển, thành tích, quy trình sản xuất và câu chuyện thương hiệu."
               />
             </div>
 
@@ -1055,13 +1049,13 @@ export default function AboutPage() {
 
                     <div className="grid sm:grid-cols-2">
                       {group.items.map((item) => {
-                        const content = (
-                          <article className="group h-full border-b border-orange-100 bg-white">
+                        return (
+                          <article key={item.id} className="group h-full border-b border-orange-100 bg-white">
                             <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
                               {item.imageUrl ? (
                                 <img
                                   src={item.imageUrl}
-                                  alt={item.title}
+                                  alt=""
                                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                 />
                               ) : (
@@ -1078,21 +1072,16 @@ export default function AboutPage() {
                                 {item.description}
                               </p>
                               {item.linkUrl && (
-                                <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700">
+                                <Link
+                                  href={item.linkUrl}
+                                  className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:text-orange-900 hover:underline"
+                                >
                                   Xem thêm
                                   <ArrowRight size={14} />
-                                </span>
+                                </Link>
                               )}
                             </div>
                           </article>
-                        );
-
-                        if (!item.linkUrl) return <div key={item.id}>{content}</div>;
-
-                        return (
-                          <Link key={item.id} href={item.linkUrl} className="block h-full">
-                            {content}
-                          </Link>
                         );
                       })}
                     </div>

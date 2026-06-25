@@ -1314,13 +1314,16 @@ function TrustEvidenceSections() {
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {items.map((item, index) => {
-            const card = (
-              <article className="group grid h-full grid-cols-[92px_1fr] overflow-hidden border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg">
+            return (
+              <article
+                key={item.id}
+                className="group grid h-full grid-cols-[92px_1fr] overflow-hidden border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg"
+              >
                 <div className="relative h-full min-h-[132px] overflow-hidden bg-slate-100">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
-                      alt={item.title}
+                      alt=""
                       className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                   ) : (
@@ -1340,21 +1343,16 @@ function TrustEvidenceSections() {
                     {item.description}
                   </p>
                   {item.linkUrl && (
-                    <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">
+                    <Link
+                      href={item.linkUrl}
+                      className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700 transition hover:text-orange-900 hover:underline"
+                    >
                       Chi tiết
                       <ArrowRight size={14} />
-                    </span>
+                    </Link>
                   )}
                 </div>
               </article>
-            );
-
-            if (!item.linkUrl) return <div key={item.id}>{card}</div>;
-
-            return (
-              <Link key={item.id} href={item.linkUrl} className="block h-full">
-                {card}
-              </Link>
             );
           })}
         </div>
