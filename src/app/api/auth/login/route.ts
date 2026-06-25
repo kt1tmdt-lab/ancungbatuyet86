@@ -35,7 +35,10 @@ export async function POST(req: Request) {
 
   const token = signToken({ id: user.id, email: user.email, role: user.role });
   
-  const response = NextResponse.json({ user: { id: user.id, email: user.email, role: user.role } });
+  const response = NextResponse.json({
+    user: { id: user.id, email: user.email, role: user.role },
+    token,
+  });
   
   await logAudit({
     userId: user.id,

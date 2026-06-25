@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (res.ok) {
           const data = await res.json();
           setUser(data.user);
-          setToken("cookie-auth");
+          setToken(data.token ?? null);
         }
       } catch (error) {
         console.error("Failed to fetch user session", error);
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error("Login failed");
     const data = await res.json();
     setUser(data.user);
-    setToken("cookie-auth");
+    setToken(data.token ?? null);
   };
 
   const logout = async () => {

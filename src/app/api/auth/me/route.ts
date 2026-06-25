@@ -16,5 +16,5 @@ export async function GET(req: Request) {
 
   if (!user) return NextResponse.json({ user: null });
 
-  return NextResponse.json({ user });
+  return NextResponse.json({ user, token });
 }
