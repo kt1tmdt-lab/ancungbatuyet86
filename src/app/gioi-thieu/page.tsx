@@ -635,26 +635,26 @@ export default function AboutPage() {
   }, {});
   const trustGroups = [
     {
-      label: "Phap ly & bao ve khach hang",
-      title: "Ho so minh bach de khach hang an tam",
+      label: "Pháp lý & bảo vệ khách hàng",
+      title: "Minh bạch để khách hàng yên tâm",
       icon: ShieldCheck,
       keys: ["food_safety_certificate", "pvi_insurance"],
     },
     {
-      label: "Hanh trinh & ghi nhan",
-      title: "Cau chuyen phat trien co dau moc",
+      label: "Hành trình & ghi nhận",
+      title: "Những dấu mốc tạo nên niềm tin",
       icon: Trophy,
       keys: ["company_history", "achievements"],
     },
     {
-      label: "Van hanh san xuat",
-      title: "Quy trinh duoc tach rieng de de theo doi",
+      label: "Vận hành sản xuất",
+      title: "Quy trình rõ ràng từ bếp đến tay khách",
       icon: Factory,
       keys: ["production_process", "brand_story"],
     },
     {
-      label: "Dinh huong thuong hieu",
-      title: "Su menh va tam nhin nam o phan chien luoc",
+      label: "Định hướng thương hiệu",
+      title: "Đi đường dài bằng sứ mệnh rõ ràng",
       icon: Target,
       keys: ["mission", "vision"],
     },
@@ -1020,9 +1020,9 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
             <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
               <SectionIntro
-                label="Ho so uy tin"
-                title="Khong don mot cuc, moi bang chung nam dung ngu canh."
-                description="Cac chung nhan, bao hiem, lich su, thanh tich, quy trinh va dinh huong thuong hieu duoc trai thanh tung cum de khach hang doc cham hon va tin nhanh hon."
+                label="Hồ sơ uy tín"
+                title="Mỗi bằng chứng được đặt đúng chỗ để người xem dễ tin hơn."
+                description="Thay vì dồn tất cả vào một mảng thông tin nặng nề, phần giới thiệu chia rõ chứng nhận, bảo hiểm, lịch sử, thành tích, quy trình và định hướng thương hiệu thành từng nhóm dễ theo dõi."
               />
             </div>
 
@@ -1079,7 +1079,7 @@ export default function AboutPage() {
                               </p>
                               {item.linkUrl && (
                                 <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700">
-                                  Xem them
+                                  Xem thêm
                                   <ArrowRight size={14} />
                                 </span>
                               )}

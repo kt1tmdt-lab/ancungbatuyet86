@@ -1300,7 +1300,7 @@ function TrustEvidenceSections() {
               Tín hiệu tin cậy
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
-              Một vài bằng chứng chính, không dồn hết vào một chỗ.
+              Những bằng chứng chính được kể gọn, phần đầy đủ nằm ở trang giới thiệu.
             </h2>
           </div>
           <Link
