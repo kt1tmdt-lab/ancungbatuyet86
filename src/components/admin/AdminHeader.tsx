@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList } from "lucide-react";
+import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList, Radar } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 function formatTimeAgo(dateString: string) {
@@ -175,6 +175,7 @@ export function AdminHeader() {
       group: "Marketing & CSKH",
       items: [
         { href: "/admin/marketing", label: "Quản lý Marketing", icon: Megaphone, show: isMarketingAllowed },
+        { href: "/admin/media-intelligence", label: "Radar Thương Hiệu", icon: Radar, show: isMarketingAllowed },
         { href: "/admin/marketing?tab=assets", label: "Ảnh & link trang", icon: ImagePlus, show: isMarketingAllowed },
         { href: "/admin/contacts", label: "Liên hệ", icon: Users, show: isContactAllowed },
       ],
