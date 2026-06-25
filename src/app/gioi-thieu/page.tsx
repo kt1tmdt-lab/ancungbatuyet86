@@ -352,23 +352,8 @@ export default function AboutPage() {
     image: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.imageUrl || item.image,
     linkUrl: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.linkUrl || item.linkUrl,
   }));
-  const configuredGalleryImages = Array.from({ length: 6 })
-    .map((_, index) => assetByKey[`about_gallery_${index + 1}`])
-    .filter((asset): asset is PageAssetItem => Boolean(asset?.imageUrl))
-    .map((asset) => ({
-      src: asset.imageUrl,
-      label: asset.label || asset.key,
-      linkUrl: asset.linkUrl,
-    }));
-  const fallbackGalleryImages = [
-    { src: "/hero/chan-ga-plate.png", label: "Sản phẩm nổi bật", linkUrl: "/san-pham" },
-    { src: "/hero/chan-ga-poster.png", label: "Poster sản phẩm", linkUrl: "/san-pham" },
-    { src: "/hero/ba-tuyet-character.png", label: "Nhân vật thương hiệu", linkUrl: "/gioi-thieu" },
-    { src: "/bento/bento-factory.png", label: "Khu vực sản xuất", linkUrl: "/quy-trinh" },
-  ];
-  const galleryImages = (configuredGalleryImages.length > 0 ? configuredGalleryImages : fallbackGalleryImages).slice(0, 4);
   const factoryImage = assetByKey.about_process_background?.imageUrl || "/bento/bento-factory.png";
-  const teamImage = assetByKey.about_team_quote?.imageUrl || galleryImages[galleryImages.length - 1]?.src;
+  const teamImage = assetByKey.about_team_quote?.imageUrl || "/bento/bento-factory.png";
   const teamLink = assetByKey.about_team_quote?.linkUrl;
   const aboutVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0");
   const enabledTrustSections = trustSections.filter((item) => item.enabled);
@@ -559,45 +544,6 @@ export default function AboutPage() {
                 />
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="about-gallery" className="scroll-mt-24 border-b border-orange-100 bg-white">
-        <div className="grid lg:grid-cols-[0.52fr_1.48fr]">
-          <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Hình ảnh thương hiệu"
-              title="Cho khách hàng nhìn thấy sản phẩm, xưởng và đội ngũ."
-              description="Hình ảnh thật về sản phẩm, xưởng và đội ngũ giúp khách hàng cảm nhận rõ hơn về quy mô và sự chỉn chu của thương hiệu."
-            />
-          </div>
-
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3">
-            {galleryImages.length > 0 ? (
-              galleryImages.map((image, index) => (
-                <motion.div
-                  key={image.src}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="border-b border-r border-white/20 overflow-hidden"
-                >
-                  <BrandImage
-                    src={image.src}
-                    label={image.label}
-                    linkUrl={image.linkUrl}
-                    ratio="aspect-[5/3]"
-                    muted={index > 1}
-                  />
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full border border-dashed border-orange-200 bg-orange-50/40 px-6 py-12 text-center text-sm font-bold text-slate-600">
-                Chua co anh thuong hieu trong CMS.
-              </div>
-            )}
           </div>
         </div>
       </section>
