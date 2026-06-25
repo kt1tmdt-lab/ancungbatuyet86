@@ -26,12 +26,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const storedToken = window.localStorage.getItem("auth_token");
+
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/auth/me", {
+          headers: storedToken ? { Authorization: `Bearer ${storedToken}` } : {},
+        });
         if (res.ok) {
           const data = await res.json();
-          setUser(data.user);
-          setToken(data.token ?? null);
+          if (data.user && data.token) {
+            setUser(data.user);
+            setToken(data.token);
+            window.localStorage.setItem("auth_token", data.token);
+          } else {
+            window.localStorage.removeItem("auth_token");
+          }
         }
       } catch (error) {
         console.error("Failed to fetch user session", error);
@@ -52,6 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await res.json();
     setUser(data.user);
     setToken(data.token ?? null);
+    if (data.token) {
+      window.localStorage.setItem("auth_token", data.token);
+    } else {
+      window.localStorage.removeItem("auth_token");
+    }
   };
 
   const logout = async () => {
@@ -62,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
     setToken(null);
+    window.localStorage.removeItem("auth_token");
   };
 
   return (
