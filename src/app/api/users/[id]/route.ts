@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken, hashPassword } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -73,6 +74,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     });
 
+    // log user update action
+    await logAudit({
+      userId: payload.id,
+      action: "UPDATE_USER",
+      entityType: "User",
+      entityId: user.id,
+      details: { email: user.email, role: user.role, name: user.name }
+    });
+
     return NextResponse.json(user);
   } catch (error) {
     console.error("PUT User Error:", error);
@@ -99,10 +109,27 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: "Bạn không thể tự xóa tài khoản của chính mình" }, { status: 400 });
     }
 
+    // Find user details first
+    const targetUser = await prisma.user.findUnique({
+      where: { id },
+      select: { email: true, name: true, role: true }
+    });
+
     // Delete user
     await prisma.user.delete({
       where: { id }
     });
+
+    // log user delete action
+    if (targetUser) {
+      await logAudit({
+        userId: payload.id,
+        action: "DELETE_USER",
+        entityType: "User",
+        entityId: id,
+        details: { email: targetUser.email, role: targetUser.role, name: targetUser.name }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

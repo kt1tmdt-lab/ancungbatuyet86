@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { sendTelegramNotification } from "@/lib/telegram";
 
 function cleanString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -59,6 +60,18 @@ export async function POST(req: NextRequest) {
         status: "NEW",
       },
     });
+
+    // Gửi thông báo đến Telegram
+    const telegramMessage = 
+      `🔔 <b>YÊU CẦU LIÊN HỆ MỚI!</b>\n\n` +
+      `👤 <b>Họ tên:</b> ${name}\n` +
+      `📞 <b>Điện thoại:</b> <code>${phone || "Không có"}</code>\n` +
+      `📧 <b>Email:</b> <code>${email || "Không có"}</code>\n` +
+      `🌐 <b>Nguồn:</b> ${source || "Website"}\n\n` +
+      `📝 <b>Nội dung yêu cầu:</b>\n` +
+      `<i>${content}</i>`;
+      
+    void sendTelegramNotification(telegramMessage);
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {

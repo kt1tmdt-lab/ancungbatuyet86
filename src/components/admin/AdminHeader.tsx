@@ -3,8 +3,27 @@
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
-import { LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList } from "lucide-react";
+import { toast } from "react-hot-toast";
+
+function formatTimeAgo(dateString: string) {
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Vừa xong";
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    return `${diffDays} ngày trước`;
+  } catch (e) {
+    return "";
+  }
+}
 
 export function AdminHeader() {
   const { user, logout } = useAuth();
@@ -12,9 +31,103 @@ export function AdminHeader() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [lastViewedTime, setLastViewedTime] = useState<string | null>(null);
+
+  const latestNotificationTimeRef = useRef<string | null>(null);
+
   const handleLogout = () => {
     logout();
     router.push("/admin/login");
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    const savedTime = localStorage.getItem("last_viewed_notifications_time");
+    setLastViewedTime(savedTime);
+
+    const fetchNotifications = async (isInitial: boolean = false) => {
+      try {
+        const token = localStorage.getItem("auth_token");
+        const res = await fetch("/api/admin/notifications", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setNotifications(data);
+
+        const refTime = savedTime || localStorage.getItem("last_viewed_notifications_time") || new Date(0).toISOString();
+        const unread = data.filter((n: any) => new Date(n.createdAt).getTime() > new Date(refTime).getTime()).length;
+        setUnreadCount(unread);
+
+        if (data.length > 0) {
+          const newestItemTime = data[0].createdAt;
+          
+          if (!isInitial && latestNotificationTimeRef.current) {
+            const previousLatestTime = new Date(latestNotificationTimeRef.current).getTime();
+            const newItems = data
+              .filter((n: any) => new Date(n.createdAt).getTime() > previousLatestTime)
+              .reverse();
+
+            newItems.forEach((item: any) => {
+              toast((t) => (
+                <div 
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                    router.push(item.link);
+                  }}
+                  className="cursor-pointer flex flex-col gap-1 p-1"
+                >
+                  <span className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    {item.title}
+                  </span>
+                  <span className="text-xs text-slate-600 line-clamp-2">
+                    {item.description}
+                  </span>
+                </div>
+              ), {
+                duration: 6000,
+                position: "top-right",
+                icon: item.type === "CONTACT" ? "📞" : "⚙️",
+              });
+            });
+          }
+
+          latestNotificationTimeRef.current = newestItemTime;
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
+    fetchNotifications(true);
+
+    const interval = setInterval(() => {
+      fetchNotifications(false);
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [user, router]);
+
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClose = () => setDropdownOpen(false);
+    window.addEventListener("click", handleClose);
+    return () => window.removeEventListener("click", handleClose);
+  }, [dropdownOpen]);
+
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDropdownOpen(!dropdownOpen);
+
+    const nowStr = new Date().toISOString();
+    localStorage.setItem("last_viewed_notifications_time", nowStr);
+    setLastViewedTime(nowStr);
+    setUnreadCount(0);
   };
 
   const roleLabels: Record<string, string> = {
@@ -113,6 +226,107 @@ export function AdminHeader() {
               <span className="text-xs text-orange-400 font-medium">
                 {roleLabels[user?.role || ""] || "👤 Thành viên"}
               </span>
+            </div>
+
+            {/* Bell Notification */}
+            <div className="relative">
+              <button
+                onClick={toggleDropdown}
+                className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-full transition relative flex items-center justify-center focus:outline-none"
+                aria-label="Xem thông báo"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-slate-900 animate-pulse">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {dropdownOpen && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-800 border border-slate-700 rounded-lg shadow-xl text-slate-200 z-50 overflow-hidden"
+                >
+                  <div className="px-4 py-3 border-b border-slate-700 flex items-center justify-between bg-slate-900">
+                    <span className="font-bold text-sm text-white">🔔 Thông báo hệ thống</span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => {
+                          const nowStr = new Date().toISOString();
+                          localStorage.setItem("last_viewed_notifications_time", nowStr);
+                          setLastViewedTime(nowStr);
+                          setUnreadCount(0);
+                        }}
+                        className="text-xs text-orange-400 hover:text-orange-300 font-semibold"
+                      >
+                        Đánh dấu đã đọc
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto divide-y divide-slate-700/50">
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-6 text-center text-xs text-slate-400">
+                        Không có thông báo mới nào.
+                      </div>
+                    ) : (
+                      notifications.map((item) => {
+                        const isNew = lastViewedTime 
+                          ? new Date(item.createdAt).getTime() > new Date(lastViewedTime).getTime()
+                          : true;
+                        
+                        return (
+                          <Link
+                            key={item.id}
+                            href={item.link}
+                            onClick={() => setDropdownOpen(false)}
+                            className={`flex gap-3 px-4 py-3 hover:bg-slate-700/40 transition text-left block w-full ${
+                              isNew ? "bg-slate-700/20 border-l-2 border-orange-500" : ""
+                            }`}
+                          >
+                            <div className="mt-0.5 shrink-0">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                item.type === "CONTACT" 
+                                  ? "bg-blue-500/10 text-blue-400" 
+                                  : "bg-orange-500/10 text-orange-400"
+                              }`}>
+                                {item.type === "CONTACT" ? (
+                                  <Users size={14} />
+                                ) : (
+                                  <ClipboardList size={14} />
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-xs font-semibold text-slate-200 truncate ${isNew ? "text-orange-400" : ""}`}>
+                                {item.title}
+                              </p>
+                              <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-2 leading-relaxed">
+                                {item.description}
+                              </p>
+                              <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
+                                <Clock size={10} />
+                                {formatTimeAgo(item.createdAt)}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className="px-4 py-2 border-t border-slate-700 bg-slate-900 text-center">
+                    <Link
+                      href="/admin/activity-logs"
+                      onClick={() => setDropdownOpen(false)}
+                      className="text-xs text-slate-400 hover:text-white font-semibold block w-full"
+                    >
+                      Xem toàn bộ nhật ký hoạt động
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="w-px h-6 bg-slate-800 hidden sm:block" />

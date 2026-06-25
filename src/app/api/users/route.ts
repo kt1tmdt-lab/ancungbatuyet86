@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken, hashPassword } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
@@ -90,6 +91,15 @@ export async function POST(req: NextRequest) {
           select: { posts: true }
         }
       }
+    });
+
+    // log creation audit
+    await logAudit({
+      userId: payload.id,
+      action: "CREATE_USER",
+      entityType: "User",
+      entityId: newUser.id,
+      details: { email: newUser.email, role: newUser.role, name: newUser.name }
     });
 
     return NextResponse.json(newUser, { status: 201 });
