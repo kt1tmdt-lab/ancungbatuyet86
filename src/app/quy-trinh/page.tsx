@@ -146,7 +146,7 @@ const documents = [
     icon: Award,
     title: "Phiếu kiểm nghiệm",
     description:
-      "Có thể gắn ảnh phiếu kiểm nghiệm theo từng dòng sản phẩm hoặc từng lô.",
+      "Kết quả kiểm nghiệm chất lượng sản phẩm định kỳ đảm bảo các chỉ số lý hóa, vi sinh an toàn tuyệt đối trước khi phân phối.",
   },
   {
     icon: ScanLine,
@@ -292,8 +292,7 @@ function HeroSection({ images, links }: { images: Record<string, string>; links:
               transition={{ delay: 0.45 }}
               className="text-gray-300 text-lg mt-7 max-w-2xl leading-relaxed"
             >
-              Quy trình được trình bày bằng hình ảnh, điểm kiểm soát và hồ sơ
-              liên quan để khách hàng hiểu sản phẩm được tạo ra như thế nào.
+              Tổ hợp nhà máy sản xuất khép kín quy mô lớn, tuân thủ nghiêm ngặt các tiêu chuẩn quản lý chất lượng quốc tế ISO 22000 & HACCP, mang đến những sản phẩm đồ ăn vặt thơm ngon, an toàn tuyệt đối cho sức khỏe người tiêu dùng.
             </motion.p>
 
             <motion.div
@@ -302,7 +301,7 @@ function HeroSection({ images, links }: { images: Record<string, string>; links:
               transition={{ delay: 0.6 }}
               className="flex flex-wrap gap-3 mt-9"
             >
-              {["6 bước sản xuất", "Có khu vực chứng từ"].map(
+              {["Tiêu chuẩn HACCP", "Công nghệ sấy lạnh", "Kiểm soát 6 bước nghiêm ngặt"].map(
                 (item) => (
                   <span
                     key={item}
@@ -345,9 +344,9 @@ function HeroSection({ images, links }: { images: Record<string, string>; links:
             </div>
 
             <div className="absolute -bottom-6 left-8 right-8 bg-white text-neutral p-5 shadow-2xl">
-              <p className="text-sm text-gray-500">Điểm khác biệt</p>
+              <p className="text-sm text-gray-500">Cam kết chất lượng</p>
               <p className="text-xl font-extrabold">
-                Quy trình có hình, có điểm kiểm tra, có bằng chứng.
+                Tự động hóa hoàn toàn, đảm bảo vô trùng trong mọi công đoạn.
               </p>
             </div>
           </motion.div>
@@ -372,9 +371,9 @@ function ProcessStepsSection({ images, links }: { images: Record<string, string>
     <section id="process-steps" className="scroll-mt-24 py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeader
-          label="6 điểm chạm"
-          title="Quy trình nhìn được, không chỉ đọc được"
-          description="Mỗi bước đều có điểm kiểm soát và hồ sơ liên quan để khách hàng hiểu rõ cách sản phẩm được tạo ra."
+          label="Quy trình khép kín"
+          title="Hành trình sản xuất chuẩn công nghiệp"
+          description="Hệ thống kiểm soát chất lượng từ khâu chọn lọc nguyên liệu thô tại trang trại đến sản phẩm hoàn thiện trao tay khách hàng."
         />
 
         <div className="mt-16 space-y-10">
@@ -487,9 +486,7 @@ function ProcessStepsSection({ images, links }: { images: Record<string, string>
                         className={`text-sm leading-relaxed mt-2 ${step.highlight ? "text-gray-300" : "text-gray-500"
                           }`}
                       >
-                        Ảnh thật tại công đoạn này, phiếu kiểm tra nội bộ, mã lô
-                        hoặc chứng từ liên quan giúp khách hàng dễ kiểm chứng
-                        quy trình sản xuất.
+                        Hình ảnh ghi nhận thực tế tại nhà xưởng, hồ sơ lưu mẫu và phiếu kiểm tra kiểm soát chỉ số lý hóa, vi sinh của từng lô sản xuất.
                       </p>
                     </div>
                   </div>
@@ -524,9 +521,9 @@ function FactorySection({ images, links }: { images: Record<string, string>; lin
             </span>
 
             <h2 className="text-4xl sm:text-6xl font-extrabold mt-5 leading-tight">
-              Có nhà xưởng thì
+              Tổ hợp nhà máy
               <br />
-              <span className="text-primary-light">phải cho khách thấy.</span>
+              <span className="text-primary-light">quy mô và hiện đại.</span>
             </h2>
 
             <p className="text-gray-300 text-lg leading-relaxed mt-6">
@@ -553,7 +550,7 @@ function FactorySection({ images, links }: { images: Record<string, string>; lin
                 </p>
                 <p className="text-5xl font-extrabold mt-4">3.300m²</p>
                 <p className="text-gray-500 text-sm mt-3">
-                  Theo thông tin Znews ghi nhận.
+                  Nhà máy đạt chứng nhận ISO 22000:2018.
                 </p>
               </div>
 
@@ -607,9 +604,9 @@ function DocumentationSection({ images, links }: { images: Record<string, string
         <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center">
           <div>
             <SectionHeader
-              label="Hồ sơ minh bạch"
-              title="Hồ sơ rõ ràng để khách hàng yên tâm hơn"
-              description="Các hồ sơ quan trọng được tập hợp tại đây để khách hàng và đối tác dễ theo dõi khi cần kiểm chứng."
+              label="Chứng thực chất lượng"
+              title="Hồ sơ pháp lý đầy đủ và minh bạch"
+              description="Hệ thống chứng nhận chất lượng, giấy phép đủ điều kiện vệ sinh an toàn thực phẩm và kết quả kiểm nghiệm định kỳ từ cơ quan chức năng."
             />
 
             <ImageBlock
@@ -669,12 +666,11 @@ function CTASection() {
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-extrabold text-neutral leading-tight">
-            Quy trình tốt phải nhìn thấy được.
+            Bảo chứng từ sự tận tâm.
           </h2>
 
           <p className="text-gray-500 mt-5 leading-relaxed">
-            Hình ảnh xưởng, giấy tờ và phiếu kiểm nghiệm giúp khách hàng hiểu
-            rõ hơn về tiêu chuẩn vận hành phía sau từng sản phẩm.
+            Chúng tôi tự hào là đơn vị tiên phong chuẩn hóa quy trình sản xuất đồ ăn vặt tại Việt Nam, mang đến giá trị thực sự cho cộng đồng.
           </p>
 
           <div className="mt-9">
