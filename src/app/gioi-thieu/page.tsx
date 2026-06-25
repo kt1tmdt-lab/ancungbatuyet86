@@ -301,7 +301,7 @@ function BrandImage({
       <div
         className={`flex items-center justify-center border border-dashed border-orange-200 bg-orange-50 px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-orange-500 ${ratio} ${className}`}
       >
-        Chua co anh tu CMS
+        Chưa có ảnh từ CMS
       </div>
     );
   }
@@ -663,50 +663,25 @@ export default function AboutPage() {
   const activeTrustItem = allTrustItems.find((item) => item.key === activeTrustKey) || allTrustItems[0];
 
   return (
-    <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
-      <section className="border-b border-orange-100 bg-[#f7efe3] px-5 pb-10 pt-24 sm:px-8 lg:px-14 xl:px-20">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-end"
-        >
-          <div>
-            <div className="mb-5 inline-flex w-fit items-center gap-3 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
-              <BadgeCheck size={15} />
-              Hồ sơ thương hiệu thực phẩm Việt
-            </div>
-
-            <h1 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
+    <main className="bg-[#fffaf6] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
+      <section className="px-5 pb-16 pt-24 sm:px-8 lg:pb-24 lg:pt-28">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+          >
+            <p className="mb-5 inline-flex bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
               Ăn Cùng Bà Tuyết
-              <span className="block text-orange-600">làm thật, bán thật.</span>
+            </p>
+            <h1 className="max-w-4xl text-5xl font-black leading-[0.95] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-7xl">
+              Đồ ăn vặt Việt, làm chỉn chu và bán minh bạch.
             </h1>
-          </div>
-
-          <div>
-            <p className="max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-              Ăn Cùng Bà Tuyết là thương hiệu đồ ăn vặt Việt Nam phát triển từ
-              nội dung gần gũi, sản phẩm dễ ăn và sức mua thật trên các nền tảng
-              thương mại điện tử.
+            <p className="mt-7 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+              Thương hiệu phát triển từ sản phẩm dễ ăn, nội dung gần gũi và sức mua thật trên các kênh thương mại điện tử.
             </p>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {[
-                "Sản xuất có quy trình",
-                "Đóng gói chỉn chu",
-                "Số liệu có nguồn",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center gap-3 border border-orange-100 bg-white px-4 py-3 text-sm font-bold text-slate-800 shadow-sm"
-                >
-                  <CheckCircle2 size={18} className="shrink-0 text-green-600" />
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/san-pham"
                 className="inline-flex items-center justify-center gap-3 bg-orange-600 px-7 py-4 text-sm font-black text-white transition hover:bg-orange-700"
@@ -716,616 +691,355 @@ export default function AboutPage() {
               </Link>
               <Link
                 href="/quy-trinh"
-                className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-7 py-4 text-sm font-black text-slate-950 transition hover:border-orange-300 hover:text-orange-700"
+                className="inline-flex items-center justify-center gap-3 bg-white px-7 py-4 text-sm font-black text-slate-950 shadow-sm ring-1 ring-slate-200 transition hover:text-orange-700 hover:ring-orange-200"
               >
-                Xem quy trình sản xuất
+                Quy trình sản xuất
               </Link>
             </div>
-          </div>
-        </motion.div>
-      </section>
+          </motion.div>
 
-      <section className="border-b border-orange-100 bg-white">
-        <div className="grid md:grid-cols-3">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+            className="relative"
+          >
+            <div className="overflow-hidden bg-white shadow-[0_30px_90px_rgba(15,23,42,0.12)]">
+              <div className="relative aspect-[4/3] bg-orange-50">
+                <img
+                  src={factoryImage || galleryImages[0]?.src || "/hero/chan-ga-plate.png"}
+                  alt="Không gian sản xuất và sản phẩm Ăn Cùng Bà Tuyết"
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-100">
+                    Hồ sơ thương hiệu
+                  </p>
+                  <p className="mt-2 max-w-md text-2xl font-black leading-tight">
+                    Sản phẩm, xưởng và số liệu được trình bày rõ ràng.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="mx-auto mt-10 grid max-w-7xl gap-4 md:grid-cols-3">
           {heroStats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.06 }}
-              className="border-b border-orange-100 p-6 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 sm:p-8 lg:p-10"
+              transition={{ delay: index * 0.05 }}
+              className="bg-white p-6 shadow-sm ring-1 ring-orange-100"
             >
-              <p className="text-5xl font-black tracking-[-0.07em] text-slate-950 lg:text-6xl">
+              <p className="text-5xl font-black tracking-[-0.07em] text-slate-950">
                 {stat.value}
               </p>
-              <p className="mt-3 text-sm font-black uppercase tracking-[0.16em] text-slate-600">
+              <p className="mt-3 text-sm font-black uppercase tracking-[0.14em] text-slate-600">
                 {stat.label}
               </p>
-              <div className="mt-5">
-                <SourceLink name={stat.sourceName} url={stat.sourceUrl} />
-              </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      <section id="about-video" className="scroll-mt-24 grid border-b border-orange-100 bg-[#fffaf2] lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-          <SectionIntro
-            label="Không chỉ là đồ ăn vặt"
-            title="Một thương hiệu lớn lên từ sản phẩm, nội dung và niềm tin."
-            description="Hình ảnh, số liệu và nguồn dẫn rõ ràng giúp khách hàng tự kiểm chứng hành trình phát triển của thương hiệu."
-          />
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2">
-            {[
-              "Sản phẩm có nhận diện rõ",
-              "Bán hàng qua kênh chính thức",
-              "Câu chuyện thương hiệu gần gũi",
-              "Nội dung có dẫn nguồn kiểm chứng",
-            ].map((item) => (
-              <div
-                key={item}
-                className="border border-orange-100 bg-white p-5 text-sm font-bold text-slate-700"
-              >
-                <CheckCircle2 className="mb-3 text-green-600" size={20} />
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative w-full min-h-[350px] sm:min-h-[450px] lg:min-h-[500px] bg-black lg:border-l lg:border-t-0 border-t border-orange-100 overflow-hidden">
-          <iframe
-            src={aboutVideoUrl}
-            title="Hành trình thương hiệu Ăn Cùng Bà Tuyết"
-            className="w-full h-full border-none absolute inset-0 z-10"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
-      </section>
-
-      <section id="about-process" className="scroll-mt-24 relative border-b border-orange-100 bg-white overflow-hidden">
-        {/* Underlay background image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={factoryImage}
-            alt="Quy trình vận hành background"
-            className="w-full h-full object-cover opacity-25"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#f7efe3]/50 via-white/80 to-white/60" />
-        </div>
-
-        <div className="relative z-10 grid lg:grid-cols-[0.62fr_1.38fr]">
-          <div className="border-b border-orange-100 bg-[#f7efe3]/70 backdrop-blur-md px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Quy trình vận hành"
-              title="Nhìn giống công ty thực phẩm phải có quy trình rõ."
-              description="Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
-            />
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 bg-white/20 backdrop-blur-sm">
-            {processDisplaySteps.map((item, index) => (
-              <div
-                key={item.title}
-                className="border-b border-orange-100 sm:border-r lg:border-b-0"
-              >
-                <ValueCard
-                  item={item}
-                  index={index}
-                  className="bg-transparent"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-orange-100 bg-[#fbf7ef]">
-        <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="border-b border-orange-100 px-5 py-14 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Số liệu có nguồn"
-              title="Không kể hay. Đưa bằng chứng."
-              description="Các con số được trình bày như hồ sơ tăng trưởng của thương hiệu: doanh thu, sản phẩm bán ra, kênh bán hàng, xưởng sản xuất và hiệu quả quảng cáo."
-            />
-
-            <div className="mt-10 border border-orange-100 bg-white p-8 shadow-sm">
-              <div className="mb-7 flex h-16 w-16 items-center justify-center bg-orange-600 text-white">
-                <BarChart3 size={31} />
-              </div>
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-orange-700">
-                Cột mốc doanh thu
+      <section className="bg-white px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+                Nền tảng vận hành
               </p>
-              <h3 className="mt-4 text-7xl font-black leading-none tracking-[-0.08em] text-slate-950 sm:text-8xl">
-                228,6
-                <span className="block text-4xl text-orange-600 sm:text-5xl">
-                  tỷ đồng
-                </span>
-              </h3>
-              <p className="mt-6 leading-8 text-slate-600">
-                Doanh thu năm 2025 theo Dân trí dẫn dữ liệu Metric, tăng 304% so
-                với năm trước.
-              </p>
-              <div className="mt-7 border-t border-slate-100 pt-5">
-                <SourceLink name="Dân trí / Metric" url={sources.dantri2026} />
-              </div>
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                Quy trình rõ, hồ sơ rõ, câu chuyện rõ.
+              </h2>
             </div>
+            <p className="max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
+              Trang giới thiệu tập trung vào các điểm khách hàng cần biết: sản xuất thế nào, thương hiệu có gì để tin, và định hướng phát triển ra sao.
+            </p>
           </div>
 
-          <div className="grid sm:grid-cols-2">
-            {[
-              {
-                icon: PackageCheck,
-                value: "1,9M+",
-                label: "sản phẩm bán ra năm 2025",
-                note: "Sức mua thật được ghi nhận theo dữ liệu Dân trí dẫn từ Metric.",
-                sourceName: "Dân trí / Metric",
-                sourceUrl: sources.dantri2026,
-              },
-              {
-                icon: ShoppingBag,
-                value: "97%+",
-                label: "doanh số từ TikTok Shop",
-                note: "Kênh bán hàng chủ lực giúp thương hiệu tăng trưởng mạnh trên online.",
-                sourceName: "Dân trí / Metric",
-                sourceUrl: sources.dantri2026,
-              },
-              {
-                icon: Factory,
-                value: "3.300m²",
-                label: "xưởng mới",
-                note: "Znews ghi nhận xưởng mới có 2 tầng và diện tích lớn hơn xưởng cũ.",
-                sourceName: "Znews",
-                sourceUrl: sources.znewsFactory,
-              },
-              {
-                icon: MousePointerClick,
-                value: "39M+",
-                label: "lượt hiển thị PSA",
-                note: "Theo case study TikTok for Business về Product Shopping Ads.",
-                sourceName: "TikTok for Business",
-                sourceUrl: sources.tiktokCase,
-              },
-            ].map((item, index) => {
+          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {processDisplaySteps.map((item, index) => {
               const Icon = item.icon;
-
-              return (
-                <motion.div
-                  key={`${item.value}-${item.label}`}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.06 }}
-                  className="border-b border-orange-100 bg-white p-7 transition-colors hover:bg-orange-50/60 sm:border-r"
-                >
-                  <div className="mb-8 flex items-center justify-between gap-5">
-                    <div className="flex h-14 w-14 items-center justify-center bg-slate-950 text-white">
-                      <Icon size={27} />
+              const card = (
+                <article className="flex h-full min-h-[260px] flex-col justify-between bg-[#fffaf3] p-6 ring-1 ring-orange-100">
+                  <div>
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center bg-white text-orange-600 shadow-sm">
+                      <Icon size={23} />
                     </div>
-                    <span className="text-xs font-black text-slate-300">
-                      0{index + 1}
-                    </span>
+                    <h3 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      {item.text}
+                    </p>
                   </div>
-                  <p className="text-5xl font-black tracking-[-0.07em] text-slate-950">
-                    {item.value}
-                  </p>
-                  <h3 className="mt-2 text-lg font-black text-slate-900">
-                    {item.label}
-                  </h3>
-                  <p className="mt-3 min-h-[76px] text-sm leading-7 text-slate-650">
-                    {item.note}
-                  </p>
-                  <div className="mt-6 border-t border-slate-100 pt-5">
-                    <SourceLink name={item.sourceName} url={item.sourceUrl} />
-                  </div>
-                </motion.div>
+                  <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700">
+                    Chi tiết <ArrowRight size={13} />
+                  </span>
+                </article>
+              );
+              const href = item.linkUrl || (item.slug ? `/tin-tuc/${item.slug}` : "");
+
+              return href ? (
+                <Link key={item.title} href={href} className="block h-full">
+                  {card}
+                </Link>
+              ) : (
+                <div key={item.title}>{card}</div>
               );
             })}
           </div>
         </div>
+      </section>
 
-        <div className="grid border-t border-orange-100 bg-white lg:grid-cols-[0.85fr_1.15fr]">
-          <div className="px-5 py-12 sm:px-8 lg:px-14 xl:px-20">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-orange-700">
-              Hiệu quả quảng cáo
-            </p>
-            <h3 className="mt-3 max-w-3xl text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              Product Shopping Ads không chỉ tạo hiển thị, mà còn kéo tăng GMV.
-            </h3>
-            <div className="mt-6">
-              <SourceLink name="TikTok for Business" url={sources.tiktokCase} />
+      {trustGroups.length > 0 && (
+        <section id="ho-so-uy-tin" className="px-5 py-20 sm:px-8 lg:py-24">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.42fr_0.58fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+                Hồ sơ uy tín
+              </p>
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                Các bằng chứng chính được gom lại để dễ kiểm tra.
+              </h2>
+              <p className="mt-5 text-base leading-8 text-slate-600">
+                Chọn từng mục để xem phần chi tiết. Nội dung này có thể chỉnh trong CMS Marketing.
+              </p>
+            </div>
+
+            <div className="overflow-hidden bg-white shadow-sm ring-1 ring-orange-100">
+              <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
+                <div className="divide-y divide-orange-100">
+                  {trustGroups.map((group) => {
+                    const Icon = group.icon;
+
+                    return (
+                      <div key={group.label} className="p-4">
+                        <div className="mb-3 flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center bg-orange-50 text-orange-600">
+                            <Icon size={18} />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-700">
+                              {group.label}
+                            </p>
+                            <p className="text-sm font-black text-slate-950">{group.title}</p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {group.items.map((item) => {
+                            const isActive = activeTrustItem?.key === item.key;
+
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => setActiveTrustKey(item.key)}
+                                className={`w-full px-4 py-3 text-left text-sm font-bold transition ${
+                                  isActive ? "bg-orange-600 text-white" : "bg-[#fffaf3] text-slate-800 hover:bg-orange-50"
+                                }`}
+                              >
+                                {item.title}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {activeTrustItem && (
+                  <article className="bg-slate-950 text-white">
+                    <div className="relative aspect-[16/10] bg-slate-900">
+                      {activeTrustItem.imageUrl ? (
+                        <img
+                          src={activeTrustItem.imageUrl}
+                          alt=""
+                          className="h-full w-full object-cover opacity-80"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-orange-300">
+                          <BadgeCheck size={44} />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                    </div>
+                    <div className="p-6 sm:p-8">
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">
+                        Chi tiết
+                      </p>
+                      <h3 className="mt-3 text-3xl font-black leading-tight tracking-[-0.04em]">
+                        {activeTrustItem.detailTitle || activeTrustItem.title}
+                      </h3>
+                      <p className="mt-5 text-sm font-semibold leading-7 text-white/76">
+                        {activeTrustItem.description}
+                      </p>
+                      <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm leading-7 text-white/66">
+                        {(activeTrustItem.detailContent || "Nội dung chi tiết sẽ được cập nhật trong CMS Marketing.")
+                          .split(/\n+/)
+                          .filter(Boolean)
+                          .map((paragraph) => (
+                            <p key={paragraph}>{paragraph}</p>
+                          ))}
+                      </div>
+                    </div>
+                  </article>
+                )}
+              </div>
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="grid sm:grid-cols-2">
-            <div className="border-t border-orange-100 bg-[#f7efe3] p-8 lg:border-l lg:border-t-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-slate-600">
-                  ROAS
-                </p>
-                <TrendingUp className="text-orange-700" size={27} />
-              </div>
-              <p className="mt-5 text-6xl font-black tracking-[-0.07em] text-slate-950">
-                8,9x
+      <section className="bg-white px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+                Định hướng
               </p>
-              <p className="mt-3 text-sm leading-7 text-slate-600">
-                Tăng theo case study TikTok for Business.
-              </p>
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                Đi đường dài bằng chất lượng ổn định.
+              </h2>
             </div>
 
-            <div className="border-t border-orange-100 bg-slate-950 p-8 text-white sm:border-l lg:border-t-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-white/70">
-                  GMV
-                </p>
-                <TrendingUp className="text-orange-300" size={27} />
-              </div>
-              <p className="mt-5 text-6xl font-black tracking-[-0.07em]">7x</p>
-              <p className="mt-3 text-sm leading-7 text-white/70">
-                So với khoảng thời gian tương đương trước chiến dịch.
-              </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {values.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <article key={item.title} className="min-h-[220px] bg-[#fffaf3] p-6 ring-1 ring-orange-100">
+                    <div className="mb-5 flex h-12 w-12 items-center justify-center bg-white text-orange-600 shadow-sm">
+                      <Icon size={23} />
+                    </div>
+                    <h3 className="text-xl font-black tracking-[-0.03em] text-slate-950">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </div>
       </section>
 
-      <section id="about-gallery" className="scroll-mt-24 border-b border-orange-100 bg-white">
-        <div className="grid lg:grid-cols-[0.52fr_1.48fr]">
-          <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Hình ảnh thương hiệu"
-              title="Cho khách hàng nhìn thấy sản phẩm, xưởng và đội ngũ."
-              description="Hình ảnh thật về sản phẩm, xưởng và đội ngũ giúp khách hàng cảm nhận rõ hơn về quy mô và sự chỉn chu của thương hiệu."
-            />
+      <section id="about-gallery" className="px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+                Hình ảnh
+              </p>
+              <h2 className="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                Sản phẩm, xưởng và con người.
+              </h2>
+            </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {galleryImages.length > 0 ? (
               galleryImages.map((image, index) => (
                 <motion.div
                   key={image.src}
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 18 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
-                  className="border-b border-r border-white/20 overflow-hidden"
+                  className={index === 0 ? "md:col-span-2 md:row-span-2" : ""}
                 >
                   <BrandImage
                     src={image.src}
                     label={image.label}
                     linkUrl={image.linkUrl}
-                    ratio="aspect-[5/3]"
+                    ratio={index === 0 ? "aspect-[4/3]" : "aspect-[4/3]"}
                     muted={index > 1}
                   />
                 </motion.div>
               ))
             ) : (
-              <div className="col-span-full border border-dashed border-orange-200 bg-orange-50/40 px-6 py-12 text-center text-sm font-bold text-slate-600">
-                Chua co anh thuong hieu trong CMS.
+              <div className="col-span-full bg-orange-50 px-6 py-12 text-center text-sm font-bold text-slate-600">
+                Chưa có ảnh thương hiệu trong CMS.
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {trustGroups.length > 0 && (
-        <section id="ho-so-uy-tin" className="scroll-mt-24 border-b border-orange-100 bg-white">
-          <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
-            <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-              <SectionIntro
-                label="Hồ sơ uy tín"
-                title="Chứng nhận, bảo hiểm và quy trình được tách thành từng nhóm dễ kiểm chứng."
-                description="Phần này chỉ giữ các bằng chứng cần xem nhanh: hồ sơ pháp lý, bảo hiểm, dấu mốc phát triển, thành tích, quy trình sản xuất và câu chuyện thương hiệu."
-              />
+      <section className="bg-white px-5 py-20 sm:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+                Tin tức
+              </p>
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                Dấu mốc mới của thương hiệu.
+              </h2>
             </div>
-
-            <div className="grid bg-white xl:grid-cols-[0.92fr_1.08fr]">
-              <div className="border-b border-orange-100 xl:border-b-0 xl:border-r">
-                {trustGroups.map((group, groupIndex) => {
-                  const Icon = group.icon;
-
-                  return (
-                    <motion.div
-                      key={group.label}
-                      initial={{ opacity: 0, y: 18 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: groupIndex * 0.05 }}
-                      className="border-b border-orange-100 last:border-b-0"
-                    >
-                      <div className="flex items-start gap-4 bg-[#fffaf3] p-5">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-orange-600 text-white">
-                          <Icon size={20} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-700">
-                            {group.label}
-                          </p>
-                          <h3 className="mt-1 text-lg font-black leading-tight tracking-[-0.03em] text-slate-950">
-                            {group.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="divide-y divide-orange-100">
-                        {group.items.map((item) => {
-                          const isActive = activeTrustItem?.key === item.key;
-
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setActiveTrustKey(item.key)}
-                              className={`grid w-full grid-cols-[72px_1fr_auto] items-center gap-4 p-4 text-left transition ${
-                                isActive ? "bg-orange-50" : "bg-white hover:bg-orange-50/70"
-                              }`}
-                            >
-                              <div className="relative h-16 overflow-hidden bg-orange-50">
-                                {item.imageUrl ? (
-                                  <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
-                                ) : (
-                                  <div className="flex h-full items-center justify-center text-orange-500">
-                                    <BadgeCheck size={24} />
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-black leading-tight text-slate-950">
-                                  {item.title}
-                                </h4>
-                                <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-slate-500">
-                                  {item.description}
-                                </p>
-                              </div>
-                              <span className={`text-xs font-black uppercase tracking-[0.14em] ${
-                                isActive ? "text-orange-700" : "text-slate-300"
-                              }`}>
-                                Xem
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {activeTrustItem && (
-                <motion.article
-                  key={activeTrustItem.key}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-slate-950 text-white"
-                >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
-                    {activeTrustItem.imageUrl ? (
-                      <img
-                        src={activeTrustItem.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover opacity-80"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-orange-300">
-                        <BadgeCheck size={48} />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-300">
-                        Chi tiết hồ sơ
-                      </p>
-                      <h3 className="mt-2 text-2xl font-black leading-tight tracking-[-0.04em]">
-                        {activeTrustItem.detailTitle || activeTrustItem.title}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="p-6 sm:p-8">
-                    <p className="text-base font-semibold leading-8 text-white/78">
-                      {activeTrustItem.description}
-                    </p>
-                    <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm leading-7 text-white/68">
-                      {(activeTrustItem.detailContent || "Nội dung chi tiết sẽ được cập nhật trong CMS Marketing.")
-                        .split(/\n+/)
-                        .filter(Boolean)
-                        .map((paragraph) => (
-                          <p key={paragraph}>{paragraph}</p>
-                        ))}
-                    </div>
-                    {activeTrustItem.linkUrl && activeTrustItem.linkUrl !== "/gioi-thieu" && (
-                      <Link
-                        href={activeTrustItem.linkUrl}
-                        className="mt-7 inline-flex items-center gap-2 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-950 transition hover:bg-orange-500 hover:text-white"
-                      >
-                        Mở trang liên quan
-                        <ArrowRight size={14} />
-                      </Link>
-                    )}
-                  </div>
-                </motion.article>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section className="border-b border-orange-100 bg-[#f7efe3]">
-        <div className="grid lg:grid-cols-[0.62fr_1.38fr]">
-          <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Định hướng thương hiệu"
-              title="Sứ mệnh, tầm nhìn và giá trị cốt lõi."
-              description="Câu chuyện được kể gần gũi nhưng vẫn thể hiện rõ nền tảng của một doanh nghiệp sản xuất thực phẩm."
-            />
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((item, index) => (
-              <div
-                key={item.title}
-                className="border-b border-orange-100 sm:border-r lg:border-b-0"
-              >
-                <ValueCard item={item} index={index} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <SectionIntro
-            label="Tin tức & Truyền thông"
-            title="Dấu ấn & Câu chuyện nổi bật"
-            description="Cập nhật các hoạt động mới nhất, câu chuyện hậu trường sản xuất và cột mốc nổi bật từ Ăn Cùng Bà Tuyết."
-          />
-          <Link
-            href="/tin-tuc"
-            className="inline-flex w-fit items-center gap-3 border border-orange-200 bg-orange-50 px-6 py-4 text-sm font-black text-orange-700 transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
-          >
-            Xem tất cả tin tức
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-
-        {loadingPosts ? (
-          <div className="grid gap-6 md:grid-cols-3">
-            {[0, 1, 2].map((item) => (
-              <div key={item} className="h-[360px] animate-pulse border border-slate-200 bg-slate-50" />
-            ))}
-          </div>
-        ) : displayPosts.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-3">
-            {displayPosts.map((post, index) => (
-              <DBPostCard key={post.id || post.slug} post={post} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="border border-dashed border-orange-200 bg-orange-50/40 px-6 py-12 text-center">
-            <p className="text-sm font-bold text-slate-600">
-              Chưa có bài viết đã xuất bản trong database.
-            </p>
-          </div>
-        )}
-      </section>
-
-      <section className="border-b border-orange-100 bg-[#f7efe3]">
-        <div className="grid lg:grid-cols-[0.46fr_1.54fr]">
-          <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-            <SectionIntro
-              label="Hành trình có đối chiếu"
-              title="Mốc quan trọng, nguồn rõ ràng."
-              description="Các mốc phát triển được trình bày rõ ràng để khách hàng theo dõi hành trình lớn lên của thương hiệu."
-            />
-          </div>
-
-          <div>
-            {timeline.map((item, index) => (
-              <motion.div
-                key={`${item.year}-${item.title}`}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.06 }}
-                className="grid border-b border-orange-100 bg-white last:border-b-0 md:grid-cols-[220px_1fr]"
-              >
-                <div className="border-b border-orange-100 bg-orange-50 p-6 md:border-b-0 md:border-r">
-                  <p className="text-4xl font-black tracking-[-0.06em] text-orange-700">
-                    {item.year}
-                  </p>
-                </div>
-                <div className="p-6 sm:p-8">
-                  <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 max-w-4xl leading-8 text-slate-600">
-                    {item.description}
-                  </p>
-                  <div className="mt-5">
-                    <SourceLink name={item.sourceName} url={item.sourceUrl} />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="about-team" className="scroll-mt-24 grid border-b border-orange-100 bg-white lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="min-h-[280px] border-b border-orange-100 lg:min-h-[360px] lg:border-b-0 lg:border-r">
-          <BrandImage
-            src={teamImage}
-            label="Đội ngũ vận hành / ảnh minh hoạ"
-            linkUrl={teamLink}
-            ratio="aspect-auto"
-            className="h-full"
-            muted
-          />
-        </div>
-
-        <div className="flex items-center px-5 py-16 sm:px-8 lg:px-14 xl:px-20">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="max-w-4xl"
-          >
-            <div className="mb-8 flex h-16 w-16 items-center justify-center bg-orange-600 text-white">
-              <Quote size={30} />
-            </div>
-            <blockquote className="border-l-4 border-orange-500 pl-6 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              &ldquo;Một thương hiệu muốn đi xa không thể chỉ nói hay. Phải có sản
-              phẩm thật, hình ảnh thật và bằng chứng thật.&rdquo;
-            </blockquote>
-            <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
-              — Tinh thần Ăn Cùng Bà Tuyết
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="bg-slate-950 text-white">
-        <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="px-5 py-16 sm:px-8 lg:px-14 xl:px-20">
-            <p className="mb-5 inline-flex border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-200">
-              Tiếp tục khám phá
-            </p>
-            <h2 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] sm:text-6xl">
-              Xem sản phẩm và quy trình phía sau thương hiệu.
-            </h2>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-white/70 sm:text-lg">
-              Trang giới thiệu tạo niềm tin, còn trang sản phẩm và quy trình sản
-              xuất giúp khách hàng hiểu rõ vì sao nên lựa chọn thương hiệu.
-            </p>
-          </div>
-
-          <div className="grid border-t border-white/10 lg:border-l lg:border-t-0">
             <Link
-              href="/quy-trinh"
-              className="group flex items-center justify-between border-b border-white/10 bg-orange-600 p-8 text-lg font-black text-white transition hover:bg-orange-700"
+              href="/tin-tuc"
+              className="inline-flex w-fit items-center gap-3 bg-orange-600 px-6 py-4 text-sm font-black text-white transition hover:bg-orange-700"
             >
-              Xem quy trình sản xuất
-              <ArrowRight
-                className="transition-transform group-hover:translate-x-1"
-                size={22}
-              />
+              Xem tất cả
+              <ArrowRight size={18} />
             </Link>
+          </div>
+
+          {loadingPosts ? (
+            <div className="grid gap-5 md:grid-cols-3">
+              {[0, 1, 2].map((item) => (
+                <div key={item} className="h-[360px] animate-pulse bg-slate-50" />
+              ))}
+            </div>
+          ) : displayPosts.length > 0 ? (
+            <div className="grid gap-5 md:grid-cols-3">
+              {displayPosts.map((post, index) => (
+                <DBPostCard key={post.id || post.slug} post={post} index={index} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-orange-50 px-6 py-12 text-center">
+              <p className="text-sm font-bold text-slate-600">
+                Chưa có bài viết đã xuất bản trong database.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="bg-slate-950 px-5 py-20 text-white sm:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">
+              Khám phá tiếp
+            </p>
+            <h2 className="mt-4 max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] sm:text-6xl">
+              Xem sản phẩm và quy trình phía sau.
+            </h2>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <Link
               href="/san-pham"
-              className="group flex items-center justify-between bg-white p-8 text-lg font-black text-slate-950 transition hover:bg-orange-50"
+              className="inline-flex items-center justify-between gap-8 bg-orange-600 px-7 py-4 text-sm font-black text-white transition hover:bg-orange-700"
             >
               Xem sản phẩm
-              <ArrowRight
-                className="transition-transform group-hover:translate-x-1"
-                size={22}
-              />
+              <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/quy-trinh"
+              className="inline-flex items-center justify-between gap-8 bg-white px-7 py-4 text-sm font-black text-slate-950 transition hover:bg-orange-50"
+            >
+              Xem quy trình
+              <ArrowRight size={18} />
             </Link>
           </div>
         </div>
