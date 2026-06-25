@@ -321,10 +321,6 @@ function ValueCard({
 
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
-  const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(
-    DEFAULT_MARKETING_CONFIG.trustSections,
-  );
-  const [activeTrustKey, setActiveTrustKey] = useState("");
 
   useEffect(() => {
     async function fetchPageAssets() {
@@ -334,7 +330,6 @@ export default function AboutPage() {
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);
         setPageAssets(marketingConfig.pageAssets);
-        setTrustSections(marketingConfig.trustSections);
       } catch (error) {
         console.error("Failed to fetch configurable page assets:", error);
       }
@@ -356,38 +351,6 @@ export default function AboutPage() {
   const teamImage = assetByKey.about_team_quote?.imageUrl || "/bento/bento-factory.png";
   const teamLink = assetByKey.about_team_quote?.linkUrl;
   const aboutVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0");
-  const enabledTrustSections = trustSections.filter((item) => item.enabled);
-  const trustByKey = enabledTrustSections.reduce<Record<string, TrustSectionItem>>((acc, item) => {
-    acc[item.key] = item;
-    return acc;
-  }, {});
-  const trustGroups = [
-    {
-      label: "Pháp lý & bảo vệ khách hàng",
-      title: "Minh bạch để khách hàng yên tâm",
-      icon: ShieldCheck,
-      keys: ["food_safety_certificate", "pvi_insurance"],
-    },
-    {
-      label: "Hành trình & ghi nhận",
-      title: "Những dấu mốc tạo nên niềm tin",
-      icon: Trophy,
-      keys: ["company_history", "achievements"],
-    },
-    {
-      label: "Vận hành sản xuất",
-      title: "Quy trình rõ ràng từ bếp đến tay khách",
-      icon: Factory,
-      keys: ["production_process", "brand_story"],
-    },
-  ]
-    .map((group) => ({
-      ...group,
-      items: group.keys.map((key) => trustByKey[key]).filter((item): item is TrustSectionItem => Boolean(item)),
-    }))
-    .filter((group) => group.items.length > 0);
-  const allTrustItems = trustGroups.flatMap((group) => group.items);
-  const activeTrustItem = allTrustItems.find((item) => item.key === activeTrustKey) || allTrustItems[0];
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
@@ -548,148 +511,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {trustGroups.length > 0 && (
-        <section id="ho-so-uy-tin" className="scroll-mt-24 border-b border-orange-100 bg-white">
-          <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
-            <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-              <SectionIntro
-                label="Hồ sơ uy tín"
-                title="Chứng nhận, bảo hiểm và quy trình được tách thành từng nhóm dễ kiểm chứng."
-                description="Phần này chỉ giữ các bằng chứng cần xem nhanh: hồ sơ pháp lý, bảo hiểm, dấu mốc phát triển, thành tích, quy trình sản xuất và câu chuyện thương hiệu."
-              />
-            </div>
 
-            <div className="grid bg-white xl:grid-cols-[0.92fr_1.08fr]">
-              <div className="border-b border-orange-100 xl:border-b-0 xl:border-r">
-                {trustGroups.map((group, groupIndex) => {
-                  const Icon = group.icon;
-
-                  return (
-                    <motion.div
-                      key={group.label}
-                      initial={{ opacity: 0, y: 18 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: groupIndex * 0.05 }}
-                      className="border-b border-orange-100 last:border-b-0"
-                    >
-                      <div className="flex items-start gap-4 bg-[#fffaf3] p-5">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-orange-600 text-white">
-                          <Icon size={20} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-700">
-                            {group.label}
-                          </p>
-                          <h3 className="mt-1 text-lg font-black leading-tight tracking-[-0.03em] text-slate-950">
-                            {group.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="divide-y divide-orange-100">
-                        {group.items.map((item) => {
-                          const isActive = activeTrustItem?.key === item.key;
-
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => setActiveTrustKey(item.key)}
-                              className={`grid w-full grid-cols-[72px_1fr_auto] items-center gap-4 p-4 text-left transition ${
-                                isActive ? "bg-orange-50" : "bg-white hover:bg-orange-50/70"
-                              }`}
-                            >
-                              <div className="relative h-16 overflow-hidden bg-orange-50">
-                                {item.imageUrl ? (
-                                  <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
-                                ) : (
-                                  <div className="flex h-full items-center justify-center text-orange-500">
-                                    <BadgeCheck size={24} />
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="text-sm font-black leading-tight text-slate-950">
-                                  {item.title}
-                                </h4>
-                                <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-slate-500">
-                                  {item.description}
-                                </p>
-                              </div>
-                              <span className={`text-xs font-black uppercase tracking-[0.14em] ${
-                                isActive ? "text-orange-700" : "text-slate-300"
-                              }`}>
-                                Xem
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {activeTrustItem && (
-                <motion.article
-                  key={activeTrustItem.key}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-slate-950 text-white"
-                >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
-                    {activeTrustItem.imageUrl ? (
-                      <img
-                        src={activeTrustItem.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover opacity-80"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-orange-300">
-                        <BadgeCheck size={48} />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-300">
-                        Chi tiết hồ sơ
-                      </p>
-                      <h3 className="mt-2 text-2xl font-black leading-tight tracking-[-0.04em]">
-                        {activeTrustItem.detailTitle || activeTrustItem.title}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="p-6 sm:p-8">
-                    <p className="text-base font-semibold leading-8 text-white/78">
-                      {activeTrustItem.description}
-                    </p>
-                    <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm leading-7 text-white/68">
-                      {(activeTrustItem.detailContent || "Nội dung chi tiết sẽ được cập nhật trong CMS Marketing.")
-                        .split(/\n+/)
-                        .filter(Boolean)
-                        .map((paragraph) => (
-                          <p key={paragraph}>{paragraph}</p>
-                        ))}
-                    </div>
-                    {activeTrustItem.linkUrl && activeTrustItem.linkUrl !== "/gioi-thieu" && (
-                      <Link
-                        href={activeTrustItem.linkUrl}
-                        className="mt-7 inline-flex items-center gap-2 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-950 transition hover:bg-orange-500 hover:text-white"
-                      >
-                        Mở trang liên quan
-                        <ArrowRight size={14} />
-                      </Link>
-                    )}
-                  </div>
-                </motion.article>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       <section className="border-b border-orange-100 bg-[#f7efe3]">
         <div className="grid lg:grid-cols-[0.62fr_1.38fr]">

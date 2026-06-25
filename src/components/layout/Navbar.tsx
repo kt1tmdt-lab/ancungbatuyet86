@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Script from "next/script";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Globe2, Loader2, Menu, Phone, Search, X } from "lucide-react";
+import { Globe2, Loader2, Menu, Phone, Search, X, ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { DEFAULT_SITE_CONFIG, type SiteConfigData } from "@/lib/site-config-defaults";
@@ -186,6 +186,7 @@ export default function Navbar({
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [language, setLanguage] = useState<"vi" | "en">("vi");
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -287,6 +288,51 @@ export default function Navbar({
 
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
+              if (link.href === "/gioi-thieu") {
+                const isAboutActive = pathname.startsWith("/gioi-thieu");
+                return (
+                  <div key={link.href} className="relative group py-2">
+                    <Link
+                      href={link.href}
+                      className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
+                        isAboutActive
+                          ? "bg-primary-light text-primary-dark font-semibold"
+                          : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                    </Link>
+                    <div className="absolute top-full left-0 w-48 bg-white border border-gray-100 shadow-xl py-1 hidden group-hover:block z-50 animate-fade-in">
+                      <Link
+                        href="/gioi-thieu"
+                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                      >
+                        Giới thiệu chung
+                      </Link>
+                      <Link
+                        href="/gioi-thieu/lich-su"
+                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                      >
+                        Lịch sử phát triển
+                      </Link>
+                      <Link
+                        href="/gioi-thieu/thanh-tuu"
+                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                      >
+                        Thành tựu & Uy tín
+                      </Link>
+                      <Link
+                        href="/gioi-thieu/cong-dong"
+                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                      >
+                        Cộng đồng
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
@@ -366,6 +412,56 @@ export default function Navbar({
         <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
+              if (link.href === "/gioi-thieu") {
+                const isAboutActive = pathname.startsWith("/gioi-thieu");
+                return (
+                  <div key={link.href} className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-none text-base font-medium transition-colors text-left ${
+                        isAboutActive ? "bg-primary-light text-primary-dark font-semibold" : "text-gray-600 hover:bg-primary-light"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
+                    </button>
+                    {mobileAboutOpen && (
+                      <div className="bg-orange-50/30 flex flex-col pl-4 border-l-2 border-orange-200">
+                        <Link
+                          href="/gioi-thieu"
+                          onClick={() => setOpen(false)}
+                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                        >
+                          Giới thiệu chung
+                        </Link>
+                        <Link
+                          href="/gioi-thieu/lich-su"
+                          onClick={() => setOpen(false)}
+                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                        >
+                          Lịch sử phát triển
+                        </Link>
+                        <Link
+                          href="/gioi-thieu/thanh-tuu"
+                          onClick={() => setOpen(false)}
+                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                        >
+                          Thành tựu & Uy tín
+                        </Link>
+                        <Link
+                          href="/gioi-thieu/cong-dong"
+                          onClick={() => setOpen(false)}
+                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                        >
+                          Cộng đồng
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
