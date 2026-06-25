@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { normalizePageSlug } from "@/lib/pages";
 import {
   Loader,
   AlertCircle,
@@ -22,8 +23,6 @@ import {
   LayoutGrid,
   Columns,
   ShoppingBag,
-  FileText,
-  HelpCircle,
   Upload,
   Globe,
   Monitor,
@@ -36,6 +35,8 @@ import Link from "next/link";
 interface Block {
   id: string;
   type: "hero" | "text" | "features" | "split" | "products";
+  // Builder blocks carry different schemas depending on their type.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 }
 
@@ -45,6 +46,12 @@ interface Product {
   price: string;
   image: string;
   categoryLabel: string;
+}
+
+interface FeatureItem {
+  icon: string;
+  title: string;
+  description: string;
 }
 
 // Pre-defined icons for features
@@ -65,8 +72,8 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
   // Loaders & Errors
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const [productsLoading, setProductsLoading] = useState(false);
+  const [fetching, setFetching] = useState(Boolean(pageId));
+  const [productsLoading, setProductsLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -86,16 +93,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-  // Fetch page details on edit mode
-  useEffect(() => {
-    fetchProducts();
-    if (pageId) {
-      fetchPageDetails();
-    }
-  }, [pageId]);
-
-  const fetchProducts = async () => {
-    setProductsLoading(true);
+  const fetchProducts = useCallback(async () => {
     try {
       const res = await fetch("/api/products");
       if (res.ok) {
@@ -107,10 +105,11 @@ export function PageForm({ pageId }: { pageId?: string }) {
     } finally {
       setProductsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchPageDetails = async () => {
-    setFetching(true);
+  const fetchPageDetails = useCallback(async () => {
+    if (!pageId || !token) return;
+
     try {
       const res = await fetch(`/api/pages/${pageId}`, {
         headers: {
@@ -131,28 +130,35 @@ export function PageForm({ pageId }: { pageId?: string }) {
       } else {
         setError("Không thể tải chi tiết trang");
       }
-    } catch (err) {
+    } catch {
       setError("Đã xảy ra lỗi khi tải chi tiết trang");
     } finally {
       setFetching(false);
     }
-  };
+  }, [pageId, token]);
+
+  // Fetch supporting data and page details on edit mode
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchProducts();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchPageDetails();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [fetchPageDetails]);
 
   // Generate slug dynamically from Title
   const handleTitleChange = (val: string) => {
     setTitle(val);
     if (!pageId) {
-      const generatedSlug = val
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // remove accents
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "d")
-        .replace(/[^a-z0-9\s-]/g, "") // remove spec chars
-        .trim()
-        .replace(/\s+/g, "-") // spaces to hyphens
-        .replace(/-+/g, "-");
-      setSlug(generatedSlug);
+      setSlug(normalizePageSlug(val));
     }
   };
 
@@ -232,6 +238,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
   };
 
   // Update block data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateBlockData = (id: string, updatedData: any) => {
     setBlocks(
       blocks.map((b) => (b.id === id ? { ...b, data: { ...b.data, ...updatedData } } : b))
@@ -311,7 +318,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
       } else {
         setError(data.error || "Lỗi khi lưu trang");
       }
-    } catch (err) {
+    } catch {
       setError("Không thể lưu trang, vui lòng thử lại sau");
     } finally {
       setLoading(false);
@@ -609,7 +616,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               <div className="space-y-3">
                                 <label className="block text-xs font-bold text-slate-700">Danh sách tính năng</label>
                                 <div className="space-y-2">
-                                  {(block.data.items || []).map((item: any, fIndex: number) => (
+                                  {(block.data.items || []).map((item: FeatureItem, fIndex: number) => (
                                     <div key={fIndex} className="flex gap-2 items-start border border-slate-100 p-3  bg-slate-50/50">
                                       <div className="grid grid-cols-1 gap-1 shrink-0 w-24">
                                         <span className="text-[9px] font-bold text-slate-500">Biểu tượng</span>
@@ -660,7 +667,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const newItems = (block.data.items || []).filter((_: any, idx: number) => idx !== fIndex);
+                                          const newItems = (block.data.items || []).filter((_item: FeatureItem, idx: number) => idx !== fIndex);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
                                         className="p-1 text-red-500 hover:bg-red-50  shrink-0 mt-1"
@@ -1128,7 +1135,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   <h2 className="text-2xl font-black text-slate-900 tracking-tight">{block.data.title}</h2>
                                 )}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                  {(block.data.items || []).map((item: any, fIdx: number) => {
+                                  {(block.data.items || []).map((item: FeatureItem, fIdx: number) => {
                                     return (
                                       <div key={fIdx} className="bg-cream  border border-slate-100/50 p-6 flex flex-col items-center text-center space-y-3 transition transform hover:-translate-y-1">
                                         <div className="w-10 h-10  bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">

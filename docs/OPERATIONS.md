@@ -1,6 +1,6 @@
 # ACBT Web Operations
 
-## Chạy local
+## Chay local
 
 ```bash
 npm install
@@ -8,73 +8,96 @@ npx prisma generate
 npm run dev
 ```
 
-Mở:
+Mo:
 
 ```txt
 http://localhost:3000
 ```
 
-## Kiểm tra trước khi deploy
+## Kiem tra truoc khi deploy
 
 ```bash
 npm run typecheck
 npm run build
 ```
 
-`npm run lint` hiện còn phụ thuộc vào các lỗi lint cũ trong repo. Cần dọn dần trước khi đưa vào CI bắt buộc.
+## Deploy production tren VPS
 
-## Deploy production
+Stack khuyen dung:
+
+```txt
+Nginx -> Next.js standalone/PM2 -> Prisma -> PostgreSQL local
+Nginx -> /uploads -> UPLOAD_DIR
+```
+
+Lenh tren VPS:
 
 ```bash
 npm ci
-npx prisma generate
-npx prisma migrate deploy
+npm run db:migrate:deploy
 npm run build
 npm run start
 ```
 
-## Biến môi trường cần có
+Neu dung PM2:
+
+```bash
+pm2 start npm --name acbt-web -- run start
+pm2 save
+```
+
+## Bien moi truong can co
 
 ```txt
 DATABASE_URL=
 JWT_SECRET=
 NEXT_PUBLIC_SITE_URL=
+UPLOAD_DIR=
+UPLOAD_PUBLIC_URL=
 ```
 
-Nếu dùng Cloudflare R2 cho upload:
+Vi du full VPS:
 
 ```txt
-R2_ENDPOINT_URL=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=
-R2_PUBLIC_DOMAIN=
+DATABASE_URL="postgresql://acbt_user:Ancungbatuyet2026%40@localhost:5432/acbt_web?schema=public"
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+UPLOAD_DIR="/var/www/acbt-uploads"
+UPLOAD_PUBLIC_URL="https://your-domain.com/uploads"
 ```
 
-## Khuyến nghị hạ tầng
+## Migrate anh remote ve VPS
 
-### Nhanh gọn
+Sau khi database production da ket noi dung trong `.env`, chay:
 
-- Vercel chạy Next.js.
-- Neon/Supabase/Railway Postgres cho database.
-- Cloudflare R2 hoặc AWS S3 cho media.
-- Cloudflare DNS/CDN.
+```bash
+npm run media:migrate-local
+```
 
-### Tự quản trị
+Script nay se:
 
-- VPS 2 CPU / 4GB RAM trở lên.
-- PostgreSQL managed hoặc server riêng.
-- Nginx reverse proxy.
-- PM2 hoặc Docker để chạy `next start`.
-- Backup database hằng ngày.
-- Uptime monitor cho `/` và `/api/admin/stats`.
+- Tai anh remote trong bang media, post, product, page va site config ve `UPLOAD_DIR`.
+- Cap nhat URL trong database sang `UPLOAD_PUBLIC_URL`.
+- Bo qua URL khong phai anh hoac URL tai loi.
 
-## Checklist tối ưu
+Neu da co file trong `public/uploads` va muon tao record media tu file local:
 
-- Public page dùng Server Component khi không cần tương tác.
-- Ảnh lớn dùng `next/image` hoặc CDN resize.
-- Query public có cache/revalidate phù hợp.
-- Admin list có pagination khi dữ liệu nhiều.
-- Không lưu secret trong code.
-- Không commit `.env`.
-- Backup database trước khi chạy migration.
+```bash
+npm run media:sync-local
+```
+
+## Backup bat buoc
+
+Can backup ca database va thu muc uploads:
+
+```bash
+pg_dump "$DATABASE_URL" > backup-acbt.sql
+tar -czf backup-acbt-uploads.tar.gz /var/www/acbt-uploads
+```
+
+## Checklist
+
+- Khong commit `.env`.
+- Backup database truoc khi chay migration.
+- Backup `UPLOAD_DIR` dinh ky.
+- Nginx can serve `UPLOAD_PUBLIC_URL` tu dung `UPLOAD_DIR`.
+- Kiem tra `node scripts/check-db.js` sau deploy.

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
 import { 
   Newspaper, 
@@ -10,77 +12,159 @@ import {
   Plus, 
   Trash2, 
   Save, 
-  Loader,
   AlertCircle,
   Star,
   Globe,
   Play,
   Calendar,
   User,
-  Settings
+  Settings,
+  Image as ImageIcon,
+  ImagePlus,
+  Link2,
+  Eye,
+  ExternalLink,
+  X
 } from "lucide-react";
 import toast from "react-hot-toast";
+import {
+  normalizeMarketingConfig,
+  type FeedbackItem,
+  type PageAssetItem,
+  type PressItem,
+  type VideoItem,
+} from "@/lib/marketing-config";
 
-interface PressItem {
-  id: string;
-  sourceName: string;
-  title: string;
-  link: string;
-  publishDate: string;
+const PAGE_ASSET_META: Record<string, { page: string; position: string; note: string; previewPath: string }> = {
+  about_video: {
+    page: "Giới thiệu",
+    position: "Video giới thiệu",
+    note: "Dán link YouTube/TikTok hoặc link embed vào ô link.",
+    previewPath: "/gioi-thieu#about-video",
+  },
+  home_factory_proof_image: {
+    page: "Trang chủ",
+    position: "Ảnh nhà máy lớn",
+    note: "Ảnh lớn bên trái trong khối bằng chứng thương hiệu.",
+    previewPath: "/#factory-proof",
+  },
+  home_factory_proof_1: {
+    page: "Trang chủ",
+    position: "Bằng chứng 1",
+    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    previewPath: "/#factory-proof",
+  },
+  home_factory_proof_2: {
+    page: "Trang chủ",
+    position: "Bằng chứng 2",
+    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    previewPath: "/#factory-proof",
+  },
+  home_factory_proof_3: {
+    page: "Trang chủ",
+    position: "Bằng chứng 3",
+    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    previewPath: "/#factory-proof",
+  },
+  home_factory_proof_4: {
+    page: "Trang chủ",
+    position: "Bằng chứng 4",
+    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    previewPath: "/#factory-proof",
+  },
+  about_process_background: {
+    page: "Giới thiệu",
+    position: "Ảnh nền khu sản xuất",
+    note: "Ảnh lớn trong phần nói về năng lực sản xuất.",
+    previewPath: "/gioi-thieu#about-process",
+  },
+  about_gallery_1: { page: "Giới thiệu", position: "Gallery ảnh 1", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_gallery_2: { page: "Giới thiệu", position: "Gallery ảnh 2", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_gallery_3: { page: "Giới thiệu", position: "Gallery ảnh 3", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_gallery_4: { page: "Giới thiệu", position: "Gallery ảnh 4", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_gallery_5: { page: "Giới thiệu", position: "Gallery ảnh 5", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_gallery_6: { page: "Giới thiệu", position: "Gallery ảnh 6", note: "Ảnh trong lưới giới thiệu thương hiệu.", previewPath: "/gioi-thieu#about-gallery" },
+  about_team_quote: {
+    page: "Giới thiệu",
+    position: "Ảnh câu chuyện đội ngũ",
+    note: "Ảnh đi cùng phần trích dẫn/câu chuyện thương hiệu.",
+    previewPath: "/gioi-thieu#about-team",
+  },
+  about_process_ingredient: { page: "Giới thiệu", position: "Thẻ quy trình: Nguyên liệu", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
+  about_process_factory: { page: "Giới thiệu", position: "Thẻ quy trình: Nhà máy", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
+  about_process_packaging: { page: "Giới thiệu", position: "Thẻ quy trình: Đóng gói", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
+  about_process_distribution: { page: "Giới thiệu", position: "Thẻ quy trình: Phân phối", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
+  process_farm: { page: "Quy trình", position: "Nguyên liệu đầu vào", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_inspect: { page: "Quy trình", position: "Kiểm định nguyên liệu", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_cooking: { page: "Quy trình", position: "Sơ chế và chế biến", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_qc: { page: "Quy trình", position: "Kiểm soát chất lượng", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_packaging: { page: "Quy trình", position: "Đóng gói", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_delivery: { page: "Quy trình", position: "Giao hàng và phân phối", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
+  process_factory: { page: "Quy trình", position: "Khu vực nhà máy", note: "Ảnh/link phần nhà máy.", previewPath: "/quy-trinh#process-factory" },
+  process_documents: { page: "Quy trình", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ.", previewPath: "/quy-trinh#process-documents" },
+};
+
+function getPageAssetMeta(item: PageAssetItem) {
+  return PAGE_ASSET_META[item.key] || {
+    page: "Tùy chỉnh",
+    position: item.label || item.key || "Vị trí mới",
+    note: "Mục tùy chỉnh, chỉ có tác dụng khi code ngoài web đọc đúng key này.",
+    previewPath: "/",
+  };
 }
 
-interface FeedbackItem {
-  id: string;
-  customerName: string;
-  roleOrLocation: string;
-  rating: number;
-  comment: string;
-}
-
-interface VideoItem {
-  id: string;
-  platform: "tiktok" | "youtube";
-  videoId: string;
-  title: string;
-  url: string;
-}
-
-export default function MarketingPage() {
+function MarketingPageContent() {
   const { token } = useAuth();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos">("press");
+  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "assets">(
+    searchParams.get("tab") === "assets" ? "assets" : "press",
+  );
+  const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
+  const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
 
   // State for assets lists
   const [pressList, setPressList] = useState<PressItem[]>([]);
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
+  const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
 
   useEffect(() => {
-    if (token) {
-      fetchMarketingConfig();
+    if (searchParams.get("tab") === "assets") {
+      const timer = window.setTimeout(() => setActiveTab("assets"), 0);
+      return () => window.clearTimeout(timer);
     }
-  }, [token]);
+  }, [searchParams]);
 
-  const fetchMarketingConfig = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/settings/marketing");
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.data) {
-          setPressList(data.data.press || []);
-          setFeedbackList(data.data.feedback || []);
-          setVideoList(data.data.videos || []);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load marketing settings", error);
-      toast.error("Không thể tải cấu hình marketing");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (!token) return;
+
+    let cancelled = false;
+
+    fetch("/api/settings/marketing")
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load"))))
+      .then((data) => {
+        if (cancelled) return;
+        const config = normalizeMarketingConfig(data?.data);
+        setPressList(config.press);
+        setFeedbackList(config.feedback);
+        setVideoList(config.videos);
+        setAssetList(config.pageAssets);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load marketing settings", error);
+        toast.error("Không thể tải cấu hình marketing");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -95,10 +179,17 @@ export default function MarketingPage() {
           press: pressList,
           feedback: feedbackList,
           videos: videoList,
+          pageAssets: assetList,
         }),
       });
 
       if (!res.ok) throw new Error("Failed to save");
+      const data = await res.json();
+      const config = normalizeMarketingConfig(data?.data);
+      setPressList(config.press);
+      setFeedbackList(config.feedback);
+      setVideoList(config.videos);
+      setAssetList(config.pageAssets);
       toast.success("Đã lưu tài sản truyền thông thành công!");
     } catch (error) {
       console.error("Failed to save marketing settings", error);
@@ -142,6 +233,17 @@ export default function MarketingPage() {
     setVideoList([...videoList, newItem]);
   };
 
+  const addAsset = () => {
+    const newItem: PageAssetItem = {
+      id: Date.now().toString(),
+      key: "",
+      label: "",
+      imageUrl: "",
+      linkUrl: "",
+    };
+    setAssetList([...assetList, newItem]);
+  };
+
   // Remove Item Helpers
   const removePress = (id: string) => {
     setPressList(pressList.filter((item) => item.id !== id));
@@ -155,12 +257,16 @@ export default function MarketingPage() {
     setVideoList(videoList.filter((item) => item.id !== id));
   };
 
+  const removeAsset = (id: string) => {
+    setAssetList(assetList.filter((item) => item.id !== id));
+  };
+
   // Update Field Helpers
   const updatePress = (id: string, field: keyof PressItem, val: string) => {
     setPressList(pressList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
-  const updateFeedback = (id: string, field: keyof FeedbackItem, val: any) => {
+  const updateFeedback = (id: string, field: keyof FeedbackItem, val: string | number) => {
     setFeedbackList(feedbackList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
@@ -182,6 +288,10 @@ export default function MarketingPage() {
       }
       return item;
     }));
+  };
+
+  const updateAsset = (id: string, field: keyof PageAssetItem, val: string) => {
+    setAssetList(assetList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
   return (
@@ -239,6 +349,17 @@ export default function MarketingPage() {
           >
             <Video size={16} />
             Video truyền thông ({videoList.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("assets")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === "assets"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            <ImageIcon size={16} />
+            Ảnh & link trang ({assetList.length})
           </button>
         </div>
 
@@ -453,7 +574,7 @@ export default function MarketingPage() {
                             </label>
                             <select
                               value={item.platform}
-                              onChange={(e) => updateVideo(item.id, "platform", e.target.value as any)}
+                              onChange={(e) => updateVideo(item.id, "platform", e.target.value)}
                               className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500 text-slate-800"
                             >
                               <option value="tiktok">TikTok Video</option>
@@ -509,9 +630,289 @@ export default function MarketingPage() {
               </div>
             )}
 
+            {activeTab === "assets" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Ảnh và link có thể cấu hình</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Mỗi dòng là một vị trí đang dùng ngoài website. Bạn chỉ cần sửa ảnh, chữ hiển thị và link.
+                    </p>
+                  </div>
+                  <button
+                    onClick={addAsset}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
+                  >
+                    <Plus size={14} />
+                    Thêm ảnh/link
+                  </button>
+                </div>
+
+                <div className="border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-slate-700">
+                  <p className="font-bold text-slate-900">Logic sử dụng:</p>
+                  <p className="mt-1">
+                    Các vị trí có sẵn là những chỗ website đang đọc dữ liệu. Mặc định chỉ nên sửa
+                    <span className="font-bold"> nhãn hiển thị, URL ảnh, URL link</span>. Mã key chỉ để hệ thống nhận ra đúng vị trí.
+                  </p>
+                </div>
+
+                {assetList.length === 0 ? (
+                  <div className="text-center py-16 text-slate-400">
+                    <AlertCircle className="mx-auto text-slate-300 mb-2" size={36} />
+                    <p className="text-xs font-semibold">Chưa có ảnh/link nào được cấu hình.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {assetList.map((item, index) => {
+                      const meta = getPageAssetMeta(item);
+                      const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
+
+                      return (
+                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[180px_1fr_auto]">
+                          <div className="overflow-hidden border border-slate-200 bg-white">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.label || item.key} className="h-36 w-full object-cover" />
+                            ) : (
+                              <div className="flex h-36 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
+                                Không có ảnh
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 space-y-4">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+                                    {meta.page}
+                                  </span>
+                                  <span className="text-xs font-black text-slate-400">#{index + 1}</span>
+                                </div>
+                                <h3 className="mt-2 text-base font-black text-slate-950">{meta.position}</h3>
+                                <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{meta.note}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1fr]">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nhãn hiển thị</label>
+                                <input
+                                  type="text"
+                                  value={item.label}
+                                  onChange={(e) => updateAsset(item.id, "label", e.target.value)}
+                                  placeholder="Tên hiển thị cho vị trí này"
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mã vị trí</label>
+                                <input
+                                  type="text"
+                                  value={item.key}
+                                  onChange={(e) => updateAsset(item.id, "key", e.target.value)}
+                                  readOnly={isFixedSlot}
+                                  placeholder="process_factory"
+                                  className={`w-full border border-slate-300 p-2 text-xs font-mono font-bold outline-none focus:border-orange-500 ${
+                                    isFixedSlot ? "bg-slate-100 text-slate-500" : "bg-white text-slate-900"
+                                  }`}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <ImageIcon size={11} /> URL ảnh
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={item.imageUrl}
+                                    onChange={(e) => updateAsset(item.id, "imageUrl", e.target.value)}
+                                    placeholder="/uploads/anh-that.png hoặc https://..."
+                                    className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setMediaPickerAssetId(item.id)}
+                                    className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                                  >
+                                    <ImagePlus size={14} />
+                                    Thư viện
+                                  </button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <Link2 size={11} /> URL link khi bấm
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.linkUrl}
+                                  onChange={(e) => updateAsset(item.id, "linkUrl", e.target.value)}
+                                  placeholder="/tin-tuc/bai-viet hoặc https://..."
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 lg:flex-col lg:items-end lg:justify-center">
+                            <button
+                              onClick={() => setPreviewAsset(item)}
+                              className="flex items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                              title="Xem thử ảnh và link"
+                            >
+                              <Eye size={16} />
+                              Xem thử
+                            </button>
+                            {!isFixedSlot && (
+                              <button
+                                onClick={() => removeAsset(item.id)}
+                                className="flex items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                                title="Xóa dòng này"
+                              >
+                                <Trash2 size={16} />
+                                Xóa
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         )}
+
+        {previewAsset && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+            <div className="w-full max-w-6xl overflow-hidden border border-slate-200 bg-white shadow-2xl">
+              <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">
+                    Vị trí thật trên website
+                  </p>
+                  <h3 className="mt-1 text-lg font-black text-slate-950">
+                    {previewAsset.label || previewAsset.key || "Ảnh/link chưa đặt tên"}
+                  </h3>
+                  <p className="mt-1 text-xs font-bold text-slate-500">
+                    {getPageAssetMeta(previewAsset).page} / {getPageAssetMeta(previewAsset).position}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPreviewAsset(null)}
+                  className="border border-slate-200 p-2 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                  aria-label="Đóng preview"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="grid gap-5 p-5 lg:grid-cols-[1.7fr_0.9fr]">
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-xs font-black uppercase tracking-wider text-slate-500">
+                      Khung xem trang thật
+                    </p>
+                    <a
+                      href={getPageAssetMeta(previewAsset).previewPath}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-black text-orange-600 hover:text-orange-700"
+                    >
+                      Mở vị trí này trên web
+                      <ExternalLink size={13} />
+                    </a>
+                  </div>
+                  <div className="h-[520px] overflow-hidden border border-slate-200 bg-slate-100">
+                    <iframe
+                      src={getPageAssetMeta(previewAsset).previewPath}
+                      title={`Vị trí thật của ${previewAsset.label || previewAsset.key}`}
+                      className="h-full w-full border-0"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="border border-orange-100 bg-orange-50 p-4">
+                    <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-orange-700">Nó nằm ở đâu?</label>
+                    <p className="text-sm font-black text-slate-950">{getPageAssetMeta(previewAsset).page}</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-700">{getPageAssetMeta(previewAsset).position}</p>
+                    <p className="mt-2 text-xs font-medium leading-5 text-slate-600">{getPageAssetMeta(previewAsset).note}</p>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-slate-500">Ảnh đang cấu hình</label>
+                    <div className="min-h-40 border border-slate-200 bg-slate-100">
+                      {previewAsset.imageUrl ? (
+                        <img
+                          src={previewAsset.imageUrl}
+                          alt={previewAsset.label || previewAsset.key}
+                          className="h-40 w-full object-contain"
+                        />
+                      ) : (
+                        <div className="flex h-40 items-center justify-center px-6 text-center text-sm font-semibold text-slate-400">
+                          Chưa nhập URL ảnh cho mục này.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-slate-500">URL ảnh</label>
+                    <div className="break-all border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-700">
+                      {previewAsset.imageUrl || "Chưa có"}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-black uppercase tracking-wider text-slate-500">Link khi bấm</label>
+                    <div className="break-all border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-700">
+                      {previewAsset.linkUrl || "Chưa có"}
+                    </div>
+                  </div>
+
+                  {previewAsset.linkUrl ? (
+                    <a
+                      href={previewAsset.linkUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 bg-orange-500 px-4 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-600"
+                    >
+                      Mở link kiểm tra
+                      <ExternalLink size={14} />
+                    </a>
+                  ) : (
+                    <p className="text-xs font-semibold leading-5 text-slate-500">
+                      Nếu muốn bấm được ngoài website, nhập thêm URL ở ô &quot;URL link khi bấm&quot;.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <MediaPickerModal
+          open={Boolean(mediaPickerAssetId)}
+          onClose={() => setMediaPickerAssetId(null)}
+          onSelect={(url) => {
+            if (mediaPickerAssetId) {
+              updateAsset(mediaPickerAssetId, "imageUrl", url);
+            }
+            setMediaPickerAssetId(null);
+          }}
+        />
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function MarketingPage() {
+  return (
+    <Suspense fallback={null}>
+      <MarketingPageContent />
+    </Suspense>
   );
 }

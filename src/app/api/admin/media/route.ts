@@ -1,9 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { join } from "path";
-import { unlink } from "fs/promises";
-import { deleteFromR2, getR2KeyFromPublicUrl } from "@/lib/r2-storage";
+import { deleteLocalUploadByUrl } from "@/lib/local-storage";
 
 // GET /api/admin/media — List media with pagination and search
 export async function GET(req: NextRequest) {
@@ -14,7 +12,7 @@ export async function GET(req: NextRequest) {
     }
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR" && payload.role !== "MARKETING")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -48,7 +46,7 @@ export async function GET(req: NextRequest) {
       page,
       totalPages: Math.ceil(total / limit),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Media API GET Error:", error);
     return NextResponse.json({ error: "Lỗi tải danh sách media" }, { status: 500 });
   }
@@ -78,16 +76,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Media not found" }, { status: 404 });
     }
 
-    // Delete the object from storage. R2 handles new media; local delete is kept for legacy /uploads files.
+    // Delete the object from local VPS storage when it is managed by this app.
     try {
-      const r2Key = getR2KeyFromPublicUrl(media.url);
-
-      if (r2Key) {
-        await deleteFromR2(r2Key);
-      } else if (media.url.startsWith("/uploads/")) {
-        const filePath = join(process.cwd(), "public", media.url);
-        await unlink(filePath);
-      }
+      await deleteLocalUploadByUrl(media.url);
     } catch (storageError) {
       console.warn("Could not delete media from storage:", storageError);
     }
@@ -96,7 +87,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.media.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Media API DELETE Error:", error);
     return NextResponse.json({ error: "Lỗi xóa media" }, { status: 500 });
   }

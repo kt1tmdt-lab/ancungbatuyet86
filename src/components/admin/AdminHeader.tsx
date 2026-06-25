@@ -31,6 +31,8 @@ export function AdminHeader() {
   const isMarketingAllowed = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" || user?.role === "MARKETING" || user?.role === "EDITOR";
   const isSettingsAllowed = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN" || user?.role === "MARKETING";
   const isAdminOrSuperAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+  const isContactAllowed = isAdminOrEditor || user?.role === "SUPER_ADMIN" || user?.role === "MARKETING";
+  const isPageManager = isContactAllowed;
 
   const groupedNavItems = [
     {
@@ -45,7 +47,7 @@ export function AdminHeader() {
         { href: "/admin/posts", label: "Bài viết", icon: FileText, show: true },
         { href: "/admin/posts/review", label: "Bài chờ duyệt", icon: ClipboardCheck, show: isAdminOrEditor },
         { href: "/admin/categories", label: "Danh mục", icon: FolderKanban, show: isAdminOrEditor },
-        { href: "/admin/pages", label: "Trang", icon: Globe, show: isAdminOrEditor },
+        { href: "/admin/pages", label: "Trang", icon: Globe, show: isPageManager },
         { href: "/admin/media", label: "Thư viện ảnh", icon: ImagePlus, show: isAdminOrEditor },
       ],
     },
@@ -60,7 +62,8 @@ export function AdminHeader() {
       group: "Marketing & CSKH",
       items: [
         { href: "/admin/marketing", label: "Quản lý Marketing", icon: Megaphone, show: isMarketingAllowed },
-        { href: "/admin/contacts", label: "Liên hệ", icon: Users, show: isAdminOrEditor },
+        { href: "/admin/marketing?tab=assets", label: "Ảnh & link trang", icon: ImagePlus, show: isMarketingAllowed },
+        { href: "/admin/contacts", label: "Liên hệ", icon: Users, show: isContactAllowed },
       ],
     },
     {

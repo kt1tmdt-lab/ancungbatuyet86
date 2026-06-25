@@ -14,10 +14,11 @@
     "prisma:migrate": "prisma migrate dev --name init",
     "seed": "ts-node --transpile-only scripts/seed.ts",
     "seed:sales-channels": "ts-node --transpile-only scripts/seed-sales-channels.ts",
+    "media:migrate-local": "node scripts/migrate-remote-images-to-local.js",
+    "media:sync-local": "node scripts/sync-uploaded-media.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1059.0",
     "@hookform/resolvers": "^5.4.0",
     "@prisma/client": "^5.10.0",
     "@supabase/supabase-js": "^2.108.0",

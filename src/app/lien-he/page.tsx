@@ -1,14 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, Loader } from "lucide-react";
+import { DEFAULT_SITE_CONFIG, normalizeSiteConfig } from "@/lib/site-config-defaults";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", content: "", source: "Website Contact Form" });
+  const [contact, setContact] = useState(DEFAULT_SITE_CONFIG.footerContact);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        setContact(normalizeSiteConfig(data?.data).footerContact);
+      })
+      .catch((err) => {
+        console.error("Failed to load contact settings", err);
+        setContact(DEFAULT_SITE_CONFIG.footerContact);
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +47,7 @@ export default function ContactPage() {
       } else {
         setError("Có lỗi xảy ra, vui lòng thử lại sau.");
       }
-    } catch (err) {
+    } catch {
       setError("Không thể kết nối đến máy chủ.");
     } finally {
       setLoading(false);
@@ -80,21 +94,31 @@ export default function ContactPage() {
                   <div className="bg-orange-500/50 p-3 shrink-0"><MapPin size={20} /></div>
                   <div>
                     <h3 className="font-bold text-orange-100 text-sm tracking-wider uppercase mb-1">Văn phòng chính</h3>
-                    <p className="font-semibold text-lg leading-relaxed">Hà Nội, Việt Nam</p>
+                    <p className="font-semibold text-lg leading-relaxed">{contact.address}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="bg-orange-500/50 p-3 shrink-0"><Phone size={20} /></div>
                   <div>
                     <h3 className="font-bold text-orange-100 text-sm tracking-wider uppercase mb-1">Hotline đối tác</h3>
-                    <p className="font-semibold text-lg leading-relaxed">0123 456 789</p>
+                    <a
+                      href={`tel:${contact.phone.replace(/\s+/g, "")}`}
+                      className="font-semibold text-lg leading-relaxed hover:text-orange-100"
+                    >
+                      {contact.phone}
+                    </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="bg-orange-500/50 p-3 shrink-0"><Mail size={20} /></div>
                   <div>
                     <h3 className="font-bold text-orange-100 text-sm tracking-wider uppercase mb-1">Email hỗ trợ</h3>
-                    <p className="font-semibold text-lg leading-relaxed">hello@ancungbatuyet.vn</p>
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="font-semibold text-lg leading-relaxed hover:text-orange-100"
+                    >
+                      {contact.email}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -103,9 +127,21 @@ export default function ContactPage() {
             <div className="mt-12 pt-12 border-t border-orange-500/50">
               <p className="font-bold text-orange-100 text-sm tracking-wider uppercase mb-4">Kết nối qua mạng xã hội</p>
               <div className="flex gap-4">
-                <a href="#" className="bg-orange-500/50 p-3 hover:bg-white hover:text-orange-600 transition-colors">TikTok</a>
-                <a href="#" className="bg-orange-500/50 p-3 hover:bg-white hover:text-orange-600 transition-colors">Facebook</a>
-                <a href="#" className="bg-orange-500/50 p-3 hover:bg-white hover:text-orange-600 transition-colors">Shopee</a>
+                {[
+                  { label: "TikTok", url: contact.tiktokUrl },
+                  { label: "Facebook", url: contact.facebookUrl },
+                  { label: "Shopee", url: contact.shopeeUrl },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.url || "#"}
+                    target={item.url ? "_blank" : undefined}
+                    rel={item.url ? "noopener noreferrer" : undefined}
+                    className="bg-orange-500/50 p-3 hover:bg-white hover:text-orange-600 transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                ))}
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { normalizeMarketingConfig, type PageAssetItem } from "@/lib/marketing-config";
 import {
   ArrowRight,
   Award,
@@ -171,11 +172,10 @@ function SourceLink({
       href={url}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noreferrer" : undefined}
-      className={`inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4 ${
-        dark
+      className={`inline-flex items-center gap-1 text-xs font-semibold underline underline-offset-4 ${dark
           ? "text-primary-light hover:text-white"
           : "text-primary hover:text-primary-dark"
-      }`}
+        }`}
     >
       Xem bài viết: {name}
       {isExternal ? <ExternalLink size={12} /> : <ArrowRight size={12} />}
@@ -186,10 +186,12 @@ function SourceLink({
 function ImageBlock({
   src,
   label,
+  linkUrl,
   className = "",
 }: {
   src?: string;
   label: string;
+  linkUrl?: string;
   className?: string;
 }) {
   if (!src) {
@@ -202,7 +204,7 @@ function ImageBlock({
     );
   }
 
-  return (
+  const content = (
     <div
       className={`relative overflow-hidden bg-cream ${className}`}
     >
@@ -218,9 +220,18 @@ function ImageBlock({
       </div>
     </div>
   );
+
+  if (!linkUrl) return content;
+
+  const isExternal = linkUrl.startsWith("http");
+  return (
+    <Link href={linkUrl} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined}>
+      {content}
+    </Link>
+  );
 }
 
-function HeroSection({ images }: { images: Record<string, string> }) {
+function HeroSection({ images, links }: { images: Record<string, string>; links: Record<string, string> }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -259,6 +270,7 @@ function HeroSection({ images }: { images: Record<string, string> }) {
             >
               <Sparkles size={16} />
               Quy trình sản xuất
+
             </motion.span>
 
             <motion.h1
@@ -312,18 +324,21 @@ function HeroSection({ images }: { images: Record<string, string> }) {
             <div className="grid grid-cols-2 gap-4">
               <ImageBlock
                 src={images.farm}
-                label="Nguyên liệu /"
+                linkUrl={links.farm}
+                label="Nguyên liệu "
                 className="aspect-[3/4] mt-12"
               />
               <div className="space-y-4">
                 <ImageBlock
                   src={images.packaging}
-                  label="Đóng gói /"
+                  linkUrl={links.packaging}
+                  label="Đóng gói "
                   className="aspect-square"
                 />
                 <ImageBlock
                   src={images.qc}
-                  label="QC /"
+                  linkUrl={links.qc}
+                  label="QC "
                   className="aspect-square"
                 />
               </div>
@@ -352,9 +367,9 @@ function HeroSection({ images }: { images: Record<string, string> }) {
   );
 }
 
-function ProcessStepsSection({ images }: { images: Record<string, string> }) {
+function ProcessStepsSection({ images, links }: { images: Record<string, string>; links: Record<string, string> }) {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section id="process-steps" className="scroll-mt-24 py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <SectionHeader
           label="6 điểm chạm"
@@ -379,7 +394,8 @@ function ProcessStepsSection({ images }: { images: Record<string, string> }) {
                 <div className="lg:col-span-5">
                   <ImageBlock
                     src={images[step.imageKey]}
-                    label={`${step.title} /`}
+                    linkUrl={links[step.imageKey]}
+                    label={step.title}
                     className="aspect-[4/3] h-full min-h-[320px]"
                   />
                 </div>
@@ -487,9 +503,9 @@ function ProcessStepsSection({ images }: { images: Record<string, string> }) {
   );
 }
 
-function FactorySection({ images }: { images: Record<string, string> }) {
+function FactorySection({ images, links }: { images: Record<string, string>; links: Record<string, string> }) {
   return (
-    <section className="py-24 bg-neutral text-white relative overflow-hidden">
+    <section id="process-factory" className="scroll-mt-24 py-24 bg-neutral text-white relative overflow-hidden">
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
@@ -525,7 +541,8 @@ function FactorySection({ images }: { images: Record<string, string> }) {
           <div className="grid grid-cols-2 gap-4">
             <ImageBlock
               src={images.factory}
-              label="Xưởng sản xuất /"
+              linkUrl={links.factory}
+              label="Xưởng sản xuất"
               className="aspect-[3/4] col-span-1"
             />
 
@@ -542,7 +559,8 @@ function FactorySection({ images }: { images: Record<string, string> }) {
 
               <ImageBlock
                 src={images.packaging}
-                label="Khu đóng gói /"
+                linkUrl={links.packaging}
+                label="Khu đóng gói"
                 className="aspect-square"
               />
             </div>
@@ -582,9 +600,9 @@ function FactorySection({ images }: { images: Record<string, string> }) {
   );
 }
 
-function DocumentationSection({ images }: { images: Record<string, string> }) {
+function DocumentationSection({ images, links }: { images: Record<string, string>; links: Record<string, string> }) {
   return (
-    <section className="py-24 bg-cream">
+    <section id="process-documents" className="scroll-mt-24 py-24 bg-cream">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-12 items-center">
           <div>
@@ -596,7 +614,8 @@ function DocumentationSection({ images }: { images: Record<string, string> }) {
 
             <ImageBlock
               src={images.documents}
-              label="Hồ sơ /"
+              linkUrl={links.documents}
+              label="Hồ sơ"
               className="aspect-[16/10] mt-10"
             />
           </div>
@@ -675,6 +694,7 @@ function CTASection() {
 
 export default function ProcessPage() {
   const [postImagesBySlug, setPostImagesBySlug] = useState<Record<string, string>>({});
+  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
 
   useEffect(() => {
     fetch("/api/posts?status=PUBLISHED")
@@ -691,24 +711,50 @@ export default function ProcessPage() {
       });
   }, []);
 
+  useEffect(() => {
+    fetch("/api/settings/marketing")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        setPageAssets(normalizeMarketingConfig(data?.data).pageAssets);
+      })
+      .catch((err) => {
+        console.error("Failed to load configurable process assets", err);
+      });
+  }, []);
+
+  const assetByKey = pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
+    if (item.key) acc[item.key] = item;
+    return acc;
+  }, {});
+
   const images = {
-    farm: postImagesBySlug["hau-truong-san-xuat-chan-ga"],
-    inspect: postImagesBySlug["hau-truong-san-xuat-chan-ga"],
-    cooking: postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
-    qc: postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
-    packaging: postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
-    delivery: postImagesBySlug["top-1-tiktok-shop-an-vat"],
-    factory: postImagesBySlug["khanh-thanh-nha-may-3300m2"],
-    documents: postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
+    farm: assetByKey.process_farm?.imageUrl || postImagesBySlug["hau-truong-san-xuat-chan-ga"],
+    inspect: assetByKey.process_inspect?.imageUrl || postImagesBySlug["hau-truong-san-xuat-chan-ga"],
+    cooking: assetByKey.process_cooking?.imageUrl || postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
+    qc: assetByKey.process_qc?.imageUrl || postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
+    packaging: assetByKey.process_packaging?.imageUrl || postImagesBySlug["hanh-trinh-ky-dieu-cua-an-cung-ba-tuyet"],
+    delivery: assetByKey.process_delivery?.imageUrl || postImagesBySlug["top-1-tiktok-shop-an-vat"],
+    factory: assetByKey.process_factory?.imageUrl || postImagesBySlug["khanh-thanh-nha-may-3300m2"],
+    documents: assetByKey.process_documents?.imageUrl || postImagesBySlug["bao-hiem-pvi-cho-nguoi-tieu-dung"],
     ...postImagesBySlug,
+  };
+  const links = {
+    farm: assetByKey.process_farm?.linkUrl || "",
+    inspect: assetByKey.process_inspect?.linkUrl || "",
+    cooking: assetByKey.process_cooking?.linkUrl || "",
+    qc: assetByKey.process_qc?.linkUrl || "",
+    packaging: assetByKey.process_packaging?.linkUrl || "",
+    delivery: assetByKey.process_delivery?.linkUrl || "",
+    factory: assetByKey.process_factory?.linkUrl || "",
+    documents: assetByKey.process_documents?.linkUrl || "",
   };
 
   return (
     <>
-      <HeroSection images={images} />
-      <ProcessStepsSection images={images} />
-      <FactorySection images={images} />
-      <DocumentationSection images={images} />
+      <HeroSection images={images} links={links} />
+      <ProcessStepsSection images={images} links={links} />
+      <FactorySection images={images} links={links} />
+      <DocumentationSection images={images} links={links} />
       <CTASection />
     </>
   );

@@ -3,6 +3,10 @@ import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
+function cleanString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 export async function GET(req: NextRequest) {
   try {
     const token = getTokenFromReq(req);
@@ -35,17 +39,23 @@ export async function POST(req: NextRequest) {
     if (!success) return rateLimitResponse();
 
     const body = await req.json();
-    if (!body.name || !body.content) {
+    const name = cleanString(body.name);
+    const phone = cleanString(body.phone);
+    const email = cleanString(body.email);
+    const content = cleanString(body.content);
+    const source = cleanString(body.source);
+
+    if (!name || !content) {
       return NextResponse.json({ error: "Name and content are required" }, { status: 400 });
     }
 
     const contact = await prisma.contactMessage.create({
       data: {
-        name: body.name,
-        phone: body.phone || null,
-        email: body.email || null,
-        content: body.content,
-        source: body.source || "Website",
+        name,
+        phone: phone || null,
+        email: email || null,
+        content,
+        source: source || "Website",
         status: "NEW",
       },
     });

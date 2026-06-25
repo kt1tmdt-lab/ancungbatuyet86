@@ -5,6 +5,7 @@ import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
 import {
   AlertCircle,
+  Crosshair,
   Edit3,
   ExternalLink,
   Loader,
@@ -42,6 +43,11 @@ type OnlineChannel = {
   sortOrder: number;
 };
 
+type MapPoint = {
+  lat: number;
+  lng: number;
+};
+
 const emptyLocation: Omit<Location, "id"> = {
   name: "",
   type: "dai-ly",
@@ -71,6 +77,178 @@ function locationTypeLabel(type: string) {
   if (type === "sieu-thi") return "Siêu thị";
   if (type === "online") return "Online";
   return "Đại lý";
+}
+
+function clampLat(lat: number) {
+  return Math.min(85, Math.max(-85, lat));
+}
+
+function latLngToWorld(point: MapPoint, zoom: number) {
+  const scale = 256 * 2 ** zoom;
+  const sinLat = Math.sin((clampLat(point.lat) * Math.PI) / 180);
+
+  return {
+    x: ((point.lng + 180) / 360) * scale,
+    y: (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * scale,
+  };
+}
+
+function worldToLatLng(point: { x: number; y: number }, zoom: number): MapPoint {
+  const scale = 256 * 2 ** zoom;
+  const lng = (point.x / scale) * 360 - 180;
+  const n = Math.PI - (2 * Math.PI * point.y) / scale;
+  const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+
+  return { lat, lng };
+}
+
+function LocationMapPicker({
+  value,
+  onChange,
+}: {
+  value: Partial<MapPoint>;
+  onChange: (point: MapPoint) => void;
+}) {
+  const [zoom, setZoom] = useState(13);
+  const [locating, setLocating] = useState(false);
+
+  const center = {
+    lat: Number.isFinite(value.lat) ? Number(value.lat) : emptyLocation.lat,
+    lng: Number.isFinite(value.lng) ? Number(value.lng) : emptyLocation.lng,
+  };
+  const centerWorld = latLngToWorld(center, zoom);
+  const tileCount = 2 ** zoom;
+  const tileRadius = 2;
+  const centerTileX = Math.floor(centerWorld.x / 256);
+  const centerTileY = Math.floor(centerWorld.y / 256);
+
+  const tiles = [];
+  for (let x = centerTileX - tileRadius; x <= centerTileX + tileRadius; x += 1) {
+    for (let y = centerTileY - tileRadius; y <= centerTileY + tileRadius; y += 1) {
+      if (y < 0 || y >= tileCount) continue;
+      const wrappedX = ((x % tileCount) + tileCount) % tileCount;
+      tiles.push({
+        key: `${zoom}-${x}-${y}`,
+        src: `https://tile.openstreetmap.org/${zoom}/${wrappedX}/${y}.png`,
+        left: `calc(50% + ${x * 256 - centerWorld.x}px)`,
+        top: `calc(50% + ${y * 256 - centerWorld.y}px)`,
+      });
+    }
+  }
+
+  const handlePick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const point = worldToLatLng(
+      {
+        x: centerWorld.x + event.clientX - rect.left - rect.width / 2,
+        y: centerWorld.y + event.clientY - rect.top - rect.height / 2,
+      },
+      zoom
+    );
+
+    onChange({
+      lat: Number(point.lat.toFixed(6)),
+      lng: Number(point.lng.toFixed(6)),
+    });
+  };
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) return;
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocating(false);
+        onChange({
+          lat: Number(position.coords.latitude.toFixed(6)),
+          lng: Number(position.coords.longitude.toFixed(6)),
+        });
+      },
+      () => {
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-black uppercase tracking-wider text-slate-500">Chọn tọa độ trên bản đồ</p>
+          <p className="mt-1 text-xs text-slate-400">Bấm vào bản đồ để cập nhật Latitude / Longitude.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={useCurrentLocation}
+            disabled={locating}
+            className="inline-flex items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+          >
+            {locating ? <Loader size={13} className="animate-spin" /> : <Crosshair size={13} />}
+            Vị trí hiện tại
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoom((current) => Math.max(5, current - 1))}
+            className="h-8 w-8 border border-slate-200 bg-white text-sm font-black text-slate-700 hover:bg-slate-50"
+          >
+            -
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoom((current) => Math.min(18, current + 1))}
+            className="h-8 w-8 border border-slate-200 bg-white text-sm font-black text-slate-700 hover:bg-slate-50"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handlePick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            onChange(center);
+          }
+        }}
+        className="relative h-[280px] cursor-crosshair overflow-hidden border border-slate-200 bg-slate-100 outline-none ring-orange-200 transition focus:ring-4"
+      >
+        {tiles.map((tile) => (
+          <img
+            key={tile.key}
+            src={tile.src}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            className="absolute h-64 w-64 select-none"
+            style={{ left: tile.left, top: tile.top }}
+          />
+        ))}
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-full flex-col items-center">
+          <MapPin className="fill-primary text-primary drop-shadow" size={36} />
+          <span className="-mt-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-700 shadow">
+            {center.lat.toFixed(5)}, {center.lng.toFixed(5)}
+          </span>
+        </div>
+        <div className="pointer-events-none absolute bottom-2 right-2 bg-white/90 px-2 py-1 text-[10px] font-semibold text-slate-500">
+          OpenStreetMap
+        </div>
+      </div>
+
+      <a
+        href={`https://www.google.com/maps/search/?api=1&query=${center.lat},${center.lng}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-xs font-bold text-primary-dark hover:underline"
+      >
+        Mở tọa độ này trên Google Maps <ExternalLink size={12} />
+      </a>
+    </div>
+  );
 }
 
 export default function AdminSalesChannelsPage() {
@@ -296,6 +474,10 @@ export default function AdminSalesChannelsPage() {
                 <input value={locationForm.lat ?? ""} onChange={(e) => setLocationForm({ ...locationForm, lat: Number(e.target.value) })} type="number" step="any" placeholder="Latitude" className="border border-slate-200 px-3 py-2 text-sm outline-none focus:border-orange-400" />
                 <input value={locationForm.lng ?? ""} onChange={(e) => setLocationForm({ ...locationForm, lng: Number(e.target.value) })} type="number" step="any" placeholder="Longitude" className="border border-slate-200 px-3 py-2 text-sm outline-none focus:border-orange-400" />
               </div>
+              <LocationMapPicker
+                value={{ lat: locationForm.lat, lng: locationForm.lng }}
+                onChange={(point) => setLocationForm({ ...locationForm, lat: point.lat, lng: point.lng })}
+              />
               <textarea required value={locationForm.address || ""} onChange={(e) => setLocationForm({ ...locationForm, address: e.target.value })} rows={3} placeholder="Địa chỉ" className="w-full border border-slate-200 px-3 py-2 text-sm outline-none focus:border-orange-400" />
               <label className="flex items-center gap-2 text-sm font-semibold text-slate-600">
                 <input type="checkbox" checked={locationForm.isActive ?? true} onChange={(e) => setLocationForm({ ...locationForm, isActive: e.target.checked })} />

@@ -1,9 +1,9 @@
-import { NextResponse, NextRequest } from "next/server";
-import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
 import { fileTypeFromBuffer } from "file-type";
+import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { sanitizeFileBaseName, saveLocalUpload } from "@/lib/local-storage";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
-import { isR2Configured, uploadToR2 } from "@/lib/r2-storage";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,23 +17,19 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR" && payload.role !== "MARKETING")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    if (!isR2Configured()) {
-      return NextResponse.json({ error: "Chưa cấu hình Cloudflare R2" }, { status: 500 });
     }
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
     if (!file) {
-      return NextResponse.json({ error: "Không tìm thấy file tải lên" }, { status: 400 });
+      return NextResponse.json({ error: "Missing uploaded file" }, { status: 400 });
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      return NextResponse.json({ error: "Kích thước ảnh vượt quá giới hạn 5MB" }, { status: 400 });
+      return NextResponse.json({ error: "Image size exceeds the 5MB limit" }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -41,25 +37,13 @@ export async function POST(req: NextRequest) {
 
     const typeInfo = await fileTypeFromBuffer(buffer);
     if (!typeInfo || !typeInfo.mime.startsWith("image/")) {
-      return NextResponse.json({ error: "Chỉ được phép tải lên tệp hình ảnh hợp lệ" }, { status: 400 });
+      return NextResponse.json({ error: "Only valid image files are allowed" }, { status: 400 });
     }
 
-    const timestamp = Date.now();
-    const safeNameWithExtension = file.name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[đĐ]/g, "d")
-      .replace(/[^a-z0-9.]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
-    const safeName = safeNameWithExtension.replace(/\.[a-z0-9]+$/, "") || "image";
-    const finalKey = `media/${timestamp}-${safeName}.${typeInfo.ext}`;
-
-    const fileUrl = await uploadToR2({
+    const finalKey = `media/${Date.now()}-${sanitizeFileBaseName(file.name)}.${typeInfo.ext}`;
+    const fileUrl = await saveLocalUpload({
       key: finalKey,
       body: buffer,
-      contentType: typeInfo.mime,
     });
 
     try {
@@ -77,12 +61,12 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ url: fileUrl }, { status: 200 });
-  } catch (error: any) {
-    console.error("R2 Upload API Error:", error);
+  } catch (error: unknown) {
+    console.error("Local Upload API Error:", error);
     return NextResponse.json(
       {
-        error: "Lỗi hệ thống khi lưu ảnh lên Cloudflare R2",
-        message: error?.message || String(error),
+        error: "System error while saving uploaded image",
+        message: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     );

@@ -9,7 +9,7 @@ export default function EditPagePage() {
   const id = params.id as string;
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Chỉnh sửa trang</h1>

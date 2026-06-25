@@ -83,14 +83,6 @@ export function LoginForm() {
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </Button>
         </form>
-
-        <div className="mt-6 p-4 bg-blue-50 ">
-          <p className="text-xs text-gray-600">
-            <strong>Test accounts:</strong><br />
-            Admin: admin@acbt.local / 123456<br />
-            User: user@acbt.local / 123456
-          </p>
-        </div>
       </div>
     </div>
   );

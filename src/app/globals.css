@@ -13,7 +13,8 @@
   --color-neutral-light: #334155;
   --color-cream: #FFFFFF;
   --color-warm-gray: #F1F5F9;
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-sans: Arial, "Helvetica Neue", system-ui, sans-serif;
+  --font-script: "Segoe Script", "Brush Script MT", cursive;
 }
 
 * {
@@ -21,9 +22,10 @@
 }
 
 body {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: Arial, "Helvetica Neue", system-ui, sans-serif;
   background: var(--color-cream);
   color: #2B2D42;
+  top: 0 !important;
 }
 
 ::selection {
@@ -367,6 +369,12 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.acbt-translate-widget,
+.skiptranslate,
+.goog-te-banner-frame {
+  display: none !important;
 }
 
 /* Global ripple styles for buttons */

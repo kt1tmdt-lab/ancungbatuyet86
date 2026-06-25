@@ -11,8 +11,7 @@ import {
   Edit3,
   Trash2,
   ExternalLink,
-  Globe,
-  Check
+  Globe
 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,27 +31,33 @@ export default function AdminPagesList() {
   const { token } = useAuth();
 
   useEffect(() => {
-    fetchPages();
-  }, []);
+    if (!token) return;
 
-  const fetchPages = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/pages", {
+    let cancelled = false;
+
+    fetch("/api/pages", {
         headers: {
           Authorization: `Bearer ${token}`
         }
+      })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch pages");
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) setPages(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        if (!cancelled) console.error("Failed to fetch pages:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
-      if (res.ok) {
-        const data = await res.json();
-        setPages(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch pages:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleDelete = async (pageId: string) => {
     if (!confirm("Bạn có chắc chắn muốn xóa trang này không? Bố cục thiết kế sẽ bị mất vĩnh viễn.")) return;
@@ -66,7 +71,7 @@ export default function AdminPagesList() {
         }
       });
       if (res.ok) {
-        setPages(pages.filter((p) => p.id !== pageId));
+        setPages((currentPages) => currentPages.filter((p) => p.id !== pageId));
       } else {
         const errData = await res.json();
         alert(errData.error || "Không thể xóa trang");
@@ -86,7 +91,7 @@ export default function AdminPagesList() {
   );
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -130,7 +135,7 @@ export default function AdminPagesList() {
             <div className="text-center py-20 text-slate-400 space-y-2">
               <AlertCircle size={40} className="mx-auto text-slate-300" />
               <p className="text-sm font-bold text-slate-600">Không tìm thấy trang nào</p>
-              <p className="text-xs text-slate-400">Nhấp nút "Thêm Trang Mới" để tạo trang tùy biến đầu tiên.</p>
+              <p className="text-xs text-slate-400">Nhấp nút &quot;Thêm Trang Mới&quot; để tạo trang tùy biến đầu tiên.</p>
             </div>
           ) : (
             <div className="overflow-x-auto  border border-slate-100">

@@ -9,7 +9,6 @@ import {
   Loader,
   Upload,
   Image as ImageIcon,
-  Copy,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -75,15 +74,21 @@ export function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalPr
 
   useEffect(() => {
     if (open) {
-      fetchMedia();
+      const timer = window.setTimeout(() => {
+        fetchMedia();
+      }, 0);
+      return () => window.clearTimeout(timer);
     }
   }, [open, fetchMedia]);
 
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
-      setSelectedId(null);
-      setUploadError("");
+      const timer = window.setTimeout(() => {
+        setSelectedId(null);
+        setUploadError("");
+      }, 0);
+      return () => window.clearTimeout(timer);
     }
   }, [open]);
 

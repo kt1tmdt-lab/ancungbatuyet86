@@ -18,13 +18,24 @@ import {
   Plus, 
   Trash2,
   Settings,
-  Share2
+  Share2,
+  Users,
+  TrendingUp,
+  Factory,
+  ShieldCheck
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { DEFAULT_SITE_CONFIG, normalizeSiteConfig } from "@/lib/site-config-defaults";
 
 const linkItemSchema = z.object({
   label: z.string().min(1, "Nhãn không được trống"),
   href: z.string().min(1, "Liên kết không được trống"),
+});
+
+const statItemSchema = z.object({
+  value: z.string().min(1, "Vui lòng nhập giá trị"),
+  label: z.string().min(1, "Vui lòng nhập nhãn"),
+  desc: z.string().min(1, "Vui lòng nhập mô tả"),
 });
 
 const settingsSchema = z.object({
@@ -53,6 +64,12 @@ const settingsSchema = z.object({
     tiktokUrl: z.string().optional(),
     facebookUrl: z.string().optional(),
   }),
+  stats: z.object({
+    followers: statItemSchema,
+    orders: statItemSchema,
+    area: statItemSchema,
+    insurance: statItemSchema,
+  }),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -61,25 +78,11 @@ export default function SettingsPage() {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"general" | "navigation">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "navigation" | "stats">("general");
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: {
-      heroBanner: { title: "", subtitle: "", ctaText: "", ctaLink: "" },
-      seo: { title: "", description: "", keywords: "" },
-      navbarLinks: [],
-      footerLinks: { products: [], explore: [] },
-      footerContact: {
-        phone: "0989 852 948",
-        email: "ancungbatuyet@gmail.com",
-        address: "Thái Nguyên, Việt Nam",
-        workingHours: "T2 - T7: 8:00 - 17:00",
-        shopeeUrl: "",
-        tiktokUrl: "",
-        facebookUrl: "",
-      },
-    },
+    defaultValues: DEFAULT_SITE_CONFIG,
   });
 
   const { control, register, handleSubmit, reset, formState: { errors } } = form;
@@ -111,47 +114,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/settings");
       if (res.ok) {
         const data = await res.json();
-        if (data && data.data) {
-          // Fallbacks for arrays/objects in case of empty SiteConfig
-          const config = data.data;
-          reset({
-            heroBanner: config.heroBanner || { title: "", subtitle: "", ctaText: "", ctaLink: "" },
-            seo: config.seo || { title: "", description: "", keywords: "" },
-            navbarLinks: config.navbarLinks || [
-              { href: "/", label: "Trang chủ" },
-              { href: "/san-pham", label: "Sản phẩm" },
-              { href: "/quy-trinh", label: "Quy trình" },
-              { href: "/he-thong-ban", label: "Hệ thống bán" },
-              { href: "/gioi-thieu", label: "Giới thiệu" },
-              { href: "/tin-tuc", label: "Tin tức" },
-              { href: "/lien-he", label: "Liên hệ" },
-            ],
-            footerLinks: config.footerLinks || {
-              products: [
-                { href: "/san-pham/chan-ga", label: "Chân Gà Rút Xương" },
-                { href: "/san-pham/tam-cay", label: "Tăm Cay" },
-                { href: "/san-pham/banh-trang", label: "Snack Bánh Tráng" },
-                { href: "/san-pham/bo-suu-tap", label: "Sản Phẩm Khác" },
-              ],
-              explore: [
-                { href: "/quy-trinh", label: "Quy trình sản xuất" },
-                { href: "/he-thong-ban", label: "Hệ thống điểm bán" },
-                { href: "/gioi-thieu", label: "Về chúng tôi" },
-                { href: "/tin-tuc", label: "Tin tức" },
-                { href: "/lien-he", label: "Liên hệ" },
-              ],
-            },
-            footerContact: config.footerContact || {
-              phone: "0989 852 948",
-              email: "ancungbatuyet@gmail.com",
-              address: "Thái Nguyên, Việt Nam",
-              workingHours: "T2 - T7: 8:00 - 17:00",
-              shopeeUrl: "https://shopee.vn/nmtvlog99",
-              tiktokUrl: "https://tiktok.com/@batuyethanhvi",
-              facebookUrl: "https://facebook.com/ancungbatuyet",
-            },
-          });
-        }
+        reset(normalizeSiteConfig(data?.data));
       }
     } catch (error) {
       console.error("Failed to fetch settings", error);
@@ -217,6 +180,16 @@ export default function SettingsPage() {
             }`}
           >
             Nội dung chính & SEO
+          </button>
+          <button
+            onClick={() => setActiveTab("stats")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
+              activeTab === "stats"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            Số liệu tiêu biểu
           </button>
           <button
             onClick={() => setActiveTab("navigation")}
@@ -335,6 +308,154 @@ export default function SettingsPage() {
                       <div className="text-xs text-green-700 truncate mb-1">https://ancungbatuyet.vn</div>
                       <div className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                         {form.watch("seo.description") || "Mô tả của trang web sẽ hiển thị tại đây..."}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "stats" && (
+              <div className="space-y-8 animate-fade-in">
+                <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+                    <TrendingUp className="text-orange-500" size={20} />
+                    <h2 className="text-lg font-bold text-slate-900">Cấu hình số liệu tiêu biểu</h2>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    {/* Stat item: Followers */}
+                    <div className="p-4 border border-slate-100 bg-slate-50 space-y-4">
+                      <div className="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-200 pb-2">
+                        <Users size={18} className="text-orange-500" />
+                        <span>Mục 1: Số lượng Followers</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Giá trị hiển thị</label>
+                          <input
+                            {...register("stats.followers.value")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: 10M+"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Nhãn tiêu đề</label>
+                          <input
+                            {...register("stats.followers.label")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: Followers"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả chi tiết</label>
+                        <textarea
+                          {...register("stats.followers.desc")}
+                          className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 min-h-[60px] text-xs font-semibold"
+                          placeholder="Mô tả..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stat item: Orders */}
+                    <div className="p-4 border border-slate-100 bg-slate-50 space-y-4">
+                      <div className="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-200 pb-2">
+                        <TrendingUp size={18} className="text-orange-500" />
+                        <span>Mục 2: Tổng số đơn hàng</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Giá trị hiển thị</label>
+                          <input
+                            {...register("stats.orders.value")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: 8M+"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Nhãn tiêu đề</label>
+                          <input
+                            {...register("stats.orders.label")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: Đơn hàng"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả chi tiết</label>
+                        <textarea
+                          {...register("stats.orders.desc")}
+                          className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 min-h-[60px] text-xs font-semibold"
+                          placeholder="Mô tả..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stat item: Area */}
+                    <div className="p-4 border border-slate-100 bg-slate-50 space-y-4">
+                      <div className="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-200 pb-2">
+                        <Factory size={18} className="text-orange-500" />
+                        <span>Mục 3: Năng lực sản xuất / Nhà máy</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Giá trị hiển thị</label>
+                          <input
+                            {...register("stats.area.value")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: 5.000+m²"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Nhãn tiêu đề</label>
+                          <input
+                            {...register("stats.area.label")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: Diện tích nhà máy"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả chi tiết</label>
+                        <textarea
+                          {...register("stats.area.desc")}
+                          className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 min-h-[60px] text-xs font-semibold"
+                          placeholder="Mô tả..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stat item: Insurance */}
+                    <div className="p-4 border border-slate-100 bg-slate-50 space-y-4">
+                      <div className="flex items-center gap-2 text-slate-900 font-bold border-b border-slate-200 pb-2">
+                        <ShieldCheck size={18} className="text-orange-500" />
+                        <span>Mục 4: Bảo hiểm / Cam kết</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Giá trị hiển thị</label>
+                          <input
+                            {...register("stats.insurance.value")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: PVI"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Nhãn tiêu đề</label>
+                          <input
+                            {...register("stats.insurance.label")}
+                            className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-xs font-semibold"
+                            placeholder="VD: Bảo hiểm sản phẩm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Mô tả chi tiết</label>
+                        <textarea
+                          {...register("stats.insurance.desc")}
+                          className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 min-h-[60px] text-xs font-semibold"
+                          placeholder="Mô tả..."
+                        />
                       </div>
                     </div>
                   </div>

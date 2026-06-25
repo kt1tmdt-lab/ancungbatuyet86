@@ -12,6 +12,7 @@ import {
   Play,
   ShoppingBag,
   Star,
+  Newspaper,
   Leaf,
   Truck,
   Clock3,
@@ -24,6 +25,17 @@ import {
   Award,
   type LucideIcon,
 } from "lucide-react";
+import {
+  DEFAULT_SITE_CONFIG,
+  normalizeSiteConfig,
+  type SiteConfigData,
+} from "@/lib/site-config-defaults";
+import {
+  DEFAULT_MARKETING_CONFIG,
+  normalizeMarketingConfig,
+  type MarketingConfigData,
+  type PageAssetItem,
+} from "@/lib/marketing-config";
 
 type Product = {
   id?: string | number;
@@ -67,6 +79,8 @@ type NewsEvidenceItem = {
   href: string;
   label?: string;
 };
+
+type HeroBannerConfig = SiteConfigData["heroBanner"];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -303,6 +317,20 @@ async function fetchHomePosts() {
   return Array.isArray(data) ? (data as PostItem[]) : [];
 }
 
+async function fetchHomeSiteConfig(): Promise<HeroBannerConfig> {
+  const response = await fetch("/api/settings");
+  const data = await response.json();
+
+  return normalizeSiteConfig(data?.data).heroBanner;
+}
+
+async function fetchHomeMarketingConfig(): Promise<MarketingConfigData> {
+  const response = await fetch("/api/settings/marketing");
+  const data = await response.json();
+
+  return normalizeMarketingConfig(data?.data);
+}
+
 function buildNewsEvidenceItems(posts: PostItem[]) {
   const icons = [BadgeCheck, ClipboardCheck, Store, Truck];
 
@@ -329,9 +357,19 @@ function HeroSection() {
   const [activeProduct, setActiveProduct] = useState<HeroProduct>(
     showcaseHeroProductsFallback[2],
   );
+  const [heroBanner, setHeroBanner] = useState<HeroBannerConfig>(
+    DEFAULT_SITE_CONFIG.heroBanner,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchHomeSiteConfig()
+      .then(setHeroBanner)
+      .catch((err) => {
+        console.error("Failed to load site config from DB", err);
+        setHeroBanner(DEFAULT_SITE_CONFIG.heroBanner);
+      });
+
     fetchHomeProducts()
       .then((data) => {
         if (data.length > 0) {
@@ -384,22 +422,21 @@ function HeroSection() {
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
           >
             <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : "Thương hiệu ăn vặt Việt"}
+            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt vì người Việt"}
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
             className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[4.2rem] xl:text-[5.25rem]"
           >
-            Ăn vặt thì phải
-            <span className="block text-orange-600">Ăn Cùng Bà Tuyết</span>
+            {heroBanner.title}
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
             className="mt-8 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg xl:max-w-2xl"
           >
-            Thương hiệu đồ ăn vặt Việt Nam. Bắt đầu từ 2022. Trở thành thương hiệu ăn vặt dẫn đầu trên Thương mại điện tử từ 2023 đến nay.
+            {heroBanner.subtitle}
           </motion.p>
 
           <motion.div
@@ -407,12 +444,12 @@ function HeroSection() {
             className="mt-10 flex flex-col gap-4 sm:flex-row"
           >
             <CurtainAction
-              href="/san-pham"
+              href={heroBanner.ctaLink}
               icon={<ArrowRight size={18} />}
               variant="orange"
               className="shadow-[0_20px_45px_rgba(234,88,12,0.25)]"
             >
-              SẢN PHẨM
+              {heroBanner.ctaText}
             </CurtainAction>
 
             <CurtainAction
@@ -566,37 +603,54 @@ function HeroSection() {
 // 2. CAPABILITY / STATS SECTION
 // ==========================================
 function StatsSection() {
+  const [statsData, setStatsData] = useState<SiteConfigData["stats"]>(DEFAULT_SITE_CONFIG.stats);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setStatsData(normalizeSiteConfig(data?.data).stats);
+        }
+      } catch (err) {
+        console.error("Failed to load stats from DB", err);
+      }
+    };
+    loadStats();
+  }, []);
+
   const stats: {
     value: string;
     label: string;
     desc: string;
     icon: LucideIcon;
   }[] = [
-    {
-      value: "10M+",
-      label: "Followers",
-      desc: "Là số lượng người theo dõi Bà Tuyết và Ăn Cùng Bà Tuyết trên các nền tảng mạng xã hội như TikTok, Youtube, Facebook.",
-      icon: Users,
-    },
-    {
-      value: "8M+",
-      label: "Đơn hàng TikTok Shop",
-      desc: "Chỉ tính riêng trên nền tảng TikTok Shop, chưa tính các nền tảng thương mại điện tử khác.",
-      icon: TrendingUp,
-    },
-    {
-      value: "5.000+m²",
-      label: "Diện tích nhà máy",
-      desc: "Thể hiện năng lực sản xuất, đáp ứng hàng triệu đơn hàng với không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
-      icon: Factory,
-    },
-    {
-      value: "PVI",
-      label: "Bảo hiểm sản phẩm",
-      desc: "Thể hiện trách nhiệm của thương hiệu với sức khoẻ khách hàng và chất lượng sản phẩm.",
-      icon: ShieldCheck,
-    },
-  ];
+      {
+        value: statsData.followers.value,
+        label: statsData.followers.label,
+        desc: statsData.followers.desc,
+        icon: Users,
+      },
+      {
+        value: statsData.orders.value,
+        label: statsData.orders.label,
+        desc: statsData.orders.desc,
+        icon: TrendingUp,
+      },
+      {
+        value: statsData.area.value,
+        label: statsData.area.label,
+        desc: statsData.area.desc,
+        icon: Factory,
+      },
+      {
+        value: statsData.insurance.value,
+        label: statsData.insurance.label,
+        desc: statsData.insurance.desc,
+        icon: ShieldCheck,
+      },
+    ];
 
   return (
     <section className="bg-white px-0 py-0">
@@ -610,8 +664,8 @@ function StatsSection() {
               Những con số tiêu biểu
             </h2>
           </div>
-          <p className="max-w-xl text-sm leading-7 text-slate-600">
-            Những con số thể hiện năng lực của thương hiệu, điều tạo ra những sản phẩm hấp dẫn và thuyết phục khác hàng.
+          <p className="max-w-xl text-2xl md:text-3xl leading-relaxed text-orange-600 font-script italic tracking-wide">
+            "Đừng tin những gì chúng tôi nói, hãy xem những gì chúng tôi làm"
           </p>
         </div>
 
@@ -960,8 +1014,7 @@ function WhyChooseUsFromDb() {
         <SectionTitle
           label="Tin tức & bằng chứng"
           title="Từ sản phẩm thật đến hệ thống phân phối thật"
-          description="Phần này lấy bài viết đã xuất bản từ CMS tin tức để kể câu chuyện thương hiệu, phân phối và bằng chứng truyền thông."
-          align="center"
+          description="Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể. "
         />
 
         <div className="mt-10 grid gap-0 md:grid-cols-2">
@@ -1076,16 +1129,183 @@ function WhyChooseUsFromDb() {
   );
 }
 
+function MarketingAssetsSection() {
+  const [config, setConfig] = useState<MarketingConfigData>(
+    DEFAULT_MARKETING_CONFIG,
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHomeMarketingConfig()
+      .then(setConfig)
+      .catch((error) => {
+        console.error("Failed to load marketing assets from DB", error);
+        setConfig(DEFAULT_MARKETING_CONFIG);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const hasContent =
+    config.press.length > 0 ||
+    config.feedback.length > 0 ||
+    config.videos.length > 0;
+
+  if (!loading && !hasContent) return null;
+
+  return (
+    <section id="factory-proof" className="scroll-mt-24 bg-[#fff8ed] py-0">
+      <div className="w-full px-5 py-14 sm:px-8 lg:px-16 lg:py-20">
+        <SectionTitle
+          label="Truyền thông"
+          title="Báo chí, khách hàng và video nổi bật"
+          description="Các tài sản truyền thông được quản lý từ CMS Marketing và tự động hiển thị khi đã có dữ liệu."
+        />
+
+        {loading ? (
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-44 animate-pulse border border-orange-100 bg-white"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            <div className="border border-orange-100 bg-white p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Newspaper className="text-orange-600" size={22} />
+                <h3 className="text-lg font-black text-slate-950">Báo chí</h3>
+              </div>
+              <div className="space-y-4">
+                {config.press.slice(0, 3).map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.link || "#"}
+                    target={item.link ? "_blank" : undefined}
+                    rel={item.link ? "noopener noreferrer" : undefined}
+                    className="block border-l-4 border-orange-500 bg-orange-50 p-4 transition hover:bg-orange-100"
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
+                      {item.sourceName || "Báo chí"} · {item.publishDate || "Mới"}
+                    </p>
+                    <p className="mt-2 text-sm font-bold leading-6 text-slate-900">
+                      {item.title || "Bài viết truyền thông"}
+                    </p>
+                  </a>
+                ))}
+                {config.press.length === 0 && (
+                  <p className="text-sm text-slate-500">Chưa có bài báo nào.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-orange-100 bg-white p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Star className="text-orange-600" size={22} />
+                <h3 className="text-lg font-black text-slate-950">Khách hàng</h3>
+              </div>
+              <div className="space-y-4">
+                {config.feedback.slice(0, 3).map((item) => (
+                  <div key={item.id} className="bg-[#fff8ed] p-4">
+                    <div className="text-sm font-black text-orange-600">
+                      {"★".repeat(item.rating)}
+                    </div>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+                      “{item.comment || "Sản phẩm rất ngon và chỉn chu."}”
+                    </p>
+                    <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+                      {item.customerName || "Khách hàng"} · {item.roleOrLocation || "Việt Nam"}
+                    </p>
+                  </div>
+                ))}
+                {config.feedback.length === 0 && (
+                  <p className="text-sm text-slate-500">Chưa có đánh giá nào.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-orange-100 bg-white p-6">
+              <div className="mb-5 flex items-center gap-3">
+                <Play className="text-orange-600" size={22} />
+                <h3 className="text-lg font-black text-slate-950">Video</h3>
+              </div>
+              <div className="space-y-4">
+                {config.videos.slice(0, 3).map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.url || "#"}
+                    target={item.url ? "_blank" : undefined}
+                    rel={item.url ? "noopener noreferrer" : undefined}
+                    className="flex items-center gap-4 bg-slate-950 p-4 text-white transition hover:bg-orange-600"
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-slate-950">
+                      <Play size={18} />
+                    </span>
+                    <span>
+                      <span className="block text-[10px] font-black uppercase tracking-[0.18em] text-orange-100">
+                        {item.platform === "youtube" ? "YouTube" : "TikTok"}
+                      </span>
+                      <span className="mt-1 block text-sm font-bold">
+                        {item.title || item.videoId || "Video truyền thông"}
+                      </span>
+                    </span>
+                  </a>
+                ))}
+                {config.videos.length === 0 && (
+                  <p className="text-sm text-slate-500">Chưa có video nào.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ==========================================
 // 5. FACTORY PROOF SECTION
 // ==========================================
 function FactoryProofSection() {
-  const proofs = [
+  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
+  const fallbackProofs = [
     "Khu sản xuất và đóng gói được trình bày rõ ràng bằng hình ảnh thực tế.",
     "Thông tin bảo hiểm, tiêu chuẩn và hồ sơ sản phẩm có vị trí riêng để tạo niềm tin.",
     "Nội dung tập trung vào an toàn, ổn định chất lượng và phân phối toàn quốc.",
     "Bố cục vuông, sáng, nhiều khoảng trắng, giảm hiệu ứng như web công nghệ.",
   ];
+  const assetByKey = pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
+    if (item.key) acc[item.key] = item;
+    return acc;
+  }, {});
+  const imageAsset = assetByKey.home_factory_proof_image;
+  const proofImage = imageAsset?.imageUrl || "/bento/bento-factory.png";
+  const proofImageLink = imageAsset?.linkUrl || "";
+  const proofs = fallbackProofs.map((proof, index) => {
+    const asset = assetByKey[`home_factory_proof_${index + 1}`];
+    return {
+      text: asset?.label || proof,
+      linkUrl: asset?.linkUrl || "",
+    };
+  });
+
+  useEffect(() => {
+    fetchHomeMarketingConfig()
+      .then((config) => setPageAssets(config.pageAssets))
+      .catch((error) => {
+        console.error("Failed to load configurable home assets", error);
+        setPageAssets(DEFAULT_MARKETING_CONFIG.pageAssets);
+      });
+  }, []);
+
+  const imageNode = (
+    <img
+      src={proofImage}
+      alt={imageAsset?.label || "Nhà máy sản xuất Bà Tuyết"}
+      className="absolute inset-0 h-full w-full object-cover"
+    />
+  );
 
   return (
     <section className="bg-[#fff8ed] py-0">
@@ -1097,11 +1317,17 @@ function FactoryProofSection() {
           className="h-full border-y border-r border-orange-200 bg-white p-0 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
         >
           <div className="relative min-h-[560px] overflow-hidden bg-slate-100 lg:min-h-[680px]">
-            <img
-              src="/bento/bento-factory.png"
-              alt="Nhà máy sản xuất Bà Tuyết"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            {proofImageLink ? (
+              <a
+                href={proofImageLink}
+                target={proofImageLink.startsWith("http") ? "_blank" : undefined}
+                rel={proofImageLink.startsWith("http") ? "noopener noreferrer" : undefined}
+              >
+                {imageNode}
+              </a>
+            ) : (
+              imageNode
+            )}
             <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
                 Nhà máy / khu sản xuất
@@ -1126,21 +1352,37 @@ function FactoryProofSection() {
           <SectionTitle
             label="Bằng chứng thương hiệu"
             title="Nói về năng lực sản xuất trước, rồi mới nói về bán hàng"
-            description="Khách vào website công ty thực phẩm cần thấy nơi sản xuất, quy trình, chứng nhận và cách đóng gói. Các yếu tố viral nên để sau."
+            description="Minh bạch rõ ràng quy trình sản xuất giúp người tiêu dùng yên tâm."
           />
 
           <div className="mt-8 grid gap-0">
-            {proofs.map((proof, index) => (
-              <div
-                key={proof}
-                className="flex gap-4 border-x border-b border-orange-100 bg-white p-5 lg:p-6"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-600 text-sm font-black text-white">
-                  {index + 1}
+            {proofs.map((proof, index) => {
+              const content = (
+                <div className="flex gap-4 border-x border-b border-orange-100 bg-white p-5 lg:p-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-600 text-sm font-black text-white">
+                    {index + 1}
+                  </div>
+                  <p className="leading-7 text-slate-600">{proof.text}</p>
                 </div>
-                <p className="leading-7 text-slate-600">{proof}</p>
-              </div>
-            ))}
+              );
+
+              if (!proof.linkUrl) {
+                return <div key={`${proof.text}-${index}`}>{content}</div>;
+              }
+
+              const isExternal = proof.linkUrl.startsWith("http");
+              return (
+                <a
+                  key={`${proof.text}-${index}`}
+                  href={proof.linkUrl}
+                  target={isExternal ? "_blank" : undefined}
+                  rel={isExternal ? "noopener noreferrer" : undefined}
+                  className="block transition hover:-translate-y-0.5"
+                >
+                  {content}
+                </a>
+              );
+            })}
           </div>
         </motion.div>
       </div>
@@ -1386,6 +1628,7 @@ export default function HomePage() {
       <FeaturedProducts />
       <FactoryProofSection />
       <WhyChooseUsFromDb />
+      <MarketingAssetsSection />
       <ProcessSection />
       <BrandStory />
       <CTASection />

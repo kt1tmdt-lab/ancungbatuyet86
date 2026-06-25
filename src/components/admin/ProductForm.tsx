@@ -715,7 +715,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                     {uploading ? (
                       <div className="flex items-center gap-2 text-xs font-bold text-primary-dark">
                         <Loader size={16} className="animate-spin" />
-                        <span>Đang tải lên Cloudflare R2...</span>
+                        <span>Đang tải ảnh lên máy chủ...</span>
                       </div>
                     ) : (
                       <span className="text-xs font-bold text-primary-dark">Chọn tệp ảnh từ thiết bị</span>

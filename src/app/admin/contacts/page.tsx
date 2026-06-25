@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
 import { DataTable } from "@/components/admin/DataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import { Search, Loader, Trash, MessageSquare, Phone, Mail, User, Clock, CheckCircle, ExternalLink } from "lucide-react";
+import { Search, Loader, Trash, Phone, Mail, User } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface ContactMessage {
@@ -20,7 +20,7 @@ interface ContactMessage {
 }
 
 export default function ContactsPage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,23 +28,28 @@ export default function ContactsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (token) fetchContacts();
-  }, [token]);
+    if (!token) return;
 
-  const fetchContacts = async () => {
-    try {
-      const res = await fetch("/api/contacts", {
-        headers: { Authorization: `Bearer ${token}` }
+    let cancelled = false;
+
+    fetch("/api/contacts", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load"))))
+      .then((data) => {
+        if (!cancelled) setContacts(data);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error("Failed to fetch contacts", error);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
-      if (res.ok) {
-        setContacts(await res.json());
-      }
-    } catch (error) {
-      console.error("Failed to fetch contacts", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     setActionLoading(id);
@@ -63,7 +68,7 @@ export default function ContactsPage() {
       } else {
         toast.error("Không thể cập nhật trạng thái");
       }
-    } catch (error) {
+    } catch {
       toast.error("Lỗi kết nối");
     } finally {
       setActionLoading(null);
@@ -84,7 +89,7 @@ export default function ContactsPage() {
       } else {
         toast.error("Không thể xóa tin nhắn");
       }
-    } catch (error) {
+    } catch {
       toast.error("Lỗi kết nối");
     } finally {
       setActionLoading(null);
@@ -199,8 +204,10 @@ export default function ContactsPage() {
       header: "Thao tác",
       cell: ({ row }) => {
         const c = row.original;
+        const canDelete = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
         return (
           <div className="flex items-center justify-end gap-2">
+            {canDelete && (
             <button
               onClick={() => handleDelete(c.id)}
               disabled={actionLoading === c.id}
@@ -209,11 +216,12 @@ export default function ContactsPage() {
             >
               <Trash size={15} />
             </button>
+            )}
           </div>
         );
       }
     }
-  ], [actionLoading]);
+  ], [actionLoading, user?.role]);
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "EDITOR", "MARKETING"]}>

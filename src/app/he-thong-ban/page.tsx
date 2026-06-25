@@ -261,20 +261,115 @@ function OnlineChannelsSection({ onlineChannels }: { onlineChannels: OnlineChann
   );
 }
 
+const PROVINCE_TO_REGION: Record<string, string> = {
+  "Hà Nội": "Miền Bắc",
+  "Thái Nguyên": "Miền Bắc",
+  "Bắc Ninh": "Miền Bắc",
+  "Hải Phòng": "Miền Bắc",
+  "Vĩnh Phúc": "Miền Bắc",
+  "Bắc Giang": "Miền Bắc",
+  "Quảng Ninh": "Miền Bắc",
+  "Hải Dương": "Miền Bắc",
+  "Hưng Yên": "Miền Bắc",
+  "Hòa Bình": "Miền Bắc",
+  "Sơn La": "Miền Bắc",
+  "Điện Biên": "Miền Bắc",
+  "Lai Châu": "Miền Bắc",
+  "Lào Cai": "Miền Bắc",
+  "Yên Bái": "Miền Bắc",
+  "Phú Thọ": "Miền Bắc",
+  "Hà Giang": "Miền Bắc",
+  "Tuyên Quang": "Miền Bắc",
+  "Cao Bằng": "Miền Bắc",
+  "Bắc Kạn": "Miền Bắc",
+  "Lạng Sơn": "Miền Bắc",
+  "Hà Nam": "Miền Bắc",
+  "Nam Định": "Miền Bắc",
+  "Ninh Bình": "Miền Bắc",
+  "Thái Bình": "Miền Bắc",
+  "Nghệ An": "Miền Trung",
+  "Đà Nẵng": "Miền Trung",
+  "Thanh Hóa": "Miền Trung",
+  "Hà Tĩnh": "Miền Trung",
+  "Quảng Bình": "Miền Trung",
+  "Quảng Trị": "Miền Trung",
+  "Thừa Thiên Huế": "Miền Trung",
+  "Quảng Nam": "Miền Trung",
+  "Quảng Ngãi": "Miền Trung",
+  "Bình Định": "Miền Trung",
+  "Phú Yên": "Miền Trung",
+  "Khánh Hòa": "Miền Trung",
+  "Ninh Thuận": "Miền Trung",
+  "Bình Thuận": "Miền Trung",
+  "Kon Tum": "Miền Trung",
+  "Gia Lai": "Miền Trung",
+  "Đắk Lắk": "Miền Trung",
+  "Đắk Nông": "Miền Trung",
+  "Lâm Đồng": "Miền Trung",
+  "TP.HCM": "Miền Nam",
+  "TP. Hồ Chí Minh": "Miền Nam",
+  "Hồ Chí Minh": "Miền Nam",
+  "Cần Thơ": "Miền Nam",
+  "Bình Dương": "Miền Nam",
+  "Đồng Nai": "Miền Nam",
+  "Bà Rịa - Vũng Tàu": "Miền Nam",
+  "Tây Ninh": "Miền Nam",
+  "Bình Phước": "Miền Nam",
+  "Long An": "Miền Nam",
+  "Tiền Giang": "Miền Nam",
+  "Bến Tre": "Miền Nam",
+  "Trà Vinh": "Miền Nam",
+  "Vĩnh Long": "Miền Nam",
+  "Đồng Tháp": "Miền Nam",
+  "An Giang": "Miền Nam",
+  "Kiên Giang": "Miền Nam",
+  "Hậu Giang": "Miền Nam",
+  "Sóc Trăng": "Miền Nam",
+  "Bạc Liêu": "Miền Nam",
+  "Cà Mau": "Miền Nam",
+};
+
+function getRegion(province: string): string {
+  return PROVINCE_TO_REGION[province] || "Khác";
+}
+
+function getDistrict(address: string, province: string): string {
+  const parts = address.split(",").map((p) => p.trim());
+  if (parts.length < 2) return "Khác";
+  let district = parts[parts.length - 2];
+  if (district.toLowerCase() === province.toLowerCase() && parts.length >= 3) {
+    district = parts[parts.length - 3];
+  }
+  if (district.startsWith("Khu công nghiệp ")) {
+    district = district.replace("Khu công nghiệp ", "");
+  }
+  return district;
+}
+
 function LocationsSection({
+  selectedRegion,
+  setSelectedRegion,
   selectedProvince,
   setSelectedProvince,
+  selectedDistrict,
+  setSelectedDistrict,
   selectedType,
   setSelectedType,
   filtered,
-  provinces,
+  availableProvinces,
+  availableDistricts,
 }: {
+  selectedRegion: string;
+  setSelectedRegion: (value: string) => void;
   selectedProvince: string;
   setSelectedProvince: (value: string) => void;
+  selectedDistrict: string;
+  setSelectedDistrict: (value: string) => void;
   selectedType: string;
   setSelectedType: (value: string) => void;
   filtered: Location[];
-  provinces: string[];
+  availableProvinces: string[];
+  availableDistricts: string[];
 }) {
   return (
     <section className="bg-white px-4 py-12 sm:px-6 lg:px-10">
@@ -296,14 +391,45 @@ function LocationsSection({
             </div>
 
             <select
+              value={selectedRegion}
+              onChange={(event) => {
+                setSelectedRegion(event.target.value);
+                setSelectedProvince("all");
+                setSelectedDistrict("all");
+              }}
+              className="h-11 border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            >
+              <option value="all">Tất cả vùng miền</option>
+              <option value="Miền Bắc">Miền Bắc</option>
+              <option value="Miền Trung">Miền Trung</option>
+              <option value="Miền Nam">Miền Nam</option>
+            </select>
+
+            <select
               value={selectedProvince}
-              onChange={(event) => setSelectedProvince(event.target.value)}
+              onChange={(event) => {
+                setSelectedProvince(event.target.value);
+                setSelectedDistrict("all");
+              }}
               className="h-11 border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
             >
               <option value="all">Tất cả tỉnh/TP</option>
-              {provinces.map((province) => (
+              {availableProvinces.map((province) => (
                 <option key={province} value={province}>
                   {province}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedDistrict}
+              onChange={(event) => setSelectedDistrict(event.target.value)}
+              className="h-11 border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+            >
+              <option value="all">Tất cả quận/huyện</option>
+              {availableDistricts.map((district) => (
+                <option key={district} value={district}>
+                  {district}
                 </option>
               ))}
             </select>
@@ -495,30 +621,22 @@ function DealerSection() {
 }
 
 export default function LocationsPage() {
+  const [selectedRegion, setSelectedRegion] = useState("all");
   const [selectedProvince, setSelectedProvince] = useState("all");
+  const [selectedDistrict, setSelectedDistrict] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [locations, setLocations] = useState<Location[]>([]);
   const [onlineChannels, setOnlineChannels] = useState<OnlineChannel[]>([]);
-  const [provinces, setProvinces] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/locations")
       .then((res) => res.json())
       .then((data) => {
-        const nextLocations = Array.isArray(data.locations) ? data.locations : [];
-        setLocations(nextLocations);
+        setLocations(Array.isArray(data.locations) ? data.locations : []);
         setOnlineChannels(Array.isArray(data.onlineChannels) ? data.onlineChannels : []);
-        setProvinces(
-          Array.isArray(data.provinces)
-            ? data.provinces
-            : [...new Set(nextLocations.map((location: Location) => location.province))]
-        );
       })
       .catch((error) => {
         console.error("Failed to load locations from DB", error);
-        setLocations([]);
-        setOnlineChannels([]);
-        setProvinces([]);
       });
   }, []);
 
@@ -526,9 +644,38 @@ export default function LocationsPage() {
     return locations.filter((loc) => loc.isActive);
   }, [locations]);
 
+  const availableProvinces = useMemo(() => {
+    const activeProvinces = [...new Set(activeLocations.map((loc) => loc.province))];
+    if (selectedRegion === "all") {
+      return activeProvinces;
+    }
+    return activeProvinces.filter((p) => getRegion(p) === selectedRegion);
+  }, [activeLocations, selectedRegion]);
+
+  const availableDistricts = useMemo(() => {
+    const matches = activeLocations.filter((loc) => {
+      if (selectedRegion !== "all" && getRegion(loc.province) !== selectedRegion) {
+        return false;
+      }
+      if (selectedProvince !== "all" && loc.province !== selectedProvince) {
+        return false;
+      }
+      return true;
+    });
+    return [...new Set(matches.map((loc) => getDistrict(loc.address, loc.province)))];
+  }, [activeLocations, selectedRegion, selectedProvince]);
+
   const filtered = useMemo(() => {
     return activeLocations.filter((loc) => {
+      if (selectedRegion !== "all" && getRegion(loc.province) !== selectedRegion) {
+        return false;
+      }
+
       if (selectedProvince !== "all" && loc.province !== selectedProvince) {
+        return false;
+      }
+
+      if (selectedDistrict !== "all" && getDistrict(loc.address, loc.province) !== selectedDistrict) {
         return false;
       }
 
@@ -538,7 +685,7 @@ export default function LocationsPage() {
 
       return true;
     });
-  }, [activeLocations, selectedProvince, selectedType]);
+  }, [activeLocations, selectedRegion, selectedProvince, selectedDistrict, selectedType]);
 
   return (
     <main className="bg-white antialiased selection:bg-orange-600 selection:text-white">
@@ -549,12 +696,17 @@ export default function LocationsPage() {
       <BuyingMessageStrip />
       <OnlineChannelsSection onlineChannels={onlineChannels} />
       <LocationsSection
+        selectedRegion={selectedRegion}
+        setSelectedRegion={setSelectedRegion}
         selectedProvince={selectedProvince}
         setSelectedProvince={setSelectedProvince}
+        selectedDistrict={selectedDistrict}
+        setSelectedDistrict={setSelectedDistrict}
         selectedType={selectedType}
         setSelectedType={setSelectedType}
         filtered={filtered}
-        provinces={provinces}
+        availableProvinces={availableProvinces}
+        availableDistricts={availableDistricts}
       />
       <DealerSection />
     </main>

@@ -3,6 +3,9 @@ import { PageStatus } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { canManagePages, normalizePageContent, normalizePageSlug } from "@/lib/pages";
+import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 export async function GET(
   req: NextRequest,
@@ -16,7 +19,7 @@ export async function GET(
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || !canManagePages(payload.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -29,10 +32,11 @@ export async function GET(
     }
 
     return NextResponse.json(page);
-  } catch (error: any) {
+  } catch (error) {
     console.error("GET Page ID Error:", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Internal Server Error", message: error?.message || String(error) },
+      { error: "Internal Server Error", message },
       { status: 500 }
     );
   }
@@ -50,7 +54,7 @@ export async function PUT(
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || !canManagePages(payload.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -62,17 +66,19 @@ export async function PUT(
     // 2. Parse body
     const body = await req.json();
     const { title, slug, content, status } = body;
+    const cleanTitle = typeof title === "string" ? title.trim() : "";
+    const cleanContent = normalizePageContent(content);
 
-    if (!title || !slug) {
+    if (!cleanTitle || !slug) {
       return NextResponse.json({ error: "Tiêu đề và đường dẫn slug là bắt buộc" }, { status: 400 });
     }
 
     // Normalize slug
-    const cleanSlug = slug
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9-]/g, "-")
-      .replace(/-+/g, "-");
+    const cleanSlug = normalizePageSlug(slug);
+
+    if (!cleanSlug) {
+      return NextResponse.json({ error: "Slug không hợp lệ" }, { status: 400 });
+    }
 
     // Check slug uniqueness (excluding current page)
     const duplicate = await prisma.page.findFirst({
@@ -90,9 +96,9 @@ export async function PUT(
     const updatedPage = await prisma.page.update({
       where: { id },
       data: {
-        title,
+        title: cleanTitle,
         slug: cleanSlug,
-        content: content || [],
+        content: cleanContent as unknown as Prisma.InputJsonValue,
         status: status === PageStatus.PUBLISHED ? PageStatus.PUBLISHED : PageStatus.DRAFT,
       },
     });
@@ -105,11 +111,15 @@ export async function PUT(
       details: { title: updatedPage.title, slug: updatedPage.slug }
     });
 
+    revalidatePath(`/trang/${existingPage.slug}`);
+    revalidatePath(`/trang/${updatedPage.slug}`);
+
     return NextResponse.json(updatedPage);
-  } catch (error: any) {
+  } catch (error) {
     console.error("PUT Page Error:", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Lỗi hệ thống khi cập nhật trang", message: error?.message || String(error) },
+      { error: "Lỗi hệ thống khi cập nhật trang", message },
       { status: 500 }
     );
   }
@@ -127,7 +137,7 @@ export async function DELETE(
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || !canManagePages(payload.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -147,11 +157,14 @@ export async function DELETE(
       details: { title: existingPage.title, slug: existingPage.slug }
     });
 
+    revalidatePath(`/trang/${existingPage.slug}`);
+
     return NextResponse.json({ message: "Xóa trang thành công" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("DELETE Page Error:", error);
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Lỗi hệ thống khi xóa trang", message: error?.message || String(error) },
+      { error: "Lỗi hệ thống khi xóa trang", message },
       { status: 500 }
     );
   }

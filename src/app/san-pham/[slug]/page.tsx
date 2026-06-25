@@ -13,11 +13,9 @@ import {
   Factory,
   Loader,
   PackageCheck,
-  ShieldCheck,
   ShoppingBag,
   Star,
   Leaf,
-  Truck,
   BadgeCheck,
 } from "lucide-react";
 
@@ -57,29 +55,40 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!slug) return;
-    setLoading(true);
-    fetch(`/api/products/slug/${slug}`)
-      .then((res) => {
+
+    let cancelled = false;
+
+    async function loadProduct() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/products/slug/${slug}`);
         if (!res.ok) throw new Error("Not found");
-        return res.json();
-      })
-      .then((data) => {
+        const data = await res.json();
+        if (cancelled) return;
+
         setProduct(data);
         setLoading(false);
-        // Fetch related products
-        fetch("/api/products")
-          .then((r) => r.json())
-          .then((all) => {
-            const related = (Array.isArray(all) ? all : [])
-              .filter((p: Product) => p.slug !== slug && p.category === data.category)
-              .slice(0, 4);
-            setRelatedProducts(related);
-          });
-      })
-      .catch(() => {
+
+        const relatedResponse = await fetch("/api/products");
+        const all = await relatedResponse.json();
+        if (cancelled) return;
+
+        const related = (Array.isArray(all) ? all : [])
+          .filter((p: Product) => p.slug !== slug && p.category === data.category)
+          .slice(0, 4);
+        setRelatedProducts(related);
+      } catch {
+        if (cancelled) return;
         setError(true);
         setLoading(false);
-      });
+      }
+    }
+
+    void loadProduct();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
@@ -215,17 +224,8 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Trust Badges */}
-              <div className="mt-6 flex flex-wrap gap-3">
-                <span className="inline-flex items-center gap-1.5 border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700">
-                  <CheckCircle2 size={14} /> 100% Chính hãng
-                </span>
-                <span className="inline-flex items-center gap-1.5 border border-orange-100 bg-orange-50 px-3 py-2 text-xs font-bold text-orange-700">
-                  <PackageCheck size={14} /> Đóng gói chuẩn
-                </span>
-                <span className="inline-flex items-center gap-1.5 border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
-                  <Truck size={14} /> Giao toàn quốc
-                </span>
+              <div className="mt-6 border-l-4 border-orange-500 bg-white px-4 py-3 text-xs font-semibold leading-6 text-slate-600">
+                Thông tin sản phẩm được hiển thị theo dữ liệu bạn nhập trong CMS.
               </div>
             </motion.div>
           </div>
@@ -421,22 +421,19 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Safety Badges */}
-              <div className="space-y-3">
-                {[
-                  { icon: ShieldCheck, title: "An toàn thực phẩm", desc: "Đạt tiêu chuẩn VSATTP", color: "text-emerald-600 bg-emerald-50 border-emerald-100" },
-                  { icon: Factory, title: "Nhà máy đạt chuẩn", desc: "Quy trình khép kín, sạch", color: "text-blue-600 bg-blue-50 border-blue-100" },
-                  { icon: Truck, title: "Giao hàng toàn quốc", desc: "Ship COD, nhanh 1-3 ngày", color: "text-orange-600 bg-orange-50 border-orange-100" },
-                ].map((badge, i) => (
-                  <div key={i} className={`flex items-start gap-3 border p-4 ${badge.color}`}>
-                    <badge.icon size={20} className="mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs font-black">{badge.title}</p>
-                      <p className="mt-0.5 text-[11px] font-medium opacity-75">{badge.desc}</p>
+              {specs.length > 0 && (
+                <div className="space-y-3">
+                  {specs.slice(0, 3).map((spec, i) => (
+                    <div key={`${spec.label}-${i}`} className="flex items-start gap-3 border border-orange-100 bg-white p-4 text-slate-700">
+                      <BadgeCheck size={20} className="mt-0.5 shrink-0 text-orange-600" />
+                      <div>
+                        <p className="text-xs font-black">{spec.label}</p>
+                        <p className="mt-0.5 text-[11px] font-medium text-slate-500">{spec.value}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { normalizeMarketingConfig } from "@/lib/marketing-config";
+import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -9,11 +12,11 @@ export async function GET() {
       where: { id: "marketing_assets" },
     });
 
-    if (!config) {
-      return NextResponse.json({ id: "marketing_assets", data: { press: [], feedback: [], videos: [] } });
-    }
-
-    return NextResponse.json(config);
+    return NextResponse.json({
+      id: "marketing_assets",
+      data: normalizeMarketingConfig(config?.data),
+      updatedAt: config?.updatedAt || null,
+    });
   } catch (error) {
     console.error("GET Marketing Config Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -37,11 +40,12 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
+    const data = normalizeMarketingConfig(body);
 
     const config = await prisma.siteConfig.upsert({
       where: { id: "marketing_assets" },
-      update: { data: body },
-      create: { id: "marketing_assets", data: body },
+      update: { data: data as Prisma.InputJsonValue },
+      create: { id: "marketing_assets", data: data as Prisma.InputJsonValue },
     });
 
     await logAudit({
@@ -50,11 +54,16 @@ export async function PUT(req: NextRequest) {
       entityType: "SiteConfig",
       entityId: "marketing_assets",
       details: {
-        pressCount: body?.press?.length || 0,
-        feedbackCount: body?.feedback?.length || 0,
-        videoCount: body?.videos?.length || 0,
+        pressCount: data.press.length,
+        feedbackCount: data.feedback.length,
+        videoCount: data.videos.length,
+        pageAssetCount: data.pageAssets.length,
       },
     });
+
+    revalidatePath("/");
+    revalidatePath("/gioi-thieu");
+    revalidatePath("/quy-trinh");
 
     return NextResponse.json(config);
   } catch (error) {

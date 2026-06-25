@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import CurtainHover from "@/components/shared/CurtainHover";
+import { normalizeMarketingConfig, type PageAssetItem } from "@/lib/marketing-config";
 import {
   ArrowRight,
   Heart,
@@ -33,6 +34,21 @@ const sources = {
   znewsFactory: "/tin-tuc/khanh-thanh-nha-may-3300m2",
   tiktokCase: "/tin-tuc/top-1-tiktok-shop-an-vat",
 };
+
+const ABOUT_PROCESS_ASSET_KEYS = [
+  "about_process_ingredient",
+  "about_process_factory",
+  "about_process_packaging",
+  "about_process_distribution",
+];
+
+function toYouTubeEmbedUrl(url: string) {
+  if (!url) return "";
+  if (url.includes("/embed/")) return url;
+
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|watch\?.+&v=|shorts\/))([^#&?]+)/);
+  return match?.[1] ? `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0` : url;
+}
 
 
 type SourceItem = {
@@ -263,12 +279,14 @@ function SectionIntro({
 function BrandImage({
   src,
   label,
+  linkUrl,
   className = "",
   ratio = "aspect-[4/3]",
   muted = false,
 }: {
   src?: string;
   label: string;
+  linkUrl?: string;
   className?: string;
   ratio?: string;
   muted?: boolean;
@@ -283,7 +301,7 @@ function BrandImage({
     );
   }
 
-  return (
+  const content = (
     <CurtainHover
       overlayMode="full"
       overlayContent={
@@ -307,6 +325,15 @@ function BrandImage({
       </div>
     </CurtainHover>
   );
+
+  if (!linkUrl) return content;
+
+  const isExternal = linkUrl.startsWith("http");
+  return (
+    <Link href={linkUrl} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined}>
+      {content}
+    </Link>
+  );
 }
 
 function ValueCard({
@@ -314,7 +341,7 @@ function ValueCard({
   index,
   className = "bg-white",
 }: {
-  item: IconBlock & { image?: string; slug?: string };
+  item: IconBlock & { image?: string; slug?: string; linkUrl?: string };
   index: number;
   className?: string;
 }) {
@@ -365,9 +392,12 @@ function ValueCard({
       </motion.div>
     );
 
-    if (item.slug) {
+    const itemHref = item.linkUrl || (item.slug ? `/tin-tuc/${item.slug}` : "");
+
+    if (itemHref) {
+      const isExternal = itemHref.startsWith("http");
       return (
-        <Link href={`/tin-tuc/${item.slug}`} className="block h-full">
+        <Link href={itemHref} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noreferrer" : undefined} className="block h-full">
           {cardContent}
         </Link>
       );
@@ -522,6 +552,7 @@ function DBPostCard({
 
 export default function AboutPage() {
   const [dbPosts, setDbPosts] = useState<DBPost[]>([]);
+  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
   const postImagesBySlug = dbPosts.reduce<Record<string, string>>((acc, post) => {
     if (post.slug && post.coverImageUrl) acc[post.slug] = post.coverImageUrl;
     return acc;
@@ -545,17 +576,48 @@ export default function AboutPage() {
     fetchDbPosts();
   }, []);
 
+  useEffect(() => {
+    async function fetchPageAssets() {
+      try {
+        const res = await fetch("/api/settings/marketing");
+        if (!res.ok) return;
+        const data = await res.json();
+        setPageAssets(normalizeMarketingConfig(data?.data).pageAssets);
+      } catch (error) {
+        console.error("Failed to fetch configurable page assets:", error);
+      }
+    }
+
+    fetchPageAssets();
+  }, []);
+
   const displayPosts = dbPosts.slice(0, 3);
-  const processDisplaySteps = processSteps.map((item) => ({
+  const assetByKey = pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
+    if (item.key) acc[item.key] = item;
+    return acc;
+  }, {});
+  const processDisplaySteps = processSteps.map((item, index) => ({
     ...item,
-    image: item.slug ? postImagesBySlug[item.slug] : undefined,
+    image: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.imageUrl || (item.slug ? postImagesBySlug[item.slug] : undefined),
+    linkUrl: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.linkUrl || (item.slug ? `/tin-tuc/${item.slug}` : undefined),
   }));
-  const galleryImages = dbPosts
+  const configuredGalleryImages = Array.from({ length: 6 })
+    .map((_, index) => assetByKey[`about_gallery_${index + 1}`])
+    .filter((asset): asset is PageAssetItem => Boolean(asset?.imageUrl))
+    .map((asset) => ({
+      src: asset.imageUrl,
+      label: asset.label || asset.key,
+      linkUrl: asset.linkUrl,
+    }));
+  const fallbackGalleryImages = dbPosts
     .filter((post) => post.coverImageUrl)
     .slice(0, 6)
-    .map((post) => ({ src: post.coverImageUrl as string, label: post.title }));
-  const factoryImage = postImagesBySlug["khanh-thanh-nha-may-3300m2"] || galleryImages[0]?.src;
-  const teamImage = galleryImages[galleryImages.length - 1]?.src;
+    .map((post) => ({ src: post.coverImageUrl as string, label: post.title, linkUrl: `/tin-tuc/${post.slug}` }));
+  const galleryImages = configuredGalleryImages.length > 0 ? configuredGalleryImages : fallbackGalleryImages;
+  const factoryImage = assetByKey.about_process_background?.imageUrl || postImagesBySlug["khanh-thanh-nha-may-3300m2"] || galleryImages[0]?.src;
+  const teamImage = assetByKey.about_team_quote?.imageUrl || galleryImages[galleryImages.length - 1]?.src;
+  const teamLink = assetByKey.about_team_quote?.linkUrl;
+  const aboutVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0");
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
@@ -645,7 +707,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="grid border-b border-orange-100 bg-[#fffaf2] lg:grid-cols-[0.95fr_1.05fr]">
+      <section id="about-video" className="scroll-mt-24 grid border-b border-orange-100 bg-[#fffaf2] lg:grid-cols-[0.95fr_1.05fr]">
         <div className="px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
           <SectionIntro
             label="Không chỉ là đồ ăn vặt"
@@ -673,7 +735,7 @@ export default function AboutPage() {
 
         <div className="relative w-full min-h-[350px] sm:min-h-[450px] lg:min-h-[500px] bg-black lg:border-l lg:border-t-0 border-t border-orange-100 overflow-hidden">
           <iframe
-            src="https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0"
+            src={aboutVideoUrl}
             title="Hành trình thương hiệu Ăn Cùng Bà Tuyết"
             className="w-full h-full border-none absolute inset-0 z-10"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -682,7 +744,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="relative border-b border-orange-100 bg-white overflow-hidden">
+      <section id="about-process" className="scroll-mt-24 relative border-b border-orange-100 bg-white overflow-hidden">
         {/* Underlay background image */}
         <div className="absolute inset-0 z-0">
           <img
@@ -868,7 +930,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-b border-orange-100 bg-white">
+      <section id="about-gallery" className="scroll-mt-24 border-b border-orange-100 bg-white">
         <div className="grid lg:grid-cols-[0.52fr_1.48fr]">
           <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
@@ -892,6 +954,7 @@ export default function AboutPage() {
                   <BrandImage
                     src={image.src}
                     label={image.label}
+                    linkUrl={image.linkUrl}
                     ratio="aspect-[5/3]"
                     muted={index > 1}
                   />
@@ -1008,11 +1071,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="grid border-b border-orange-100 bg-white lg:grid-cols-[0.8fr_1.2fr]">
+      <section id="about-team" className="scroll-mt-24 grid border-b border-orange-100 bg-white lg:grid-cols-[0.8fr_1.2fr]">
         <div className="min-h-[280px] border-b border-orange-100 lg:min-h-[360px] lg:border-b-0 lg:border-r">
           <BrandImage
             src={teamImage}
             label="Đội ngũ vận hành / ảnh minh hoạ"
+            linkUrl={teamLink}
             ratio="aspect-auto"
             className="h-full"
             muted

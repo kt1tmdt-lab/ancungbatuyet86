@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 
+const CONTACT_STATUSES = ["NEW", "READ", "RESPONDED"] as const;
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = getTokenFromReq(req);
@@ -15,7 +17,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const resolvedParams = await params;
     const body = await req.json();
     
-    if (!body.status) {
+    if (!CONTACT_STATUSES.includes(body.status)) {
       return NextResponse.json({ error: "Status is required" }, { status: 400 });
     }
 

@@ -1,65 +1,52 @@
-# Deploy voi PostgreSQL hosting
+# Deploy PostgreSQL local tren VPS
 
-Du an nay da dung Prisma voi PostgreSQL trong `prisma/schema.prisma`, nen khong can doi database provider. Khi deploy, ban chi can tao database PostgreSQL tren hosting va gan `DATABASE_URL`.
+Du an dung Prisma voi PostgreSQL trong `prisma/schema.prisma`, nen khong can doi database provider. Tren VPS, chi can tao PostgreSQL local, gan `DATABASE_URL`, chay migration va build app.
 
-## 1. Chon hosting
+## 1. Tao database
 
-De don gian, nen tach thanh 2 phan:
+Trong VPS:
 
-- App Next.js: Vercel, Render, Railway, VPS hoac hosting Node.js co ho tro `npm run build` va `npm run start`.
-- Database PostgreSQL: Neon, Supabase, Railway PostgreSQL, Render PostgreSQL, Aiven hoac PostgreSQL tren VPS.
-
-Neu deploy tren Vercel, minh khuyen dung Neon hoac Supabase PostgreSQL vi de set SSL va bien moi truong.
-
-## 2. Tao PostgreSQL database
-
-Sau khi tao database, hosting se cung cap connection string dang:
-
-```txt
-postgresql://USER:PASSWORD@HOST:5432/DATABASE
+```bash
+sudo -u postgres psql
 ```
 
-Hay them `?schema=public&sslmode=require` neu hosting yeu cau SSL:
+Trong `psql`:
 
-```txt
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public&sslmode=require"
+```sql
+CREATE USER acbt_user WITH PASSWORD 'Ancungbatuyet2026@';
+CREATE DATABASE acbt_web OWNER acbt_user;
+GRANT ALL PRIVILEGES ON DATABASE acbt_web TO acbt_user;
+\q
 ```
 
-Luu y:
+## 2. Cau hinh `.env`
 
-- Khong commit `.env`.
-- Dung password database that manh.
-- Neu provider co ca pooled URL va direct URL, dung direct URL khi chay migration. Pooled URL co the dung cho runtime neu provider huong dan ho tro Prisma.
+Trong thu muc app tren VPS:
 
-## 3. Set bien moi truong tren hosting
-
-Bat buoc:
-
-```txt
-DATABASE_URL=
-JWT_SECRET=
-NEXT_PUBLIC_SITE_URL=
+```bash
+nano .env
 ```
 
-Neu can upload anh trong admin, bat buoc cau hinh Cloudflare R2:
+Vi du:
 
 ```txt
-R2_ENDPOINT_URL=
-R2_ACCESS_KEY_ID=
-R2_SECRET_ACCESS_KEY=
-R2_BUCKET_NAME=
-R2_PUBLIC_DOMAIN=
+DATABASE_URL="postgresql://acbt_user:Ancungbatuyet2026%40@localhost:5432/acbt_web?schema=public"
+JWT_SECRET="change-this-to-a-long-random-secret"
+NEXT_PUBLIC_SITE_URL="https://your-domain.com"
+UPLOAD_DIR="/var/www/acbt-uploads"
+UPLOAD_PUBLIC_URL="https://your-domain.com/uploads"
 ```
 
-`NEXT_PUBLIC_SITE_URL` nen la domain production, vi du:
+## 3. Tao thu muc upload
 
-```txt
-NEXT_PUBLIC_SITE_URL="https://acbt.vn"
+```bash
+sudo mkdir -p /var/www/acbt-uploads
+sudo chown -R $USER:$USER /var/www/acbt-uploads
 ```
 
-## 4. Lenh build/deploy
+Nginx can map `/uploads` ve `/var/www/acbt-uploads`.
 
-Tren hosting, dung:
+## 4. Deploy
 
 ```bash
 npm ci
@@ -68,41 +55,24 @@ npm run build
 npm run start
 ```
 
-Neu hosting chi cho khai bao command:
-
-```txt
-Build command: npm ci && npm run db:migrate:deploy && npm run build
-Start command: npm run start
-```
-
-Vercel thuong tu chay `npm install` va `npm run build`; khi do co 2 cach:
-
-- Chay migration tu may local sau khi set `DATABASE_URL` production.
-- Hoac them migration vao build command tren dashboard: `npm run db:migrate:deploy && npm run build`.
-
-## 5. Chay migration tu may local
-
-Sau khi dien `DATABASE_URL` cua database hosting vao `.env`, chay:
+Neu dung PM2:
 
 ```bash
-npm run db:migrate:deploy
+pm2 start npm --name acbt-web -- run start
+pm2 save
 ```
 
-Kiem tra ket noi:
+## 5. Kiem tra database
 
 ```bash
 node scripts/check-db.js
 ```
 
-## 6. Seed du lieu ban dau
-
-Neu database production dang trong, co the chay:
+## 6. Seed neu database trong
 
 ```bash
 npm run seed
 ```
-
-Sau khi seed, dang nhap admin bang tai khoan seed va doi mat khau ngay trong database/admin flow neu co.
 
 Tai khoan seed hien tai:
 
@@ -110,17 +80,23 @@ Tai khoan seed hien tai:
 admin@acbt.local / 123456
 ```
 
-## 7. Luu y quan trong cho upload anh
+Doi mat khau ngay sau khi dang nhap admin.
 
-Hosting nhu Vercel/Render thuong khong nen luu upload vao o dia local. Du an nay da co upload qua Cloudflare R2, vi vay can cau hinh R2 truoc khi dung CMS upload anh tren production.
+## 7. Keo anh remote ve VPS
 
-Neu chua cau hinh R2, API upload se tra loi loi cau hinh R2.
-
-## 8. Checklist truoc khi public
+Sau khi `.env` da tro dung database production/local:
 
 ```bash
-npm run typecheck
-npm run build
+npm run media:migrate-local
 ```
 
-Truoc khi chay migration production, nen backup database tren dashboard hosting.
+Script se tai anh remote ve `UPLOAD_DIR` va cap nhat database sang URL local.
+
+## 8. Backup
+
+Backup ca database va uploads:
+
+```bash
+pg_dump "$DATABASE_URL" > backup-acbt.sql
+tar -czf backup-acbt-uploads.tar.gz /var/www/acbt-uploads
+```

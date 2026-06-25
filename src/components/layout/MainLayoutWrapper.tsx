@@ -4,15 +4,18 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import type { SiteConfigData } from "@/lib/site-config-defaults";
 
 export default function MainLayoutWrapper({
   children,
+  initialConfig,
 }: {
   children: React.ReactNode;
+  initialConfig?: SiteConfigData;
 }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<SiteConfigData | undefined>(initialConfig);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -33,7 +36,7 @@ export default function MainLayoutWrapper({
 
   return (
     <>
-      <Navbar initialLinks={config?.navbarLinks} />
+      <Navbar initialLinks={config?.navbarLinks} initialContact={config?.footerContact} />
       <main className="flex-1 pt-16 lg:pt-18">{children}</main>
       <Footer initialLinks={config?.footerLinks} initialContact={config?.footerContact} />
     </>
