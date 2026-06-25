@@ -4,7 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import CurtainHover from "@/components/shared/CurtainHover";
-import { normalizeMarketingConfig, type PageAssetItem } from "@/lib/marketing-config";
+import {
+  DEFAULT_MARKETING_CONFIG,
+  normalizeMarketingConfig,
+  type PageAssetItem,
+  type TrustSectionItem,
+} from "@/lib/marketing-config";
 import {
   ArrowRight,
   Heart,
@@ -553,6 +558,9 @@ function DBPostCard({
 export default function AboutPage() {
   const [dbPosts, setDbPosts] = useState<DBPost[]>([]);
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
+  const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(
+    DEFAULT_MARKETING_CONFIG.trustSections,
+  );
   const postImagesBySlug = dbPosts.reduce<Record<string, string>>((acc, post) => {
     if (post.slug && post.coverImageUrl) acc[post.slug] = post.coverImageUrl;
     return acc;
@@ -582,7 +590,9 @@ export default function AboutPage() {
         const res = await fetch("/api/settings/marketing");
         if (!res.ok) return;
         const data = await res.json();
-        setPageAssets(normalizeMarketingConfig(data?.data).pageAssets);
+        const marketingConfig = normalizeMarketingConfig(data?.data);
+        setPageAssets(marketingConfig.pageAssets);
+        setTrustSections(marketingConfig.trustSections);
       } catch (error) {
         console.error("Failed to fetch configurable page assets:", error);
       }
@@ -618,6 +628,42 @@ export default function AboutPage() {
   const teamImage = assetByKey.about_team_quote?.imageUrl || galleryImages[galleryImages.length - 1]?.src;
   const teamLink = assetByKey.about_team_quote?.linkUrl;
   const aboutVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0");
+  const enabledTrustSections = trustSections.filter((item) => item.enabled);
+  const trustByKey = enabledTrustSections.reduce<Record<string, TrustSectionItem>>((acc, item) => {
+    acc[item.key] = item;
+    return acc;
+  }, {});
+  const trustGroups = [
+    {
+      label: "Phap ly & bao ve khach hang",
+      title: "Ho so minh bach de khach hang an tam",
+      icon: ShieldCheck,
+      keys: ["food_safety_certificate", "pvi_insurance"],
+    },
+    {
+      label: "Hanh trinh & ghi nhan",
+      title: "Cau chuyen phat trien co dau moc",
+      icon: Trophy,
+      keys: ["company_history", "achievements"],
+    },
+    {
+      label: "Van hanh san xuat",
+      title: "Quy trinh duoc tach rieng de de theo doi",
+      icon: Factory,
+      keys: ["production_process", "brand_story"],
+    },
+    {
+      label: "Dinh huong thuong hieu",
+      title: "Su menh va tam nhin nam o phan chien luoc",
+      icon: Target,
+      keys: ["mission", "vision"],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      items: group.keys.map((key) => trustByKey[key]).filter((item): item is TrustSectionItem => Boolean(item)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
@@ -968,6 +1014,95 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {trustGroups.length > 0 && (
+        <section id="ho-so-uy-tin" className="scroll-mt-24 border-b border-orange-100 bg-white">
+          <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
+            <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
+              <SectionIntro
+                label="Ho so uy tin"
+                title="Khong don mot cuc, moi bang chung nam dung ngu canh."
+                description="Cac chung nhan, bao hiem, lich su, thanh tich, quy trinh va dinh huong thuong hieu duoc trai thanh tung cum de khach hang doc cham hon va tin nhanh hon."
+              />
+            </div>
+
+            <div className="grid xl:grid-cols-2">
+              {trustGroups.map((group, groupIndex) => {
+                const Icon = group.icon;
+
+                return (
+                  <motion.div
+                    key={group.label}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: groupIndex * 0.06 }}
+                    className="border-b border-orange-100 bg-[#fffaf3] xl:border-r xl:odd:border-r"
+                  >
+                    <div className="flex items-start gap-4 border-b border-orange-100 bg-white p-6">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-orange-600 text-white">
+                        <Icon size={22} />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-700">
+                          {group.label}
+                        </p>
+                        <h3 className="mt-2 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950">
+                          {group.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2">
+                      {group.items.map((item) => {
+                        const content = (
+                          <article className="group h-full border-b border-orange-100 bg-white">
+                            <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
+                              {item.imageUrl ? (
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.title}
+                                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-orange-500">
+                                  <BadgeCheck size={34} />
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-5">
+                              <h4 className="line-clamp-2 text-base font-black leading-tight tracking-[-0.02em] text-slate-950">
+                                {item.title}
+                              </h4>
+                              <p className="mt-3 line-clamp-4 text-sm leading-6 text-slate-600">
+                                {item.description}
+                              </p>
+                              {item.linkUrl && (
+                                <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700">
+                                  Xem them
+                                  <ArrowRight size={14} />
+                                </span>
+                              )}
+                            </div>
+                          </article>
+                        );
+
+                        if (!item.linkUrl) return <div key={item.id}>{content}</div>;
+
+                        return (
+                          <Link key={item.id} href={item.linkUrl} className="block h-full">
+                            {content}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="border-b border-orange-100 bg-[#f7efe3]">
         <div className="grid lg:grid-cols-[0.62fr_1.38fr]">

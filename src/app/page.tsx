@@ -1276,50 +1276,72 @@ function TrustEvidenceSections() {
       });
   }, []);
 
-  const items = config.trustSections.filter((item) => item.enabled);
+  const priorityKeys = [
+    "food_safety_certificate",
+    "pvi_insurance",
+    "production_process",
+    "brand_story",
+  ];
+  const enabledItems = config.trustSections.filter((item) => item.enabled);
+  const items = priorityKeys
+    .map((key) => enabledItems.find((item) => item.key === key))
+    .filter((item): item is (typeof enabledItems)[number] => Boolean(item))
+    .concat(enabledItems.filter((item) => !priorityKeys.includes(item.key)))
+    .slice(0, 4);
   if (items.length === 0) return null;
 
   return (
-    <section id="uy-tin" className="scroll-mt-24 border-y border-orange-100 bg-white">
-      <div className="grid lg:grid-cols-[0.42fr_1.58fr]">
-        <div className="border-b border-orange-100 bg-[#fff8ed] px-5 py-14 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
-          <SectionTitle
-            label="Nang luc & uy tin"
-            title="Ho so minh bach de khach hang an tam."
-            description="Cac chung nhan, cau chuyen, quy trinh va dinh huong thuong hieu duoc quan ly truc tiep tu CMS Marketing."
-          />
+    <section id="uy-tin" className="scroll-mt-24 border-y border-orange-100 bg-[#fffaf3]">
+      <div className="px-5 py-12 sm:px-8 lg:px-16">
+        <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="inline-flex items-center gap-2 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+              <ShieldCheck size={14} />
+              Tín hiệu tin cậy
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
+              Một vài bằng chứng chính, không dồn hết vào một chỗ.
+            </h2>
+          </div>
+          <Link
+            href="/gioi-thieu#ho-so-uy-tin"
+            className="inline-flex w-fit items-center gap-2 border border-orange-200 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
+          >
+            Xem hồ sơ đầy đủ
+            <ArrowRight size={15} />
+          </Link>
         </div>
 
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {items.map((item, index) => {
             const card = (
-              <article className="group h-full border-b border-r border-orange-100 bg-white transition hover:bg-orange-50">
-                <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+              <article className="group grid h-full grid-cols-[92px_1fr] overflow-hidden border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg">
+                <div className="relative h-full min-h-[132px] overflow-hidden bg-slate-100">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-orange-500">
-                      <ShieldCheck size={36} />
+                    <div className="flex h-full items-center justify-center bg-orange-50 text-orange-500">
+                      <ShieldCheck size={28} />
                     </div>
                   )}
                 </div>
-                <div className="p-5">
+                <div className="p-4">
                   <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
-                    Ho so 0{index + 1}
+                    Bằng chứng 0{index + 1}
                   </p>
-                  <h3 className="mt-2 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950">
+                  <h3 className="mt-2 line-clamp-2 text-base font-black leading-tight tracking-[-0.02em] text-slate-950">
                     {item.title}
                   </h3>
-                  <p className="mt-3 line-clamp-4 text-sm font-medium leading-6 text-slate-600">
+                  <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">
                     {item.description}
                   </p>
                   {item.linkUrl && (
-                    <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
-                      Xem chi tiet
+                    <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">
+                      Chi tiết
                       <ArrowRight size={14} />
                     </span>
                   )}
