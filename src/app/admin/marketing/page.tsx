@@ -256,6 +256,8 @@ function MarketingPageContent() {
       key: `custom_${Date.now()}`,
       title: "",
       description: "",
+      detailTitle: "",
+      detailContent: "",
       imageUrl: "",
       linkUrl: "",
       enabled: true,
@@ -676,9 +678,9 @@ function MarketingPageContent() {
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h2 className="text-base font-black text-slate-900 uppercase">Noi dung the hien uy tin</h2>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Nội dung thể hiện uy tín</h2>
                     <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
-                      Quan ly cac khoi nhu giay ve sinh an toan thuc pham, bao hiem PVI, lich su cong ty, thanh tich, quy trinh, cau chuyen, su menh va tam nhin.
+                      Quản lý chứng nhận, bảo hiểm, lịch sử công ty, thành tích, quy trình và câu chuyện thương hiệu. Mỗi mục có phần chi tiết riêng để khách bấm xem thêm.
                     </p>
                   </div>
                   <button
@@ -686,7 +688,7 @@ function MarketingPageContent() {
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
                   >
                     <Plus size={14} />
-                    Them muc
+                    Thêm mục
                   </button>
                 </div>
 
@@ -715,13 +717,13 @@ function MarketingPageContent() {
                               onChange={(e) => updateTrustSection(item.id, "enabled", e.target.checked)}
                               className="h-4 w-4 accent-orange-500"
                             />
-                            Hien thi ngoai website
+                            Hiển thị ngoài website
                           </label>
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-[0.8fr_1.2fr]">
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ma muc</label>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mã mục</label>
                             <input
                               type="text"
                               value={item.key}
@@ -730,7 +732,7 @@ function MarketingPageContent() {
                             />
                           </div>
                           <div>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tieu de</label>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tiêu đề</label>
                             <input
                               type="text"
                               value={item.title}
@@ -741,7 +743,7 @@ function MarketingPageContent() {
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mo ta</label>
+                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mô tả ngắn</label>
                           <textarea
                             value={item.description}
                             onChange={(e) => updateTrustSection(item.id, "description", e.target.value)}
@@ -750,10 +752,33 @@ function MarketingPageContent() {
                           />
                         </div>
 
+                        <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tiêu đề chi tiết</label>
+                            <input
+                              type="text"
+                              value={item.detailTitle}
+                              onChange={(e) => updateTrustSection(item.id, "detailTitle", e.target.value)}
+                              placeholder="Ví dụ: Hồ sơ an toàn thực phẩm"
+                              className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nội dung chi tiết khi bấm xem thêm</label>
+                            <textarea
+                              value={item.detailContent}
+                              onChange={(e) => updateTrustSection(item.id, "detailContent", e.target.value)}
+                              rows={4}
+                              placeholder="Viết nội dung chi tiết, mỗi ý có thể xuống dòng."
+                              className="w-full resize-none border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                            />
+                          </div>
+                        </div>
+
                         <div className="grid gap-4 xl:grid-cols-2">
                           <div>
                             <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
-                              <ImageIcon size={11} /> URL anh
+                              <ImageIcon size={11} /> URL ảnh
                             </label>
                             <div className="flex gap-2">
                               <input
@@ -768,7 +793,7 @@ function MarketingPageContent() {
                                 className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                               >
                                 <ImagePlus size={14} />
-                                Thu vien
+                                Thư viện
                               </button>
                             </div>
                           </div>
@@ -791,7 +816,7 @@ function MarketingPageContent() {
                         className="flex h-fit items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 lg:self-center"
                       >
                         <Trash2 size={16} />
-                        Xoa
+                        Xóa
                       </button>
                     </div>
                   ))}

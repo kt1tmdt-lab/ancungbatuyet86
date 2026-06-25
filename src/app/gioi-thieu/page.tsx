@@ -561,6 +561,7 @@ export default function AboutPage() {
   const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(
     DEFAULT_MARKETING_CONFIG.trustSections,
   );
+  const [activeTrustKey, setActiveTrustKey] = useState("");
   const postImagesBySlug = dbPosts.reduce<Record<string, string>>((acc, post) => {
     if (post.slug && post.coverImageUrl) acc[post.slug] = post.coverImageUrl;
     return acc;
@@ -658,6 +659,8 @@ export default function AboutPage() {
       items: group.keys.map((key) => trustByKey[key]).filter((item): item is TrustSectionItem => Boolean(item)),
     }))
     .filter((group) => group.items.length > 0);
+  const allTrustItems = trustGroups.flatMap((group) => group.items);
+  const activeTrustItem = allTrustItems.find((item) => item.key === activeTrustKey) || allTrustItems[0];
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
@@ -1020,74 +1023,133 @@ export default function AboutPage() {
               />
             </div>
 
-            <div className="grid xl:grid-cols-2">
-              {trustGroups.map((group, groupIndex) => {
-                const Icon = group.icon;
+            <div className="grid bg-white xl:grid-cols-[0.92fr_1.08fr]">
+              <div className="border-b border-orange-100 xl:border-b-0 xl:border-r">
+                {trustGroups.map((group, groupIndex) => {
+                  const Icon = group.icon;
 
-                return (
-                  <motion.div
-                    key={group.label}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: groupIndex * 0.06 }}
-                    className="border-b border-orange-100 bg-[#fffaf3] xl:border-r xl:odd:border-r"
-                  >
-                    <div className="flex items-start gap-4 border-b border-orange-100 bg-white p-6">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-orange-600 text-white">
-                        <Icon size={22} />
+                  return (
+                    <motion.div
+                      key={group.label}
+                      initial={{ opacity: 0, y: 18 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: groupIndex * 0.05 }}
+                      className="border-b border-orange-100 last:border-b-0"
+                    >
+                      <div className="flex items-start gap-4 bg-[#fffaf3] p-5">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-orange-600 text-white">
+                          <Icon size={20} />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-700">
+                            {group.label}
+                          </p>
+                          <h3 className="mt-1 text-lg font-black leading-tight tracking-[-0.03em] text-slate-950">
+                            {group.title}
+                          </h3>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-700">
-                          {group.label}
-                        </p>
-                        <h3 className="mt-2 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950">
-                          {group.title}
-                        </h3>
-                      </div>
-                    </div>
 
-                    <div className="grid sm:grid-cols-2">
-                      {group.items.map((item) => {
-                        return (
-                          <article key={item.id} className="group h-full border-b border-orange-100 bg-white">
-                            <div className="relative aspect-[4/3] overflow-hidden bg-orange-50">
-                              {item.imageUrl ? (
-                                <img
-                                  src={item.imageUrl}
-                                  alt=""
-                                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                />
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-orange-500">
-                                  <BadgeCheck size={34} />
-                                </div>
-                              )}
-                            </div>
-                            <div className="p-5">
-                              <h4 className="line-clamp-2 text-base font-black leading-tight tracking-[-0.02em] text-slate-950">
-                                {item.title}
-                              </h4>
-                              <p className="mt-3 line-clamp-4 text-sm leading-6 text-slate-600">
-                                {item.description}
-                              </p>
-                              {item.linkUrl && (
-                                <Link
-                                  href={item.linkUrl}
-                                  className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:text-orange-900 hover:underline"
-                                >
-                                  Xem thêm
-                                  <ArrowRight size={14} />
-                                </Link>
-                              )}
-                            </div>
-                          </article>
-                        );
-                      })}
+                      <div className="divide-y divide-orange-100">
+                        {group.items.map((item) => {
+                          const isActive = activeTrustItem?.key === item.key;
+
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => setActiveTrustKey(item.key)}
+                              className={`grid w-full grid-cols-[72px_1fr_auto] items-center gap-4 p-4 text-left transition ${
+                                isActive ? "bg-orange-50" : "bg-white hover:bg-orange-50/70"
+                              }`}
+                            >
+                              <div className="relative h-16 overflow-hidden bg-orange-50">
+                                {item.imageUrl ? (
+                                  <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="flex h-full items-center justify-center text-orange-500">
+                                    <BadgeCheck size={24} />
+                                  </div>
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-black leading-tight text-slate-950">
+                                  {item.title}
+                                </h4>
+                                <p className="mt-1 line-clamp-2 text-xs font-medium leading-5 text-slate-500">
+                                  {item.description}
+                                </p>
+                              </div>
+                              <span className={`text-xs font-black uppercase tracking-[0.14em] ${
+                                isActive ? "text-orange-700" : "text-slate-300"
+                              }`}>
+                                Xem
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {activeTrustItem && (
+                <motion.article
+                  key={activeTrustItem.key}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="bg-slate-950 text-white"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
+                    {activeTrustItem.imageUrl ? (
+                      <img
+                        src={activeTrustItem.imageUrl}
+                        alt=""
+                        className="h-full w-full object-cover opacity-80"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-orange-300">
+                        <BadgeCheck size={48} />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-300">
+                        Chi tiết hồ sơ
+                      </p>
+                      <h3 className="mt-2 text-2xl font-black leading-tight tracking-[-0.04em]">
+                        {activeTrustItem.detailTitle || activeTrustItem.title}
+                      </h3>
                     </div>
-                  </motion.div>
-                );
-              })}
+                  </div>
+
+                  <div className="p-6 sm:p-8">
+                    <p className="text-base font-semibold leading-8 text-white/78">
+                      {activeTrustItem.description}
+                    </p>
+                    <div className="mt-6 space-y-3 border-t border-white/10 pt-6 text-sm leading-7 text-white/68">
+                      {(activeTrustItem.detailContent || "Nội dung chi tiết sẽ được cập nhật trong CMS Marketing.")
+                        .split(/\n+/)
+                        .filter(Boolean)
+                        .map((paragraph) => (
+                          <p key={paragraph}>{paragraph}</p>
+                        ))}
+                    </div>
+                    {activeTrustItem.linkUrl && activeTrustItem.linkUrl !== "/gioi-thieu" && (
+                      <Link
+                        href={activeTrustItem.linkUrl}
+                        className="mt-7 inline-flex items-center gap-2 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-slate-950 transition hover:bg-orange-500 hover:text-white"
+                      >
+                        Mở trang liên quan
+                        <ArrowRight size={14} />
+                      </Link>
+                    )}
+                  </div>
+                </motion.article>
+              )}
             </div>
           </div>
         </section>

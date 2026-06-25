@@ -35,6 +35,8 @@ export type TrustSectionItem = {
   key: string;
   title: string;
   description: string;
+  detailTitle: string;
+  detailContent: string;
   imageUrl: string;
   linkUrl: string;
   enabled: boolean;
@@ -244,6 +246,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "food_safety_certificate",
       title: "Giấy vệ sinh an toàn thực phẩm",
       description: "Khu vực dành cho giấy chứng nhận, hồ sơ pháp lý và tiêu chuẩn an toàn thực phẩm của thương hiệu.",
+      detailTitle: "Hồ sơ an toàn thực phẩm",
+      detailContent: "Đưa hình ảnh giấy chứng nhận, ngày cấp, đơn vị cấp và phạm vi áp dụng vào đây để khách hàng có thể kiểm chứng nhanh. Nên bổ sung ảnh thật của giấy tờ và ghi rõ sản phẩm hoặc cơ sở sản xuất liên quan.",
       imageUrl: "/bento/bento-insurance.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -253,6 +257,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "pvi_insurance",
       title: "Bảo hiểm PVI",
       description: "Thể hiện cam kết bảo vệ người tiêu dùng và trách nhiệm của doanh nghiệp với sản phẩm đưa ra thị trường.",
+      detailTitle: "Cam kết bảo vệ người tiêu dùng",
+      detailContent: "Trình bày số hợp đồng, phạm vi bảo hiểm, thời hạn hiệu lực và ý nghĩa của bảo hiểm đối với khách hàng. Phần này giúp người mua hiểu doanh nghiệp có trách nhiệm rõ ràng với sản phẩm.",
       imageUrl: "/bento/bento-insurance.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -262,6 +268,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "company_history",
       title: "Lịch sử hình thành công ty",
       description: "Tóm tắt hành trình phát triển, các mốc quan trọng và bước chuyển từ căn bếp nhỏ đến vận hành bài bản.",
+      detailTitle: "Hành trình phát triển",
+      detailContent: "Kể các cột mốc quan trọng theo thời gian: lúc bắt đầu bán hàng, mở rộng đội ngũ, xây dựng nhà xưởng, phát triển kênh online và các bước chuyển giúp thương hiệu vận hành chuyên nghiệp hơn.",
       imageUrl: "/hero/ba-tuyet-character.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -271,6 +279,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "achievements",
       title: "Thành tích đáng tự hào",
       description: "Khu vực trưng bày cúp, giải thưởng, dấu mốc kinh doanh và những ghi nhận nổi bật của thương hiệu.",
+      detailTitle: "Dấu mốc và ghi nhận",
+      detailContent: "Ghi rõ các cúp, giải thưởng, xếp hạng sàn thương mại điện tử, doanh số hoặc bài báo tiêu biểu. Nên ưu tiên số liệu có nguồn đối chiếu để tăng độ tin cậy.",
       imageUrl: "/bento/bento-tiktok.png",
       linkUrl: "/tin-tuc",
       enabled: true,
@@ -280,6 +290,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "production_process",
       title: "Quy trình sản xuất",
       description: "Mô tả các bước chọn nguyên liệu, sơ chế, kiểm soát chất lượng, đóng gói và phân phối.",
+      detailTitle: "Từ nguyên liệu đến đóng gói",
+      detailContent: "Mô tả ngắn từng bước: chọn nguyên liệu, sơ chế, tẩm ướp, kiểm soát chất lượng, đóng gói, lưu kho và vận chuyển. Có thể thêm ảnh xưởng hoặc ảnh từng công đoạn để khách hàng thấy quy trình thật.",
       imageUrl: "/bento/bento-factory.png",
       linkUrl: "/quy-trinh",
       enabled: true,
@@ -289,6 +301,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "brand_story",
       title: "Câu chuyện thương hiệu",
       description: "Câu chuyện về con người, sản phẩm và tinh thần gần gũi làm nên Ăn Cùng Bà Tuyết.",
+      detailTitle: "Tinh thần làm thật, bán thật",
+      detailContent: "Kể câu chuyện thương hiệu bằng giọng gần gũi: vì sao chọn ngành ăn vặt, điều gì khiến khách hàng nhớ đến Bà Tuyết, và đội ngũ giữ chất lượng sản phẩm như thế nào qua từng ngày.",
       imageUrl: "/hero/chan-ga-poster.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -298,6 +312,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "mission",
       title: "Sứ mệnh",
       description: "Mang đến các món ăn vặt sạch, ngon, dễ tiếp cận và có thông tin minh bạch cho khách hàng.",
+      detailTitle: "Sứ mệnh thương hiệu",
+      detailContent: "Nêu rõ thương hiệu muốn giải quyết điều gì cho khách hàng: đồ ăn vặt ngon, dễ mua, rõ nguồn gốc và được phục vụ tử tế.",
       imageUrl: "/hero/chan-ga-plate.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -307,6 +323,8 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       key: "vision",
       title: "Tầm nhìn",
       description: "Trở thành thương hiệu đồ ăn vặt Việt Nam có quy trình, uy tín và được yêu thích rộng rãi.",
+      detailTitle: "Tầm nhìn dài hạn",
+      detailContent: "Mô tả mục tiêu phát triển trong vài năm tới: chuẩn hóa sản xuất, mở rộng kênh bán, xây dựng niềm tin và đưa sản phẩm ăn vặt Việt đến nhiều khách hàng hơn.",
       imageUrl: "/bento/bento-ingredients.png",
       linkUrl: "/gioi-thieu",
       enabled: true,
@@ -431,16 +449,20 @@ function normalizeTrustSections(input: unknown): TrustSectionItem[] {
       const key = stringValue(item.key);
       const title = stringValue(item.title);
       const description = stringValue(item.description);
+      const detailTitle = stringValue(item.detailTitle);
+      const detailContent = stringValue(item.detailContent);
       const imageUrl = stringValue(item.imageUrl);
       const linkUrl = stringValue(item.linkUrl);
 
-      if (!key && !title && !description && !imageUrl && !linkUrl) return null;
+      if (!key && !title && !description && !detailTitle && !detailContent && !imageUrl && !linkUrl) return null;
 
       return {
         id: itemId(item.id),
         key,
         title,
         description,
+        detailTitle,
+        detailContent,
         imageUrl,
         linkUrl,
         enabled: item.enabled !== false,
