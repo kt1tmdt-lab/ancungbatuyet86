@@ -174,7 +174,7 @@ function BrandImage({
       <div
         className={`flex items-center justify-center border border-dashed border-orange-200 bg-orange-50 px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-orange-500 ${ratio} ${className}`}
       >
-        Chua co anh tu CMS
+        Chưa có hình ảnh
       </div>
     );
   }
@@ -440,17 +440,17 @@ export default function AboutPage() {
       <section id="about-video" className="scroll-mt-24 grid border-b border-orange-100 bg-[#fffaf2] lg:grid-cols-[0.95fr_1.05fr]">
         <div className="px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
           <SectionIntro
-            label="Không chỉ là đồ ăn vặt"
-            title="Một thương hiệu lớn lên từ sản phẩm, nội dung và niềm tin."
-            description="Video giới thiệu giúp khách hàng nhìn thấy tinh thần thương hiệu, sản phẩm và cách đội ngũ vận hành mỗi ngày."
+            label="Câu chuyện thương hiệu"
+            title="Từ căn bếp nhỏ đến thương hiệu hàng triệu khách hàng tin dùng."
+            description="Video giúp bạn nhìn thấy thật sự sản phẩm được làm ra như thế nào, bởi ai và với tinh thần gì."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {[
-              "Sản phẩm có nhận diện rõ",
-              "Bán hàng qua kênh chính thức",
-              "Câu chuyện thương hiệu gần gũi",
-              "Thông tin sản phẩm rõ ràng",
+              "Sản phẩm sạch, rõ nguồn gốc",
+              "Sản xuất tại xưởng có kiểm soát",
+              "Giao hàng toàn quốc qua sàn TMĐT",
+              "Được bảo hiểm sản phẩm bởi PVI",
             ].map((item) => (
               <div
                 key={item}
@@ -489,7 +489,7 @@ export default function AboutPage() {
           <div className="border-b border-orange-100 bg-[#f7efe3]/70 backdrop-blur-md px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
               label="Quy trình vận hành"
-              title="Nhìn giống công ty thực phẩm phải có quy trình rõ."
+              title="Quy trình sản xuất bài bản & an toàn"
               description="Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
             />
           </div>
@@ -519,7 +519,7 @@ export default function AboutPage() {
             <SectionIntro
               label="Định hướng thương hiệu"
               title="Sứ mệnh, tầm nhìn và giá trị cốt lõi."
-              description="Câu chuyện được kể gần gũi nhưng vẫn thể hiện rõ nền tảng của một doanh nghiệp sản xuất thực phẩm."
+              description="Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
             />
           </div>
 
@@ -540,7 +540,7 @@ export default function AboutPage() {
         <div className="min-h-[280px] border-b border-orange-100 lg:min-h-[360px] lg:border-b-0 lg:border-r">
           <BrandImage
             src={teamImage}
-            label="Đội ngũ vận hành / ảnh minh hoạ"
+            label="Đội ngũ Ăn Cùng Bà Tuyết"
             linkUrl={teamLink}
             ratio="aspect-auto"
             className="h-full"
@@ -577,11 +577,11 @@ export default function AboutPage() {
               Tiếp tục khám phá
             </p>
             <h2 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] sm:text-6xl">
-              Xem sản phẩm và quy trình phía sau thương hiệu.
+              Sản phẩm thật, quy trình rõ — mọi thứ đều có thể kiểm chứng.
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/70 sm:text-lg">
-              Trang giới thiệu tạo niềm tin, còn trang sản phẩm và quy trình sản
-              xuất giúp khách hàng hiểu rõ vì sao nên lựa chọn thương hiệu.
+              Khám phá danh sách sản phẩm đang bán chạy và toàn bộ quy trình từ
+              chọn nguyên liệu đến giao hàng tận tay khách hàng.
             </p>
           </div>
 
