@@ -47,12 +47,59 @@ declare global {
   }
 }
 
+function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 30 20" className={`${className} rounded-full object-cover inline-block shadow-sm border border-slate-100`}>
+      <rect width="30" height="20" fill="#da251d"/>
+      <polygon points="15,4 16.17,7.62 20,7.62 16.9,9.88 18.07,13.5 15,11.25 11.93,13.5 13.1,9.88 10,7.62 13.83,7.62" fill="#ffff00"/>
+    </svg>
+  );
+}
+
+function EnFlag({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 50 30" className={`${className} rounded-full object-cover inline-block shadow-sm border border-slate-100`}>
+      <rect width="50" height="30" fill="#012169"/>
+      <path d="M0,0 L50,30 M50,0 L0,30" stroke="#fff" stroke-width="6"/>
+      <path d="M0,0 L50,30 M50,0 L0,30" stroke="#c8102e" stroke-width="2"/>
+      <path d="M25,0 v30 M0,15 h50" stroke="#fff" stroke-width="10"/>
+      <path d="M25,0 v30 M0,15 h50" stroke="#c8102e" stroke-width="6"/>
+    </svg>
+  );
+}
+
 function setTranslateCookie(language: "vi" | "en") {
-  const value = language === "vi" ? "" : "/vi/en";
-  const maxAge = language === "vi" ? "Max-Age=0" : "Max-Age=31536000";
+  const value = language === "vi" ? "/vi/vi" : "/vi/en";
+  const maxAge = "Max-Age=31536000";
 
   document.cookie = `googtrans=${value}; Path=/; ${maxAge}`;
-  document.cookie = `googtrans=${value}; Domain=${window.location.hostname}; Path=/; ${maxAge}`;
+
+  const host = window.location.hostname;
+  document.cookie = `googtrans=${value}; Domain=${host}; Path=/; ${maxAge}`;
+
+  if (host.includes(".")) {
+    document.cookie = `googtrans=${value}; Domain=.${host}; Path=/; ${maxAge}`;
+    const parts = host.split(".");
+    if (parts.length > 2) {
+      const baseDomain = "." + parts.slice(-2).join(".");
+      document.cookie = `googtrans=${value}; Domain=${baseDomain}; Path=/; ${maxAge}`;
+    }
+  }
+
+  // Double down on vi: attempt to delete the cookie too just in case
+  if (language === "vi") {
+    const expire = "Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0";
+    document.cookie = `googtrans=; Path=/; ${expire}`;
+    document.cookie = `googtrans=; Domain=${host}; Path=/; ${expire}`;
+    if (host.includes(".")) {
+      document.cookie = `googtrans=; Domain=.${host}; Path=/; ${expire}`;
+      const parts = host.split(".");
+      if (parts.length > 2) {
+        const baseDomain = "." + parts.slice(-2).join(".");
+        document.cookie = `googtrans=; Domain=${baseDomain}; Path=/; ${expire}`;
+      }
+    }
+  }
 }
 
 function SearchDialog({
@@ -364,26 +411,32 @@ export default function Navbar({
               <Search size={20} />
             </button>
 
-            <div className="hidden sm:flex items-center border border-orange-100 bg-white">
+            <div className="hidden sm:flex items-center gap-2 bg-slate-50/50 p-1 border border-orange-100 rounded-full">
               <button
                 type="button"
                 onClick={() => handleLanguageChange("vi")}
-                className={`px-2.5 py-2 text-xs font-black transition-colors ${
-                  language === "vi" ? "bg-orange-600 text-white" : "text-slate-600 hover:bg-orange-50"
+                className={`p-0.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  language === "vi" 
+                    ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
+                    : "opacity-45 hover:opacity-100 hover:scale-105"
                 }`}
                 aria-pressed={language === "vi"}
+                title="Tiếng Việt"
               >
-                VI
+                <VnFlag className="w-6 h-6" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLanguageChange("en")}
-                className={`px-2.5 py-2 text-xs font-black transition-colors ${
-                  language === "en" ? "bg-orange-600 text-white" : "text-slate-600 hover:bg-orange-50"
+                className={`p-0.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  language === "en" 
+                    ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
+                    : "opacity-45 hover:opacity-100 hover:scale-105"
                 }`}
                 aria-pressed={language === "en"}
+                title="English"
               >
-                EN
+                <EnFlag className="w-6 h-6" />
               </button>
             </div>
 
@@ -485,26 +538,30 @@ export default function Navbar({
             >
               {phone}
             </Button>
-            <div className="mt-2 grid grid-cols-2 border border-orange-100">
+            <div className="mt-3 grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => handleLanguageChange("vi")}
-                className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-black ${
-                  language === "vi" ? "bg-orange-600 text-white" : "bg-white text-slate-700"
+                className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
+                  language === "vi" 
+                    ? "bg-orange-50 border-orange-500 text-orange-700 font-extrabold shadow-sm" 
+                    : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
-                <Globe2 size={16} />
-                VI
+                <VnFlag className="w-5 h-5" />
+                Tiếng Việt
               </button>
               <button
                 type="button"
                 onClick={() => handleLanguageChange("en")}
-                className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-black ${
-                  language === "en" ? "bg-orange-600 text-white" : "bg-white text-slate-700"
+                className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
+                  language === "en" 
+                    ? "bg-orange-50 border-orange-500 text-orange-700 font-extrabold shadow-sm" 
+                    : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
-                <Globe2 size={16} />
-                EN
+                <EnFlag className="w-5 h-5" />
+                English
               </button>
             </div>
           </nav>
