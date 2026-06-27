@@ -5,6 +5,10 @@ import prisma from "@/lib/prisma";
 import { sanitizeFileBaseName, saveLocalUpload } from "@/lib/local-storage";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
+const allowedRoles = new Set(["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]);
+const uploadMaxMb = Number(process.env.UPLOAD_MAX_MB || 50);
+const uploadMaxBytes = uploadMaxMb * 1024 * 1024;
+
 export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
@@ -17,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR" && payload.role !== "MARKETING")) {
+    if (!payload || !allowedRoles.has(payload.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -27,9 +31,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing uploaded file" }, { status: 400 });
     }
 
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json({ error: "Image size exceeds the 5MB limit" }, { status: 400 });
+    if (file.size > uploadMaxBytes) {
+      return NextResponse.json(
+        { error: `Image size exceeds the ${uploadMaxMb}MB limit` },
+        { status: 413 },
+      );
     }
 
     const bytes = await file.arrayBuffer();
@@ -41,10 +47,22 @@ export async function POST(req: NextRequest) {
     }
 
     const finalKey = `media/${Date.now()}-${sanitizeFileBaseName(file.name)}.${typeInfo.ext}`;
-    const fileUrl = await saveLocalUpload({
-      key: finalKey,
-      body: buffer,
-    });
+    let fileUrl: string;
+    try {
+      fileUrl = await saveLocalUpload({
+        key: finalKey,
+        body: buffer,
+      });
+    } catch (storageError) {
+      console.error("Local upload storage write failed:", storageError);
+      return NextResponse.json(
+        {
+          error: "Cannot save image to upload storage",
+          message: storageError instanceof Error ? storageError.message : String(storageError),
+        },
+        { status: 500 },
+      );
+    }
 
     try {
       await prisma.media.create({

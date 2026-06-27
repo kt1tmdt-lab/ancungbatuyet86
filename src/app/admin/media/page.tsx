@@ -31,6 +31,9 @@ interface MediaItem {
   uploader?: { name: string | null; email: string };
 }
 
+const uploadMaxMb = 50;
+const uploadMaxBytes = uploadMaxMb * 1024 * 1024;
+
 function formatBytes(bytes: number) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -118,8 +121,8 @@ export default function MediaLibraryPage() {
         hasError = true;
         continue;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        setUploadError("Kích thước file vượt quá 5MB");
+      if (file.size > uploadMaxBytes) {
+        setUploadError(`Kích thước file vượt quá ${uploadMaxMb}MB`);
         hasError = true;
         continue;
       }
@@ -260,7 +263,7 @@ export default function MediaLibraryPage() {
                   className="hidden"
                 />
               </label>
-              <p className="text-[10px] text-slate-400 mt-2">Hỗ trợ: JPG, PNG, GIF, WebP — Tối đa 5MB/ảnh</p>
+              <p className="text-[10px] text-slate-400 mt-2">Hỗ trợ: JPG, PNG, GIF, WebP — Tối đa {uploadMaxMb}MB/ảnh</p>
             </div>
           </div>
         </div>
