@@ -39,6 +39,21 @@ cp -r public .next/standalone/public
 mkdir -p .next/standalone/.next
 cp -r .next/static .next/standalone/.next/static
 
+echo "==> Copy standalone runtime package aliases"
+mkdir -p .next/standalone/node_modules/@prisma
+cp -r node_modules/@prisma/client .next/standalone/node_modules/@prisma/client
+cp -r node_modules/.prisma .next/standalone/node_modules/.prisma
+
+for alias in $(grep -RhoE '@prisma/client-[a-f0-9]+' .next/standalone/.next/server .next/server 2>/dev/null | sort -u); do
+  rm -rf ".next/standalone/node_modules/${alias}"
+  cp -r node_modules/@prisma/client ".next/standalone/node_modules/${alias}"
+done
+
+for alias in $(grep -RhoE 'bcrypt-[a-f0-9]+' .next/standalone/.next/server .next/server 2>/dev/null | sort -u); do
+  rm -rf ".next/standalone/node_modules/${alias}"
+  cp -r node_modules/bcrypt ".next/standalone/node_modules/${alias}"
+done
+
 echo "==> Ensure upload directory"
 mkdir -p "${UPLOAD_DIR:-/var/www/acbt-uploads}"
 
