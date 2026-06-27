@@ -64,6 +64,8 @@ export async function PUT(req: NextRequest) {
 
     revalidatePath("/");
     revalidatePath("/gioi-thieu");
+    revalidatePath("/gioi-thieu/thanh-tuu");
+    revalidatePath("/gioi-thieu/lich-su");
     revalidatePath("/quy-trinh");
 
     return NextResponse.json(config);

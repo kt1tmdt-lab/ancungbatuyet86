@@ -697,7 +697,7 @@ function MarketingPageContent() {
                     <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[150px_1fr_auto]">
                       <div className="overflow-hidden border border-slate-200 bg-white">
                         {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                          <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-contain bg-white p-2" />
                         ) : (
                           <div className="flex h-32 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
                             Chon anh

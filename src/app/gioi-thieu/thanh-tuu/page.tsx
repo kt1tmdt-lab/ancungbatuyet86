@@ -10,6 +10,12 @@ import {
 import { ShieldCheck, Factory, Award, ArrowRight, X, Sparkles, BookOpen, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
+const DOCUMENT_IMAGE_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
+
+function isDocumentImage(item: TrustSectionItem) {
+  return DOCUMENT_IMAGE_KEYS.has(item.key);
+}
+
 export default function AchievementsPage() {
   const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(
     DEFAULT_MARKETING_CONFIG.trustSections,
@@ -127,7 +133,11 @@ export default function AchievementsPage() {
                             <img
                               src={item.imageUrl}
                               alt={item.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              className={`w-full h-full transition-transform duration-500 ${
+                                isDocumentImage(item)
+                                  ? "object-contain bg-white p-3"
+                                  : "object-cover group-hover:scale-105"
+                              }`}
                               loading="lazy"
                             />
                           ) : (
@@ -203,7 +213,11 @@ export default function AchievementsPage() {
                   <img
                     src={selectedItem.imageUrl}
                     alt={selectedItem.title}
-                    className="w-full h-full object-cover"
+                    className={`w-full h-full ${
+                      isDocumentImage(selectedItem)
+                        ? "object-contain bg-white p-4"
+                        : "object-cover"
+                    }`}
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-orange-400 p-8 min-h-[240px]">
