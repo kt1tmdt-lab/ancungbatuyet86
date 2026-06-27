@@ -170,9 +170,21 @@ function MarketingPageContent() {
     };
   }, [token]);
 
-  const handleSave = async () => {
+  const saveMarketingConfig = async (nextConfig?: {
+    press?: PressItem[];
+    feedback?: FeedbackItem[];
+    videos?: VideoItem[];
+    pageAssets?: PageAssetItem[];
+    trustSections?: TrustSectionItem[];
+  }) => {
     setIsSaving(true);
     try {
+      const nextPress = nextConfig?.press || pressList;
+      const nextFeedback = nextConfig?.feedback || feedbackList;
+      const nextVideos = nextConfig?.videos || videoList;
+      const nextPageAssets = nextConfig?.pageAssets || assetList;
+      const nextTrustSections = nextConfig?.trustSections || trustList;
+
       const res = await fetch("/api/settings/marketing", {
         method: "PUT",
         headers: {
@@ -180,11 +192,11 @@ function MarketingPageContent() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          press: pressList,
-          feedback: feedbackList,
-          videos: videoList,
-          pageAssets: assetList,
-          trustSections: trustList,
+          press: nextPress,
+          feedback: nextFeedback,
+          videos: nextVideos,
+          pageAssets: nextPageAssets,
+          trustSections: nextTrustSections,
         }),
       });
 
@@ -203,6 +215,10 @@ function MarketingPageContent() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleSave = async () => {
+    await saveMarketingConfig();
   };
 
   // Add Item Helpers
@@ -325,6 +341,27 @@ function MarketingPageContent() {
     val: string | boolean,
   ) => {
     setTrustList(trustList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+  };
+
+  const handleMediaSelect = async (url: string) => {
+    if (!mediaPickerAssetId) return;
+
+    if (activeTab === "trust") {
+      const nextTrustList = trustList.map((item) =>
+        item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
+      );
+      setTrustList(nextTrustList);
+      setMediaPickerAssetId(null);
+      await saveMarketingConfig({ trustSections: nextTrustList });
+      return;
+    }
+
+    const nextAssetList = assetList.map((item) =>
+      item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
+    );
+    setAssetList(nextAssetList);
+    setMediaPickerAssetId(null);
+    await saveMarketingConfig({ pageAssets: nextAssetList });
   };
 
   return (
@@ -1091,16 +1128,7 @@ function MarketingPageContent() {
         <MediaPickerModal
           open={Boolean(mediaPickerAssetId)}
           onClose={() => setMediaPickerAssetId(null)}
-          onSelect={(url) => {
-            if (mediaPickerAssetId) {
-              if (activeTab === "trust") {
-                updateTrustSection(mediaPickerAssetId, "imageUrl", url);
-              } else {
-                updateAsset(mediaPickerAssetId, "imageUrl", url);
-              }
-            }
-            setMediaPickerAssetId(null);
-          }}
+          onSelect={handleMediaSelect}
         />
       </div>
     </ProtectedRoute>
