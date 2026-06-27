@@ -14,6 +14,8 @@ import Link from "next/link";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { SeoScorePanel } from "@/components/admin/SeoScorePanel";
 import { normalizeContentAssetUrls } from "@/lib/content-assets";
+import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { uploadAdminImage } from "@/lib/admin-upload-client";
 
 const POST_TEMPLATES = [
   {
@@ -52,6 +54,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
   const [success, setSuccess] = useState("");
 
   const [coverUploading, setCoverUploading] = useState(false);
+  const [coverUploadProgress, setCoverUploadProgress] = useState(0);
   const [coverUploadError, setCoverUploadError] = useState("");
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
@@ -161,27 +164,23 @@ export function CreatePostForm({ postId }: { postId?: string }) {
     if (!file || !token) return;
 
     setCoverUploading(true);
+    setCoverUploadProgress(0);
     setCoverUploadError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      const data = await uploadAdminImage({
+        file,
+        token,
+        onProgress: setCoverUploadProgress,
       });
-      const data = await res.json();
-      if (res.ok && data.url) {
+      if (data.url) {
         setValue("coverImageUrl", data.url, { shouldValidate: true });
-      } else {
-        setCoverUploadError(data.error || "Tải ảnh bìa thất bại");
       }
-    } catch {
-      setCoverUploadError("Không thể kết nối server upload");
+    } catch (err) {
+      setCoverUploadError(err instanceof Error ? err.message : "Không thể kết nối server upload");
     } finally {
       setCoverUploading(false);
+      setCoverUploadProgress(0);
       e.target.value = "";
     }
   };
@@ -329,8 +328,9 @@ export function CreatePostForm({ postId }: { postId?: string }) {
               <input {...register("coverImageUrl")} className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs mb-2" />
               <div className="flex gap-2">
                 <label className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-white text-[11px] font-bold cursor-pointer hover:bg-primary-dark">
-                  <Upload size={13} /> Tải lên
-                  <input type="file" accept="image/*" onChange={handleCoverUpload} className="hidden" />
+                  {coverUploading ? <UploadProgressCircle progress={coverUploadProgress} size={28} /> : <Upload size={13} />}
+                  {coverUploading ? "Đang tải..." : "Tải lên"}
+                  <input type="file" accept="image/*" onChange={handleCoverUpload} disabled={coverUploading} className="hidden" />
                 </label>
                 <button type="button" onClick={() => setMediaPickerOpen(true)} className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200">
                   <ImagePlus size={13} /> Thư viện

@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import CurtainHover from "@/components/shared/CurtainHover";
+import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { uploadAdminImage } from "@/lib/admin-upload-client";
 import {
   Image as ImageIcon,
   Search,
@@ -71,6 +73,7 @@ export default function MediaLibraryPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -110,12 +113,13 @@ export default function MediaLibraryPage() {
   const handleUploadFiles = async (files: FileList | File[]) => {
     if (!token) return;
     setUploading(true);
+    setUploadProgress(0);
     setUploadError("");
 
     const fileArray = Array.from(files);
     let hasError = false;
 
-    for (const file of fileArray) {
+    for (const [index, file] of fileArray.entries()) {
       if (!file.type.startsWith("image/")) {
         setUploadError("Chỉ chấp nhận tệp hình ảnh");
         hasError = true;
@@ -127,26 +131,21 @@ export default function MediaLibraryPage() {
         continue;
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-
       try {
-        const res = await fetch("/api/admin/upload", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
+        await uploadAdminImage({
+          file,
+          token,
+          onProgress: (fileProgress) => {
+            setUploadProgress(Math.round(((index + fileProgress / 100) / fileArray.length) * 100));
+          },
         });
-        if (!res.ok) {
-          const data = await res.json();
-          setUploadError(data.error || "Upload thất bại");
-          hasError = true;
-        }
-      } catch {
-        setUploadError("Không thể kết nối server");
+      } catch (err) {
+        setUploadError(err instanceof Error ? err.message : "Không thể kết nối server");
         hasError = true;
       }
     }
 
+    setUploadProgress(hasError ? 0 : 100);
     setUploading(false);
     if (!hasError) {
       setPage(1);
@@ -242,11 +241,15 @@ export default function MediaLibraryPage() {
           }`}
         >
           <div className="flex flex-col items-center gap-3">
-            <div className={`w-14 h-14 flex items-center justify-center transition ${
-              dragActive ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
-            }`}>
-              <Upload size={24} />
-            </div>
+            {uploading ? (
+              <UploadProgressCircle progress={uploadProgress} size={56} />
+            ) : (
+              <div className={`w-14 h-14 flex items-center justify-center transition ${
+                dragActive ? "bg-primary text-white" : "bg-slate-100 text-slate-400"
+              }`}>
+                <Upload size={24} />
+              </div>
+            )}
             <div>
               <p className="text-sm font-bold text-slate-800">
                 {uploading ? "Đang tải lên..." : "Kéo thả ảnh vào đây hoặc"}

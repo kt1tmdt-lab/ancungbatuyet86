@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Loader, AlertCircle, Save, ArrowLeft, Plus, Trash } from "lucide-react";
+import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { uploadAdminImage } from "@/lib/admin-upload-client";
 import Link from "next/link";
 
 interface ProductData {
@@ -84,39 +86,37 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [story, setStory] = useState(initialData?.story || "");
 
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const router = useRouter();
+  const { token } = useAuth();
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploading(true);
+    setUploadProgress(0);
     setUploadError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
+      const data = await uploadAdminImage({
+        file,
+        token,
+        onProgress: setUploadProgress,
       });
-
-      const data = await res.json();
-      if (res.ok && data.url) {
+      if (data.url) {
         setImage(data.url);
-      } else {
-        setUploadError(data.error || "Tải ảnh lên thất bại");
       }
     } catch (err) {
       console.error(err);
-      setUploadError("Không thể kết nối đến server upload");
+      setUploadError(err instanceof Error ? err.message : "Không thể kết nối đến server upload");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -714,7 +714,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                     />
                     {uploading ? (
                       <div className="flex items-center gap-2 text-xs font-bold text-primary-dark">
-                        <Loader size={16} className="animate-spin" />
+                        <UploadProgressCircle progress={uploadProgress} size={34} />
                         <span>Đang tải ảnh lên máy chủ...</span>
                       </div>
                     ) : (

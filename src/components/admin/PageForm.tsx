@@ -30,6 +30,8 @@ import {
   Smartphone
 } from "lucide-react";
 import Link from "next/link";
+import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { uploadAdminImage } from "@/lib/admin-upload-client";
 
 // Define block interfaces
 interface Block {
@@ -92,6 +94,11 @@ export function PageForm({ pageId }: { pageId?: string }) {
   // Preview Drawer Modal
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [uploadingBlock, setUploadingBlock] = useState<{
+    blockId: string;
+    fieldName: string;
+    progress: number;
+  } | null>(null);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -247,30 +254,25 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
   // Image Upload handler for block field
   const handleBlockImageUpload = async (blockId: string, fieldName: string, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
+    setUploadingBlock({ blockId, fieldName, progress: 0 });
 
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: formData
+      const data = await uploadAdminImage({
+        file,
+        token,
+        onProgress: (progress) => setUploadingBlock({ blockId, fieldName, progress }),
       });
-
-      const data = await res.json();
-      if (res.ok && data.url) {
+      if (data.url) {
         const targetBlock = blocks.find(b => b.id === blockId);
         if (targetBlock) {
           updateBlockData(blockId, { [fieldName]: data.url });
         }
-      } else {
-        alert(data.error || "Tải ảnh lên thất bại");
       }
     } catch (err) {
       console.error(err);
-      alert("Lỗi kết nối khi tải ảnh");
+      alert(err instanceof Error ? err.message : "Lỗi kết nối khi tải ảnh");
+    } finally {
+      setUploadingBlock(null);
     }
   };
 
@@ -547,15 +549,21 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
                                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
-                                      <Upload size={14} className="mr-1" />
-                                      Tải lên
+                                      {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "backgroundImage" ? (
+                                        <UploadProgressCircle progress={uploadingBlock.progress} size={28} />
+                                      ) : (
+                                        <Upload size={14} className="mr-1" />
+                                      )}
+                                      {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "backgroundImage" ? "Đang tải" : "Tải lên"}
                                       <input
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
+                                        disabled={uploadingBlock !== null}
                                         onChange={(e) => {
                                           const file = e.target.files?.[0];
                                           if (file) handleBlockImageUpload(block.id, "backgroundImage", file);
+                                          e.target.value = "";
                                         }}
                                       />
                                     </label>
@@ -760,15 +768,21 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
                                     />
                                     <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-750 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
-                                      <Upload size={14} className="mr-1" />
-                                      Tải lên
+                                      {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "imageUrl" ? (
+                                        <UploadProgressCircle progress={uploadingBlock.progress} size={28} />
+                                      ) : (
+                                        <Upload size={14} className="mr-1" />
+                                      )}
+                                      {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "imageUrl" ? "Đang tải" : "Tải lên"}
                                       <input
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
+                                        disabled={uploadingBlock !== null}
                                         onChange={(e) => {
                                           const file = e.target.files?.[0];
                                           if (file) handleBlockImageUpload(block.id, "imageUrl", file);
+                                          e.target.value = "";
                                         }}
                                       />
                                     </label>

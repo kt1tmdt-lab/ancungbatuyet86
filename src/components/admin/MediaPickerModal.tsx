@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { uploadAdminImage } from "@/lib/admin-upload-client";
 import {
   X,
   Search,
@@ -45,6 +47,7 @@ export function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalPr
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
 
   const fetchMedia = useCallback(async () => {
@@ -102,29 +105,25 @@ export function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalPr
     if (!file || !token) return;
 
     setUploading(true);
+    setUploadProgress(0);
     setUploadError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+      const data = await uploadAdminImage({
+        file,
+        token,
+        onProgress: setUploadProgress,
       });
-      const data = await res.json();
-      if (res.ok && data.url) {
+      if (data.url) {
         // Refresh the media list
         setPage(1);
         await fetchMedia();
-      } else {
-        setUploadError(data.error || "Tải ảnh thất bại");
       }
-    } catch {
-      setUploadError("Không thể kết nối server");
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Không thể kết nối server");
     } finally {
       setUploading(false);
+      setUploadProgress(0);
       e.target.value = "";
     }
   };
@@ -178,7 +177,11 @@ export function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalPr
             />
           </div>
           <label className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold cursor-pointer hover:bg-primary-dark transition shrink-0">
-            <Upload size={14} />
+            {uploading ? (
+              <UploadProgressCircle progress={uploadProgress} size={28} />
+            ) : (
+              <Upload size={14} />
+            )}
             {uploading ? "Đang tải..." : "Upload ảnh"}
             <input
               type="file"
