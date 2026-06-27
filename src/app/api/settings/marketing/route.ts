@@ -6,6 +6,8 @@ import { normalizeMarketingConfig } from "@/lib/marketing-config";
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const config = await prisma.siteConfig.findUnique({
@@ -16,6 +18,10 @@ export async function GET() {
       id: "marketing_assets",
       data: normalizeMarketingConfig(config?.data),
       updatedAt: config?.updatedAt || null,
+    }, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
     });
   } catch (error) {
     console.error("GET Marketing Config Error:", error);

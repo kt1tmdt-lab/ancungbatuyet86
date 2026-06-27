@@ -325,7 +325,7 @@ async function fetchHomeSiteConfig(): Promise<HeroBannerConfig> {
 }
 
 async function fetchHomeMarketingConfig(): Promise<MarketingConfigData> {
-  const response = await fetch("/api/settings/marketing");
+  const response = await fetch("/api/settings/marketing", { cache: "no-store" });
   const data = await response.json();
 
   return normalizeMarketingConfig(data?.data);

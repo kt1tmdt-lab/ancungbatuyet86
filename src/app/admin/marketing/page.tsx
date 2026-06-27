@@ -145,7 +145,7 @@ function MarketingPageContent() {
 
     let cancelled = false;
 
-    fetch("/api/settings/marketing")
+    fetch("/api/settings/marketing", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load"))))
       .then((data) => {
         if (cancelled) return;

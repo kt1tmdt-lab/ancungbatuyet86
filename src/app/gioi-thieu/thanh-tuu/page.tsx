@@ -25,7 +25,7 @@ export default function AchievementsPage() {
   useEffect(() => {
     async function fetchAchievements() {
       try {
-        const res = await fetch("/api/settings/marketing");
+        const res = await fetch("/api/settings/marketing", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);

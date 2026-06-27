@@ -50,7 +50,7 @@ export default function HistoryPage() {
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const res = await fetch("/api/settings/marketing");
+        const res = await fetch("/api/settings/marketing", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);

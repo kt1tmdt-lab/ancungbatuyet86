@@ -708,7 +708,7 @@ export default function ProcessPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/settings/marketing")
+    fetch("/api/settings/marketing", { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         setPageAssets(normalizeMarketingConfig(data?.data).pageAssets);
