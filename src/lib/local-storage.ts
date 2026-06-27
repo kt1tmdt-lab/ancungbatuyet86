@@ -1,7 +1,7 @@
 import { mkdir, unlink, writeFile } from "fs/promises";
-import { dirname, extname, join, normalize, relative, sep } from "path";
+import { dirname, extname, join, relative, resolve, sep } from "path";
 
-const uploadDir = process.env.UPLOAD_DIR || join("public", "uploads");
+const uploadDir = resolve(process.env.UPLOAD_DIR || join("public", "uploads"));
 const publicUrl = (process.env.UPLOAD_PUBLIC_URL || "/uploads").replace(/\/+$/, "");
 
 function trimLeadingSlash(value: string) {
@@ -39,7 +39,7 @@ export function getLocalPathFromPublicUrl(url: string) {
   const key = getLocalKeyFromPublicUrl(url);
   if (!key) return null;
 
-  const targetPath = normalize(join(uploadDir, key));
+  const targetPath = resolve(uploadDir, key);
   if (!isInsideDir(uploadDir, targetPath)) return null;
 
   return targetPath;
@@ -64,7 +64,7 @@ export async function saveLocalUpload(params: {
   key: string;
   body: Buffer;
 }) {
-  const targetPath = normalize(join(uploadDir, params.key));
+  const targetPath = resolve(uploadDir, params.key);
   if (!isInsideDir(uploadDir, targetPath)) {
     throw new Error("Invalid upload path");
   }
