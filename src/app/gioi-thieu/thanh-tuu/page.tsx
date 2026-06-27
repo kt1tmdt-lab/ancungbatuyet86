@@ -125,24 +125,24 @@ export default function AchievementsPage() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.4 }}
-                        className="bg-white border border-orange-100/60 rounded-3xl overflow-hidden shadow-[0_10px_35px_rgba(15,23,42,0.02)] hover:shadow-[0_20px_50px_rgba(234,88,12,0.08)] hover:border-orange-300 transition-all duration-300 flex flex-col justify-between cursor-pointer group h-full min-h-[360px]"
+                        className="bg-white border border-orange-100/60 rounded-3xl overflow-hidden shadow-[0_10px_35px_rgba(15,23,42,0.02)] hover:shadow-[0_20px_50px_rgba(234,88,12,0.08)] hover:border-orange-300 transition-all duration-300 flex flex-col justify-between cursor-pointer group h-full min-h-[300px]"
                       >
                         {/* Image Header with Zoom effect */}
-                        <div className="relative aspect-[16/9] w-full bg-orange-50 overflow-hidden shrink-0">
+                        <div className="relative h-48 sm:h-56 w-full bg-orange-50 overflow-hidden shrink-0">
                           {item.imageUrl ? (
                             <img
                               src={item.imageUrl}
                               alt={item.title}
                               className={`w-full h-full transition-transform duration-500 ${
                                 isDocumentImage(item)
-                                  ? "object-contain bg-white p-3"
+                                  ? "object-contain bg-white p-5"
                                   : "object-cover group-hover:scale-105"
                               }`}
                               loading="lazy"
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center bg-orange-50 text-orange-400">
-                              <Sparkles size={36} className="animate-pulse" />
+                              <Sparkles size={28} className="animate-pulse" />
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-slate-950/0 to-transparent pointer-events-none" />
