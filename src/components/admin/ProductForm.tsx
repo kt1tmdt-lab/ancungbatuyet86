@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Loader, AlertCircle, Save, ArrowLeft, Plus, Trash } from "lucide-react";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 import Link from "next/link";
 
@@ -88,6 +89,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -213,6 +215,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <Link
@@ -721,6 +724,13 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                       <span className="text-xs font-bold text-primary-dark">Chọn tệp ảnh từ thiết bị</span>
                     )}
                   </label>
+                  <button
+                    type="button"
+                    onClick={() => setMediaPickerOpen(true)}
+                    className="shrink-0 px-4 py-3 bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-primary hover:text-primary-dark transition"
+                  >
+                    Thư viện
+                  </button>
                 </div>
 
                 {uploadError && (
@@ -788,6 +798,16 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         </div>
       </div>
     </form>
+    <MediaPickerModal
+      open={mediaPickerOpen}
+      onClose={() => setMediaPickerOpen(false)}
+      onSelect={(url) => {
+        setImage(url);
+        setHeroImage(url);
+        setMediaPickerOpen(false);
+      }}
+    />
+    </>
   );
 }
 

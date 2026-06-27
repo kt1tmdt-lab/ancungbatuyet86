@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
+import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 
 // Define block interfaces
@@ -98,6 +99,10 @@ export function PageForm({ pageId }: { pageId?: string }) {
     blockId: string;
     fieldName: string;
     progress: number;
+  } | null>(null);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<{
+    blockId: string;
+    fieldName: string;
   } | null>(null);
 
   const fetchProducts = useCallback(async () => {
@@ -274,6 +279,12 @@ export function PageForm({ pageId }: { pageId?: string }) {
     } finally {
       setUploadingBlock(null);
     }
+  };
+
+  const handleBlockMediaSelect = (url: string) => {
+    if (!mediaPickerTarget) return;
+    updateBlockData(mediaPickerTarget.blockId, { [mediaPickerTarget.fieldName]: url });
+    setMediaPickerTarget(null);
   };
 
   // Submit Page
@@ -567,6 +578,13 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                         }}
                                       />
                                     </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => setMediaPickerTarget({ blockId: block.id, fieldName: "backgroundImage" })}
+                                      className="bg-white hover:bg-orange-50 text-slate-700 px-3 py-2 flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250 hover:border-orange-200"
+                                    >
+                                      Thư viện
+                                    </button>
                                   </div>
                                 </div>
                                 {block.data.backgroundImage && (
@@ -786,6 +804,13 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                         }}
                                       />
                                     </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => setMediaPickerTarget({ blockId: block.id, fieldName: "imageUrl" })}
+                                      className="bg-white hover:bg-orange-50 text-slate-700 px-3 py-2 flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250 hover:border-orange-200"
+                                    >
+                                      Thư viện
+                                    </button>
                                   </div>
                                 </div>
                                 {block.data.imageUrl && (
@@ -1250,6 +1275,11 @@ export function PageForm({ pageId }: { pageId?: string }) {
           </div>
         </div>
       )}
+      <MediaPickerModal
+        open={Boolean(mediaPickerTarget)}
+        onClose={() => setMediaPickerTarget(null)}
+        onSelect={handleBlockMediaSelect}
+      />
     </div>
   );
 }
