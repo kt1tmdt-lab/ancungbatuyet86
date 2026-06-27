@@ -50,6 +50,9 @@ export type MarketingConfigData = {
   trustSections: TrustSectionItem[];
 };
 
+const TRUST_DOCUMENT_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
+const TRUST_DOCUMENT_PLACEHOLDER_IMAGES = new Set(["/bento/bento-insurance.png"]);
+
 export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   {
     id: "default-about-video",
@@ -248,7 +251,7 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       description: "Khu vực dành cho giấy chứng nhận, hồ sơ pháp lý và tiêu chuẩn an toàn thực phẩm của thương hiệu.",
       detailTitle: "Hồ sơ an toàn thực phẩm",
       detailContent: "Đưa hình ảnh giấy chứng nhận, ngày cấp, đơn vị cấp và phạm vi áp dụng vào đây để khách hàng có thể kiểm chứng nhanh. Nên bổ sung ảnh thật của giấy tờ và ghi rõ sản phẩm hoặc cơ sở sản xuất liên quan.",
-      imageUrl: "/bento/bento-insurance.png",
+      imageUrl: "",
       linkUrl: "/gioi-thieu",
       enabled: true,
     },
@@ -259,7 +262,7 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       description: "Thể hiện cam kết bảo vệ người tiêu dùng và trách nhiệm của doanh nghiệp với sản phẩm đưa ra thị trường.",
       detailTitle: "Cam kết bảo vệ người tiêu dùng",
       detailContent: "Trình bày số hợp đồng, phạm vi bảo hiểm, thời hạn hiệu lực và ý nghĩa của bảo hiểm đối với khách hàng. Phần này giúp người mua hiểu doanh nghiệp có trách nhiệm rõ ràng với sản phẩm.",
-      imageUrl: "/bento/bento-insurance.png",
+      imageUrl: "",
       linkUrl: "/gioi-thieu",
       enabled: true,
     },
@@ -338,6 +341,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function stringValue(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function trustImageUrl(key: string, imageUrl: string) {
+  if (TRUST_DOCUMENT_KEYS.has(key) && TRUST_DOCUMENT_PLACEHOLDER_IMAGES.has(imageUrl)) {
+    return "";
+  }
+
+  return imageUrl;
 }
 
 function itemId(value: unknown) {
@@ -451,7 +462,7 @@ function normalizeTrustSections(input: unknown): TrustSectionItem[] {
       const description = stringValue(item.description);
       const detailTitle = stringValue(item.detailTitle);
       const detailContent = stringValue(item.detailContent);
-      const imageUrl = stringValue(item.imageUrl);
+      const imageUrl = trustImageUrl(key, stringValue(item.imageUrl));
       const linkUrl = stringValue(item.linkUrl);
 
       if (!key && !title && !description && !detailTitle && !detailContent && !imageUrl && !linkUrl) return null;
