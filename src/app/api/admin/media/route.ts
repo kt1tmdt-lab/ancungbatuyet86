@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { deleteLocalUploadByUrl } from "@/lib/local-storage";
+import { normalizeUploadPublicUrl } from "@/lib/upload-url";
 
 // GET /api/admin/media — List media with pagination and search
 export async function GET(req: NextRequest) {
@@ -41,7 +42,10 @@ export async function GET(req: NextRequest) {
     ]);
 
     return NextResponse.json({
-      items,
+      items: items.map((item) => ({
+        ...item,
+        url: normalizeUploadPublicUrl(item.url),
+      })),
       total,
       page,
       totalPages: Math.ceil(total / limit),

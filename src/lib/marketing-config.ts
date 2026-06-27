@@ -1,3 +1,5 @@
+import { normalizeUploadPublicUrl } from "@/lib/upload-url";
+
 export type PressItem = {
   id: string;
   sourceName: string;
@@ -348,7 +350,7 @@ function trustImageUrl(key: string, imageUrl: string) {
     return "";
   }
 
-  return imageUrl;
+  return normalizeUploadPublicUrl(imageUrl);
 }
 
 function itemId(value: unknown) {
@@ -435,7 +437,7 @@ function normalizePageAssets(input: unknown): PageAssetItem[] {
       if (!isRecord(item)) return null;
       const key = stringValue(item.key);
       const label = stringValue(item.label);
-      const imageUrl = stringValue(item.imageUrl);
+      const imageUrl = normalizeUploadPublicUrl(stringValue(item.imageUrl));
       const linkUrl = stringValue(item.linkUrl);
 
       if (!key && !label && !imageUrl && !linkUrl) return null;

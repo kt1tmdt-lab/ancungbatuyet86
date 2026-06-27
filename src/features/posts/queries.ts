@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
+import { normalizeUploadPublicUrl } from "@/lib/upload-url";
 import type { PostListFilters } from "./types";
 
 export const postInclude = {
@@ -64,11 +65,13 @@ export function buildPostWhere(filters: PostListFilters = {}) {
 }
 
 export async function listPosts(filters: PostListFilters = {}) {
-  return prisma.post.findMany({
+  const posts = await prisma.post.findMany({
     where: buildPostWhere(filters),
     include: postInclude,
     orderBy: { createdAt: "desc" },
   });
+
+  return posts.map(normalizePostUrls);
 }
 
 export async function getPostBySlug(slug: string, options: { incrementView?: boolean } = {}) {
@@ -84,16 +87,16 @@ export async function getPostBySlug(slug: string, options: { incrementView?: boo
       where: { id: post.id },
       data: { viewCount: { increment: 1 } },
       include: postInclude,
-    }).catch(() => post);
+    }).then(normalizePostUrls).catch(() => normalizePostUrls(post));
   }
 
-  return post;
+  return normalizePostUrls(post);
 }
 
 export async function getRelatedPosts(postId: string, categoryId: string | null, take = 3) {
   if (!categoryId) return [];
 
-  return prisma.post.findMany({
+  const posts = await prisma.post.findMany({
     where: {
       categoryId,
       status: "PUBLISHED",
@@ -106,6 +109,15 @@ export async function getRelatedPosts(postId: string, categoryId: string | null,
     take,
     orderBy: { createdAt: "desc" },
   });
+
+  return posts.map(normalizePostUrls);
+}
+
+function normalizePostUrls<T extends { coverImageUrl: string | null }>(post: T) {
+  return {
+    ...post,
+    coverImageUrl: post.coverImageUrl ? normalizeUploadPublicUrl(post.coverImageUrl) : post.coverImageUrl,
+  };
 }
 
 export async function getPostWithRelatedBySlug(slug: string) {

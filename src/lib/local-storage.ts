@@ -1,12 +1,9 @@
 import { mkdir, unlink, writeFile } from "fs/promises";
 import { dirname, extname, join, relative, resolve, sep } from "path";
+import { buildUploadPublicUrl, getUploadKeyFromUrl, getUploadPublicUrl } from "@/lib/upload-url";
 
 const uploadDir = resolve(process.env.UPLOAD_DIR || join("public", "uploads"));
-const publicUrl = (process.env.UPLOAD_PUBLIC_URL || "/uploads").replace(/\/+$/, "");
-
-function trimLeadingSlash(value: string) {
-  return value.replace(/^\/+/, "");
-}
+const publicUrl = getUploadPublicUrl();
 
 function isInsideDir(baseDir: string, targetPath: string) {
   const rel = relative(baseDir, targetPath);
@@ -18,21 +15,15 @@ export function getUploadDir() {
 }
 
 export function buildLocalPublicUrl(key: string) {
-  return `${publicUrl}/${trimLeadingSlash(key)}`;
+  return buildUploadPublicUrl(key);
 }
 
 export function isLocalPublicUrl(url: string) {
-  if (publicUrl.startsWith("http")) {
-    return url.startsWith(`${publicUrl}/`);
-  }
-
-  return url.startsWith(`${publicUrl}/`);
+  return getUploadKeyFromUrl(url) !== null;
 }
 
 export function getLocalKeyFromPublicUrl(url: string) {
-  if (!isLocalPublicUrl(url)) return null;
-
-  return decodeURIComponent(url.slice(publicUrl.length).replace(/^\/+/, ""));
+  return getUploadKeyFromUrl(url);
 }
 
 export function getLocalPathFromPublicUrl(url: string) {

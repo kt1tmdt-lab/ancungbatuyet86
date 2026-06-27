@@ -1,5 +1,6 @@
 import { ProductStatus, type Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
+import { normalizeUploadPublicUrl } from "@/lib/upload-url";
 import type { ProductListFilters } from "./types";
 
 export function buildProductWhere(filters: ProductListFilters = {}) {
@@ -21,21 +22,33 @@ export function buildProductWhere(filters: ProductListFilters = {}) {
 }
 
 export async function listProducts(filters: ProductListFilters = {}) {
-  return prisma.product.findMany({
+  const products = await prisma.product.findMany({
     where: buildProductWhere(filters),
     orderBy: [
       { sortOrder: "asc" },
       { createdAt: "desc" }
     ],
   });
+
+  return products.map(normalizeProductUrls);
 }
 
 export async function getProductById(id: string) {
-  return prisma.product.findUnique({ where: { id } });
+  const product = await prisma.product.findUnique({ where: { id } });
+  return product ? normalizeProductUrls(product) : null;
 }
 
 export async function getProductBySlug(slug: string) {
-  return prisma.product.findUnique({ where: { slug } });
+  const product = await prisma.product.findUnique({ where: { slug } });
+  return product ? normalizeProductUrls(product) : null;
+}
+
+function normalizeProductUrls<T extends { image: string; heroImage: string | null }>(product: T) {
+  return {
+    ...product,
+    image: normalizeUploadPublicUrl(product.image),
+    heroImage: product.heroImage ? normalizeUploadPublicUrl(product.heroImage) : product.heroImage,
+  };
 }
 
 export async function productSlugExists(slug: string, exceptId?: string) {
