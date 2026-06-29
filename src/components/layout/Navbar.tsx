@@ -246,9 +246,11 @@ function SearchDialog({
 export default function Navbar({
   initialLinks,
   initialContact,
+  initialProductMenuLinks,
 }: {
   initialLinks?: { href: string; label: string }[];
   initialContact?: SiteConfigData["footerContact"];
+  initialProductMenuLinks?: SiteConfigData["productMenuLinks"];
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -273,6 +275,9 @@ export default function Navbar({
     return () => window.clearTimeout(timer);
   }, []);
   const navLinks = mergeRequiredNavLinks(initialLinks);
+  const productMenuLinks = initialProductMenuLinks?.length
+    ? initialProductMenuLinks
+    : PRODUCT_MENU_LINKS;
   const phone = initialContact?.phone || DEFAULT_SITE_CONFIG.footerContact.phone;
   const phoneHref = `tel:${phone.replace(/\s+/g, "")}`;
   const trimmedSearchQuery = useMemo(() => searchQuery.trim(), [searchQuery]);
@@ -385,7 +390,7 @@ export default function Navbar({
                       >
                         Tất cả sản phẩm
                       </Link>
-                      {PRODUCT_MENU_LINKS.map((item) => (
+                      {productMenuLinks.map((item) => (
                         <Link
                           key={item.href}
                           href={item.href}
@@ -553,7 +558,7 @@ export default function Navbar({
                         >
                           Tất cả sản phẩm
                         </Link>
-                        {PRODUCT_MENU_LINKS.map((item) => (
+                        {productMenuLinks.map((item) => (
                           <Link
                             key={item.href}
                             href={item.href}

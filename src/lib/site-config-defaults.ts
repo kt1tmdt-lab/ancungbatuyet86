@@ -3,6 +3,10 @@ export type LinkItem = {
   label: string;
 };
 
+export type ProductMenuLinkItem = LinkItem & {
+  note: string;
+};
+
 export type StatItem = {
   value: string;
   label: string;
@@ -22,6 +26,7 @@ export type SiteConfigData = {
     keywords: string;
   };
   navbarLinks: LinkItem[];
+  productMenuLinks: ProductMenuLinkItem[];
   footerLinks: {
     products: LinkItem[];
     explore: LinkItem[];
@@ -53,6 +58,13 @@ export const REQUIRED_NAV_LINKS: LinkItem[] = [
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
+export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [
+  { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương", note: "Dòng chủ lực" },
+  { href: "/san-pham/chan-ga-khong-lo", label: "Chân gà khổng lồ", note: "Sản phẩm nổi bật" },
+  { href: "/san-pham/tam-cay", label: "Tăm cay", note: "Dòng bán chạy" },
+  { href: "/san-pham/snack-banh-trang", label: "Snack / Bánh tráng", note: "Đóng gói tiện lợi" },
+];
+
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   heroBanner: {
@@ -77,6 +89,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     { href: "/tin-tuc", label: "Tin tức" },
     { href: "/lien-he", label: "Liên hệ" },
   ],
+  productMenuLinks: DEFAULT_PRODUCT_MENU_LINKS,
   footerLinks: {
     products: [
       { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương" },
@@ -162,6 +175,23 @@ function normalizeNavbarLinks(value: unknown) {
   );
 }
 
+function normalizeProductMenuLinks(value: unknown) {
+  if (!Array.isArray(value)) return DEFAULT_PRODUCT_MENU_LINKS;
+
+  const links = value
+    .map((item) => {
+      if (!isRecord(item)) return null;
+      const label = typeof item.label === "string" ? item.label.trim() : "";
+      const href = typeof item.href === "string" ? item.href.trim() : "";
+      const note = typeof item.note === "string" ? item.note.trim() : "";
+
+      return label && href ? { label, href, note: note || "Sản phẩm chủ lực" } : null;
+    })
+    .filter((item): item is ProductMenuLinkItem => Boolean(item));
+
+  return links.length > 0 ? links : DEFAULT_PRODUCT_MENU_LINKS;
+}
+
 export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const source = isRecord(input) ? input : {};
   const heroBanner = isRecord(source.heroBanner) ? source.heroBanner : {};
@@ -190,6 +220,7 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
           : DEFAULT_SITE_CONFIG.seo.keywords,
     },
     navbarLinks: normalizeNavbarLinks(source.navbarLinks),
+    productMenuLinks: normalizeProductMenuLinks(source.productMenuLinks),
     footerLinks: {
       products: normalizeLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
       explore: normalizeLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),

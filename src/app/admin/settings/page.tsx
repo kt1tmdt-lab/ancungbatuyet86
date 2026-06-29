@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { 
@@ -32,6 +32,10 @@ const linkItemSchema = z.object({
   href: z.string().min(1, "Liên kết không được trống"),
 });
 
+const productMenuLinkSchema = linkItemSchema.extend({
+  note: z.string().optional(),
+});
+
 const statItemSchema = z.object({
   value: z.string().min(1, "Vui lòng nhập giá trị"),
   label: z.string().min(1, "Vui lòng nhập nhãn"),
@@ -51,6 +55,7 @@ const settingsSchema = z.object({
     keywords: z.string().optional(),
   }),
   navbarLinks: z.array(linkItemSchema),
+  productMenuLinks: z.array(productMenuLinkSchema),
   footerLinks: z.object({
     products: z.array(linkItemSchema),
     explore: z.array(linkItemSchema),
@@ -74,24 +79,38 @@ const settingsSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
+type ProductOption = {
+  id: string;
+  slug: string;
+  name: string;
+  category?: string | null;
+};
+
 export default function SettingsPage() {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "navigation" | "stats">("general");
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: DEFAULT_SITE_CONFIG,
   });
 
-  const { control, register, handleSubmit, reset, formState: { errors } } = form;
+  const { control, register, handleSubmit, reset, setValue, getValues, formState: { errors } } = form;
 
   // Field arrays for menus
   const { fields: navbarFields, append: appendNavbar, remove: removeNavbar } = useFieldArray({
     control,
     name: "navbarLinks",
   });
+
+  const { fields: productMenuFields, append: appendProductMenu, remove: removeProductMenu } = useFieldArray({
+    control,
+    name: "productMenuLinks",
+  });
+  const watchedProductMenuLinks = useWatch({ control, name: "productMenuLinks" });
 
   const { fields: footerProductsFields, append: appendFooterProduct, remove: removeFooterProduct } = useFieldArray({
     control,
@@ -106,6 +125,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (token) {
       fetchSettings();
+      fetchProducts();
     }
   }, [token]);
 
@@ -122,6 +142,59 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      let res = await fetch("/api/products?status=ALL", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        res = await fetch("/api/products");
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await res.json();
+      setProductOptions(Array.isArray(data?.data) ? data.data : []);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+      toast.error("Không thể tải danh sách sản phẩm");
+    }
+  };
+
+  const getProductHref = (product: ProductOption) => `/san-pham/${product.slug}`;
+
+  const getProductNote = (product: ProductOption) => product.category || "Sản phẩm chủ lực";
+
+  const handleProductMenuSelect = (index: number, href: string) => {
+    const product = productOptions.find((item) => getProductHref(item) === href);
+    if (!product) return;
+
+    setValue(`productMenuLinks.${index}.href`, href, { shouldDirty: true, shouldValidate: true });
+    setValue(`productMenuLinks.${index}.label`, product.name, { shouldDirty: true, shouldValidate: true });
+    setValue(`productMenuLinks.${index}.note`, getProductNote(product), { shouldDirty: true, shouldValidate: true });
+  };
+
+  const addProductMenuItem = () => {
+    const selectedHrefs = new Set((getValues("productMenuLinks") || []).map((item) => item.href));
+    const product = productOptions.find((item) => !selectedHrefs.has(getProductHref(item)));
+
+    if (!product) {
+      toast.error("Không còn sản phẩm nào để thêm vào dropdown");
+      return;
+    }
+
+    appendProductMenu({
+      label: product.name,
+      href: getProductHref(product),
+      note: getProductNote(product),
+    });
   };
 
   const onSubmit = async (data: SettingsFormValues) => {
@@ -510,6 +583,88 @@ export default function SettingsPage() {
                             </button>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Link2 className="text-orange-500" size={20} />
+                        <h2 className="text-lg font-bold text-slate-900">Dropdown sản phẩm Header</h2>
+                      </div>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        Chọn từ sản phẩm đã có. Website tự lấy tên và link sản phẩm đúng theo slug.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addProductMenuItem}
+                      disabled={productOptions.length === 0}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white font-bold text-xs hover:bg-orange-600 transition shadow cursor-pointer disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      <Plus size={14} />
+                      Thêm sản phẩm
+                    </button>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    {productOptions.length === 0 ? (
+                      <p className="text-center py-6 text-xs text-slate-400 font-semibold italic">
+                        Chưa tải được sản phẩm. Hãy kiểm tra mục quản lý sản phẩm trước.
+                      </p>
+                    ) : productMenuFields.length === 0 ? (
+                      <p className="text-center py-6 text-xs text-slate-400 font-semibold italic">
+                        Chưa có sản phẩm trong dropdown. Bấm Thêm sản phẩm để chọn.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {productMenuFields.map((field, idx) => {
+                          const selectedItem = watchedProductMenuLinks?.[idx];
+                          const selectedHref = selectedItem?.href || "";
+                          const selectedLabel = selectedItem?.label || "";
+
+                          return (
+                            <div key={field.id} className="grid grid-cols-1 lg:grid-cols-[32px_1fr_220px_40px] gap-3 items-center">
+                              <span className="text-xs font-bold text-slate-400">#{idx + 1}</span>
+                              <div>
+                                <select
+                                  value={selectedHref}
+                                  onChange={(event) => handleProductMenuSelect(idx, event.target.value)}
+                                  className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500 bg-white"
+                                >
+                                  {productOptions.map((product) => {
+                                    const href = getProductHref(product);
+                                    return (
+                                      <option key={product.id} value={href}>
+                                        {product.name}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                                <p className="mt-1 text-[11px] font-semibold text-slate-400">
+                                  {selectedLabel} - {selectedHref}
+                                </p>
+                                <input type="hidden" {...register(`productMenuLinks.${idx}.label` as const)} />
+                                <input type="hidden" {...register(`productMenuLinks.${idx}.href` as const)} />
+                              </div>
+                              <input
+                                {...register(`productMenuLinks.${idx}.note` as const)}
+                                placeholder="Ghi chú nhỏ"
+                                className="border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeProductMenu(idx)}
+                                className="p-2 border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-700 transition"
+                                aria-label="Xóa sản phẩm khỏi dropdown"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
