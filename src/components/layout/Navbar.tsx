@@ -26,6 +26,15 @@ type SearchResult = {
   type: "page" | "product" | "post" | "location" | "channel";
 };
 
+type HeaderProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  category?: string | null;
+  categoryLabel?: string | null;
+  tagline?: string | null;
+};
+
 const RESULT_TYPE_LABEL: Record<SearchResult["type"], string> = {
   page: "Trang",
   product: "Sản phẩm",
@@ -261,6 +270,8 @@ export default function Navbar({
   const [language, setLanguage] = useState<"vi" | "en">("vi");
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [currentProductMenuLinks, setCurrentProductMenuLinks] = useState<SiteConfigData["productMenuLinks"]>([]);
+  const [productMenuLoaded, setProductMenuLoaded] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -275,12 +286,61 @@ export default function Navbar({
     return () => window.clearTimeout(timer);
   }, []);
   const navLinks = mergeRequiredNavLinks(initialLinks);
-  const productMenuLinks = initialProductMenuLinks?.length
-    ? initialProductMenuLinks
-    : PRODUCT_MENU_LINKS;
+  const productMenuLinks = currentProductMenuLinks.length
+    ? currentProductMenuLinks
+    : productMenuLoaded
+      ? []
+    : initialProductMenuLinks?.length
+      ? initialProductMenuLinks
+      : PRODUCT_MENU_LINKS;
   const phone = initialContact?.phone || DEFAULT_SITE_CONFIG.footerContact.phone;
   const phoneHref = `tel:${phone.replace(/\s+/g, "")}`;
   const trimmedSearchQuery = useMemo(() => searchQuery.trim(), [searchQuery]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch("/api/products", { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Products request failed");
+        return response.json() as Promise<{ data?: HeaderProduct[] }>;
+      })
+      .then((data) => {
+        const products = Array.isArray(data.data) ? data.data : [];
+        const productsByHref = new Map(products.map((product) => [`/san-pham/${product.slug}`, product]));
+        const selectedProducts = initialProductMenuLinks?.length
+          ? initialProductMenuLinks
+              .map((item) => {
+                const product = productsByHref.get(item.href);
+                return product
+                  ? {
+                      href: `/san-pham/${product.slug}`,
+                      label: product.name,
+                      note: item.note || product.categoryLabel || product.category || product.tagline || "Sản phẩm hiện tại",
+                    }
+                  : null;
+              })
+              .filter((item): item is SiteConfigData["productMenuLinks"][number] => Boolean(item))
+          : [];
+        const fallbackProducts = products.slice(0, 4).map((product) => ({
+          href: `/san-pham/${product.slug}`,
+          label: product.name,
+          note: product.categoryLabel || product.category || product.tagline || "Sản phẩm hiện tại",
+        }));
+
+        setCurrentProductMenuLinks(
+          selectedProducts.length ? selectedProducts : fallbackProducts,
+        );
+        setProductMenuLoaded(true);
+      })
+      .catch((error) => {
+        if (error.name === "AbortError") return;
+        console.error("Failed to load header products", error);
+        setProductMenuLoaded(true);
+      });
+
+    return () => controller.abort();
+  }, [initialProductMenuLinks]);
 
   useEffect(() => {
     if (!searchOpen || trimmedSearchQuery.length < 2) {

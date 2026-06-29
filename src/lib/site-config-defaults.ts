@@ -58,12 +58,7 @@ export const REQUIRED_NAV_LINKS: LinkItem[] = [
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
-export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [
-  { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương", note: "Dòng chủ lực" },
-  { href: "/san-pham/chan-ga-khong-lo", label: "Chân gà khổng lồ", note: "Sản phẩm nổi bật" },
-  { href: "/san-pham/tam-cay", label: "Tăm cay", note: "Dòng bán chạy" },
-  { href: "/san-pham/snack-banh-trang", label: "Snack / Bánh tráng", note: "Đóng gói tiện lợi" },
-];
+export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [];
 
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
