@@ -4,8 +4,17 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList, Radar, ServerCog } from "lucide-react";
+import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList, Radar, ServerCog, MonitorCog } from "lucide-react";
 import { toast } from "react-hot-toast";
+
+type AdminNotification = {
+  id: string;
+  title: string;
+  description: string;
+  link: string;
+  type: string;
+  createdAt: string;
+};
 
 function formatTimeAgo(dateString: string) {
   try {
@@ -20,7 +29,7 @@ function formatTimeAgo(dateString: string) {
     if (diffMins < 60) return `${diffMins} phút trước`;
     if (diffHours < 24) return `${diffHours} giờ trước`;
     return `${diffDays} ngày trước`;
-  } catch (e) {
+  } catch {
     return "";
   }
 }
@@ -31,7 +40,7 @@ export function AdminHeader() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [lastViewedTime, setLastViewedTime] = useState<string | null>(null);
@@ -47,7 +56,7 @@ export function AdminHeader() {
     if (!user) return;
 
     const savedTime = localStorage.getItem("last_viewed_notifications_time");
-    setLastViewedTime(savedTime);
+    const initTimer = window.setTimeout(() => setLastViewedTime(savedTime), 0);
 
     const fetchNotifications = async (isInitial: boolean = false) => {
       try {
@@ -57,11 +66,11 @@ export function AdminHeader() {
         });
         if (!res.ok) return;
 
-        const data = await res.json();
+        const data = (await res.json()) as AdminNotification[];
         setNotifications(data);
 
         const refTime = savedTime || localStorage.getItem("last_viewed_notifications_time") || new Date(0).toISOString();
-        const unread = data.filter((n: any) => new Date(n.createdAt).getTime() > new Date(refTime).getTime()).length;
+        const unread = data.filter((n) => new Date(n.createdAt).getTime() > new Date(refTime).getTime()).length;
         setUnreadCount(unread);
 
         if (data.length > 0) {
@@ -70,10 +79,10 @@ export function AdminHeader() {
           if (!isInitial && latestNotificationTimeRef.current) {
             const previousLatestTime = new Date(latestNotificationTimeRef.current).getTime();
             const newItems = data
-              .filter((n: any) => new Date(n.createdAt).getTime() > previousLatestTime)
+              .filter((n) => new Date(n.createdAt).getTime() > previousLatestTime)
               .reverse();
 
-            newItems.forEach((item: any) => {
+            newItems.forEach((item) => {
               toast((t) => (
                 <div 
                   onClick={() => {
@@ -110,7 +119,10 @@ export function AdminHeader() {
       fetchNotifications(false);
     }, 15000);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.clearTimeout(initTimer);
+      clearInterval(interval);
+    };
   }, [user, router]);
 
   useEffect(() => {
@@ -152,6 +164,7 @@ export function AdminHeader() {
       group: "Tổng quan",
       items: [
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard, show: true },
+        { href: "/admin/web-control", label: "Tổng quản lý web", icon: MonitorCog, show: isMarketingAllowed },
       ],
     },
     {

@@ -43,6 +43,16 @@ export type SiteConfigData = {
   };
 };
 
+export const REQUIRED_NAV_LINKS: LinkItem[] = [
+  { href: "/", label: "Trang chủ" },
+  { href: "/san-pham", label: "Sản phẩm" },
+  { href: "/quy-trinh", label: "Quy trình" },
+  { href: "/he-thong-ban", label: "Hệ thống bán" },
+  { href: "/gioi-thieu", label: "Giới thiệu" },
+  { href: "/tin-tuc", label: "Tin tức" },
+  { href: "/lien-he", label: "Liên hệ" },
+];
+
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   heroBanner: {
@@ -138,6 +148,18 @@ function normalizeLinks(value: unknown, fallback: LinkItem[]) {
   return links.length > 0 ? links : fallback;
 }
 
+function normalizeNavbarLinks(value: unknown) {
+  const links = normalizeLinks(value, REQUIRED_NAV_LINKS);
+  const byHref = new Map(links.map((item) => [item.href, item]));
+
+  return REQUIRED_NAV_LINKS.map((requiredItem) => ({
+    ...requiredItem,
+    ...(byHref.get(requiredItem.href) || {}),
+  })).concat(
+    links.filter((item) => !REQUIRED_NAV_LINKS.some((requiredItem) => requiredItem.href === item.href)),
+  );
+}
+
 export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const source = isRecord(input) ? input : {};
   const heroBanner = isRecord(source.heroBanner) ? source.heroBanner : {};
@@ -165,7 +187,7 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
           ? seo.keywords
           : DEFAULT_SITE_CONFIG.seo.keywords,
     },
-    navbarLinks: normalizeLinks(source.navbarLinks, DEFAULT_SITE_CONFIG.navbarLinks),
+    navbarLinks: normalizeNavbarLinks(source.navbarLinks),
     footerLinks: {
       products: normalizeLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
       explore: normalizeLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),

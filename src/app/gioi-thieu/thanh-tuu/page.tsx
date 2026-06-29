@@ -11,6 +11,12 @@ import { ShieldCheck, Factory, Award, ArrowRight, X, Sparkles, BookOpen, ShieldA
 import Link from "next/link";
 
 const DOCUMENT_IMAGE_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
+const FEATURED_TRUST_KEYS = new Set([
+  "food_safety_certificate",
+  "pvi_insurance",
+  "production_process",
+  "brand_story",
+]);
 
 function isDocumentImage(item: TrustSectionItem) {
   return DOCUMENT_IMAGE_KEYS.has(item.key);
@@ -43,6 +49,8 @@ export default function AchievementsPage() {
     return acc;
   }, {});
 
+  const customTrustItems = enabledTrustSections.filter((item) => !FEATURED_TRUST_KEYS.has(item.key));
+
   // Group achievements data
   const trustGroups = [
     {
@@ -64,32 +72,42 @@ export default function AchievementsPage() {
       ...group,
       items: group.keys.map((key) => trustByKey[key]).filter((item): item is TrustSectionItem => Boolean(item)),
     }))
-    .filter((group) => group.items.length > 0);
+    .filter((group) => group.items.length > 0)
+    .concat(
+      customTrustItems.length > 0
+        ? [
+            {
+              label: "Giải thưởng & nội dung khác",
+              title: "Các thành tựu, hoạt động và bằng chứng do admin bổ sung",
+              icon: Award,
+              badgeColor: "bg-amber-50 text-amber-700 border-amber-100",
+              keys: [],
+              items: customTrustItems,
+            },
+          ]
+        : [],
+    );
 
   return (
     <main className="bg-[#fbf7ef] py-16 px-4 sm:px-6 lg:px-8 min-h-screen relative overflow-hidden">
-      {/* Background Ornaments */}
-      <div className="absolute top-10 right-10 w-80 h-80 bg-orange-100/30 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-10 left-10 w-80 h-80 bg-amber-50 rounded-full blur-3xl pointer-events-none -z-10" />
-
       <div className="max-w-6xl mx-auto relative z-10">
         {/* Header Section */}
         <div className="text-center mb-20">
-          <span className="inline-flex items-center gap-1.5 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700 shadow-sm rounded-full mb-4">
+          <span className="inline-flex items-center gap-1.5 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700 mb-4">
             <Award size={13} className="text-orange-600" />
             Hồ sơ năng lực
           </span>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-[-0.04em]">
             Thành tựu & Uy tín
           </h2>
-          <div className="h-1.5 w-24 bg-gradient-to-r from-orange-500 to-amber-500 mx-auto my-6 rounded-full" />
+          <div className="h-1.5 w-24 bg-orange-600 mx-auto my-6" />
           <p className="text-base sm:text-lg text-slate-650 max-w-2xl mx-auto leading-relaxed font-medium">
             Sự phát triển bền vững song hành cùng chất lượng kiểm định khắt khe và trách nhiệm tuyệt đối đối với sức khỏe người tiêu dùng.
           </p>
         </div>
 
         {trustGroups.length === 0 ? (
-          <div className="border border-dashed border-orange-200 bg-white p-12 text-center text-sm font-bold text-slate-500 rounded-2xl shadow-sm">
+          <div className="border border-dashed border-orange-200 bg-white p-12 text-center text-sm font-bold text-slate-500">
             Chưa có thông tin hồ sơ uy tín được cấu hình.
           </div>
         ) : (
@@ -101,11 +119,11 @@ export default function AchievementsPage() {
                   {/* Group Title Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-orange-100/80">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-600 text-white shadow-md">
+                      <div className="flex h-10 w-10 items-center justify-center bg-orange-600 text-white">
                         <Icon size={20} />
                       </div>
                       <div>
-                        <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ${group.badgeColor}`}>
+                        <span className={`inline-flex px-2 py-0.5 text-[10px] font-black uppercase tracking-wider border ${group.badgeColor}`}>
                           {group.label}
                         </span>
                         <h3 className="text-lg sm:text-xl font-black text-slate-950 tracking-[-0.03em] mt-0.5">
@@ -124,8 +142,8 @@ export default function AchievementsPage() {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.4 }}
-                        className="bg-white border border-orange-100/60 rounded-3xl overflow-hidden shadow-[0_10px_35px_rgba(15,23,42,0.02)] hover:shadow-[0_20px_50px_rgba(234,88,12,0.08)] hover:border-orange-300 transition-all duration-300 flex flex-col justify-between cursor-pointer group h-full min-h-[300px]"
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="bg-white border border-orange-100 overflow-hidden hover:border-orange-300 transition-colors duration-200 flex flex-col justify-between cursor-pointer group h-full min-h-[300px]"
                       >
                         {/* Image Header with Zoom effect */}
                         <div className="relative h-48 sm:h-56 w-full bg-orange-50 overflow-hidden shrink-0">
@@ -146,7 +164,7 @@ export default function AchievementsPage() {
                             </div>
                           )}
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-slate-950/0 to-transparent pointer-events-none" />
-                          <span className="absolute bottom-4 right-4 bg-slate-950/70 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-white/10 group-hover:bg-orange-600 group-hover:border-orange-500 transition-colors">
+                          <span className="absolute bottom-4 right-4 bg-slate-950/70 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 border border-white/10 group-hover:bg-orange-600 group-hover:border-orange-500 transition-colors">
                             Xem chứng thực
                           </span>
                         </div>
@@ -191,17 +209,17 @@ export default function AchievementsPage() {
 
             {/* Modal Box */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white text-slate-950 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative border border-orange-100 flex flex-col md:grid md:grid-cols-[1.1fr_1.3fr] h-auto max-h-[85vh] md:max-h-[80vh] z-10"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 18 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white text-slate-950 w-full max-w-4xl overflow-hidden shadow-2xl relative border border-orange-100 flex flex-col md:grid md:grid-cols-[1.1fr_1.3fr] h-auto max-h-[85vh] md:max-h-[80vh] z-10"
             >
               {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="absolute right-4 top-4 bg-white/90 backdrop-blur-md text-slate-950 p-2 rounded-full border border-slate-200 hover:bg-orange-600 hover:text-white hover:border-orange-500 transition-all z-20 shadow-md"
+                className="absolute right-4 top-4 bg-white/90 backdrop-blur-md text-slate-950 p-2 border border-slate-200 hover:bg-orange-600 hover:text-white hover:border-orange-500 transition-colors z-20"
                 aria-label="Đóng"
               >
                 <X size={18} />
@@ -231,7 +249,7 @@ export default function AchievementsPage() {
               <div className="p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[50vh] md:max-h-[80vh]">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 border border-orange-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest">
                       <BookOpen size={10} /> Document
                     </span>
                   </div>
@@ -240,7 +258,7 @@ export default function AchievementsPage() {
                     {selectedItem.detailTitle || selectedItem.title}
                   </h3>
 
-                  <p className="mt-4 text-base font-semibold leading-relaxed text-orange-700 bg-orange-50/50 p-4 border border-orange-100/50 rounded-2xl">
+                  <p className="mt-4 text-base font-semibold leading-relaxed text-orange-700 bg-orange-50/50 p-4 border border-orange-100/50">
                     {selectedItem.description}
                   </p>
 
@@ -261,7 +279,7 @@ export default function AchievementsPage() {
                     <Link
                       href={selectedItem.linkUrl}
                       onClick={() => setSelectedItem(null)}
-                      className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-750 text-white w-full sm:w-auto px-6 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors shadow-md hover:shadow-lg"
+                      className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-750 text-white w-full sm:w-auto px-6 py-3.5 text-xs font-black uppercase tracking-widest transition-colors"
                     >
                       Tài liệu / Trang liên quan
                       <ArrowRight size={14} />

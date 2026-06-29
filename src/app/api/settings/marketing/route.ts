@@ -66,6 +66,7 @@ export async function PUT(req: NextRequest) {
         pageAssetCount: data.pageAssets.length,
         trustSectionCount: data.trustSections.length,
         historyMilestoneCount: data.historyMilestones.length,
+        communityActivityCount: data.communityActivities.length,
       },
     });
 
@@ -73,6 +74,7 @@ export async function PUT(req: NextRequest) {
     revalidatePath("/gioi-thieu");
     revalidatePath("/gioi-thieu/thanh-tuu");
     revalidatePath("/gioi-thieu/lich-su");
+    revalidatePath("/gioi-thieu/cong-dong");
     revalidatePath("/quy-trinh");
 
     return NextResponse.json(config);

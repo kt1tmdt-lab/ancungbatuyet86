@@ -57,6 +57,18 @@ export type HistoryMilestoneItem = {
   sortOrder: number;
 };
 
+export type CommunityActivityItem = {
+  id: string;
+  title: string;
+  description: string;
+  iconKey: "heart" | "users" | "message" | "hand";
+  tone: "red" | "blue" | "orange" | "green";
+  imageUrl: string;
+  linkUrl: string;
+  enabled: boolean;
+  sortOrder: number;
+};
+
 export type MarketingConfigData = {
   press: PressItem[];
   feedback: FeedbackItem[];
@@ -64,6 +76,7 @@ export type MarketingConfigData = {
   pageAssets: PageAssetItem[];
   trustSections: TrustSectionItem[];
   historyMilestones: HistoryMilestoneItem[];
+  communityActivities: CommunityActivityItem[];
 };
 
 const TRUST_DOCUMENT_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
@@ -305,6 +318,52 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       imageUrl: "/bento/bento-factory.png",
       linkUrl: "/quy-trinh",
       type: "milestone",
+      enabled: true,
+      sortOrder: 40,
+    },
+  ],
+  communityActivities: [
+    {
+      id: "default-community-charity",
+      title: "Hoạt động Thiện nguyện",
+      description: "Ăn Cùng Bà Tuyết thường xuyên tổ chức các chương trình quyên góp, trao quà vùng cao, hỗ trợ trẻ em nghèo hiếu học và đồng bào gặp hoàn cảnh khó khăn.",
+      iconKey: "heart",
+      tone: "red",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+      sortOrder: 10,
+    },
+    {
+      id: "default-community-partner",
+      title: "Đồng hành cùng đối tác Việt",
+      description: "Hợp tác chặt chẽ cùng các nhà xưởng, hợp tác xã nông sản tại địa phương để tạo việc làm bền vững cho người lao động vùng trung du và miền núi.",
+      iconKey: "users",
+      tone: "blue",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+      sortOrder: 20,
+    },
+    {
+      id: "default-community-live",
+      title: "Gắn kết qua Livestream",
+      description: "Các phiên phát sóng trực tiếp không chỉ giới thiệu đồ ăn sạch, mà còn là không gian chia sẻ câu chuyện ẩm thực vui vẻ, mang tiếng cười đến mọi gia đình.",
+      iconKey: "message",
+      tone: "orange",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+      sortOrder: 30,
+    },
+    {
+      id: "default-community-care",
+      title: "Tử tế từ những việc nhỏ nhất",
+      description: "Lắng nghe góp ý của từng khách hàng, cam kết giải quyết khiếu nại chất lượng nhanh chóng và thỏa đáng để bảo vệ quyền lợi người tiêu dùng.",
+      iconKey: "hand",
+      tone: "green",
+      imageUrl: "",
+      linkUrl: "",
       enabled: true,
       sortOrder: 40,
     },
@@ -618,6 +677,45 @@ function normalizeHistoryMilestones(input: unknown): HistoryMilestoneItem[] {
     .filter((item): item is HistoryMilestoneItem => Boolean(item));
 }
 
+function normalizeCommunityActivities(input: unknown): CommunityActivityItem[] {
+  if (!Array.isArray(input)) return DEFAULT_MARKETING_CONFIG.communityActivities;
+
+  return input
+    .map((item, index) => {
+      if (!isRecord(item)) return null;
+      const title = stringValue(item.title);
+      const description = stringValue(item.description);
+      const iconKey =
+        item.iconKey === "users" || item.iconKey === "message" || item.iconKey === "hand"
+          ? item.iconKey
+          : "heart";
+      const tone =
+        item.tone === "blue" || item.tone === "orange" || item.tone === "green" || item.tone === "red"
+          ? item.tone
+          : "orange";
+      const imageUrl = normalizeUploadPublicUrl(stringValue(item.imageUrl));
+      const linkUrl = stringValue(item.linkUrl);
+      const sortOrder = Number.isFinite(Number(item.sortOrder))
+        ? Number(item.sortOrder)
+        : index * 10;
+
+      if (!title && !description && !imageUrl && !linkUrl) return null;
+
+      return {
+        id: itemId(item.id),
+        title,
+        description,
+        iconKey,
+        tone,
+        imageUrl,
+        linkUrl,
+        enabled: item.enabled !== false,
+        sortOrder,
+      };
+    })
+    .filter((item): item is CommunityActivityItem => Boolean(item));
+}
+
 function withDefaultPageAssets(items: PageAssetItem[]) {
   const byKey = new Map(items.map((item) => [item.key, item]));
 
@@ -649,5 +747,6 @@ export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
       : legacyHistoryMilestones.length > 0
         ? legacyHistoryMilestones
         : DEFAULT_MARKETING_CONFIG.historyMilestones,
+    communityActivities: normalizeCommunityActivities(source.communityActivities),
   };
 }

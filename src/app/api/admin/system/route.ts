@@ -153,8 +153,8 @@ export async function GET(req: NextRequest) {
       {
         id: "marketing-config",
         label: "Nội dung trang",
-        status: marketing.pageAssets.length > 0 && marketing.historyMilestones.length > 0 ? "ok" : "warning",
-        detail: `${marketing.pageAssets.length} ảnh/link, ${marketing.historyMilestones.length} cột mốc lịch sử`,
+        status: marketing.pageAssets.length > 0 && marketing.historyMilestones.length > 0 && marketing.communityActivities.length > 0 ? "ok" : "warning",
+        detail: `${marketing.pageAssets.length} ảnh/link, ${marketing.historyMilestones.length} cột mốc, ${marketing.trustSections.length} mục uy tín, ${marketing.communityActivities.length} hoạt động cộng đồng`,
         href: "/admin/marketing",
       },
       {
@@ -269,6 +269,8 @@ export async function GET(req: NextRequest) {
         user: log.userId ? userMap.get(log.userId) || null : null,
       })),
       quickLinks: [
+        { href: "/admin/marketing?tab=trust", label: "Thành tựu & uy tín", group: "Nội dung trang" },
+        { href: "/admin/marketing?tab=community", label: "Hoạt động cộng đồng", group: "Nội dung trang" },
         { href: "/admin/settings", label: "Cấu hình Web", group: "Hệ thống" },
         { href: "/admin/marketing?tab=history", label: "Lịch sử phát triển", group: "Nội dung trang" },
         { href: "/admin/marketing?tab=assets", label: "Ảnh & link trang", group: "Nội dung trang" },

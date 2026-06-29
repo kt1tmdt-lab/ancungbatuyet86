@@ -121,10 +121,8 @@ export default function HistoryPage() {
   if (historyItems.length === 0) {
     return (
       <main className="bg-[#fbf7ef] py-16 px-4 sm:px-6 lg:px-8 min-h-screen relative overflow-hidden">
-        {/* Background Decorative Blur */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-100/40 rounded-full blur-3xl pointer-events-none -z-10" />
         <div className="max-w-6xl mx-auto text-center mt-20">
-          <div className="border border-dashed border-orange-200 bg-white p-12 text-center text-sm font-bold text-slate-500 rounded-2xl shadow-sm">
+          <div className="border border-dashed border-orange-200 bg-white p-12 text-center text-sm font-bold text-slate-500">
             Chưa có thông tin lịch sử thương hiệu được cấu hình.
           </div>
         </div>
@@ -137,86 +135,57 @@ export default function HistoryPage() {
   // Slide transitions variants
   const slideVariants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 120 : dir < 0 ? -120 : 0,
+      x: dir > 0 ? 42 : dir < 0 ? -42 : 0,
       opacity: 0,
-      scale: 0.97,
     }),
     center: {
       x: 0,
       opacity: 1,
-      scale: 1,
       transition: {
-        x: { type: "spring" as const, stiffness: 300, damping: 30 },
-        opacity: { duration: 0.3 },
+        x: { duration: 0.32, ease: [0.22, 1, 0.36, 1] as const },
+        opacity: { duration: 0.22 },
       },
     },
     exit: (dir: number) => ({
-      x: dir > 0 ? -120 : dir < 0 ? 120 : 0,
+      x: dir > 0 ? -42 : dir < 0 ? 42 : 0,
       opacity: 0,
-      scale: 0.97,
       transition: {
-        x: { type: "spring" as const, stiffness: 300, damping: 30 },
-        opacity: { duration: 0.25 },
+        x: { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const },
+        opacity: { duration: 0.18 },
       },
     }),
   };
 
   return (
     <main className="bg-[#fbf7ef] py-16 px-4 sm:px-6 lg:px-8 min-h-screen relative overflow-hidden">
-      {/* Decorative Background Elements with Floating Motion */}
-      <motion.div
-        animate={{
-          y: [0, -15, 0],
-          x: [0, 10, 0],
-        }}
-        transition={{
-          duration: 9,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-0 left-1/4 w-96 h-96 bg-orange-100/30 rounded-full blur-3xl pointer-events-none -z-10"
-      />
-      <motion.div
-        animate={{
-          y: [0, 15, 0],
-          x: [0, -10, 0],
-        }}
-        transition={{
-          duration: 11,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute bottom-20 right-1/4 w-96 h-96 bg-amber-50 rounded-full blur-3xl pointer-events-none -z-10"
-      />
-
       <div className="max-w-5xl mx-auto relative z-10">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-1.5 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700 shadow-sm rounded-full mb-4">
-            <History size={13} className="text-orange-600 animate-spin-slow" />
+          <span className="inline-flex items-center gap-1.5 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700 mb-4">
+            <History size={13} className="text-orange-600" />
             Hành trình thời gian
           </span>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-[-0.04em]">
             Lịch sử & Cột mốc
           </h2>
-          <div className="h-1.5 w-24 bg-gradient-to-r from-orange-500 to-amber-500 mx-auto my-6 rounded-full" />
+          <div className="h-1.5 w-24 bg-orange-600 mx-auto my-6" />
           <p className="text-base sm:text-lg text-slate-655 max-w-2xl mx-auto leading-relaxed font-medium">
             Từ một căn bếp nhỏ đong đầy tâm huyết đến thương hiệu ăn vặt quốc dân. Nhìn lại những dấu mốc kiến tạo nên Ăn Cùng Bà Tuyết hôm nay.
           </p>
         </div>
 
         {/* Horizontal Timeline Navigation Axis */}
-        <div className="relative mb-12 bg-white/50 backdrop-blur-sm border border-orange-100/60 p-6 rounded-3xl shadow-[0_8px_30px_rgba(234,88,12,0.02)]">
+        <div className="relative mb-10 bg-white border border-orange-100 p-6">
           <div
             ref={timelineRef}
             className="w-full overflow-x-auto no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing py-8"
           >
             <div className="relative min-w-[700px] md:min-w-0 md:w-full h-12 flex items-center px-12">
               {/* Timeline Track Line */}
-              <div className="absolute left-12 right-12 h-1 bg-slate-200 rounded-full">
+              <div className="absolute left-12 right-12 h-0.5 bg-slate-200">
                 {/* Highlighted active segment */}
                 <motion.div
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-orange-500 via-orange-600 to-amber-500 rounded-full shadow-[0_0_8px_rgba(234,88,12,0.4)]"
+                  className="absolute left-0 top-0 h-full bg-orange-600"
                   initial={false}
                   animate={{
                     width: historyItems.length <= 1 ? "100%" : `${(activeIndex / (historyItems.length - 1)) * 100}%`,
@@ -254,12 +223,13 @@ export default function HistoryPage() {
                     {/* Year text wrapper */}
                     <motion.div
                       animate={{
-                        y: isSelected ? -8 : 0,
-                        scale: isSelected ? 1.08 : 1,
+                        y: isSelected ? -6 : 0,
+                        scale: isSelected ? 1.04 : 1,
                       }}
-                      className={`mb-3 px-3.5 py-1 text-xs font-black rounded-full border transition-all duration-300 ${
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                      className={`mb-3 px-3.5 py-1 text-xs font-black border transition-all duration-200 ${
                         isSelected
-                          ? "bg-orange-600 text-white border-orange-600 shadow-md shadow-orange-500/20"
+                          ? "bg-orange-600 text-white border-orange-600"
                           : isPast
                           ? "bg-orange-50 text-orange-600 border-orange-200"
                           : "bg-white text-slate-400 border-slate-200 group-hover:border-orange-300 group-hover:text-orange-500"
@@ -274,9 +244,9 @@ export default function HistoryPage() {
                       {isSelected && (
                         <motion.span
                           layoutId="timeline-glow-ring"
-                          className="absolute w-7 h-7 bg-orange-500/20 border border-orange-500/60 rounded-full"
-                          animate={{ scale: [1, 1.4, 1] }}
-                          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                          className="absolute w-7 h-7 bg-orange-500/10 border border-orange-500/40 rounded-full"
+                          animate={{ opacity: [0.65, 0.25, 0.65], scale: [1, 1.18, 1] }}
+                          transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
                         />
                       )}
 
@@ -314,7 +284,7 @@ export default function HistoryPage() {
           <button
             onClick={handlePrev}
             disabled={activeIndex === 0}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-7 w-13 h-13 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-20 hover:border-orange-500 hover:shadow-xl hover:scale-105 disabled:hover:scale-100 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-all z-20 shadow-md cursor-pointer hidden md:flex"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-7 w-13 h-13 bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-20 hover:border-orange-500 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-colors z-20 cursor-pointer hidden md:flex"
             title="Cột mốc trước"
           >
             <ChevronLeft size={22} strokeWidth={2.2} />
@@ -324,14 +294,14 @@ export default function HistoryPage() {
           <button
             onClick={handleNext}
             disabled={activeIndex === historyItems.length - 1}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-7 w-13 h-13 rounded-full bg-white border border-slate-200/80 flex items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-20 hover:border-orange-500 hover:shadow-xl hover:scale-105 disabled:hover:scale-100 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-all z-20 shadow-md cursor-pointer hidden md:flex"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-7 w-13 h-13 bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-orange-600 disabled:opacity-20 hover:border-orange-500 disabled:hover:border-slate-200 disabled:hover:text-slate-600 transition-colors z-20 cursor-pointer hidden md:flex"
             title="Cột mốc sau"
           >
             <ChevronRight size={22} strokeWidth={2.2} />
           </button>
 
           {/* Sliding Content Container */}
-          <div className="overflow-hidden rounded-3xl min-h-[420px] bg-white border border-orange-100/60 shadow-[0_15px_40px_rgba(234,88,12,0.03)] relative">
+          <div className="overflow-hidden min-h-[420px] bg-white border border-orange-100 relative">
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={activeItem.id}
@@ -354,7 +324,7 @@ export default function HistoryPage() {
                   <div>
                     {/* Category Label and Year Badge */}
                     <div className="flex items-center gap-2 mb-4">
-                      <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                      <span className={`inline-flex items-center gap-1 border px-3 py-1 text-xs font-black uppercase tracking-wider ${
                         activeItem.type === "achievement" 
                           ? "bg-amber-50 text-amber-700 border-amber-100" 
                           : "bg-orange-50 text-orange-700 border-orange-100"
@@ -363,7 +333,7 @@ export default function HistoryPage() {
                         {activeItem.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                       </span>
                       {activeItem.year && (
-                        <span className="text-xs font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 rounded-full flex items-center gap-1">
+                        <span className="text-xs font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 flex items-center gap-1">
                           <Calendar size={11} /> Năm {activeItem.year}
                         </span>
                       )}
@@ -384,7 +354,7 @@ export default function HistoryPage() {
                   <div className="flex flex-wrap gap-4 mt-auto">
                     <button
                       onClick={() => setSelectedItem(activeItem)}
-                      className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-orange-600/10 hover:shadow-lg hover:shadow-orange-600/20 active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3.5 text-xs font-black uppercase tracking-widest transition-colors cursor-pointer"
                     >
                       Xem chi tiết cột mốc
                       <ArrowRight size={14} />
@@ -393,7 +363,7 @@ export default function HistoryPage() {
                     {activeItem.linkUrl && activeItem.linkUrl !== "/gioi-thieu" && (
                       <Link
                         href={activeItem.linkUrl}
-                        className="inline-flex items-center gap-1.5 px-6 py-3.5 border border-slate-200 bg-white hover:border-orange-300 text-slate-700 hover:text-orange-600 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-6 py-3.5 border border-slate-200 bg-white hover:border-orange-300 text-slate-700 hover:text-orange-600 text-xs font-black uppercase tracking-widest transition-colors cursor-pointer"
                       >
                         Tài liệu liên quan
                       </Link>
@@ -404,7 +374,7 @@ export default function HistoryPage() {
                 {/* Right Area: Image visual or creative placeholder */}
                 <div className="w-full relative z-10">
                   {activeItem.imageUrl ? (
-                    <div className="relative aspect-[16/11] w-full overflow-hidden rounded-2xl border border-orange-100/50 bg-orange-50/50 shadow-md group">
+                    <div className="relative aspect-[16/11] w-full overflow-hidden border border-orange-100 bg-orange-50 group">
                       <img
                         src={activeItem.imageUrl}
                         alt={activeItem.title}
@@ -414,10 +384,7 @@ export default function HistoryPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent pointer-events-none" />
                     </div>
                   ) : (
-                    <div className="relative aspect-[16/11] w-full bg-gradient-to-br from-orange-50 to-amber-100 border border-orange-100/70 rounded-2xl flex flex-col items-center justify-center p-8 overflow-hidden shadow-sm">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-300/10 rounded-full blur-2xl pointer-events-none" />
-                      <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-                      
+                    <div className="relative aspect-[16/11] w-full bg-orange-50 border border-orange-100 flex flex-col items-center justify-center p-8 overflow-hidden">
                       {activeItem.type === "achievement" ? (
                         <Award size={56} className="text-amber-600 stroke-[1.2] mb-3" />
                       ) : (
@@ -440,7 +407,7 @@ export default function HistoryPage() {
           <button
             onClick={handlePrev}
             disabled={activeIndex === 0}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-orange-150 text-slate-700 font-bold text-xs rounded-xl disabled:opacity-40 transition-colors shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white border border-orange-150 text-slate-700 font-bold text-xs disabled:opacity-40 transition-colors"
           >
             <ChevronLeft size={16} strokeWidth={2.2} />
             Cột mốc trước
@@ -448,7 +415,7 @@ export default function HistoryPage() {
           <button
             onClick={handleNext}
             disabled={activeIndex === historyItems.length - 1}
-            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-orange-600 text-white font-bold text-xs rounded-xl disabled:opacity-40 transition-colors shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-orange-600 text-white font-bold text-xs disabled:opacity-40 transition-colors"
           >
             Cột mốc sau
             <ChevronRight size={16} strokeWidth={2.2} />
@@ -471,17 +438,17 @@ export default function HistoryPage() {
 
             {/* Modal Box Content */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.93, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.93, y: 20 }}
-              transition={{ type: "spring", duration: 0.45 }}
-              className="bg-white text-slate-950 w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative border border-orange-100 flex flex-col md:grid md:grid-cols-[1.1fr_1.3fr] h-auto max-h-[85vh] md:max-h-[80vh] z-10"
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 18 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white text-slate-950 w-full max-w-4xl overflow-hidden shadow-2xl relative border border-orange-100 flex flex-col md:grid md:grid-cols-[1.1fr_1.3fr] h-auto max-h-[85vh] md:max-h-[80vh] z-10"
             >
               {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="absolute right-4 top-4 bg-white/95 backdrop-blur-sm text-slate-800 p-2 rounded-full border border-slate-200 hover:bg-orange-600 hover:text-white hover:border-orange-500 hover:rotate-90 transition-all z-20 shadow-md cursor-pointer"
+                className="absolute right-4 top-4 bg-white/95 backdrop-blur-sm text-slate-800 p-2 border border-slate-200 hover:bg-orange-600 hover:text-white hover:border-orange-500 transition-colors z-20 cursor-pointer"
                 aria-label="Đóng"
               >
                 <X size={18} />
@@ -512,7 +479,7 @@ export default function HistoryPage() {
                 <div>
                   {/* Category and year badge */}
                   <div className="flex items-center gap-2 mb-4">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                    <span className={`inline-flex px-3 py-1 text-[10px] font-black uppercase tracking-widest border ${
                       selectedItem.type === "achievement"
                         ? "bg-amber-50 text-amber-700 border-amber-100"
                         : "bg-orange-50 text-orange-700 border-orange-100"
@@ -521,7 +488,7 @@ export default function HistoryPage() {
                       {selectedItem.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                     </span>
                     {(selectedItem.year || extractYear(selectedItem.title)) && (
-                      <span className="text-[10px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 rounded-full flex items-center gap-1">
+                      <span className="text-[10px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 flex items-center gap-1">
                         <Clock size={10} /> Năm {selectedItem.year || extractYear(selectedItem.title)}
                       </span>
                     )}
@@ -533,7 +500,7 @@ export default function HistoryPage() {
                   </h3>
 
                   {/* Summary Box */}
-                  <p className="mt-4 text-sm font-semibold leading-relaxed text-orange-750 bg-orange-50/50 p-4 border border-orange-100/50 rounded-2xl">
+                  <p className="mt-4 text-sm font-semibold leading-relaxed text-orange-750 bg-orange-50/50 p-4 border border-orange-100/50">
                     {selectedItem.description}
                   </p>
 
@@ -556,7 +523,7 @@ export default function HistoryPage() {
                     <Link
                       href={selectedItem.linkUrl}
                       onClick={() => setSelectedItem(null)}
-                      className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-750 text-white w-full sm:w-auto px-6 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors shadow-md hover:shadow-lg"
+                      className="inline-flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-750 text-white w-full sm:w-auto px-6 py-3.5 text-xs font-black uppercase tracking-widest transition-colors"
                     >
                       Tài liệu / Trang liên quan
                       <ArrowRight size={14} />

@@ -25,11 +25,13 @@ import {
   Link2,
   Eye,
   ExternalLink,
-  X
+  X,
+  Heart
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   normalizeMarketingConfig,
+  type CommunityActivityItem,
   type FeedbackItem,
   type HistoryMilestoneItem,
   type PageAssetItem,
@@ -121,12 +123,16 @@ function MarketingPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets" | "history">(
+  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets" | "history" | "community">(
     searchParams.get("tab") === "assets"
       ? "assets"
       : searchParams.get("tab") === "history"
         ? "history"
-        : "press",
+        : searchParams.get("tab") === "trust"
+          ? "trust"
+          : searchParams.get("tab") === "community"
+            ? "community"
+            : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
@@ -138,14 +144,12 @@ function MarketingPageContent() {
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
   const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
   const [historyList, setHistoryList] = useState<HistoryMilestoneItem[]>([]);
+  const [communityList, setCommunityList] = useState<CommunityActivityItem[]>([]);
 
   useEffect(() => {
-    if (searchParams.get("tab") === "assets") {
-      const timer = window.setTimeout(() => setActiveTab("assets"), 0);
-      return () => window.clearTimeout(timer);
-    }
-    if (searchParams.get("tab") === "history") {
-      const timer = window.setTimeout(() => setActiveTab("history"), 0);
+    const tab = searchParams.get("tab");
+    if (tab === "assets" || tab === "history" || tab === "trust" || tab === "community") {
+      const timer = window.setTimeout(() => setActiveTab(tab), 0);
       return () => window.clearTimeout(timer);
     }
   }, [searchParams]);
@@ -166,6 +170,7 @@ function MarketingPageContent() {
         setAssetList(config.pageAssets);
         setTrustList(config.trustSections);
         setHistoryList(config.historyMilestones);
+        setCommunityList(config.communityActivities);
       })
       .catch((error) => {
         if (cancelled) return;
@@ -188,6 +193,7 @@ function MarketingPageContent() {
     pageAssets?: PageAssetItem[];
     trustSections?: TrustSectionItem[];
     historyMilestones?: HistoryMilestoneItem[];
+    communityActivities?: CommunityActivityItem[];
   }) => {
     setIsSaving(true);
     try {
@@ -197,6 +203,7 @@ function MarketingPageContent() {
       const nextPageAssets = nextConfig?.pageAssets || assetList;
       const nextTrustSections = nextConfig?.trustSections || trustList;
       const nextHistoryMilestones = nextConfig?.historyMilestones || historyList;
+      const nextCommunityActivities = nextConfig?.communityActivities || communityList;
 
       const res = await fetch("/api/settings/marketing", {
         method: "PUT",
@@ -211,6 +218,7 @@ function MarketingPageContent() {
           pageAssets: nextPageAssets,
           trustSections: nextTrustSections,
           historyMilestones: nextHistoryMilestones,
+          communityActivities: nextCommunityActivities,
         }),
       });
 
@@ -223,6 +231,7 @@ function MarketingPageContent() {
       setAssetList(config.pageAssets);
       setTrustList(config.trustSections);
       setHistoryList(config.historyMilestones);
+      setCommunityList(config.communityActivities);
       toast.success("Đã lưu tài sản truyền thông thành công!");
     } catch (error) {
       console.error("Failed to save marketing settings", error);
@@ -314,6 +323,23 @@ function MarketingPageContent() {
     setHistoryList([...historyList, newItem]);
   };
 
+  const addCommunityActivity = () => {
+    const newItem: CommunityActivityItem = {
+      id: Date.now().toString(),
+      title: "",
+      description: "",
+      iconKey: "heart",
+      tone: "orange",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+      sortOrder: communityList.length > 0
+        ? Math.max(...communityList.map((item) => Number(item.sortOrder) || 0)) + 10
+        : 10,
+    };
+    setCommunityList([...communityList, newItem]);
+  };
+
   // Remove Item Helpers
   const removePress = (id: string) => {
     setPressList(pressList.filter((item) => item.id !== id));
@@ -337,6 +363,10 @@ function MarketingPageContent() {
 
   const removeHistoryMilestone = (id: string) => {
     setHistoryList(historyList.filter((item) => item.id !== id));
+  };
+
+  const removeCommunityActivity = (id: string) => {
+    setCommunityList(communityList.filter((item) => item.id !== id));
   };
 
   // Update Field Helpers
@@ -388,6 +418,14 @@ function MarketingPageContent() {
     setHistoryList(historyList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
+  const updateCommunityActivity = (
+    id: string,
+    field: keyof CommunityActivityItem,
+    val: string | boolean | number,
+  ) => {
+    setCommunityList(communityList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+  };
+
   const handleMediaSelect = async (url: string) => {
     if (!mediaPickerAssetId) return;
 
@@ -408,6 +446,16 @@ function MarketingPageContent() {
       setHistoryList(nextHistoryList);
       setMediaPickerAssetId(null);
       await saveMarketingConfig({ historyMilestones: nextHistoryList });
+      return;
+    }
+
+    if (activeTab === "community") {
+      const nextCommunityList = communityList.map((item) =>
+        item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
+      );
+      setCommunityList(nextCommunityList);
+      setMediaPickerAssetId(null);
+      await saveMarketingConfig({ communityActivities: nextCommunityList });
       return;
     }
 
@@ -507,6 +555,17 @@ function MarketingPageContent() {
           >
             <ImageIcon size={16} />
             Ảnh & link trang ({assetList.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("community")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === "community"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            <Heart size={16} />
+            Cong dong ({communityList.filter((item) => item.enabled).length})
           </button>
         </div>
 
@@ -1103,6 +1162,171 @@ function MarketingPageContent() {
                           >
                             <Trash2 size={16} />
                             Xóa
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "community" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Hoat dong cong dong</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Quan ly tung dong noi dung trong trang Cong dong: tieu de, mo ta, icon, mau, anh, link, bat/tat va thu tu hien thi.
+                    </p>
+                  </div>
+                  <button
+                    onClick={addCommunityActivity}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
+                  >
+                    <Plus size={14} />
+                    Them hoat dong
+                  </button>
+                </div>
+
+                {communityList.length === 0 ? (
+                  <div className="text-center py-16 text-slate-400">
+                    <AlertCircle className="mx-auto text-slate-300 mb-2" size={36} />
+                    <p className="text-xs font-semibold">Chua co hoat dong cong dong nao.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {communityList
+                      .slice()
+                      .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0))
+                      .map((item, index) => (
+                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 xl:grid-cols-[150px_1fr_auto]">
+                          <div className="overflow-hidden border border-slate-200 bg-white">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                            ) : (
+                              <div className="flex h-32 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
+                                Chua co anh
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <span className="bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+                                #{index + 1}
+                              </span>
+                              <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-700">
+                                <input
+                                  type="checkbox"
+                                  checked={item.enabled}
+                                  onChange={(e) => updateCommunityActivity(item.id, "enabled", e.target.checked)}
+                                  className="h-4 w-4 accent-orange-500"
+                                />
+                                Hien thi ngoai website
+                              </label>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-[1fr_140px_140px_120px]">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tieu de</label>
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) => updateCommunityActivity(item.id, "title", e.target.value)}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Icon</label>
+                                <select
+                                  value={item.iconKey}
+                                  onChange={(e) => updateCommunityActivity(item.id, "iconKey", e.target.value)}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                >
+                                  <option value="heart">Trai tim</option>
+                                  <option value="users">Cong dong</option>
+                                  <option value="message">Tin nhan</option>
+                                  <option value="hand">Ho tro</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mau</label>
+                                <select
+                                  value={item.tone}
+                                  onChange={(e) => updateCommunityActivity(item.id, "tone", e.target.value)}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                >
+                                  <option value="orange">Cam</option>
+                                  <option value="red">Do</option>
+                                  <option value="blue">Xanh duong</option>
+                                  <option value="green">Xanh la</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Thu tu</label>
+                                <input
+                                  type="number"
+                                  value={item.sortOrder}
+                                  onChange={(e) => updateCommunityActivity(item.id, "sortOrder", Number(e.target.value))}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mo ta</label>
+                              <textarea
+                                value={item.description}
+                                onChange={(e) => updateCommunityActivity(item.id, "description", e.target.value)}
+                                rows={3}
+                                className="w-full resize-none border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                              />
+                            </div>
+
+                            <div className="grid gap-4 xl:grid-cols-2">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <ImageIcon size={11} /> URL anh
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={item.imageUrl}
+                                    onChange={(e) => updateCommunityActivity(item.id, "imageUrl", e.target.value)}
+                                    placeholder="/uploads/hoat-dong.png"
+                                    className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setMediaPickerAssetId(item.id)}
+                                    className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                                  >
+                                    <ImagePlus size={14} />
+                                    Thu vien
+                                  </button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <Link2 size={11} /> Link khi bam
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.linkUrl}
+                                  onChange={(e) => updateCommunityActivity(item.id, "linkUrl", e.target.value)}
+                                  placeholder="/tin-tuc/hoat-dong hoac https://..."
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => removeCommunityActivity(item.id)}
+                            className="flex h-fit items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 xl:self-center"
+                          >
+                            <Trash2 size={16} />
+                            Xoa
                           </button>
                         </div>
                       ))}

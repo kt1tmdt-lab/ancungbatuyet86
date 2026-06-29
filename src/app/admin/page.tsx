@@ -3,20 +3,20 @@
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CurtainHover from "@/components/shared/CurtainHover";
 import { 
   FileText, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   Eye, 
   PenTool, 
   FolderPlus, 
   Users, 
   ArrowRight,
   TrendingUp,
-  ClipboardCheck
+  ClipboardCheck,
+  MonitorCog
 } from "lucide-react";
 import { PostsTable } from "@/components/admin/PostsTable";
 
@@ -44,11 +44,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
 
-  useEffect(() => {
-    if (token) fetchStats();
-  }, [token]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/stats", {
         headers: { Authorization: `Bearer ${token}` },
@@ -62,7 +58,13 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    const timer = window.setTimeout(() => void fetchStats(), 0);
+    return () => window.clearTimeout(timer);
+  }, [token, fetchStats]);
 
   const isEditorOrAdmin = user?.role === "ADMIN" || user?.role === "EDITOR";
 
@@ -500,6 +502,32 @@ export default function AdminPage() {
           <div className="md:col-span-2 bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <h2 className="text-lg font-bold text-slate-900">Thao tác nhanh</h2>
             <div className="grid sm:grid-cols-2 gap-4">
+              {isEditorOrAdmin && (
+                <Link
+                  href="/admin/web-control"
+                  className="group border border-orange-200 bg-orange-50 hover:border-orange-500 transition-all block sm:col-span-2"
+                >
+                  <div className="p-5 flex flex-col justify-between min-h-[150px]">
+                    <div className="flex gap-4 items-start">
+                      <div className="w-10 h-10 shrink-0 bg-orange-500 text-white flex items-center justify-center">
+                        <MonitorCog size={18} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-950">
+                          Tổng quản lý website
+                        </h3>
+                        <p className="text-xs text-slate-600 mt-1 leading-5">
+                          Một nơi gom tất cả chỗ sửa text, ảnh, link, sản phẩm, bài viết, điểm bán, SEO, hệ thống và nhật ký.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center gap-1 text-xs font-bold text-orange-600 group-hover:translate-x-1 transition-transform self-end">
+                      Mở bảng tổng quản lý <ArrowRight size={14} />
+                    </div>
+                  </div>
+                </Link>
+              )}
+
               {/* Action: Viết bài */}
               <Link 
                 href="/admin/posts/new"

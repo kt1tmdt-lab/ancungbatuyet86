@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Script from "next/script";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Globe2, Loader2, Menu, Phone, Search, X, ChevronDown } from "lucide-react";
+import { Loader2, Menu, Phone, Search, X, ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
-import { DEFAULT_SITE_CONFIG, type SiteConfigData } from "@/lib/site-config-defaults";
+import { DEFAULT_SITE_CONFIG, REQUIRED_NAV_LINKS, type SiteConfigData } from "@/lib/site-config-defaults";
 
-const DEFAULT_NAV_LINKS = [
+const DEFAULT_NAV_LINKS = REQUIRED_NAV_LINKS;
+export const LEGACY_NAV_LINKS = [
   { href: "/", label: "Trang chủ" },
   { href: "/san-pham", label: "Sản phẩm" },
   { href: "/quy-trinh", label: "Quy trình" },
@@ -45,6 +46,18 @@ declare global {
       };
     };
   }
+}
+
+function mergeRequiredNavLinks(links: { href: string; label: string }[] | undefined) {
+  if (!Array.isArray(links) || links.length === 0) return DEFAULT_NAV_LINKS;
+
+  const byHref = new Map(links.map((item) => [item.href, item]));
+  return DEFAULT_NAV_LINKS.map((requiredItem) => ({
+    ...requiredItem,
+    ...(byHref.get(requiredItem.href) || {}),
+  })).concat(
+    links.filter((item) => !DEFAULT_NAV_LINKS.some((requiredItem) => requiredItem.href === item.href)),
+  );
 }
 
 function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
@@ -238,12 +251,16 @@ export default function Navbar({
   const router = useRouter();
 
   useEffect(() => {
-    const savedLanguage = window.localStorage.getItem("acbt-language");
-    if (savedLanguage === "en" || savedLanguage === "vi") {
-      setLanguage(savedLanguage);
-    }
+    const timer = window.setTimeout(() => {
+      const savedLanguage = window.localStorage.getItem("acbt-language");
+      if (savedLanguage === "en" || savedLanguage === "vi") {
+        setLanguage(savedLanguage);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
-  const navLinks = Array.isArray(initialLinks) && initialLinks.length > 0 ? initialLinks : DEFAULT_NAV_LINKS;
+  const navLinks = mergeRequiredNavLinks(initialLinks);
   const phone = initialContact?.phone || DEFAULT_SITE_CONFIG.footerContact.phone;
   const phoneHref = `tel:${phone.replace(/\s+/g, "")}`;
   const trimmedSearchQuery = useMemo(() => searchQuery.trim(), [searchQuery]);

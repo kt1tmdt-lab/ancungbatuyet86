@@ -1,37 +1,57 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Users, Heart, MessageSquare, HandHelping, ArrowRight, Quote } from "lucide-react";
 import Link from "next/link";
+import {
+  DEFAULT_MARKETING_CONFIG,
+  normalizeMarketingConfig,
+  type CommunityActivityItem,
+} from "@/lib/marketing-config";
 
-const communityActivities = [
-  {
-    icon: Heart,
-    title: "Hoạt động Thiện nguyện",
-    description: "Ăn Cùng Bà Tuyết thường xuyên tổ chức các chương trình quyên góp, trao quà vùng cao, hỗ trợ trẻ em nghèo hiếu học và đồng bào gặp hoàn cảnh khó khăn.",
-    color: "bg-red-50 text-red-600 border-red-150"
-  },
-  {
-    icon: Users,
-    title: "Đồng hành cùng đối tác Việt",
-    description: "Hợp tác chặt chẽ cùng các nhà xưởng, hợp tác xã nông sản tại địa phương để tạo việc làm bền vững cho người lao động vùng trung du và miền núi.",
-    color: "bg-blue-50 text-blue-600 border-blue-150"
-  },
-  {
-    icon: MessageSquare,
-    title: "Gắn kết qua Livestream",
-    description: "Các phiên phát sóng trực tiếp không chỉ giới thiệu đồ ăn sạch, mà còn là không gian chia sẻ câu chuyện ẩm thực vui vẻ, mang tiếng cười đến mọi gia đình.",
-    color: "bg-orange-50 text-orange-600 border-orange-150"
-  },
-  {
-    icon: HandHelping,
-    title: "Tử tế từ những việc nhỏ nhất",
-    description: "Lắng nghe góp ý của từng khách hàng, cam kết giải quyết khiếu nại chất lượng nhanh chóng và thỏa đáng để bảo vệ quyền lợi người tiêu dùng.",
-    color: "bg-green-50 text-green-600 border-green-150"
-  }
-];
+const ICONS = {
+  heart: Heart,
+  users: Users,
+  message: MessageSquare,
+  hand: HandHelping,
+};
+
+const TONES = {
+  red: "bg-red-50 text-red-600 border-red-150",
+  blue: "bg-blue-50 text-blue-600 border-blue-150",
+  orange: "bg-orange-50 text-orange-600 border-orange-150",
+  green: "bg-green-50 text-green-600 border-green-150",
+};
 
 export default function CommunityPage() {
+  const [communityActivities, setCommunityActivities] = useState<CommunityActivityItem[]>(
+    DEFAULT_MARKETING_CONFIG.communityActivities,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/settings/marketing", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load marketing config"))))
+      .then((data) => {
+        if (!cancelled) {
+          setCommunityActivities(normalizeMarketingConfig(data?.data).communityActivities);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load community activities", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleActivities = communityActivities
+    .filter((item) => item.enabled)
+    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+
   return (
     <main className="bg-[#fbf7ef] py-16 px-5 sm:px-8 lg:px-14 xl:px-20">
       <div className="max-w-6xl mx-auto">
@@ -48,22 +68,20 @@ export default function CommunityPage() {
           </p>
         </div>
 
-        {/* Core Values Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-16 animate-fade-in">
-          {communityActivities.map((act, index) => {
-            const Icon = act.icon;
-            return (
-              <motion.div
-                key={act.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: index * 0.08 }}
-                className="bg-white border border-orange-100 p-6 sm:p-8 hover:border-orange-300 hover:shadow-[0_12px_40px_rgba(15,23,42,0.04)] transition-all duration-300 flex gap-5 items-start"
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${act.color}`}>
-                  <Icon size={22} />
-                </div>
+          {visibleActivities.map((act, index) => {
+            const Icon = ICONS[act.iconKey] || Heart;
+            const content = (
+              <>
+                {act.imageUrl ? (
+                  <div className="h-28 w-28 shrink-0 overflow-hidden border border-orange-100 bg-slate-50 max-sm:h-20 max-sm:w-20">
+                    <img src={act.imageUrl} alt={act.title} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className={`w-12 h-12 flex items-center justify-center shrink-0 border ${TONES[act.tone] || TONES.orange}`}>
+                    <Icon size={22} />
+                  </div>
+                )}
                 <div>
                   <h3 className="text-lg font-black text-slate-950 tracking-[-0.03em]">
                     {act.title}
@@ -71,18 +89,44 @@ export default function CommunityPage() {
                   <p className="mt-2 text-sm leading-[1.625] text-slate-600 font-medium">
                     {act.description}
                   </p>
+                  {act.linkUrl ? (
+                    <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-orange-600">
+                      Xem thêm <ArrowRight size={13} />
+                    </span>
+                  ) : null}
                 </div>
+              </>
+            );
+
+            return (
+              <motion.div
+                key={act.id || act.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.28, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                className="bg-white border border-orange-100 p-6 sm:p-8 hover:border-orange-300 transition-colors duration-200"
+              >
+                {act.linkUrl ? (
+                  <Link href={act.linkUrl} className="flex gap-5 items-start">
+                    {content}
+                  </Link>
+                ) : (
+                  <div className="flex gap-5 items-start">
+                    {content}
+                  </div>
+                )}
               </motion.div>
             );
           })}
         </div>
 
-        {/* Big Quote / Statement Section */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="bg-slate-950 text-white p-8 sm:p-12 relative overflow-hidden shadow-xl"
+          className="bg-slate-950 text-white p-8 sm:p-12 relative overflow-hidden"
         >
           <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
             <Quote size={200} className="translate-x-12 translate-y-12" />
