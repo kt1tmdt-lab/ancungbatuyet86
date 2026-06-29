@@ -296,6 +296,11 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
 ];
 
 export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
+  { id: "home-text-factory-proof-1-title", key: "factory_proof_1_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 1 - tên mục", value: "Nguyên liệu đầu vào", multiline: false, sortOrder: 70 },
+  { id: "home-text-factory-proof-2-title", key: "factory_proof_2_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 2 - tên mục", value: "Quy trình sản xuất", multiline: false, sortOrder: 80 },
+  { id: "home-text-factory-proof-3-title", key: "factory_proof_3_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 3 - tên mục", value: "Đóng gói - tem nhãn", multiline: false, sortOrder: 90 },
+  { id: "home-text-factory-proof-4-title", key: "factory_proof_4_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 4 - tên mục", value: "Bảo chứng niềm tin", multiline: false, sortOrder: 100 },
+  { id: "home-text-factory-proof-5-title", key: "factory_proof_5_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 5 - tên mục", value: "Báo chí / truyền thông", multiline: false, sortOrder: 105 },
   { id: "home-text-factory-card-label", key: "factory_card_label", group: "Trang chủ - Bằng chứng nhà máy", label: "Nhãn ảnh nhà máy", value: "Nhà máy / khu sản xuất", multiline: false, sortOrder: 10 },
   { id: "home-text-factory-card-title", key: "factory_card_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Tiêu đề ảnh nhà máy", value: "Không gian sản xuất được kiểm soát", multiline: false, sortOrder: 20 },
   { id: "home-text-factory-card-description", key: "factory_card_description", group: "Trang chủ - Bằng chứng nhà máy", label: "Mô tả ảnh nhà máy", value: "Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.", multiline: true, sortOrder: 30 },

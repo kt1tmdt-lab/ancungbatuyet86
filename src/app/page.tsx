@@ -1471,8 +1471,10 @@ function FactoryProofSection() {
   ];
   const proofs = fallbackProofs.map((proof, index) => {
     const asset = assetByKey[`home_factory_proof_${index + 1}`];
+    const title = homeTextValue(homeTexts, `factory_proof_${index + 1}_title`, proof.title);
     return {
       ...proof,
+      title,
       text: asset?.label || proof.text,
       imageUrl: asset?.imageUrl || proofImageFallbacks[index] || imageAsset?.imageUrl || "/bento/bento-factory.png",
       linkUrl: asset?.linkUrl || "",

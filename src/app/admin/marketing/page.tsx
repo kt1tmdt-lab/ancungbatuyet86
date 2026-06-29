@@ -117,6 +117,14 @@ const PAGE_ASSET_META: Record<string, { page: string; position: string; note: st
   process_documents: { page: "Quy trình", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ.", previewPath: "/quy-trinh#process-documents" },
 };
 
+const FACTORY_PROOF_ASSET_KEYS = new Set([
+  "home_factory_proof_1",
+  "home_factory_proof_2",
+  "home_factory_proof_3",
+  "home_factory_proof_4",
+  "home_factory_proof_5",
+]);
+
 function getPageAssetMeta(item: PageAssetItem) {
   return PAGE_ASSET_META[item.key] || {
     page: "Tùy chỉnh",
@@ -1512,6 +1520,7 @@ function MarketingPageContent() {
                     {assetList.map((item, index) => {
                       const meta = getPageAssetMeta(item);
                       const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
+                      const isFactoryProofAsset = FACTORY_PROOF_ASSET_KEYS.has(item.key);
 
                       return (
                         <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[180px_1fr_auto]">
@@ -1536,6 +1545,11 @@ function MarketingPageContent() {
                                 </div>
                                 <h3 className="mt-2 text-base font-black text-slate-950">{meta.position}</h3>
                                 <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{meta.note}</p>
+                                {isFactoryProofAsset && (
+                                  <p className="mt-1 text-xs font-bold leading-5 text-orange-600">
+                                    Tên mục sửa ở tab Text trang chủ. Ô nhãn bên dưới là nội dung/mô tả hiện dưới ảnh lớn.
+                                  </p>
+                                )}
                               </div>
                             </div>
 
