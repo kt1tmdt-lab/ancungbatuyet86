@@ -62,22 +62,26 @@ function mergeRequiredNavLinks(links: { href: string; label: string }[] | undefi
 
 function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 30 20" className={`${className} rounded-full object-cover inline-block shadow-sm border border-slate-100`}>
+    <span className={`${className} inline-flex overflow-hidden rounded-full border border-slate-100 shadow-sm`}>
+      <svg viewBox="0 0 30 20" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
       <rect width="30" height="20" fill="#da251d"/>
       <polygon points="15,4 16.17,7.62 20,7.62 16.9,9.88 18.07,13.5 15,11.25 11.93,13.5 13.1,9.88 10,7.62 13.83,7.62" fill="#ffff00"/>
-    </svg>
+      </svg>
+    </span>
   );
 }
 
 function EnFlag({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 50 30" className={`${className} rounded-full object-cover inline-block shadow-sm border border-slate-100`}>
+    <span className={`${className} inline-flex overflow-hidden rounded-full border border-slate-100 shadow-sm`}>
+      <svg viewBox="0 0 50 30" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
       <rect width="50" height="30" fill="#012169"/>
       <path d="M0,0 L50,30 M50,0 L0,30" stroke="#fff" stroke-width="6"/>
       <path d="M0,0 L50,30 M50,0 L0,30" stroke="#c8102e" stroke-width="2"/>
       <path d="M25,0 v30 M0,15 h50" stroke="#fff" stroke-width="10"/>
       <path d="M25,0 v30 M0,15 h50" stroke="#c8102e" stroke-width="6"/>
-    </svg>
+      </svg>
+    </span>
   );
 }
 
@@ -431,7 +435,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => handleLanguageChange("vi")}
-                className={`p-0.5 rounded-full transition-all duration-300 cursor-pointer ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
                   language === "vi" 
                     ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
                     : "opacity-45 hover:opacity-100 hover:scale-105"
@@ -439,12 +443,12 @@ export default function Navbar({
                 aria-pressed={language === "vi"}
                 title="Tiếng Việt"
               >
-                <VnFlag className="w-6 h-6" />
+                <VnFlag className="h-7 w-7" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLanguageChange("en")}
-                className={`p-0.5 rounded-full transition-all duration-300 cursor-pointer ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
                   language === "en" 
                     ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
                     : "opacity-45 hover:opacity-100 hover:scale-105"
@@ -452,7 +456,7 @@ export default function Navbar({
                 aria-pressed={language === "en"}
                 title="English"
               >
-                <EnFlag className="w-6 h-6" />
+                <EnFlag className="h-7 w-7" />
               </button>
             </div>
 
@@ -564,7 +568,7 @@ export default function Navbar({
                     : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
-                <VnFlag className="w-5 h-5" />
+                <VnFlag className="h-6 w-6" />
                 Tiếng Việt
               </button>
               <button
@@ -576,7 +580,7 @@ export default function Navbar({
                     : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
-                <EnFlag className="w-5 h-5" />
+                <EnFlag className="h-6 w-6" />
                 English
               </button>
             </div>
