@@ -34,6 +34,13 @@ const RESULT_TYPE_LABEL: Record<SearchResult["type"], string> = {
   channel: "Kênh bán",
 };
 
+const PRODUCT_MENU_LINKS = [
+  { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương", note: "Dòng chủ lực" },
+  { href: "/san-pham/chan-ga-khong-lo", label: "Chân gà khổng lồ", note: "Sản phẩm nổi bật" },
+  { href: "/san-pham/tam-cay", label: "Tăm cay", note: "Dòng bán chạy" },
+  { href: "/san-pham/snack-banh-trang", label: "Snack / Bánh tráng", note: "Đóng gói tiện lợi" },
+];
+
 declare global {
   interface Window {
     googleTranslateElementInit?: () => void;
@@ -251,6 +258,7 @@ export default function Navbar({
   const [searchError, setSearchError] = useState("");
   const [language, setLanguage] = useState<"vi" | "en">("vi");
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -353,8 +361,45 @@ export default function Navbar({
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
+              if (link.href === "/san-pham") {
+                const isProductsActive = pathname.startsWith("/san-pham");
+                return (
+                  <div key={link.href} className="relative group py-2">
+                    <Link
+                      href={link.href}
+                      className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
+                        isProductsActive
+                          ? "bg-primary-light text-primary-dark font-semibold"
+                          : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                    </Link>
+                    <div className="absolute top-full left-0 z-50 hidden w-64 border border-gray-100 bg-white py-1 shadow-xl group-hover:block animate-fade-in">
+                      <Link
+                        href="/san-pham"
+                        className="block border-b border-orange-50 px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition-colors hover:bg-orange-50"
+                      >
+                        Tất cả sản phẩm
+                      </Link>
+                      {PRODUCT_MENU_LINKS.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="block px-4 py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-orange-50 hover:text-orange-700"
+                        >
+                          <span className="block">{item.label}</span>
+                          <span className="mt-0.5 block text-[11px] font-semibold text-gray-400">{item.note}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
               if (link.href === "/gioi-thieu") {
                 const isAboutActive = pathname.startsWith("/gioi-thieu");
                 return (
@@ -472,7 +517,7 @@ export default function Navbar({
 
             <button
               onClick={() => setOpen(!open)}
-              className="acbt-icon-btn lg:hidden p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark"
+              className="acbt-icon-btn p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark md:hidden"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
@@ -482,9 +527,48 @@ export default function Navbar({
       </div>
 
       {open && (
-        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
+        <div className="bg-white border-t border-gray-100 shadow-lg md:hidden">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
+              if (link.href === "/san-pham") {
+                const isProductsActive = pathname.startsWith("/san-pham");
+                return (
+                  <div key={link.href} className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                      className={`flex items-center justify-between px-4 py-3 rounded-none text-base font-medium transition-colors text-left ${
+                        isProductsActive ? "bg-primary-light text-primary-dark font-semibold" : "text-gray-600 hover:bg-primary-light"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
+                    </button>
+                    {mobileProductsOpen && (
+                      <div className="bg-orange-50/30 flex flex-col pl-4 border-l-2 border-orange-200">
+                        <Link
+                          href="/san-pham"
+                          onClick={() => setOpen(false)}
+                          className="px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] text-orange-700"
+                        >
+                          Tất cả sản phẩm
+                        </Link>
+                        {PRODUCT_MENU_LINKS.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setOpen(false)}
+                            className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               if (link.href === "/gioi-thieu") {
                 const isAboutActive = pathname.startsWith("/gioi-thieu");
                 return (
