@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { MessageCircle, Phone, Mail, MapPin, Clock, ShoppingBag, Music2 } from "lucide-react";
 
 interface FooterLink {
   href: string;
@@ -25,10 +25,12 @@ const DEFAULT_FOOTER_EXPLORE = [
 ];
 
 const DEFAULT_FOOTER_PRODUCTS = [
-  { href: "/san-pham/chan-ga", label: "Chân Gà Rút Xương" },
-  { href: "/san-pham/tam-cay", label: "Tăm Cay" },
-  { href: "/san-pham/banh-trang", label: "Snack Bánh Tráng" },
-  { href: "/san-pham/bo-suu-tap", label: "Sản Phẩm Khác" },
+  { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương" },
+  { href: "/san-pham/chan-ga-khong-lo", label: "Chân gà khổng lồ" },
+  { href: "/san-pham/tam-cay", label: "Tăm cay" },
+  { href: "/san-pham/snack-banh-trang", label: "Snack" },
+  { href: "/san-pham/banh-trang", label: "Bánh tráng" },
+  { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác" },
 ];
 
 export default function Footer({
@@ -43,8 +45,8 @@ export default function Footer({
 
   const contact = {
     phone: initialContact?.phone || "0989 852 948",
-    email: initialContact?.email || "ancungbatuyet@gmail.com",
-    address: initialContact?.address || "Thái Nguyên, Việt Nam",
+    email: initialContact?.email || "cskh@ancungbatuyet.vn",
+    address: initialContact?.address || "Xuân Phương, Hà Nội",
     workingHours: initialContact?.workingHours || "T2 - T7: 8:00 - 17:00",
     shopeeUrl: initialContact?.shopeeUrl || "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     tiktokUrl: initialContact?.tiktokUrl || "https://tiktok.com/@batuyethanhvi",
@@ -56,17 +58,16 @@ export default function Footer({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 overflow-hidden rounded-full border border-slate-800 flex items-center justify-center bg-white shadow-sm">
-                <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="w-full h-full object-cover" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-12 w-32 items-center justify-center overflow-hidden bg-white">
+                <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
               </div>
               <div>
-                <p className="font-bold text-sm leading-tight">Ăn Cùng</p>
-                <p className="font-bold text-primary-light text-sm leading-tight">Bà Tuyết</p>
+                <p className="whitespace-nowrap text-sm font-black leading-tight text-primary-light">Ăn Cùng Bà Tuyết</p>
               </div>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Thương hiệu đồ ăn vặt sạch hàng đầu Việt Nam. Ăn vặt thì phải ăn cùng Bà Tuyết.
+            <p className="text-gray-300 text-base font-black leading-relaxed">
+              Ăn vặt thì phải Ăn Cùng Bà Tuyết
             </p>
           </div>
 
@@ -123,9 +124,9 @@ export default function Footer({
 
             <div className="flex gap-3 mt-6">
               {[
-                { label: "TikTok", url: contact.tiktokUrl },
-                { label: "Facebook", url: contact.facebookUrl },
-                { label: "Shopee", url: contact.shopeeUrl },
+                { label: "TikTok", url: contact.tiktokUrl, icon: Music2 },
+                { label: "Facebook", url: contact.facebookUrl, icon: MessageCircle },
+                { label: "Shopee", url: contact.shopeeUrl, icon: ShoppingBag },
               ].map((s) => (
                 <a
                   key={s.label}
@@ -133,8 +134,10 @@ export default function Footer({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-none bg-white/10 flex items-center justify-center text-xs font-bold hover:bg-primary transition-colors"
+                  aria-label={s.label}
+                  title={s.label}
                 >
-                  {s.label[0]}
+                  <s.icon size={17} />
                 </a>
               ))}
             </div>

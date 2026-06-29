@@ -33,6 +33,7 @@ import {
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
+  type HomeTextItem,
   type MarketingConfigData,
   type PageAssetItem,
 } from "@/lib/marketing-config";
@@ -97,35 +98,31 @@ const stagger = {
 };
 
 const HERO_CHARACTER_IMAGE = "/hero/ba-tuyet-character.png";
+const FEATURED_PRODUCT_PRIORITY = [
+  "chan-ga-khong-lo",
+  "chan-ga-rut-xuong",
+  "chan-ga",
+  "tam-cay",
+  "snack-banh-trang",
+  "banh-trang",
+  "dui-ga",
+  "dui-ga-pho-mai",
+];
 
 const showcaseHeroProductsFallback: HeroProduct[] = [
   {
-    slug: "dui-ga-pho-mai",
-    category: "dui-ga",
-    name: "Snack Đùi Gà Phô Mai Đóng Hũ",
-    tagline: "Đùi gà giòn phồng thơm ngậy vị bột phô mai lắc.",
-    price: "39.000đ",
-    priceRange: "39.000đ - 75.000đ",
-    image: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
-    orbitImage: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
-    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
-    proof: "Thông tin in trên bao bì và hồ sơ sản phẩm.",
-    stats: [{ label: "Đơn đã bán", value: "900.000+" }],
-    facts: ["Vị phô mai", "Đóng hũ", "Dễ bảo quản"],
-  },
-  {
-    slug: "banh-trang",
-    category: "banh-trang",
-    name: "Snack Bánh Tráng Vị Sa Tế Bò",
-    tagline: "Giòn tan rôm rốp đậm đà vị sa tế bò nướng.",
+    slug: "chan-ga",
+    category: "chan-ga",
+    name: "Chân Gà Rút Xương Vị Cay Tê",
+    tagline: "Giòn sần sật, vị cay tê đậm đà chuẩn vị ăn vặt Bà Tuyết.",
     price: "15.000đ",
-    priceRange: "15.000đ - 79.000đ",
-    image: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
-    orbitImage: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
+    priceRange: "15.000đ - 180.000đ",
+    image: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
+    orbitImage: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
     purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
-    proof: "Thông tin bao bì, hồ sơ sản phẩm và quy cách đóng gói.",
-    stats: [{ label: "Đơn đã bán", value: "2.500.000+" }],
-    facts: ["Giòn tan", "Sa tế bò", "Đóng gói sạch"],
+    proof: "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
+    stats: [{ label: "Đơn đã bán", value: "5.000.000+" }],
+    facts: ["Sản phẩm chủ lực", "Đóng gói tiện lợi", "Có hồ sơ kiểm soát"],
   },
   {
     slug: "tam-cay",
@@ -142,18 +139,32 @@ const showcaseHeroProductsFallback: HeroProduct[] = [
     facts: ["Vị cay đặc trưng", "Bao bì dễ nhận diện", "Dễ bán theo combo"],
   },
   {
-    slug: "chan-ga",
-    category: "chan-ga",
-    name: "Chân Gà Rút Xương Vị Cay Tê",
-    tagline: "Giòn sần sật, vị cay tê đậm đà chuẩn vị ăn vặt Bà Tuyết.",
+    slug: "banh-trang",
+    category: "banh-trang",
+    name: "Snack Bánh Tráng Vị Sa Tế Bò",
+    tagline: "Giòn tan rôm rốp đậm đà vị sa tế bò nướng.",
     price: "15.000đ",
-    priceRange: "15.000đ - 180.000đ",
-    image: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
-    orbitImage: "/uploads/1780482157869-chan-ga-rut-xuong-moi-png.png",
+    priceRange: "15.000đ - 79.000đ",
+    image: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
+    orbitImage: "/uploads/1780482043582-snack-banh-trang-vi-sa-te-bo.png",
     purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
-    proof: "Hồ sơ sản phẩm, thông tin bao bì và quy trình kiểm soát chất lượng.",
-    stats: [{ label: "Đơn đã bán", value: "5.000.000+" }],
-    facts: ["Sản phẩm chủ lực", "Đóng gói tiện lợi", "Có hồ sơ kiểm soát"],
+    proof: "Thông tin bao bì, hồ sơ sản phẩm và quy cách đóng gói.",
+    stats: [{ label: "Đơn đã bán", value: "2.500.000+" }],
+    facts: ["Giòn tan", "Sa tế bò", "Đóng gói sạch"],
+  },
+  {
+    slug: "dui-ga-pho-mai",
+    category: "dui-ga",
+    name: "Snack Đùi Gà Phô Mai Đóng Hũ",
+    tagline: "Đùi gà giòn phồng thơm ngậy vị bột phô mai lắc.",
+    price: "39.000đ",
+    priceRange: "39.000đ - 75.000đ",
+    image: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
+    orbitImage: "/uploads/1780482013661-dui-ga-pho-mai-700g.png",
+    purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
+    proof: "Thông tin in trên bao bì và hồ sơ sản phẩm.",
+    stats: [{ label: "Đơn đã bán", value: "900.000+" }],
+    facts: ["Vị phô mai", "Đóng hũ", "Dễ bảo quản"],
   },
 ];
 
@@ -275,6 +286,22 @@ function getProductImage(product?: Product | HeroProduct) {
   return product?.image || product?.heroImage || "";
 }
 
+function getFeaturedProductRank(product: Product | HeroProduct) {
+  const candidates = [product.slug, product.category, product.categoryLabel, product.name]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+  const rank = FEATURED_PRODUCT_PRIORITY.findIndex((key) =>
+    candidates.some((value) => value.includes(key)),
+  );
+
+  return rank === -1 ? FEATURED_PRODUCT_PRIORITY.length : rank;
+}
+
+function sortFeaturedProducts<T extends Product | HeroProduct>(items: T[]) {
+  return [...items].sort((a, b) => getFeaturedProductRank(a) - getFeaturedProductRank(b));
+}
+
 function toHeroProduct(product: HeroProduct): HeroProduct {
   const image = getProductImage(product);
 
@@ -331,6 +358,25 @@ async function fetchHomeMarketingConfig(): Promise<MarketingConfigData> {
   return normalizeMarketingConfig(data?.data);
 }
 
+function useHomeMarketingConfig() {
+  const [config, setConfig] = useState<MarketingConfigData>(DEFAULT_MARKETING_CONFIG);
+
+  useEffect(() => {
+    fetchHomeMarketingConfig()
+      .then(setConfig)
+      .catch((error) => {
+        console.error("Failed to load configurable home marketing data", error);
+        setConfig(DEFAULT_MARKETING_CONFIG);
+      });
+  }, []);
+
+  return config;
+}
+
+function homeTextValue(items: HomeTextItem[], key: string, fallback: string) {
+  return items.find((item) => item.key === key)?.value || fallback;
+}
+
 function buildNewsEvidenceItems(posts: PostItem[]) {
   const icons = [BadgeCheck, ClipboardCheck, Store, Truck];
 
@@ -355,7 +401,7 @@ function HeroSection() {
     showcaseHeroProductsFallback,
   );
   const [activeProduct, setActiveProduct] = useState<HeroProduct>(
-    showcaseHeroProductsFallback[2],
+    showcaseHeroProductsFallback[0],
   );
   const [heroBanner, setHeroBanner] = useState<HeroBannerConfig>(
     DEFAULT_SITE_CONFIG.heroBanner,
@@ -377,22 +423,21 @@ function HeroSection() {
           const withImages = dbProducts.filter((product) =>
             getProductImage(product),
           );
-          const nextProducts = withImages.length > 0 ? withImages : dbProducts;
+          const nextProducts = sortFeaturedProducts(withImages.length > 0 ? withImages : dbProducts);
           setProducts(nextProducts);
-          const tamCay = nextProducts.find((p) => p.slug === "tam-cay");
-          setActiveProduct(tamCay || nextProducts[0]);
+          setActiveProduct(nextProducts[0]);
           setLoading(false);
           return;
         }
 
         setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[2]);
+        setActiveProduct(showcaseHeroProductsFallback[0]);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to load hero products from DB", err);
         setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[2]);
+        setActiveProduct(showcaseHeroProductsFallback[0]);
         setLoading(false);
       });
   }, []);
@@ -401,14 +446,16 @@ function HeroSection() {
   const activeImage =
     activeProduct?.orbitImage || getProductImage(activeProduct);
   const activeStat = activeProduct?.stats?.[0];
+  const brandName = "Ăn Cùng Bà Tuyết";
+  const heroTitle = heroBanner.title || DEFAULT_SITE_CONFIG.heroBanner.title;
 
   return (
     <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
       <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#166534_100%)]" />
       <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-green-50/55 lg:block" />
-      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
-      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-green-200/25 blur-3xl" />
-      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-green-300/50 xl:block" />
+      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-red-200/25 blur-3xl" />
+      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-red-300/20 blur-3xl" />
+      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-red-300/50 xl:block" />
 
       <div className="relative mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
         <motion.div
@@ -422,14 +469,21 @@ function HeroSection() {
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
           >
             <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt vì người Việt"}
+            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt, làm chỉn chu cho bữa ăn vặt Việt"}
           </motion.div>
 
           <motion.h1
             variants={fadeUp}
             className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[4.2rem] xl:text-[5.25rem]"
           >
-            {heroBanner.title}
+            {heroTitle.includes(brandName) ? (
+              <>
+                {heroTitle.replace(brandName, "").trim()}{" "}
+                <span className="font-script text-orange-700">{brandName}</span>
+              </>
+            ) : (
+              heroTitle
+            )}
           </motion.h1>
 
           <motion.p
@@ -453,7 +507,7 @@ function HeroSection() {
             </CurtainAction>
 
             <CurtainAction
-              href={activeProduct?.purchaseUrl || "https://shopee.vn/an-vat-ba-tuyet-tam-cay"}
+              href="/gioi-thieu"
               icon={<ShoppingBag size={17} />}
               variant="white"
               className="shadow-[0_14px_36px_rgba(15,23,42,0.08)]"
@@ -467,9 +521,9 @@ function HeroSection() {
             className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
           >
             {[
-              { label: "Không gian sản xuất", value: "5.000+m²", icon: Factory },
+              { label: "Không gian sản xuất", value: "Rõ ràng", icon: Factory },
               { label: "Bảo hiểm trách nhiệm sản phẩm", value: "PVI", icon: ShieldCheck },
-              { label: "Sản phẩm hiện có mặt", value: "Toàn quốc", icon: Truck },
+              { label: "Sản phẩm được phân phối", value: "Toàn quốc", icon: Truck },
             ].map((item) => {
               const Icon = item.icon;
               return (
@@ -477,7 +531,7 @@ function HeroSection() {
                   key={item.label}
                   className="border-b border-orange-100 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
                 >
-                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-yellow-300">
                     <Icon size={20} strokeWidth={1.8} />
                   </div>
                   <p className="text-2xl font-black tracking-[-0.04em] text-slate-950">
@@ -498,15 +552,14 @@ function HeroSection() {
           transition={{ duration: 0.65 }}
           className="relative z-10 min-h-[700px] overflow-visible sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
         >
-          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.20)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]" />
-          <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-[2rem] border border-green-300/60 bg-green-100/30 xl:block" />
+          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-red-600 shadow-[0_35px_80px_rgba(185,28,28,0.20)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]">
+            <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
+          </div>
+          <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-red-300/60 bg-red-100/30 xl:block" />
 
-          <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-[1.4rem] bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
-              Thông điệp thương hiệu
-            </p>
+          <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-none bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
             <p className="mt-3 text-lg font-black leading-6 text-slate-950">
-              Ngon từ nguyên liệu, sạch từ quy trình.
+              Ngon từng miếng, sạch từ quy trình.
             </p>
           </div>
 
@@ -658,14 +711,14 @@ function StatsSection() {
         <div className="flex flex-col gap-4 border-b border-orange-100 px-5 py-10 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-16">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              Vì sao khách hàng tin tưởng và lựa chọn chúng tôi?
+              Năng lực thương hiệu
             </p>
             <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">
               Những con số tiêu biểu
             </h2>
           </div>
-          <p className="max-w-xl text-2xl md:text-3xl leading-relaxed text-orange-600 font-script italic tracking-wide">
-            "Đừng tin những gì chúng tôi nói, hãy xem những gì chúng tôi làm"
+          <p className="max-w-xl text-xl font-black leading-relaxed text-orange-600 md:text-2xl">
+            &ldquo;Ngon từng miếng, sạch từ quy trình&rdquo;
           </p>
         </div>
 
@@ -704,25 +757,26 @@ function StatsSection() {
 // 3. TRUST SECTION
 // ==========================================
 function TrustSection() {
+  const { homeTexts } = useHomeMarketingConfig();
   const trustItems: { title: string; desc: string; icon: LucideIcon }[] = [
     {
-      title: "Kiểm soát đầu vào",
-      desc: "Nguyên liệu được chọn lọc, ghi nhận thông tin và kiểm tra trước khi sản xuất.",
+      title: homeTextValue(homeTexts, "trust_item_1_title", "Kiểm soát đầu vào"),
+      desc: homeTextValue(homeTexts, "trust_item_1_description", "Nguyên liệu được chọn lọc theo nguồn rõ ràng và kiểm tra trước khi đưa vào sản xuất."),
       icon: Wheat,
     },
     {
-      title: "Quy trình sản xuất rõ ràng",
-      desc: "Các công đoạn được chuẩn hóa để giữ độ ổn định giữa từng lô sản phẩm.",
+      title: homeTextValue(homeTexts, "trust_item_2_title", "Quy trình sản xuất rõ ràng"),
+      desc: homeTextValue(homeTexts, "trust_item_2_description", "Các công đoạn được sắp xếp rõ ràng để giữ chất lượng ổn định giữa từng lô sản phẩm."),
       icon: ClipboardCheck,
     },
     {
-      title: "Đóng gói và tem nhãn",
-      desc: "Bao bì thể hiện thông tin sản phẩm, thương hiệu và quy cách sử dụng.",
+      title: homeTextValue(homeTexts, "trust_item_3_title", "Đóng gói và tem nhãn"),
+      desc: homeTextValue(homeTexts, "trust_item_3_description", "Bao bì thể hiện thông tin sản phẩm, thương hiệu và quy cách sử dụng."),
       icon: PackageCheck,
     },
     {
-      title: "Bảo chứng niềm tin",
-      desc: "Kết hợp bảo hiểm sản phẩm và hồ sơ chứng minh để khách hàng an tâm hơn.",
+      title: homeTextValue(homeTexts, "trust_item_4_title", "Bảo chứng niềm tin"),
+      desc: homeTextValue(homeTexts, "trust_item_4_description", "Bảo hiểm, giấy chứng nhận và hồ sơ liên quan giúp khách hàng có thêm cơ sở kiểm chứng."),
       icon: Award,
     },
   ];
@@ -731,9 +785,9 @@ function TrustSection() {
     <section className="bg-[#fff8ed] py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
-          label="Sứ mệnh"
-          title="Thay đổi định kiến về ăn vặt"
-          description="Ăn ngon và vui thôi chưa đủ, phải sạch sẽ đảm bảo sức khoẻ."
+          label={homeTextValue(homeTexts, "trust_section_label", "Sứ mệnh")}
+          title={homeTextValue(homeTexts, "trust_section_title", "Thay đổi định kiến về ăn vặt")}
+          description={homeTextValue(homeTexts, "trust_section_description", "Ăn vặt ngon hơn khi khách hàng biết rõ nguyên liệu, quy trình và bằng chứng phía sau sản phẩm.")}
           align="center"
         />
 
@@ -850,7 +904,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 Giá từ
               </p>
               <p className="text-lg font-black text-slate-950">
-                {product.priceRange || product.price || "Liên hệ"}
+                Xem chi tiết sản phẩm
               </p>
             </div>
 
@@ -865,6 +919,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 }
 
 function FeaturedProducts() {
+  const { homeTexts } = useHomeMarketingConfig();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -881,9 +936,9 @@ function FeaturedProducts() {
   }, []);
 
   const displayProducts = useMemo(() => {
-    const fromDb = featuredProducts.filter(
+    const fromDb = sortFeaturedProducts(featuredProducts.filter(
       (p) => p.category !== "khac" && getProductImage(p),
-    );
+    ));
     return fromDb.length > 0 ? fromDb : showcaseHeroProductsFallback;
   }, [featuredProducts]);
 
@@ -916,9 +971,9 @@ function FeaturedProducts() {
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
           <SectionTitle
-            label="Danh mục bán chạy"
-            title="Sản phẩm"
-            description="Những món đồ ăn vặt thơm ngon đang chờ bạn khám phá."
+            label={homeTextValue(homeTexts, "products_section_label", "Sản phẩm chủ lực")}
+            title={homeTextValue(homeTexts, "products_section_title", "Sản phẩm nổi bật")}
+            description={homeTextValue(homeTexts, "products_section_description", "Giới thiệu nhanh các dòng sản phẩm chính để khách hàng bấm xem chi tiết ở từng trang riêng.")}
           />
 
           <CurtainAction
@@ -993,6 +1048,7 @@ function FeaturedProducts() {
 }
 
 function WhyChooseUsFromDb() {
+  const { homeTexts } = useHomeMarketingConfig();
   const [items, setItems] = useState<NewsEvidenceItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -1012,9 +1068,9 @@ function WhyChooseUsFromDb() {
     <section className="bg-white py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
-          label="Tin tức & bằng chứng"
-          title="Từ sản phẩm thật đến hệ thống phân phối thật"
-          description="Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể. "
+          label={homeTextValue(homeTexts, "news_section_label", "Tin tức & bằng chứng")}
+          title={homeTextValue(homeTexts, "news_section_title", "Từ sản phẩm thật đến hệ thống phân phối thật")}
+          description={homeTextValue(homeTexts, "news_section_description", "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.")}
         />
 
         <div className="mt-10 grid gap-0 md:grid-cols-2">
@@ -1156,9 +1212,9 @@ function MarketingAssetsSection() {
     <section id="factory-proof" className="scroll-mt-24 bg-[#fff8ed] py-0">
       <div className="w-full px-5 py-14 sm:px-8 lg:px-16 lg:py-20">
         <SectionTitle
-          label="Truyền thông"
-          title="Báo chí, khách hàng và video nổi bật"
-          description="Những ghi nhận từ báo chí, phản hồi thực tế từ khách hàng và video sản phẩm nổi bật của thương hiệu."
+          label="Niềm tin từ khách hàng"
+          title="Khách hàng và đối tác nói gì về chúng tôi"
+          description="Giấy chứng nhận, bảo hiểm, phản hồi khách hàng, quy trình sản xuất và truyền thông được gom lại để người xem có thêm cơ sở kiểm chứng."
         />
 
         {loading ? (
@@ -1297,10 +1353,10 @@ function TrustEvidenceSections() {
           <div>
             <p className="inline-flex items-center gap-2 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
               <ShieldCheck size={14} />
-              Tín hiệu tin cậy
+              Bằng chứng thương hiệu
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
-              Những bằng chứng chính được kể gọn, phần đầy đủ nằm ở trang giới thiệu.
+              Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết
             </h2>
           </div>
           <Link
@@ -1365,12 +1421,34 @@ function TrustEvidenceSections() {
 // 5. FACTORY PROOF SECTION
 // ==========================================
 function FactoryProofSection() {
-  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
+  const { homeTexts, pageAssets } = useHomeMarketingConfig();
+  const [activeProofIndex, setActiveProofIndex] = useState(0);
   const fallbackProofs = [
-    "Khu sản xuất và đóng gói được trình bày rõ ràng bằng hình ảnh thực tế.",
-    "Thông tin bảo hiểm, tiêu chuẩn và hồ sơ sản phẩm có vị trí riêng để tạo niềm tin.",
-    "Nội dung tập trung vào an toàn, ổn định chất lượng và phân phối toàn quốc.",
-    "Bố cục vuông, sáng, nhiều khoảng trắng, giảm hiệu ứng như web công nghệ.",
+    {
+      title: "Nguyên liệu đầu vào",
+      text: "Nguyên liệu được chọn lọc theo nguồn rõ ràng, ghi nhận thông tin và kiểm tra trước khi đưa vào sản xuất.",
+      icon: Wheat,
+    },
+    {
+      title: "Quy trình sản xuất",
+      text: "Khu sơ chế, chế biến và đóng gói được trình bày bằng hình ảnh thực tế để khách hàng hiểu cách sản phẩm được làm ra.",
+      icon: Factory,
+    },
+    {
+      title: "Đóng gói - tem nhãn",
+      text: "Bao bì, tem nhãn và thông tin sản phẩm được chuẩn hóa để dễ nhận diện, dễ bảo quản và phù hợp phân phối toàn quốc.",
+      icon: PackageCheck,
+    },
+    {
+      title: "Bảo chứng niềm tin",
+      text: "Bảo hiểm PVI, giấy chứng nhận và hồ sơ liên quan giúp khách hàng có cơ sở kiểm chứng trước khi lựa chọn.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Báo chí / truyền thông",
+      text: "Các nội dung báo chí và truyền thông được gom lại để kể câu chuyện thương hiệu bằng nguồn tham chiếu rõ ràng.",
+      icon: Newspaper,
+    },
   ];
   const assetByKey = pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
     if (item.key) acc[item.key] = item;
@@ -1382,19 +1460,13 @@ function FactoryProofSection() {
   const proofs = fallbackProofs.map((proof, index) => {
     const asset = assetByKey[`home_factory_proof_${index + 1}`];
     return {
-      text: asset?.label || proof,
+      ...proof,
+      text: asset?.label || proof.text,
       linkUrl: asset?.linkUrl || "",
     };
   });
-
-  useEffect(() => {
-    fetchHomeMarketingConfig()
-      .then((config) => setPageAssets(config.pageAssets))
-      .catch((error) => {
-        console.error("Failed to load configurable home assets", error);
-        setPageAssets(DEFAULT_MARKETING_CONFIG.pageAssets);
-      });
-  }, []);
+  const activeProof = proofs[activeProofIndex] || proofs[0];
+  const ActiveProofIcon = activeProof.icon;
 
   const imageNode = (
     <img
@@ -1427,14 +1499,13 @@ function FactoryProofSection() {
             )}
             <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-                Nhà máy / khu sản xuất
+                {homeTextValue(homeTexts, "factory_card_label", "Nhà máy / khu sản xuất")}
               </p>
               <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
-                Không gian sản xuất 5.000+m²
+                {homeTextValue(homeTexts, "factory_card_title", "Không gian sản xuất được kiểm soát")}
               </h3>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty
-                thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.
+                {homeTextValue(homeTexts, "factory_card_description", "Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.")}
               </p>
             </div>
           </div>
@@ -1447,39 +1518,61 @@ function FactoryProofSection() {
           className="p-5 sm:p-8 lg:p-16"
         >
           <SectionTitle
-            label="Bằng chứng thương hiệu"
-            title="Nói về năng lực sản xuất trước, rồi mới nói về bán hàng"
-            description="Minh bạch rõ ràng quy trình sản xuất giúp người tiêu dùng yên tâm."
+            label={homeTextValue(homeTexts, "factory_section_label", "Bằng chứng thương hiệu")}
+            title={homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
+            description={homeTextValue(homeTexts, "factory_section_description", "Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết.")}
           />
 
-          <div className="mt-8 grid gap-0">
-            {proofs.map((proof, index) => {
-              const content = (
-                <div className="flex gap-4 border-x border-b border-orange-100 bg-white p-5 lg:p-6">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-orange-600 text-sm font-black text-white">
-                    {index + 1}
-                  </div>
-                  <p className="leading-7 text-slate-600">{proof.text}</p>
-                </div>
-              );
+          <div className="mt-8 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
+            <div className="grid gap-2">
+              {proofs.map((proof, index) => {
+                const Icon = proof.icon;
+                const isActive = activeProofIndex === index;
+                return (
+                  <button
+                    key={`${proof.title}-${index}`}
+                    type="button"
+                    onClick={() => setActiveProofIndex(index)}
+                    className={`flex items-center gap-4 border p-4 text-left transition ${
+                      isActive
+                        ? "border-orange-600 bg-orange-600 text-white shadow-[0_16px_35px_rgba(234,88,12,0.18)]"
+                        : "border-orange-100 bg-white text-slate-800 hover:border-orange-300"
+                    }`}
+                  >
+                    <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white text-orange-600" : "bg-orange-50 text-orange-600"}`}>
+                      <Icon size={20} />
+                    </span>
+                    <span>
+                      <span className="block text-[10px] font-black uppercase tracking-[0.16em] opacity-75">
+                        Mục 0{index + 1}
+                      </span>
+                      <span className="mt-1 block text-sm font-black">{proof.title}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-              if (!proof.linkUrl) {
-                return <div key={`${proof.text}-${index}`}>{content}</div>;
-              }
-
-              const isExternal = proof.linkUrl.startsWith("http");
-              return (
-                <a
-                  key={`${proof.text}-${index}`}
-                  href={proof.linkUrl}
-                  target={isExternal ? "_blank" : undefined}
-                  rel={isExternal ? "noopener noreferrer" : undefined}
-                  className="block transition hover:-translate-y-0.5"
+            <div className="border border-orange-100 bg-white p-6 shadow-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-yellow-300">
+                <ActiveProofIcon size={26} />
+              </div>
+              <h3 className="mt-6 text-2xl font-black tracking-[-0.04em] text-slate-950">
+                {activeProof.title}
+              </h3>
+              <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
+                {activeProof.text}
+              </p>
+              {activeProof.linkUrl && (
+                <Link
+                  href={activeProof.linkUrl}
+                  className="mt-7 inline-flex items-center gap-2 border border-orange-200 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:border-orange-600 hover:bg-orange-600 hover:text-white"
                 >
-                  {content}
-                </a>
-              );
-            })}
+                  Xem bằng chứng
+                  <ArrowRight size={15} />
+                </Link>
+              )}
+            </div>
           </div>
         </motion.div>
       </div>
@@ -1491,25 +1584,26 @@ function FactoryProofSection() {
 // 7. PROCESS SECTION
 // ==========================================
 function ProcessSection() {
+  const { homeTexts } = useHomeMarketingConfig();
   const steps = [
     {
-      title: "Chọn nguyên liệu",
-      desc: "Ưu tiên nguồn rõ ràng, kiểm tra đầu vào trước khi sản xuất.",
+      title: homeTextValue(homeTexts, "process_step_1_title", "Chọn nguyên liệu"),
+      desc: homeTextValue(homeTexts, "process_step_1_description", "Ưu tiên nguồn rõ ràng, kiểm tra đầu vào trước khi sản xuất."),
       icon: Leaf,
     },
     {
-      title: "Sơ chế và sản xuất",
-      desc: "Kiểm soát từng công đoạn để giữ chất lượng ổn định giữa các lô hàng.",
+      title: homeTextValue(homeTexts, "process_step_2_title", "Sơ chế và sản xuất"),
+      desc: homeTextValue(homeTexts, "process_step_2_description", "Kiểm soát từng công đoạn để giữ chất lượng ổn định giữa các lô hàng."),
       icon: Factory,
     },
     {
-      title: "Đóng gói và tem nhãn",
-      desc: "Bao bì rõ thông tin, dễ vận chuyển, dễ trưng bày và phù hợp bán online.",
+      title: homeTextValue(homeTexts, "process_step_3_title", "Đóng gói và tem nhãn"),
+      desc: homeTextValue(homeTexts, "process_step_3_description", "Bao bì rõ thông tin, dễ vận chuyển, dễ trưng bày và phù hợp bán online."),
       icon: PackageCheck,
     },
     {
-      title: "Giao hàng toàn quốc",
-      desc: "Kết nối sàn thương mại điện tử để khách đặt hàng nhanh và thuận tiện.",
+      title: homeTextValue(homeTexts, "process_step_4_title", "Giao hàng toàn quốc"),
+      desc: homeTextValue(homeTexts, "process_step_4_description", "Kết nối sàn thương mại điện tử để khách đặt hàng nhanh và thuận tiện."),
       icon: Truck,
     },
   ];
@@ -1521,16 +1615,15 @@ function ProcessSection() {
           <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:min-h-[520px] lg:p-16">
             <p className="mb-4 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
               <Clock3 size={14} />
-              Quy trình sản xuất
+              {homeTextValue(homeTexts, "process_label", "Quy trình sản xuất")}
             </p>
 
             <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl">
-              Từ nguyên liệu đến sản phẩm đóng gói
+              {homeTextValue(homeTexts, "process_title", "Từ nguyên liệu đến sản phẩm đóng gói")}
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-slate-600">
-              Bố cục quy trình giúp người xem hiểu đây là doanh nghiệp sản xuất
-              thực phẩm, không chỉ là shop bán hàng hoặc landing page quảng cáo.
+              {homeTextValue(homeTexts, "process_description", "Bố cục quy trình giúp người xem hiểu đây là doanh nghiệp sản xuất thực phẩm, không chỉ là shop bán hàng hoặc landing page quảng cáo.")}
             </p>
           </div>
 
@@ -1573,24 +1666,23 @@ function ProcessSection() {
 // 8. BRAND STORY
 // ==========================================
 function BrandStory() {
+  const { homeTexts } = useHomeMarketingConfig();
   const milestones = [
     {
-      year: "2022",
-      event: "Bắt đầu từ đam mê ẩm thực và các nội dung gần gũi với cộng đồng.",
+      year: homeTextValue(homeTexts, "brand_story_milestone_1_year", "2022"),
+      event: homeTextValue(homeTexts, "brand_story_milestone_1_event", "Bắt đầu từ đam mê ẩm thực và các nội dung gần gũi với cộng đồng."),
     },
     {
-      year: "2023",
-      event:
-        "Phát triển thương hiệu Ăn Cùng Bà Tuyết với định hướng đồ ăn vặt sạch.",
+      year: homeTextValue(homeTexts, "brand_story_milestone_2_year", "2023"),
+      event: homeTextValue(homeTexts, "brand_story_milestone_2_event", "Phát triển thương hiệu Ăn Cùng Bà Tuyết với định hướng đồ ăn vặt sạch."),
     },
     {
-      year: "2024",
-      event:
-        "Mở rộng trên TikTok Shop, xây dựng cộng đồng khách hàng trung thành.",
+      year: homeTextValue(homeTexts, "brand_story_milestone_3_year", "2024"),
+      event: homeTextValue(homeTexts, "brand_story_milestone_3_event", "Mở rộng trên TikTok Shop, xây dựng cộng đồng khách hàng trung thành."),
     },
     {
-      year: "2025",
-      event: "Đẩy mạnh nhà máy, quy trình và tiêu chuẩn hóa sản phẩm.",
+      year: homeTextValue(homeTexts, "brand_story_milestone_4_year", "2025"),
+      event: homeTextValue(homeTexts, "brand_story_milestone_4_event", "Đẩy mạnh nhà máy, quy trình và tiêu chuẩn hóa sản phẩm."),
     },
   ];
 
@@ -1600,17 +1692,15 @@ function BrandStory() {
         <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:h-fit lg:min-h-[520px] lg:p-16">
           <span className="mb-5 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
             <BadgeCheck size={14} />
-            Câu chuyện thương hiệu
+            {homeTextValue(homeTexts, "brand_story_label", "Câu chuyện thương hiệu")}
           </span>
 
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
-            Từ món ăn quen thuộc đến thương hiệu có quy trình
+            {homeTextValue(homeTexts, "brand_story_title", "Từ món ăn quen thuộc đến thương hiệu có quy trình")}
           </h2>
 
           <p className="mt-6 text-lg leading-8 text-slate-600">
-            Từ một căn bếp nhỏ với công thức gia truyền, Ăn Cùng Bà Tuyết đã
-            phát triển thành thương hiệu ăn vặt có xưởng sản xuất riêng, quy
-            trình kiểm soát chất lượng rõ ràng và hàng triệu khách hàng tin dùng.
+            {homeTextValue(homeTexts, "brand_story_description", "Từ một căn bếp nhỏ với công thức gia truyền, Ăn Cùng Bà Tuyết đã phát triển thành thương hiệu ăn vặt có xưởng sản xuất riêng, quy trình kiểm soát chất lượng rõ ràng và hàng triệu khách hàng tin dùng.")}
           </p>
 
           <div className="mt-8">
@@ -1620,7 +1710,7 @@ function BrandStory() {
               variant="white"
               className="rounded-none px-6 py-3"
             >
-              Đọc toàn bộ câu chuyện
+              {homeTextValue(homeTexts, "brand_story_cta", "Đọc toàn bộ câu chuyện")}
             </CurtainAction>
           </div>
         </div>

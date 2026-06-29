@@ -34,6 +34,7 @@ import {
   type CommunityActivityItem,
   type FeedbackItem,
   type HistoryMilestoneItem,
+  type HomeTextItem,
   type PageAssetItem,
   type PressItem,
   type TrustSectionItem,
@@ -123,16 +124,18 @@ function MarketingPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets" | "history" | "community">(
+  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "homeTexts" | "trust" | "assets" | "history" | "community">(
     searchParams.get("tab") === "assets"
       ? "assets"
-      : searchParams.get("tab") === "history"
-        ? "history"
-        : searchParams.get("tab") === "trust"
-          ? "trust"
-          : searchParams.get("tab") === "community"
-            ? "community"
-            : "press",
+      : searchParams.get("tab") === "homeTexts"
+        ? "homeTexts"
+        : searchParams.get("tab") === "history"
+          ? "history"
+          : searchParams.get("tab") === "trust"
+            ? "trust"
+            : searchParams.get("tab") === "community"
+              ? "community"
+              : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
@@ -141,6 +144,7 @@ function MarketingPageContent() {
   const [pressList, setPressList] = useState<PressItem[]>([]);
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
+  const [homeTextList, setHomeTextList] = useState<HomeTextItem[]>([]);
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
   const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
   const [historyList, setHistoryList] = useState<HistoryMilestoneItem[]>([]);
@@ -148,7 +152,7 @@ function MarketingPageContent() {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab === "assets" || tab === "history" || tab === "trust" || tab === "community") {
+    if (tab === "assets" || tab === "homeTexts" || tab === "history" || tab === "trust" || tab === "community") {
       const timer = window.setTimeout(() => setActiveTab(tab), 0);
       return () => window.clearTimeout(timer);
     }
@@ -167,6 +171,7 @@ function MarketingPageContent() {
         setPressList(config.press);
         setFeedbackList(config.feedback);
         setVideoList(config.videos);
+        setHomeTextList(config.homeTexts);
         setAssetList(config.pageAssets);
         setTrustList(config.trustSections);
         setHistoryList(config.historyMilestones);
@@ -190,6 +195,7 @@ function MarketingPageContent() {
     press?: PressItem[];
     feedback?: FeedbackItem[];
     videos?: VideoItem[];
+    homeTexts?: HomeTextItem[];
     pageAssets?: PageAssetItem[];
     trustSections?: TrustSectionItem[];
     historyMilestones?: HistoryMilestoneItem[];
@@ -200,6 +206,7 @@ function MarketingPageContent() {
       const nextPress = nextConfig?.press || pressList;
       const nextFeedback = nextConfig?.feedback || feedbackList;
       const nextVideos = nextConfig?.videos || videoList;
+      const nextHomeTexts = nextConfig?.homeTexts || homeTextList;
       const nextPageAssets = nextConfig?.pageAssets || assetList;
       const nextTrustSections = nextConfig?.trustSections || trustList;
       const nextHistoryMilestones = nextConfig?.historyMilestones || historyList;
@@ -215,6 +222,7 @@ function MarketingPageContent() {
           press: nextPress,
           feedback: nextFeedback,
           videos: nextVideos,
+          homeTexts: nextHomeTexts,
           pageAssets: nextPageAssets,
           trustSections: nextTrustSections,
           historyMilestones: nextHistoryMilestones,
@@ -228,6 +236,7 @@ function MarketingPageContent() {
       setPressList(config.press);
       setFeedbackList(config.feedback);
       setVideoList(config.videos);
+      setHomeTextList(config.homeTexts);
       setAssetList(config.pageAssets);
       setTrustList(config.trustSections);
       setHistoryList(config.historyMilestones);
@@ -402,6 +411,10 @@ function MarketingPageContent() {
     setAssetList(assetList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
+  const updateHomeText = (id: string, value: string) => {
+    setHomeTextList(homeTextList.map((item) => item.id === id ? { ...item, value } : item));
+  };
+
   const updateTrustSection = (
     id: string,
     field: keyof TrustSectionItem,
@@ -489,7 +502,7 @@ function MarketingPageContent() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200">
+        <div className="flex flex-wrap border-b border-slate-200">
           <button
             onClick={() => setActiveTab("press")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
@@ -544,6 +557,17 @@ function MarketingPageContent() {
           >
             <Calendar size={16} />
             Lịch sử ({historyList.filter((item) => item.enabled).length})
+          </button>
+          <button
+            onClick={() => setActiveTab("homeTexts")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === "homeTexts"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            <Settings size={16} />
+            Chữ trang chủ ({homeTextList.length})
           </button>
           <button
             onClick={() => setActiveTab("assets")}
@@ -1332,6 +1356,78 @@ function MarketingPageContent() {
                       ))}
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === "homeTexts" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Chữ hiển thị trên trang chủ</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Sửa từng tiêu đề, mô tả, dòng bullet và mốc thời gian đang hiển thị ở trang chủ.
+                    </p>
+                  </div>
+                  <a
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                  >
+                    <ExternalLink size={14} />
+                    Xem trang chủ
+                  </a>
+                </div>
+
+                <div className="border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-slate-700">
+                  <p className="font-bold text-slate-900">Cách dùng:</p>
+                  <p className="mt-1">
+                    Gõ nội dung mới vào ô cần sửa rồi bấm <span className="font-bold">Lưu thay đổi</span>.
+                    Nếu để trống, website sẽ dùng chữ mặc định để tránh bị mất nội dung ngoài trang.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  {Array.from(new Set(homeTextList.map((item) => item.group || "Khác"))).map((group) => {
+                    const items = homeTextList
+                      .filter((item) => (item.group || "Khác") === group)
+                      .sort((a, b) => a.sortOrder - b.sortOrder);
+
+                    return (
+                      <section key={group} className="border border-slate-200 bg-slate-50">
+                        <div className="border-b border-slate-200 bg-white px-4 py-3">
+                          <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">{group}</h3>
+                          <p className="mt-1 text-[11px] font-semibold text-slate-500">{items.length} dòng chữ có thể sửa</p>
+                        </div>
+                        <div className="grid gap-4 p-4">
+                          {items.map((item) => (
+                            <div key={item.id} className="grid gap-2 lg:grid-cols-[220px_1fr] lg:items-start">
+                              <div>
+                                <label className="block text-xs font-black text-slate-800">{item.label}</label>
+                                <p className="mt-1 font-mono text-[10px] font-bold text-slate-400">{item.key}</p>
+                              </div>
+                              {item.multiline ? (
+                                <textarea
+                                  value={item.value}
+                                  onChange={(e) => updateHomeText(item.id, e.target.value)}
+                                  rows={3}
+                                  className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition focus:border-orange-500"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={item.value}
+                                  onChange={(e) => updateHomeText(item.id, e.target.value)}
+                                  className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-orange-500"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    );
+                  })}
+                </div>
               </div>
             )}
 

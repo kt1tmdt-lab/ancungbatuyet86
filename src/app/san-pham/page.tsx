@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   Star,
+  type LucideIcon,
 } from "lucide-react";
 
 type Product = {
@@ -35,14 +36,15 @@ type Product = {
 };
 
 const categories = [
-  { id: "all", label: "Tất cả sản phẩm", note: "Dòng chủ lực" },
-  { id: "chan-ga", label: "Chân gà", note: "Best seller" },
+  { id: "all", label: "Dòng sản phẩm", note: "Tổng quan" },
+  { id: "chan-ga", label: "Chân gà", note: "Chủ lực" },
   { id: "tam-cay", label: "Tăm cay", note: "Dòng sản phẩm" },
+  { id: "snack", label: "Snack", note: "Đóng gói" },
   { id: "banh-trang", label: "Bánh tráng", note: "Dòng sản phẩm" },
-  { id: "khac", label: "Sản phẩm khác", note: "Mở rộng menu" },
+  { id: "khac", label: "Sản phẩm khác", note: "Mở rộng" },
 ];
 
-function StatPill({ icon: Icon, title, desc }: { icon: any; title: string; desc: string }) {
+function StatPill({ icon: Icon, title, desc }: { icon: LucideIcon; title: string; desc: string }) {
   return (
     <div className="border border-orange-100 bg-white p-5">
       <div className="mb-4 flex h-11 w-11 items-center justify-center bg-orange-500 text-white">
@@ -90,24 +92,10 @@ export default function ProductsPage() {
   }, [activeCategory, mainProducts, otherProductsList]);
 
 
-  const getRating = (product: Product) => {
-    const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find((s) => s.label.includes("Đánh giá"));
-    return stat?.value || "4.8★";
-  };
-
-  const getSales = (product: Product) => {
-    const stats = Array.isArray(product.stats) ? product.stats : [];
-    const stat = stats.find(
-      (s) => s.label.includes("Đơn đã bán") || s.label.includes("Đơn thành công")
-    );
-    return stat?.value || "Đang cập nhật";
-  };
-
   const getBadge = (product: Product) => {
     if (product.category === "chan-ga") return "Sản phẩm chủ lực";
     if (product.category === "tam-cay") return "Dòng sản phẩm nổi bật";
-    if (product.category === "banh-trang") return "Dòng sản phẩm đóng gói";
+    if (product.category === "banh-trang" || product.category === "snack") return "Dòng sản phẩm đóng gói";
     return "Sản phẩm mở rộng";
   };
 
@@ -125,13 +113,13 @@ export default function ProductsPage() {
             </Link>
 
             <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-orange-600">
-              Danh mục sản phẩm
+              Landing sản phẩm
             </p>
             <h1 className="max-w-4xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
-              Sản phẩm ăn vặt được trình bày rõ hình ảnh, rõ quy cách, rõ kênh mua.
+              Các dòng sản phẩm chủ lực của Ăn Cùng Bà Tuyết
             </h1>
             <p className="mt-5 max-w-3xl text-base font-medium leading-8 text-slate-600">
-              Trang sản phẩm không chỉ để bán hàng. Đây là nơi khách hàng hiểu nhanh từng dòng sản phẩm, quy cách đóng gói, giá tham khảo và các cam kết an toàn của thương hiệu.
+              Trang này giới thiệu nhanh từng nhóm sản phẩm, quy cách đóng gói và điểm nổi bật. Thông tin chi tiết nằm trong landing riêng của từng sản phẩm.
             </p>
           </div>
 
@@ -184,11 +172,11 @@ export default function ProductsPage() {
               Đang hiển thị
             </p>
             <h2 className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
-              {displayedProducts.length} sản phẩm trong danh mục
+              {displayedProducts.length} dòng sản phẩm đang hiển thị
             </h2>
           </div>
           <p className="max-w-xl text-sm font-medium leading-6 text-slate-500">
-            Ưu tiên ảnh thật, mô tả ngắn, quy cách và giá từ để khách hàng ra quyết định nhanh.
+            Ưu tiên ảnh thật, mô tả ngắn và đường dẫn sang trang giới thiệu riêng của từng sản phẩm.
           </p>
         </div>
 
@@ -208,8 +196,6 @@ export default function ProductsPage() {
           <div className="space-y-6">
             <AnimatePresence mode="popLayout">
               {displayedProducts.map((product, i) => {
-                const rating = getRating(product);
-                const sales = getSales(product);
                 const badgeText = getBadge(product);
 
                 return (
@@ -261,10 +247,10 @@ export default function ProductsPage() {
                             </span>
                             <span className="inline-flex items-center gap-1 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-amber-600">
                               <Star size={12} fill="currentColor" />
-                              {rating}
+                              Hồ sơ sản phẩm
                             </span>
                             <span className="bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                              {sales}
+                              Phân phối chính thức
                             </span>
                           </div>
 
@@ -295,10 +281,10 @@ export default function ProductsPage() {
                         <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                              Giá từ
+                              Thông tin mua hàng
                             </p>
                             <p className="mt-1 text-2xl font-black text-slate-950">
-                              {product.priceRange || product.price || "Liên hệ"}
+                              Xem trong trang chi tiết
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-3">
@@ -321,7 +307,7 @@ export default function ProductsPage() {
                                 className="px-6 py-3 text-xs uppercase tracking-wider"
                               >
                                 <ShoppingBag size={15} />
-                                Mua chính hãng
+                                Kênh chính thức
                                 <ArrowRight size={15} />
                               </Button>
                             )}
@@ -392,7 +378,7 @@ export default function ProductsPage() {
                       {product.name}
                     </p>
                     <p className="mt-2 text-xs font-black text-orange-600">
-                      {product.priceRange || product.price || "Liên hệ"}
+                      Xem chi tiết
                     </p>
                   </div>
                 </Link>

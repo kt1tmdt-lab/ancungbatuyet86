@@ -58,8 +58,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   heroBanner: {
     title: "Ăn vặt thì phải Ăn Cùng Bà Tuyết",
     subtitle:
-      "Thương hiệu đồ ăn vặt Việt Nam. Bắt đầu từ 2022. Trở thành thương hiệu ăn vặt dẫn đầu trên thương mại điện tử từ 2023 đến nay.",
-    ctaText: "Sản phẩm",
+      "Thương hiệu đồ ăn vặt Việt Nam xây dựng niềm tin bằng nguyên liệu rõ ràng, quy trình sản xuất chỉn chu và hệ thống phân phối chính thức.",
+    ctaText: "Xem sản phẩm nổi bật",
     ctaLink: "/san-pham",
   },
   seo: {
@@ -79,10 +79,12 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   ],
   footerLinks: {
     products: [
-      { href: "/san-pham/chan-ga", label: "Chân Gà Rút Xương" },
-      { href: "/san-pham/tam-cay", label: "Tăm Cay" },
-      { href: "/san-pham/banh-trang", label: "Snack Bánh Tráng" },
-      { href: "/san-pham/bo-suu-tap", label: "Sản Phẩm Khác" },
+      { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà rút xương" },
+      { href: "/san-pham/chan-ga-khong-lo", label: "Chân gà khổng lồ" },
+      { href: "/san-pham/tam-cay", label: "Tăm cay" },
+      { href: "/san-pham/snack-banh-trang", label: "Snack" },
+      { href: "/san-pham/banh-trang", label: "Bánh tráng" },
+      { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác" },
     ],
     explore: [
       { href: "/quy-trinh", label: "Quy trình sản xuất" },
@@ -94,8 +96,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   },
   footerContact: {
     phone: "0989 852 948",
-    email: "ancungbatuyet@gmail.com",
-    address: "Thái Nguyên, Việt Nam",
+    email: "cskh@ancungbatuyet.vn",
+    address: "Xuân Phương, Hà Nội",
     workingHours: "T2 - T7: 8:00 - 17:00",
     shopeeUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     tiktokUrl: "https://tiktok.com/@batuyethanhvi",
@@ -104,23 +106,23 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   stats: {
     followers: {
       value: "10M+",
-      label: "Followers",
-      desc: "Là số lượng người theo dõi Bà Tuyết và Ăn Cùng Bà Tuyết trên các nền tảng mạng xã hội như TikTok, Youtube, Facebook.",
+      label: "Cộng đồng theo dõi",
+      desc: "Cộng đồng khách hàng theo dõi Bà Tuyết và Ăn Cùng Bà Tuyết trên các nền tảng mạng xã hội.",
     },
     orders: {
       value: "8M+",
-      label: "Đơn hàng TikTok Shop",
-      desc: "Chỉ tính riêng trên nền tảng TikTok Shop, chưa tính các nền tảng thương mại điện tử khác.",
+      label: "Đơn hàng online",
+      desc: "Ghi nhận từ các kênh bán hàng trực tuyến chính thức của thương hiệu.",
     },
     area: {
       value: "5.000+m²",
-      label: "Diện tích nhà máy",
-      desc: "Thể hiện năng lực sản xuất, đáp ứng hàng triệu đơn hàng với không gian phục vụ sản xuất, đóng gói và kiểm soát chất lượng.",
+      label: "Không gian sản xuất",
+      desc: "Thể hiện năng lực sản xuất, đóng gói và kiểm soát chất lượng theo quy trình rõ ràng.",
     },
     insurance: {
       value: "PVI",
       label: "Bảo hiểm sản phẩm",
-      desc: "Thể hiện trách nhiệm của thương hiệu với sức khoẻ khách hàng và chất lượng sản phẩm.",
+      desc: "Thể hiện trách nhiệm của thương hiệu với khách hàng và chất lượng sản phẩm.",
     },
   },
 };

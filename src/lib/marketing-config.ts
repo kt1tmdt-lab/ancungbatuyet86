@@ -32,6 +32,16 @@ export type PageAssetItem = {
   linkUrl: string;
 };
 
+export type HomeTextItem = {
+  id: string;
+  key: string;
+  group: string;
+  label: string;
+  value: string;
+  multiline: boolean;
+  sortOrder: number;
+};
+
 export type TrustSectionItem = {
   id: string;
   key: string;
@@ -73,6 +83,7 @@ export type MarketingConfigData = {
   press: PressItem[];
   feedback: FeedbackItem[];
   videos: VideoItem[];
+  homeTexts: HomeTextItem[];
   pageAssets: PageAssetItem[];
   trustSections: TrustSectionItem[];
   historyMilestones: HistoryMilestoneItem[];
@@ -267,10 +278,60 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   },
 ];
 
+export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
+  { id: "home-text-factory-card-label", key: "factory_card_label", group: "Trang chủ - Bằng chứng nhà máy", label: "Nhãn ảnh nhà máy", value: "Nhà máy / khu sản xuất", multiline: false, sortOrder: 10 },
+  { id: "home-text-factory-card-title", key: "factory_card_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Tiêu đề ảnh nhà máy", value: "Không gian sản xuất được kiểm soát", multiline: false, sortOrder: 20 },
+  { id: "home-text-factory-card-description", key: "factory_card_description", group: "Trang chủ - Bằng chứng nhà máy", label: "Mô tả ảnh nhà máy", value: "Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.", multiline: true, sortOrder: 30 },
+  { id: "home-text-factory-section-label", key: "factory_section_label", group: "Trang chủ - Bằng chứng nhà máy", label: "Nhãn cụm bên phải", value: "Bằng chứng thương hiệu", multiline: false, sortOrder: 40 },
+  { id: "home-text-factory-section-title", key: "factory_section_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Tiêu đề cụm bên phải", value: "Năng lực sản xuất rõ ràng trước khi nói về bán hàng", multiline: true, sortOrder: 50 },
+  { id: "home-text-factory-section-description", key: "factory_section_description", group: "Trang chủ - Bằng chứng nhà máy", label: "Mô tả cụm bên phải", value: "Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết.", multiline: true, sortOrder: 60 },
+  { id: "home-text-process-label", key: "process_label", group: "Trang chủ - Quy trình sản xuất", label: "Nhãn quy trình", value: "Quy trình sản xuất", multiline: false, sortOrder: 100 },
+  { id: "home-text-process-title", key: "process_title", group: "Trang chủ - Quy trình sản xuất", label: "Tiêu đề quy trình", value: "Từ nguyên liệu đến sản phẩm đóng gói", multiline: true, sortOrder: 110 },
+  { id: "home-text-process-description", key: "process_description", group: "Trang chủ - Quy trình sản xuất", label: "Mô tả quy trình", value: "Bố cục quy trình giúp người xem hiểu đây là doanh nghiệp sản xuất thực phẩm, không chỉ là shop bán hàng hoặc landing page quảng cáo.", multiline: true, sortOrder: 120 },
+  { id: "home-text-process-step-1-title", key: "process_step_1_title", group: "Trang chủ - Quy trình sản xuất", label: "Bước 01 - tiêu đề", value: "Chọn nguyên liệu", multiline: false, sortOrder: 130 },
+  { id: "home-text-process-step-1-description", key: "process_step_1_description", group: "Trang chủ - Quy trình sản xuất", label: "Bước 01 - mô tả", value: "Ưu tiên nguồn rõ ràng, kiểm tra đầu vào trước khi sản xuất.", multiline: true, sortOrder: 140 },
+  { id: "home-text-process-step-2-title", key: "process_step_2_title", group: "Trang chủ - Quy trình sản xuất", label: "Bước 02 - tiêu đề", value: "Sơ chế và sản xuất", multiline: false, sortOrder: 150 },
+  { id: "home-text-process-step-2-description", key: "process_step_2_description", group: "Trang chủ - Quy trình sản xuất", label: "Bước 02 - mô tả", value: "Kiểm soát từng công đoạn để giữ chất lượng ổn định giữa các lô hàng.", multiline: true, sortOrder: 160 },
+  { id: "home-text-process-step-3-title", key: "process_step_3_title", group: "Trang chủ - Quy trình sản xuất", label: "Bước 03 - tiêu đề", value: "Đóng gói và tem nhãn", multiline: false, sortOrder: 170 },
+  { id: "home-text-process-step-3-description", key: "process_step_3_description", group: "Trang chủ - Quy trình sản xuất", label: "Bước 03 - mô tả", value: "Bao bì rõ thông tin, dễ vận chuyển, dễ trưng bày và phù hợp bán online.", multiline: true, sortOrder: 180 },
+  { id: "home-text-process-step-4-title", key: "process_step_4_title", group: "Trang chủ - Quy trình sản xuất", label: "Bước 04 - tiêu đề", value: "Giao hàng toàn quốc", multiline: false, sortOrder: 190 },
+  { id: "home-text-process-step-4-description", key: "process_step_4_description", group: "Trang chủ - Quy trình sản xuất", label: "Bước 04 - mô tả", value: "Kết nối sàn thương mại điện tử để khách đặt hàng nhanh và thuận tiện.", multiline: true, sortOrder: 200 },
+  { id: "home-text-brand-story-label", key: "brand_story_label", group: "Trang chủ - Câu chuyện thương hiệu", label: "Nhãn câu chuyện", value: "Câu chuyện thương hiệu", multiline: false, sortOrder: 300 },
+  { id: "home-text-brand-story-title", key: "brand_story_title", group: "Trang chủ - Câu chuyện thương hiệu", label: "Tiêu đề câu chuyện", value: "Từ món ăn quen thuộc đến thương hiệu có quy trình", multiline: true, sortOrder: 310 },
+  { id: "home-text-brand-story-description", key: "brand_story_description", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mô tả câu chuyện", value: "Từ một căn bếp nhỏ với công thức gia truyền, Ăn Cùng Bà Tuyết đã phát triển thành thương hiệu ăn vặt có xưởng sản xuất riêng, quy trình kiểm soát chất lượng rõ ràng và hàng triệu khách hàng tin dùng.", multiline: true, sortOrder: 320 },
+  { id: "home-text-brand-story-cta", key: "brand_story_cta", group: "Trang chủ - Câu chuyện thương hiệu", label: "Nút câu chuyện", value: "Đọc toàn bộ câu chuyện", multiline: false, sortOrder: 330 },
+  { id: "home-text-brand-story-milestone-1-year", key: "brand_story_milestone_1_year", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 1 - năm", value: "2022", multiline: false, sortOrder: 340 },
+  { id: "home-text-brand-story-milestone-1-event", key: "brand_story_milestone_1_event", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 1 - nội dung", value: "Bắt đầu từ đam mê ẩm thực và các nội dung gần gũi với cộng đồng.", multiline: true, sortOrder: 350 },
+  { id: "home-text-brand-story-milestone-2-year", key: "brand_story_milestone_2_year", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 2 - năm", value: "2023", multiline: false, sortOrder: 360 },
+  { id: "home-text-brand-story-milestone-2-event", key: "brand_story_milestone_2_event", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 2 - nội dung", value: "Phát triển thương hiệu Ăn Cùng Bà Tuyết với định hướng đồ ăn vặt sạch.", multiline: true, sortOrder: 370 },
+  { id: "home-text-brand-story-milestone-3-year", key: "brand_story_milestone_3_year", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 3 - năm", value: "2024", multiline: false, sortOrder: 380 },
+  { id: "home-text-brand-story-milestone-3-event", key: "brand_story_milestone_3_event", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 3 - nội dung", value: "Mở rộng trên TikTok Shop, xây dựng cộng đồng khách hàng trung thành.", multiline: true, sortOrder: 390 },
+  { id: "home-text-brand-story-milestone-4-year", key: "brand_story_milestone_4_year", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 4 - năm", value: "2025", multiline: false, sortOrder: 400 },
+  { id: "home-text-brand-story-milestone-4-event", key: "brand_story_milestone_4_event", group: "Trang chủ - Câu chuyện thương hiệu", label: "Mốc 4 - nội dung", value: "Đẩy mạnh nhà máy, quy trình và tiêu chuẩn hóa sản phẩm.", multiline: true, sortOrder: 410 },
+  { id: "home-text-trust-section-label", key: "trust_section_label", group: "Trang chủ - Sứ mệnh", label: "Nhãn sứ mệnh", value: "Sứ mệnh", multiline: false, sortOrder: 500 },
+  { id: "home-text-trust-section-title", key: "trust_section_title", group: "Trang chủ - Sứ mệnh", label: "Tiêu đề sứ mệnh", value: "Thay đổi định kiến về ăn vặt", multiline: true, sortOrder: 510 },
+  { id: "home-text-trust-section-description", key: "trust_section_description", group: "Trang chủ - Sứ mệnh", label: "Mô tả sứ mệnh", value: "Ăn vặt ngon hơn khi khách hàng biết rõ nguyên liệu, quy trình và bằng chứng phía sau sản phẩm.", multiline: true, sortOrder: 520 },
+  { id: "home-text-trust-item-1-title", key: "trust_item_1_title", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 1 - tiêu đề", value: "Kiểm soát đầu vào", multiline: false, sortOrder: 530 },
+  { id: "home-text-trust-item-1-description", key: "trust_item_1_description", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 1 - mô tả", value: "Nguyên liệu được chọn lọc theo nguồn rõ ràng và kiểm tra trước khi đưa vào sản xuất.", multiline: true, sortOrder: 540 },
+  { id: "home-text-trust-item-2-title", key: "trust_item_2_title", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 2 - tiêu đề", value: "Quy trình sản xuất rõ ràng", multiline: false, sortOrder: 550 },
+  { id: "home-text-trust-item-2-description", key: "trust_item_2_description", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 2 - mô tả", value: "Các công đoạn được sắp xếp rõ ràng để giữ chất lượng ổn định giữa từng lô sản phẩm.", multiline: true, sortOrder: 560 },
+  { id: "home-text-trust-item-3-title", key: "trust_item_3_title", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 3 - tiêu đề", value: "Đóng gói và tem nhãn", multiline: false, sortOrder: 570 },
+  { id: "home-text-trust-item-3-description", key: "trust_item_3_description", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 3 - mô tả", value: "Bao bì thể hiện thông tin sản phẩm, thương hiệu và quy cách sử dụng.", multiline: true, sortOrder: 580 },
+  { id: "home-text-trust-item-4-title", key: "trust_item_4_title", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 4 - tiêu đề", value: "Bảo chứng niềm tin", multiline: false, sortOrder: 590 },
+  { id: "home-text-trust-item-4-description", key: "trust_item_4_description", group: "Trang chủ - Sứ mệnh", label: "Ô sứ mệnh 4 - mô tả", value: "Bảo hiểm, giấy chứng nhận và hồ sơ liên quan giúp khách hàng có thêm cơ sở kiểm chứng.", multiline: true, sortOrder: 600 },
+  { id: "home-text-products-section-label", key: "products_section_label", group: "Trang chủ - Sản phẩm", label: "Nhãn sản phẩm", value: "Sản phẩm chủ lực", multiline: false, sortOrder: 700 },
+  { id: "home-text-products-section-title", key: "products_section_title", group: "Trang chủ - Sản phẩm", label: "Tiêu đề sản phẩm", value: "Sản phẩm nổi bật", multiline: false, sortOrder: 710 },
+  { id: "home-text-products-section-description", key: "products_section_description", group: "Trang chủ - Sản phẩm", label: "Mô tả sản phẩm", value: "Giới thiệu nhanh các dòng sản phẩm chính để khách hàng bấm xem chi tiết ở từng trang riêng.", multiline: true, sortOrder: 720 },
+  { id: "home-text-news-section-label", key: "news_section_label", group: "Trang chủ - Tin tức & bằng chứng", label: "Nhãn tin tức", value: "Tin tức & bằng chứng", multiline: false, sortOrder: 800 },
+  { id: "home-text-news-section-title", key: "news_section_title", group: "Trang chủ - Tin tức & bằng chứng", label: "Tiêu đề tin tức", value: "Từ sản phẩm thật đến hệ thống phân phối thật", multiline: true, sortOrder: 810 },
+  { id: "home-text-news-section-description", key: "news_section_description", group: "Trang chủ - Tin tức & bằng chứng", label: "Mô tả tin tức", value: "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.", multiline: true, sortOrder: 820 },
+];
+
 export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   press: [],
   feedback: [],
   videos: [],
+  homeTexts: DEFAULT_HOME_TEXTS,
   pageAssets: DEFAULT_PAGE_ASSETS,
   historyMilestones: [
     {
@@ -576,6 +637,35 @@ function normalizePageAssets(input: unknown): PageAssetItem[] {
     .filter((item): item is PageAssetItem => Boolean(item));
 }
 
+function normalizeHomeTexts(input: unknown): HomeTextItem[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item, index) => {
+      if (!isRecord(item)) return null;
+      const key = stringValue(item.key);
+      const group = stringValue(item.group);
+      const label = stringValue(item.label);
+      const value = stringValue(item.value);
+      const sortOrder = Number.isFinite(Number(item.sortOrder))
+        ? Number(item.sortOrder)
+        : index * 10;
+
+      if (!key && !label && !value) return null;
+
+      return {
+        id: itemId(item.id),
+        key,
+        group,
+        label,
+        value,
+        multiline: item.multiline === true,
+        sortOrder,
+      };
+    })
+    .filter((item): item is HomeTextItem => Boolean(item));
+}
+
 function normalizeTrustSections(input: unknown): TrustSectionItem[] {
   if (!Array.isArray(input)) return DEFAULT_MARKETING_CONFIG.trustSections;
 
@@ -726,8 +816,23 @@ function withDefaultPageAssets(items: PageAssetItem[]) {
   })).concat(items.filter((item) => item.key && !DEFAULT_PAGE_ASSETS.some((defaultItem) => defaultItem.key === item.key)));
 }
 
+function withDefaultHomeTexts(items: HomeTextItem[]) {
+  const byKey = new Map(items.map((item) => [item.key, item]));
+
+  return DEFAULT_HOME_TEXTS.map((defaultItem) => ({
+    ...defaultItem,
+    ...(byKey.get(defaultItem.key) || {}),
+    id: byKey.get(defaultItem.key)?.id || defaultItem.id,
+    group: byKey.get(defaultItem.key)?.group || defaultItem.group,
+    label: byKey.get(defaultItem.key)?.label || defaultItem.label,
+    multiline: byKey.get(defaultItem.key)?.multiline ?? defaultItem.multiline,
+    sortOrder: byKey.get(defaultItem.key)?.sortOrder ?? defaultItem.sortOrder,
+  })).concat(items.filter((item) => item.key && !DEFAULT_HOME_TEXTS.some((defaultItem) => defaultItem.key === item.key)));
+}
+
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
   const source = isRecord(input) ? input : {};
+  const homeTexts = normalizeHomeTexts(source.homeTexts);
   const pageAssets = normalizePageAssets(source.pageAssets);
   const trustSections = normalizeTrustSections(source.trustSections);
   const hasHistoryMilestones = Array.isArray(source.historyMilestones);
@@ -740,6 +845,7 @@ export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
     press: normalizePress(source.press),
     feedback: normalizeFeedback(source.feedback),
     videos: normalizeVideos(source.videos),
+    homeTexts: withDefaultHomeTexts(homeTexts),
     pageAssets: withDefaultPageAssets(pageAssets),
     trustSections,
     historyMilestones: hasHistoryMilestones
