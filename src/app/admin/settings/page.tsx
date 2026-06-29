@@ -161,7 +161,7 @@ export default function SettingsPage() {
       }
 
       const data = await res.json();
-      setProductOptions(Array.isArray(data?.data) ? data.data : []);
+      setProductOptions(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []);
     } catch (error) {
       console.error("Failed to fetch products", error);
       toast.error("Không thể tải danh sách sản phẩm");

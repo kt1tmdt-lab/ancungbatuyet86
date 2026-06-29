@@ -303,10 +303,14 @@ export default function Navbar({
     fetch("/api/products", { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Products request failed");
-        return response.json() as Promise<{ data?: HeaderProduct[] }>;
+        return response.json() as Promise<HeaderProduct[] | { data?: HeaderProduct[] }>;
       })
       .then((data) => {
-        const products = Array.isArray(data.data) ? data.data : [];
+        const products = Array.isArray(data)
+          ? data
+          : Array.isArray(data.data)
+            ? data.data
+            : [];
         const productsByHref = new Map(products.map((product) => [`/san-pham/${product.slug}`, product]));
         const selectedProducts = initialProductMenuLinks?.length
           ? initialProductMenuLinks

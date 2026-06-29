@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const isAdminList = statusParam === "ALL";
 
     if (isAdminList) {
-      requireRole(req, ["ADMIN", "EDITOR"]);
+      requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]);
     }
     
     const products = await listProducts({
