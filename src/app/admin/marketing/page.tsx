@@ -125,6 +125,11 @@ const FACTORY_PROOF_ASSET_KEYS = new Set([
   "home_factory_proof_5",
 ]);
 
+function getFactoryProofTitleKey(key: string) {
+  const match = key.match(/^home_factory_proof_(\d)$/);
+  return match ? `factory_proof_${match[1]}_title` : "";
+}
+
 function getPageAssetMeta(item: PageAssetItem) {
   return PAGE_ASSET_META[item.key] || {
     page: "Tùy chỉnh",
@@ -434,6 +439,28 @@ function MarketingPageContent() {
 
   const updateHomeText = (id: string, value: string) => {
     setHomeTextList(homeTextList.map((item) => item.id === id ? { ...item, value } : item));
+  };
+
+  const updateHomeTextByKey = (key: string, value: string) => {
+    setHomeTextList((items) => {
+      const existingItem = items.find((item) => item.key === key);
+      if (existingItem) {
+        return items.map((item) => item.id === existingItem.id ? { ...item, value } : item);
+      }
+
+      return [
+        ...items,
+        {
+          id: `home-text-${key}`,
+          key,
+          group: "Trang chủ - Bằng chứng nhà máy",
+          label: "Tên mục bằng chứng",
+          value,
+          multiline: false,
+          sortOrder: 70,
+        },
+      ];
+    });
   };
 
   const updateHomeSection = (id: string, enabled: boolean) => {
@@ -1521,6 +1548,10 @@ function MarketingPageContent() {
                       const meta = getPageAssetMeta(item);
                       const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
                       const isFactoryProofAsset = FACTORY_PROOF_ASSET_KEYS.has(item.key);
+                      const factoryProofTitleKey = getFactoryProofTitleKey(item.key);
+                      const factoryProofTitle = factoryProofTitleKey
+                        ? homeTextList.find((textItem) => textItem.key === factoryProofTitleKey)?.value || ""
+                        : "";
 
                       return (
                         <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[180px_1fr_auto]">
@@ -1552,6 +1583,19 @@ function MarketingPageContent() {
                                 )}
                               </div>
                             </div>
+
+                            {isFactoryProofAsset && factoryProofTitleKey && (
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tên mục</label>
+                                <input
+                                  type="text"
+                                  value={factoryProofTitle}
+                                  onChange={(e) => updateHomeTextByKey(factoryProofTitleKey, e.target.value)}
+                                  placeholder="VD: Quy trình sản xuất"
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            )}
 
                             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1fr]">
                               <div>
