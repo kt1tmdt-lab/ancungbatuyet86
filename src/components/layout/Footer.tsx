@@ -58,12 +58,12 @@ export default function Footer({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-12 w-32 items-center justify-center overflow-hidden bg-white">
+            <div className="mb-4 flex flex-nowrap items-center gap-3">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-visible bg-white">
                 <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
               </div>
-              <div>
-                <p className="whitespace-nowrap text-sm font-black leading-tight text-primary-light">Ăn Cùng Bà Tuyết</p>
+              <div className="min-w-0">
+                <p className="shrink-0 whitespace-nowrap text-base font-black leading-tight text-primary-light">Ăn Cùng Bà Tuyết</p>
               </div>
             </div>
             <p className="text-gray-300 text-base font-black leading-relaxed">
