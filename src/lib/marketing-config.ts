@@ -42,6 +42,15 @@ export type HomeTextItem = {
   sortOrder: number;
 };
 
+export type HomeSectionItem = {
+  id: string;
+  key: "process" | "brand_story";
+  label: string;
+  description: string;
+  enabled: boolean;
+  sortOrder: number;
+};
+
 export type TrustSectionItem = {
   id: string;
   key: string;
@@ -84,6 +93,7 @@ export type MarketingConfigData = {
   feedback: FeedbackItem[];
   videos: VideoItem[];
   homeTexts: HomeTextItem[];
+  homeSections: HomeSectionItem[];
   pageAssets: PageAssetItem[];
   trustSections: TrustSectionItem[];
   historyMilestones: HistoryMilestoneItem[];
@@ -111,29 +121,36 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   {
     id: "default-home-factory-proof-1",
     key: "home_factory_proof_1",
-    label: "Khu sản xuất và đóng gói được trình bày rõ ràng bằng hình ảnh thực tế.",
-    imageUrl: "",
+    label: "Nguyên liệu được chọn lọc theo nguồn rõ ràng, ghi nhận thông tin và kiểm tra trước khi đưa vào sản xuất.",
+    imageUrl: "/hero/chan-ga-plate.png",
     linkUrl: "/quy-trinh",
   },
   {
     id: "default-home-factory-proof-2",
     key: "home_factory_proof_2",
-    label: "Thông tin bảo hiểm, tiêu chuẩn và hồ sơ sản phẩm có vị trí riêng để tạo niềm tin.",
-    imageUrl: "",
-    linkUrl: "/gioi-thieu",
+    label: "Khu sơ chế, chế biến và đóng gói được trình bày bằng hình ảnh thực tế để khách hàng hiểu cách sản phẩm được làm ra.",
+    imageUrl: "/bento/bento-factory.png",
+    linkUrl: "/quy-trinh",
   },
   {
     id: "default-home-factory-proof-3",
     key: "home_factory_proof_3",
-    label: "Nội dung tập trung vào an toàn, ổn định chất lượng và phân phối toàn quốc.",
-    imageUrl: "",
-    linkUrl: "/he-thong-ban",
+    label: "Bao bì, tem nhãn và thông tin sản phẩm được chuẩn hóa để dễ nhận diện, dễ bảo quản và phù hợp phân phối toàn quốc.",
+    imageUrl: "/hero/chan-ga-poster.png",
+    linkUrl: "/san-pham",
   },
   {
     id: "default-home-factory-proof-4",
     key: "home_factory_proof_4",
-    label: "Bố cục vuông, sáng, nhiều khoảng trắng, giảm hiệu ứng như web công nghệ.",
-    imageUrl: "",
+    label: "Bảo hiểm PVI, giấy chứng nhận và hồ sơ liên quan giúp khách hàng có cơ sở kiểm chứng trước khi lựa chọn.",
+    imageUrl: "/bento/bento-insurance.png",
+    linkUrl: "/gioi-thieu/thanh-tuu",
+  },
+  {
+    id: "default-home-factory-proof-5",
+    key: "home_factory_proof_5",
+    label: "Các nội dung báo chí và truyền thông được gom lại để kể câu chuyện thương hiệu bằng nguồn tham chiếu rõ ràng.",
+    imageUrl: "/bento/bento-tiktok.png",
     linkUrl: "/tin-tuc",
   },
   {
@@ -327,11 +344,31 @@ export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
   { id: "home-text-news-section-description", key: "news_section_description", group: "Trang chủ - Tin tức & bằng chứng", label: "Mô tả tin tức", value: "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.", multiline: true, sortOrder: 820 },
 ];
 
+export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
+  {
+    id: "home-section-process",
+    key: "process",
+    label: "Quy trình sản xuất",
+    description: "Ẩn/hiện cụm Quy trình sản xuất: Từ nguyên liệu đến sản phẩm đóng gói.",
+    enabled: true,
+    sortOrder: 10,
+  },
+  {
+    id: "home-section-brand-story",
+    key: "brand_story",
+    label: "Câu chuyện thương hiệu",
+    description: "Ẩn/hiện cụm Từ món ăn quen thuộc đến thương hiệu có quy trình.",
+    enabled: true,
+    sortOrder: 20,
+  },
+];
+
 export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   press: [],
   feedback: [],
   videos: [],
   homeTexts: DEFAULT_HOME_TEXTS,
+  homeSections: DEFAULT_HOME_SECTIONS,
   pageAssets: DEFAULT_PAGE_ASSETS,
   historyMilestones: [
     {
@@ -666,6 +703,33 @@ function normalizeHomeTexts(input: unknown): HomeTextItem[] {
     .filter((item): item is HomeTextItem => Boolean(item));
 }
 
+function normalizeHomeSections(input: unknown): HomeSectionItem[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item, index) => {
+      if (!isRecord(item)) return null;
+      const key = item.key === "brand_story" ? "brand_story" : item.key === "process" ? "process" : null;
+      const label = stringValue(item.label);
+      const description = stringValue(item.description);
+      const sortOrder = Number.isFinite(Number(item.sortOrder))
+        ? Number(item.sortOrder)
+        : index * 10;
+
+      if (!key) return null;
+
+      return {
+        id: itemId(item.id),
+        key,
+        label,
+        description,
+        enabled: item.enabled !== false,
+        sortOrder,
+      };
+    })
+    .filter((item): item is HomeSectionItem => Boolean(item));
+}
+
 function normalizeTrustSections(input: unknown): TrustSectionItem[] {
   if (!Array.isArray(input)) return DEFAULT_MARKETING_CONFIG.trustSections;
 
@@ -830,9 +894,24 @@ function withDefaultHomeTexts(items: HomeTextItem[]) {
   })).concat(items.filter((item) => item.key && !DEFAULT_HOME_TEXTS.some((defaultItem) => defaultItem.key === item.key)));
 }
 
+function withDefaultHomeSections(items: HomeSectionItem[]) {
+  const byKey = new Map(items.map((item) => [item.key, item]));
+
+  return DEFAULT_HOME_SECTIONS.map((defaultItem) => ({
+    ...defaultItem,
+    ...(byKey.get(defaultItem.key) || {}),
+    id: byKey.get(defaultItem.key)?.id || defaultItem.id,
+    label: byKey.get(defaultItem.key)?.label || defaultItem.label,
+    description: byKey.get(defaultItem.key)?.description || defaultItem.description,
+    enabled: byKey.get(defaultItem.key)?.enabled ?? defaultItem.enabled,
+    sortOrder: byKey.get(defaultItem.key)?.sortOrder ?? defaultItem.sortOrder,
+  })).concat(items.filter((item) => item.key && !DEFAULT_HOME_SECTIONS.some((defaultItem) => defaultItem.key === item.key)));
+}
+
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
   const source = isRecord(input) ? input : {};
   const homeTexts = normalizeHomeTexts(source.homeTexts);
+  const homeSections = normalizeHomeSections(source.homeSections);
   const pageAssets = normalizePageAssets(source.pageAssets);
   const trustSections = normalizeTrustSections(source.trustSections);
   const hasHistoryMilestones = Array.isArray(source.historyMilestones);
@@ -846,6 +925,7 @@ export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
     feedback: normalizeFeedback(source.feedback),
     videos: normalizeVideos(source.videos),
     homeTexts: withDefaultHomeTexts(homeTexts),
+    homeSections: withDefaultHomeSections(homeSections),
     pageAssets: withDefaultPageAssets(pageAssets),
     trustSections,
     historyMilestones: hasHistoryMilestones

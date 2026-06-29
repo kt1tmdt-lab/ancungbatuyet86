@@ -64,6 +64,7 @@ export async function PUT(req: NextRequest) {
         feedbackCount: data.feedback.length,
         videoCount: data.videos.length,
         homeTextCount: data.homeTexts.length,
+        homeSectionCount: data.homeSections.length,
         pageAssetCount: data.pageAssets.length,
         trustSectionCount: data.trustSections.length,
         historyMilestoneCount: data.historyMilestones.length,

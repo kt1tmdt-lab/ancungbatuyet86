@@ -340,12 +340,9 @@ export default function Navbar({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 lg:h-18">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-12 w-28 items-center justify-center overflow-hidden bg-white sm:w-32">
-              <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
-            </div>
-            <div className="hidden xl:block">
-              <p className="whitespace-nowrap text-sm font-black leading-tight text-primary">Ăn Cùng Bà Tuyết</p>
+          <Link href="/" className="flex h-14 w-16 shrink-0 items-center justify-center overflow-visible bg-white sm:h-16 sm:w-20">
+            <div className="flex h-full w-full items-center justify-center">
+              <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="max-h-full max-w-full object-contain" />
             </div>
           </Link>
 

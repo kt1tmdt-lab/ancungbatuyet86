@@ -377,6 +377,13 @@ function homeTextValue(items: HomeTextItem[], key: string, fallback: string) {
   return items.find((item) => item.key === key)?.value || fallback;
 }
 
+function homeSectionEnabled(
+  sections: MarketingConfigData["homeSections"],
+  key: MarketingConfigData["homeSections"][number]["key"],
+) {
+  return sections.find((item) => item.key === key)?.enabled !== false;
+}
+
 function buildNewsEvidenceItems(posts: PostItem[]) {
   const icons = [BadgeCheck, ClipboardCheck, Store, Truck];
 
@@ -479,7 +486,7 @@ function HeroSection() {
             {heroTitle.includes(brandName) ? (
               <>
                 {heroTitle.replace(brandName, "").trim()}{" "}
-                <span className="font-script text-orange-700">{brandName}</span>
+                <span className="font-black text-orange-700">{brandName}</span>
               </>
             ) : (
               heroTitle
@@ -1455,24 +1462,31 @@ function FactoryProofSection() {
     return acc;
   }, {});
   const imageAsset = assetByKey.home_factory_proof_image;
-  const proofImage = imageAsset?.imageUrl || "/bento/bento-factory.png";
-  const proofImageLink = imageAsset?.linkUrl || "";
+  const proofImageFallbacks = [
+    "/hero/chan-ga-plate.png",
+    "/bento/bento-factory.png",
+    "/hero/chan-ga-poster.png",
+    "/bento/bento-insurance.png",
+    "/bento/bento-tiktok.png",
+  ];
   const proofs = fallbackProofs.map((proof, index) => {
     const asset = assetByKey[`home_factory_proof_${index + 1}`];
     return {
       ...proof,
       text: asset?.label || proof.text,
+      imageUrl: asset?.imageUrl || proofImageFallbacks[index] || imageAsset?.imageUrl || "/bento/bento-factory.png",
       linkUrl: asset?.linkUrl || "",
     };
   });
   const activeProof = proofs[activeProofIndex] || proofs[0];
-  const ActiveProofIcon = activeProof.icon;
+  const activeProofImage = activeProof.imageUrl || imageAsset?.imageUrl || "/bento/bento-factory.png";
+  const activeProofLink = activeProof.linkUrl || imageAsset?.linkUrl || "";
 
   const imageNode = (
     <img
-      src={proofImage}
-      alt={imageAsset?.label || "Nhà máy sản xuất Bà Tuyết"}
-      className="absolute inset-0 h-full w-full object-cover"
+      src={activeProofImage}
+      alt={activeProof.title || imageAsset?.label || "Bằng chứng thương hiệu Ăn Cùng Bà Tuyết"}
+      className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
     />
   );
 
@@ -1486,11 +1500,11 @@ function FactoryProofSection() {
           className="h-full border-y border-r border-orange-200 bg-white p-0 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
         >
           <div className="relative min-h-[560px] overflow-hidden bg-slate-100 lg:min-h-[680px]">
-            {proofImageLink ? (
+            {activeProofLink ? (
               <a
-                href={proofImageLink}
-                target={proofImageLink.startsWith("http") ? "_blank" : undefined}
-                rel={proofImageLink.startsWith("http") ? "noopener noreferrer" : undefined}
+                href={activeProofLink}
+                target={activeProofLink.startsWith("http") ? "_blank" : undefined}
+                rel={activeProofLink.startsWith("http") ? "noopener noreferrer" : undefined}
               >
                 {imageNode}
               </a>
@@ -1499,13 +1513,13 @@ function FactoryProofSection() {
             )}
             <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-                {homeTextValue(homeTexts, "factory_card_label", "Nhà máy / khu sản xuất")}
+                {activeProof.title}
               </p>
               <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
-                {homeTextValue(homeTexts, "factory_card_title", "Không gian sản xuất được kiểm soát")}
+                {activeProof.title}
               </h3>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                {homeTextValue(homeTexts, "factory_card_description", "Đưa hình ảnh nhà máy thật vào đây sẽ làm website giống công ty thực phẩm hơn rất nhiều so với nền tối và hiệu ứng glow.")}
+                {activeProof.text}
               </p>
             </div>
           </div>
@@ -1523,8 +1537,7 @@ function FactoryProofSection() {
             description={homeTextValue(homeTexts, "factory_section_description", "Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết.")}
           />
 
-          <div className="mt-8 grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
-            <div className="grid gap-2">
+          <div className="mt-8 grid gap-2">
               {proofs.map((proof, index) => {
                 const Icon = proof.icon;
                 const isActive = activeProofIndex === index;
@@ -1551,28 +1564,6 @@ function FactoryProofSection() {
                   </button>
                 );
               })}
-            </div>
-
-            <div className="border border-orange-100 bg-white p-6 shadow-sm">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-yellow-300">
-                <ActiveProofIcon size={26} />
-              </div>
-              <h3 className="mt-6 text-2xl font-black tracking-[-0.04em] text-slate-950">
-                {activeProof.title}
-              </h3>
-              <p className="mt-4 text-base font-semibold leading-8 text-slate-600">
-                {activeProof.text}
-              </p>
-              {activeProof.linkUrl && (
-                <Link
-                  href={activeProof.linkUrl}
-                  className="mt-7 inline-flex items-center gap-2 border border-orange-200 px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:border-orange-600 hover:bg-orange-600 hover:text-white"
-                >
-                  Xem bằng chứng
-                  <ArrowRight size={15} />
-                </Link>
-              )}
-            </div>
           </div>
         </motion.div>
       </div>
@@ -1584,7 +1575,9 @@ function FactoryProofSection() {
 // 7. PROCESS SECTION
 // ==========================================
 function ProcessSection() {
-  const { homeTexts } = useHomeMarketingConfig();
+  const { homeTexts, homeSections } = useHomeMarketingConfig();
+  if (!homeSectionEnabled(homeSections, "process")) return null;
+
   const steps = [
     {
       title: homeTextValue(homeTexts, "process_step_1_title", "Chọn nguyên liệu"),
@@ -1666,7 +1659,9 @@ function ProcessSection() {
 // 8. BRAND STORY
 // ==========================================
 function BrandStory() {
-  const { homeTexts } = useHomeMarketingConfig();
+  const { homeTexts, homeSections } = useHomeMarketingConfig();
+  if (!homeSectionEnabled(homeSections, "brand_story")) return null;
+
   const milestones = [
     {
       year: homeTextValue(homeTexts, "brand_story_milestone_1_year", "2022"),

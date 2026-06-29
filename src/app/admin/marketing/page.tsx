@@ -34,6 +34,7 @@ import {
   type CommunityActivityItem,
   type FeedbackItem,
   type HistoryMilestoneItem,
+  type HomeSectionItem,
   type HomeTextItem,
   type PageAssetItem,
   type PressItem,
@@ -56,26 +57,32 @@ const PAGE_ASSET_META: Record<string, { page: string; position: string; note: st
   },
   home_factory_proof_1: {
     page: "Trang chủ",
-    position: "Bằng chứng 1",
-    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    position: "Bằng chứng 1: Nguyên liệu đầu vào",
+    note: "Ảnh, nội dung và link khi bấm mục Nguyên liệu đầu vào.",
     previewPath: "/#factory-proof",
   },
   home_factory_proof_2: {
     page: "Trang chủ",
-    position: "Bằng chứng 2",
-    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    position: "Bằng chứng 2: Quy trình sản xuất",
+    note: "Ảnh, nội dung và link khi bấm mục Quy trình sản xuất.",
     previewPath: "/#factory-proof",
   },
   home_factory_proof_3: {
     page: "Trang chủ",
-    position: "Bằng chứng 3",
-    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    position: "Bằng chứng 3: Đóng gói - tem nhãn",
+    note: "Ảnh, nội dung và link khi bấm mục Đóng gói - tem nhãn.",
     previewPath: "/#factory-proof",
   },
   home_factory_proof_4: {
     page: "Trang chủ",
-    position: "Bằng chứng 4",
-    note: "Dòng nội dung bên phải ảnh nhà máy.",
+    position: "Bằng chứng 4: Bảo chứng niềm tin",
+    note: "Ảnh, nội dung và link khi bấm mục Bảo chứng niềm tin.",
+    previewPath: "/#factory-proof",
+  },
+  home_factory_proof_5: {
+    page: "Trang chủ",
+    position: "Bằng chứng 5: Báo chí / truyền thông",
+    note: "Ảnh, nội dung và link khi bấm mục Báo chí / truyền thông.",
     previewPath: "/#factory-proof",
   },
   about_process_background: {
@@ -145,6 +152,7 @@ function MarketingPageContent() {
   const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
   const [homeTextList, setHomeTextList] = useState<HomeTextItem[]>([]);
+  const [homeSectionList, setHomeSectionList] = useState<HomeSectionItem[]>([]);
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
   const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
   const [historyList, setHistoryList] = useState<HistoryMilestoneItem[]>([]);
@@ -172,6 +180,7 @@ function MarketingPageContent() {
         setFeedbackList(config.feedback);
         setVideoList(config.videos);
         setHomeTextList(config.homeTexts);
+        setHomeSectionList(config.homeSections);
         setAssetList(config.pageAssets);
         setTrustList(config.trustSections);
         setHistoryList(config.historyMilestones);
@@ -196,6 +205,7 @@ function MarketingPageContent() {
     feedback?: FeedbackItem[];
     videos?: VideoItem[];
     homeTexts?: HomeTextItem[];
+    homeSections?: HomeSectionItem[];
     pageAssets?: PageAssetItem[];
     trustSections?: TrustSectionItem[];
     historyMilestones?: HistoryMilestoneItem[];
@@ -207,6 +217,7 @@ function MarketingPageContent() {
       const nextFeedback = nextConfig?.feedback || feedbackList;
       const nextVideos = nextConfig?.videos || videoList;
       const nextHomeTexts = nextConfig?.homeTexts || homeTextList;
+      const nextHomeSections = nextConfig?.homeSections || homeSectionList;
       const nextPageAssets = nextConfig?.pageAssets || assetList;
       const nextTrustSections = nextConfig?.trustSections || trustList;
       const nextHistoryMilestones = nextConfig?.historyMilestones || historyList;
@@ -223,6 +234,7 @@ function MarketingPageContent() {
           feedback: nextFeedback,
           videos: nextVideos,
           homeTexts: nextHomeTexts,
+          homeSections: nextHomeSections,
           pageAssets: nextPageAssets,
           trustSections: nextTrustSections,
           historyMilestones: nextHistoryMilestones,
@@ -237,6 +249,7 @@ function MarketingPageContent() {
       setFeedbackList(config.feedback);
       setVideoList(config.videos);
       setHomeTextList(config.homeTexts);
+      setHomeSectionList(config.homeSections);
       setAssetList(config.pageAssets);
       setTrustList(config.trustSections);
       setHistoryList(config.historyMilestones);
@@ -413,6 +426,10 @@ function MarketingPageContent() {
 
   const updateHomeText = (id: string, value: string) => {
     setHomeTextList(homeTextList.map((item) => item.id === id ? { ...item, value } : item));
+  };
+
+  const updateHomeSection = (id: string, enabled: boolean) => {
+    setHomeSectionList(homeSectionList.map((item) => item.id === id ? { ...item, enabled } : item));
   };
 
   const updateTrustSection = (
@@ -1386,6 +1403,34 @@ function MarketingPageContent() {
                     Nếu để trống, website sẽ dùng chữ mặc định để tránh bị mất nội dung ngoài trang.
                   </p>
                 </div>
+
+                <section className="border border-slate-200 bg-slate-50">
+                  <div className="border-b border-slate-200 bg-white px-4 py-3">
+                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Ẩn/hiện cụm trang chủ</h3>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                      Tắt cụm nào thì cụm đó không hiển thị ngoài trang chủ, dữ liệu chữ vẫn được giữ lại.
+                    </p>
+                  </div>
+                  <div className="grid gap-3 p-4">
+                    {homeSectionList
+                      .slice()
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((item) => (
+                        <label key={item.id} className="flex cursor-pointer items-start gap-3 border border-slate-200 bg-white p-4">
+                          <input
+                            type="checkbox"
+                            checked={item.enabled}
+                            onChange={(e) => updateHomeSection(item.id, e.target.checked)}
+                            className="mt-1 h-4 w-4 accent-orange-600"
+                          />
+                          <span>
+                            <span className="block text-sm font-black text-slate-900">{item.label}</span>
+                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{item.description}</span>
+                          </span>
+                        </label>
+                      ))}
+                  </div>
+                </section>
 
                 <div className="space-y-6">
                   {Array.from(new Set(homeTextList.map((item) => item.group || "Khác"))).map((group) => {
