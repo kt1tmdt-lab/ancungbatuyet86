@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
-  type TrustSectionItem,
+  type HistoryMilestoneItem,
 } from "@/lib/marketing-config";
 import {
   Calendar,
@@ -16,9 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Sparkles,
-  BookOpen,
-  ShieldAlert,
   Clock,
 } from "lucide-react";
 import Link from "next/link";
@@ -38,12 +35,12 @@ function getCleanTitle(title: string, year: string | null): string {
 }
 
 export default function HistoryPage() {
-  const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(
-    DEFAULT_MARKETING_CONFIG.trustSections,
+  const [milestones, setMilestones] = useState<HistoryMilestoneItem[]>(
+    DEFAULT_MARKETING_CONFIG.historyMilestones,
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [direction, setDirection] = useState(0); // -1: left, 1: right
-  const [selectedItem, setSelectedItem] = useState<TrustSectionItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<HistoryMilestoneItem | null>(null);
   
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +51,7 @@ export default function HistoryPage() {
         if (!res.ok) return;
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);
-        setTrustSections(marketingConfig.trustSections);
+        setMilestones(marketingConfig.historyMilestones);
       } catch (error) {
         console.error("Failed to fetch history:", error);
       }
@@ -62,20 +59,18 @@ export default function HistoryPage() {
     fetchHistory();
   }, []);
 
-  const rawHistoryItems = trustSections.filter(
-    (item) => item.enabled && ["company_history", "achievements"].includes(item.key)
-  );
+  const rawHistoryItems = milestones.filter((item) => item.enabled);
 
   const historyItems = rawHistoryItems
     .map((item, idx) => {
-      const year = extractYear(item.title) || extractYear(item.description);
+      const year = item.year || extractYear(item.title) || extractYear(item.description) || "";
       const cleanTitle = getCleanTitle(item.title, year);
       return {
         ...item,
         year,
         cleanTitle,
-        yearLabel: year || (item.key === "achievements" ? "Thành tựu" : `Mốc ${idx + 1}`),
-        sortYear: parseInt(year || "2020") + idx * 0.1, // stable chronological order fallback
+        yearLabel: year || (item.type === "achievement" ? "Thành tựu" : `Mốc ${idx + 1}`),
+        sortYear: Number(item.sortOrder) || parseInt(year || "2020") + idx * 0.1,
       };
     })
     .sort((a, b) => a.sortYear - b.sortYear);
@@ -248,7 +243,7 @@ export default function HistoryPage() {
 
                 return (
                   <div
-                    key={item.id || item.key}
+                    key={item.id}
                     data-index={index}
                     onClick={() => selectIndex(index)}
                     className="absolute -translate-x-1/2 flex flex-col items-center group cursor-pointer z-10"
@@ -304,7 +299,7 @@ export default function HistoryPage() {
                     <span className={`mt-2 text-[9px] font-black uppercase tracking-wider transition-colors duration-300 ${
                       isSelected ? "text-slate-800" : "text-slate-400 group-hover:text-slate-600"
                     }`}>
-                      {item.key === "achievements" ? "Thành tựu" : "Cột mốc"}
+                      {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                     </span>
                   </div>
                 );
@@ -339,7 +334,7 @@ export default function HistoryPage() {
           <div className="overflow-hidden rounded-3xl min-h-[420px] bg-white border border-orange-100/60 shadow-[0_15px_40px_rgba(234,88,12,0.03)] relative">
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
-                key={activeItem.id || activeItem.key}
+                key={activeItem.id}
                 custom={direction}
                 variants={slideVariants}
                 initial="enter"
@@ -360,12 +355,12 @@ export default function HistoryPage() {
                     {/* Category Label and Year Badge */}
                     <div className="flex items-center gap-2 mb-4">
                       <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                        activeItem.key === "achievements" 
+                        activeItem.type === "achievement" 
                           ? "bg-amber-50 text-amber-700 border-amber-100" 
                           : "bg-orange-50 text-orange-700 border-orange-100"
                       }`}>
-                        {activeItem.key === "achievements" ? <Award size={12} /> : <Compass size={12} />}
-                        {activeItem.key === "achievements" ? "Thành tựu" : "Cột mốc"}
+                        {activeItem.type === "achievement" ? <Award size={12} /> : <Compass size={12} />}
+                        {activeItem.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                       </span>
                       {activeItem.year && (
                         <span className="text-xs font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 rounded-full flex items-center gap-1">
@@ -423,14 +418,14 @@ export default function HistoryPage() {
                       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-300/10 rounded-full blur-2xl pointer-events-none" />
                       <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
                       
-                      {activeItem.key === "achievements" ? (
+                      {activeItem.type === "achievement" ? (
                         <Award size={56} className="text-amber-600 stroke-[1.2] mb-3" />
                       ) : (
                         <Compass size={56} className="text-orange-600 stroke-[1.2] mb-3" />
                       )}
                       
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                        {activeItem.key === "achievements" ? "Bảo chứng uy tín" : "Cột mốc phát triển"}
+                        {activeItem.type === "achievement" ? "Bảo chứng uy tín" : "Cột mốc phát triển"}
                       </span>
                     </div>
                   )}
@@ -502,7 +497,7 @@ export default function HistoryPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100 text-orange-500 p-8 min-h-[240px]">
-                    {selectedItem.key === "achievements" ? (
+                    {selectedItem.type === "achievement" ? (
                       <Award size={48} className="stroke-[1.5] mb-2 text-amber-600" />
                     ) : (
                       <Compass size={48} className="stroke-[1.5] mb-2 text-orange-600" />
@@ -518,23 +513,23 @@ export default function HistoryPage() {
                   {/* Category and year badge */}
                   <div className="flex items-center gap-2 mb-4">
                     <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                      selectedItem.key === "achievements"
+                      selectedItem.type === "achievement"
                         ? "bg-amber-50 text-amber-700 border-amber-100"
                         : "bg-orange-50 text-orange-700 border-orange-100"
                     }`}>
-                      {selectedItem.key === "achievements" ? <Award size={10} /> : <Compass size={10} />}
-                      {selectedItem.key === "achievements" ? "Thành tựu" : "Cột mốc"}
+                      {selectedItem.type === "achievement" ? <Award size={10} /> : <Compass size={10} />}
+                      {selectedItem.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                     </span>
-                    {extractYear(selectedItem.title) && (
+                    {(selectedItem.year || extractYear(selectedItem.title)) && (
                       <span className="text-[10px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-3 py-1 rounded-full flex items-center gap-1">
-                        <Clock size={10} /> Năm {extractYear(selectedItem.title)}
+                        <Clock size={10} /> Năm {selectedItem.year || extractYear(selectedItem.title)}
                       </span>
                     )}
                   </div>
 
                   {/* Title without year */}
                   <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-[-0.04em] leading-tight">
-                    {getCleanTitle(selectedItem.title, extractYear(selectedItem.title))}
+                    {getCleanTitle(selectedItem.title, selectedItem.year || extractYear(selectedItem.title))}
                   </h3>
 
                   {/* Summary Box */}

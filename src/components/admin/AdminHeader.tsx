@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList, Radar } from "lucide-react";
+import { Bell, Clock, LogOut, Menu, X, FileText, Users, LayoutDashboard, ClipboardCheck, FolderKanban, FolderPlus, Globe, Store, ImagePlus, Megaphone, ClipboardList, Radar, ServerCog } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 function formatTimeAgo(dateString: string) {
@@ -183,6 +183,7 @@ export function AdminHeader() {
     {
       group: "Hệ thống",
       items: [
+        { href: "/admin/system", label: "Trung tâm hệ thống", icon: ServerCog, show: isAdminOrSuperAdmin },
         { href: "/admin/settings", label: "Cấu hình Web", icon: Globe, show: isSettingsAllowed },
         { href: "/admin/activity-logs", label: "Nhật ký hoạt động", icon: ClipboardList, show: isAdminOrSuperAdmin },
         { href: "/admin/users", label: "Thành viên", icon: Users, show: isAdminOrSuperAdmin },

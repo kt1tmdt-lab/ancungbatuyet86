@@ -31,6 +31,7 @@ import toast from "react-hot-toast";
 import {
   normalizeMarketingConfig,
   type FeedbackItem,
+  type HistoryMilestoneItem,
   type PageAssetItem,
   type PressItem,
   type TrustSectionItem,
@@ -120,8 +121,12 @@ function MarketingPageContent() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets">(
-    searchParams.get("tab") === "assets" ? "assets" : "press",
+  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "trust" | "assets" | "history">(
+    searchParams.get("tab") === "assets"
+      ? "assets"
+      : searchParams.get("tab") === "history"
+        ? "history"
+        : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
@@ -132,10 +137,15 @@ function MarketingPageContent() {
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
   const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
+  const [historyList, setHistoryList] = useState<HistoryMilestoneItem[]>([]);
 
   useEffect(() => {
     if (searchParams.get("tab") === "assets") {
       const timer = window.setTimeout(() => setActiveTab("assets"), 0);
+      return () => window.clearTimeout(timer);
+    }
+    if (searchParams.get("tab") === "history") {
+      const timer = window.setTimeout(() => setActiveTab("history"), 0);
       return () => window.clearTimeout(timer);
     }
   }, [searchParams]);
@@ -155,6 +165,7 @@ function MarketingPageContent() {
         setVideoList(config.videos);
         setAssetList(config.pageAssets);
         setTrustList(config.trustSections);
+        setHistoryList(config.historyMilestones);
       })
       .catch((error) => {
         if (cancelled) return;
@@ -176,6 +187,7 @@ function MarketingPageContent() {
     videos?: VideoItem[];
     pageAssets?: PageAssetItem[];
     trustSections?: TrustSectionItem[];
+    historyMilestones?: HistoryMilestoneItem[];
   }) => {
     setIsSaving(true);
     try {
@@ -184,6 +196,7 @@ function MarketingPageContent() {
       const nextVideos = nextConfig?.videos || videoList;
       const nextPageAssets = nextConfig?.pageAssets || assetList;
       const nextTrustSections = nextConfig?.trustSections || trustList;
+      const nextHistoryMilestones = nextConfig?.historyMilestones || historyList;
 
       const res = await fetch("/api/settings/marketing", {
         method: "PUT",
@@ -197,6 +210,7 @@ function MarketingPageContent() {
           videos: nextVideos,
           pageAssets: nextPageAssets,
           trustSections: nextTrustSections,
+          historyMilestones: nextHistoryMilestones,
         }),
       });
 
@@ -208,6 +222,7 @@ function MarketingPageContent() {
       setVideoList(config.videos);
       setAssetList(config.pageAssets);
       setTrustList(config.trustSections);
+      setHistoryList(config.historyMilestones);
       toast.success("Đã lưu tài sản truyền thông thành công!");
     } catch (error) {
       console.error("Failed to save marketing settings", error);
@@ -281,6 +296,24 @@ function MarketingPageContent() {
     setTrustList([...trustList, newItem]);
   };
 
+  const addHistoryMilestone = () => {
+    const newItem: HistoryMilestoneItem = {
+      id: Date.now().toString(),
+      year: new Date().getFullYear().toString(),
+      title: "",
+      description: "",
+      detailContent: "",
+      imageUrl: "",
+      linkUrl: "",
+      type: "milestone",
+      enabled: true,
+      sortOrder: historyList.length > 0
+        ? Math.max(...historyList.map((item) => Number(item.sortOrder) || 0)) + 10
+        : 10,
+    };
+    setHistoryList([...historyList, newItem]);
+  };
+
   // Remove Item Helpers
   const removePress = (id: string) => {
     setPressList(pressList.filter((item) => item.id !== id));
@@ -300,6 +333,10 @@ function MarketingPageContent() {
 
   const removeTrustSection = (id: string) => {
     setTrustList(trustList.filter((item) => item.id !== id));
+  };
+
+  const removeHistoryMilestone = (id: string) => {
+    setHistoryList(historyList.filter((item) => item.id !== id));
   };
 
   // Update Field Helpers
@@ -343,6 +380,14 @@ function MarketingPageContent() {
     setTrustList(trustList.map((item) => item.id === id ? { ...item, [field]: val } : item));
   };
 
+  const updateHistoryMilestone = (
+    id: string,
+    field: keyof HistoryMilestoneItem,
+    val: string | boolean | number,
+  ) => {
+    setHistoryList(historyList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+  };
+
   const handleMediaSelect = async (url: string) => {
     if (!mediaPickerAssetId) return;
 
@@ -353,6 +398,16 @@ function MarketingPageContent() {
       setTrustList(nextTrustList);
       setMediaPickerAssetId(null);
       await saveMarketingConfig({ trustSections: nextTrustList });
+      return;
+    }
+
+    if (activeTab === "history") {
+      const nextHistoryList = historyList.map((item) =>
+        item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
+      );
+      setHistoryList(nextHistoryList);
+      setMediaPickerAssetId(null);
+      await saveMarketingConfig({ historyMilestones: nextHistoryList });
       return;
     }
 
@@ -430,6 +485,17 @@ function MarketingPageContent() {
           >
             <ShieldCheck size={16} />
             Uy tin ({trustList.filter((item) => item.enabled).length})
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === "history"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            <Calendar size={16} />
+            Lịch sử ({historyList.filter((item) => item.enabled).length})
           </button>
           <button
             onClick={() => setActiveTab("assets")}
@@ -858,6 +924,190 @@ function MarketingPageContent() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {activeTab === "history" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Cột mốc lịch sử phát triển</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Mỗi dòng là một cột mốc đang hiển thị ở trang Lịch sử phát triển. Admin có thể sửa từng chữ, từng ảnh, link và thứ tự.
+                    </p>
+                  </div>
+                  <button
+                    onClick={addHistoryMilestone}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
+                  >
+                    <Plus size={14} />
+                    Thêm cột mốc
+                  </button>
+                </div>
+
+                <div className="border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-slate-700">
+                  <p className="font-bold text-slate-900">Cách dùng:</p>
+                  <p className="mt-1">
+                    Nhập năm, tiêu đề, mô tả ngắn, nội dung chi tiết và ảnh. Bật/tắt để ẩn hiện ngoài website. Ô thứ tự càng nhỏ sẽ hiển thị càng trước.
+                  </p>
+                </div>
+
+                {historyList.length === 0 ? (
+                  <div className="text-center py-16 text-slate-400">
+                    <AlertCircle className="mx-auto text-slate-300 mb-2" size={36} />
+                    <p className="text-xs font-semibold">Chưa có cột mốc nào. Bấm &quot;Thêm cột mốc&quot; để tạo dòng đầu tiên.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {[...historyList]
+                      .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0))
+                      .map((item, index) => (
+                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-slate-50 p-4 xl:grid-cols-[180px_1fr_auto]">
+                          <div className="overflow-hidden border border-slate-200 bg-white">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.title || item.year} className="h-40 w-full object-cover" />
+                            ) : (
+                              <div className="flex h-40 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
+                                Chưa có ảnh
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 space-y-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white">
+                                  Cột mốc #{index + 1}
+                                </span>
+                                <span className="text-xs font-black text-slate-400">
+                                  {item.enabled ? "Đang hiển thị" : "Đang ẩn"}
+                                </span>
+                              </div>
+                              <label className="inline-flex items-center gap-2 text-xs font-bold text-slate-600">
+                                <input
+                                  type="checkbox"
+                                  checked={item.enabled}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "enabled", e.target.checked)}
+                                  className="h-4 w-4 accent-orange-500"
+                                />
+                                Hiển thị
+                              </label>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-[120px_1fr_150px_120px]">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Năm</label>
+                                <input
+                                  type="text"
+                                  value={item.year}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "year", e.target.value)}
+                                  placeholder="2026"
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-bold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tiêu đề</label>
+                                <input
+                                  type="text"
+                                  value={item.title}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "title", e.target.value)}
+                                  placeholder="Mở rộng nhà xưởng..."
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Loại</label>
+                                <select
+                                  value={item.type}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "type", e.target.value)}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-bold outline-none focus:border-orange-500"
+                                >
+                                  <option value="milestone">Cột mốc</option>
+                                  <option value="achievement">Thành tựu</option>
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Thứ tự</label>
+                                <input
+                                  type="number"
+                                  value={item.sortOrder}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "sortOrder", Number(e.target.value))}
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-bold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mô tả ngắn</label>
+                              <textarea
+                                value={item.description}
+                                onChange={(e) => updateHistoryMilestone(item.id, "description", e.target.value)}
+                                rows={2}
+                                placeholder="Một đoạn ngắn hiển thị ở thẻ chính ngoài trang lịch sử."
+                                className="w-full resize-none border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nội dung chi tiết</label>
+                              <textarea
+                                value={item.detailContent}
+                                onChange={(e) => updateHistoryMilestone(item.id, "detailContent", e.target.value)}
+                                rows={4}
+                                placeholder="Viết nội dung chi tiết. Có thể xuống dòng để tách đoạn."
+                                className="w-full resize-none border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                              />
+                            </div>
+
+                            <div className="grid gap-4 xl:grid-cols-2">
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <ImageIcon size={11} /> URL ảnh
+                                </label>
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={item.imageUrl}
+                                    onChange={(e) => updateHistoryMilestone(item.id, "imageUrl", e.target.value)}
+                                    placeholder="/uploads/anh-cot-moc.png"
+                                    className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setMediaPickerAssetId(item.id)}
+                                    className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                                  >
+                                    <ImagePlus size={14} />
+                                    Thư viện
+                                  </button>
+                                </div>
+                              </div>
+                              <div>
+                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex items-center gap-1">
+                                  <Link2 size={11} /> Link liên quan
+                                </label>
+                                <input
+                                  type="text"
+                                  value={item.linkUrl}
+                                  onChange={(e) => updateHistoryMilestone(item.id, "linkUrl", e.target.value)}
+                                  placeholder="/tin-tuc/bai-viet hoặc https://..."
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => removeHistoryMilestone(item.id)}
+                            className="flex h-fit items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 xl:self-center"
+                          >
+                            <Trash2 size={16} />
+                            Xóa
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             )}
 

@@ -44,12 +44,26 @@ export type TrustSectionItem = {
   enabled: boolean;
 };
 
+export type HistoryMilestoneItem = {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  detailContent: string;
+  imageUrl: string;
+  linkUrl: string;
+  type: "milestone" | "achievement";
+  enabled: boolean;
+  sortOrder: number;
+};
+
 export type MarketingConfigData = {
   press: PressItem[];
   feedback: FeedbackItem[];
   videos: VideoItem[];
   pageAssets: PageAssetItem[];
   trustSections: TrustSectionItem[];
+  historyMilestones: HistoryMilestoneItem[];
 };
 
 const TRUST_DOCUMENT_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
@@ -245,6 +259,56 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   feedback: [],
   videos: [],
   pageAssets: DEFAULT_PAGE_ASSETS,
+  historyMilestones: [
+    {
+      id: "default-history-2022",
+      year: "2022",
+      title: "Bắt đầu từ căn bếp nhỏ",
+      description: "Hành trình Ăn Cùng Bà Tuyết bắt đầu từ đam mê ẩm thực và những món ăn vặt quen thuộc.",
+      detailContent: "Từ các công thức gần gũi, đội ngũ bắt đầu thử nghiệm sản phẩm, lắng nghe phản hồi của khách hàng và xây dựng những nền tảng đầu tiên cho thương hiệu.",
+      imageUrl: "/hero/ba-tuyet-character.png",
+      linkUrl: "/gioi-thieu",
+      type: "milestone",
+      enabled: true,
+      sortOrder: 10,
+    },
+    {
+      id: "default-history-2023",
+      year: "2023",
+      title: "Phát triển thương hiệu Ăn Cùng Bà Tuyết",
+      description: "Thương hiệu được định hình rõ hơn với nhóm sản phẩm ăn vặt đóng gói, dễ mua và dễ nhận diện.",
+      detailContent: "Bao bì, kênh bán và cách kể câu chuyện thương hiệu được chuẩn hóa dần để khách hàng nhận biết sản phẩm tốt hơn.",
+      imageUrl: "/hero/chan-ga-poster.png",
+      linkUrl: "/san-pham",
+      type: "milestone",
+      enabled: true,
+      sortOrder: 20,
+    },
+    {
+      id: "default-history-2024",
+      year: "2024",
+      title: "Mở rộng kênh bán online",
+      description: "Sản phẩm xuất hiện mạnh hơn trên các kênh thương mại điện tử và mạng xã hội.",
+      detailContent: "TikTok Shop, Shopee và các điểm bán online giúp thương hiệu tiếp cận nhiều khách hàng hơn trên toàn quốc.",
+      imageUrl: "/bento/bento-tiktok.png",
+      linkUrl: "/he-thong-ban",
+      type: "achievement",
+      enabled: true,
+      sortOrder: 30,
+    },
+    {
+      id: "default-history-2025",
+      year: "2025",
+      title: "Tập trung vào quy trình và năng lực sản xuất",
+      description: "Thương hiệu đẩy mạnh tiêu chuẩn hóa quy trình, hình ảnh nhà xưởng và hồ sơ uy tín.",
+      detailContent: "Các nội dung về nguyên liệu, kiểm soát chất lượng, đóng gói và phân phối được trình bày rõ hơn để tạo niềm tin với khách hàng.",
+      imageUrl: "/bento/bento-factory.png",
+      linkUrl: "/quy-trinh",
+      type: "milestone",
+      enabled: true,
+      sortOrder: 40,
+    },
+  ],
   trustSections: [
     {
       id: "default-food-safety",
@@ -492,6 +556,68 @@ function normalizeTrustSections(input: unknown): TrustSectionItem[] {
   })).concat(items.filter((item) => item.key && !DEFAULT_MARKETING_CONFIG.trustSections.some((defaultItem) => defaultItem.key === item.key)));
 }
 
+function historyYearFromText(...values: string[]) {
+  const text = values.join(" ");
+  const match = text.match(/\b(19\d\d|20\d\d)\b/);
+  return match ? match[0] : "";
+}
+
+function buildHistoryMilestonesFromTrustSections(items: TrustSectionItem[]) {
+  const historyItems = items.filter((item) =>
+    ["company_history", "achievements"].includes(item.key),
+  );
+
+  return historyItems.map((item, index): HistoryMilestoneItem => ({
+    id: `migrated-${item.id || item.key}`,
+    year: historyYearFromText(item.title, item.description, item.detailContent),
+    title: item.title,
+    description: item.description,
+    detailContent: item.detailContent,
+    imageUrl: item.imageUrl,
+    linkUrl: item.linkUrl,
+    type: item.key === "achievements" ? "achievement" : "milestone",
+    enabled: item.enabled,
+    sortOrder: (index + 1) * 10,
+  }));
+}
+
+function normalizeHistoryMilestones(input: unknown): HistoryMilestoneItem[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item, index) => {
+      if (!isRecord(item)) return null;
+      const year = stringValue(item.year);
+      const title = stringValue(item.title);
+      const description = stringValue(item.description);
+      const detailContent = stringValue(item.detailContent);
+      const imageUrl = normalizeUploadPublicUrl(stringValue(item.imageUrl));
+      const linkUrl = stringValue(item.linkUrl);
+      const type = item.type === "achievement" ? "achievement" : "milestone";
+      const sortOrder = Number.isFinite(Number(item.sortOrder))
+        ? Number(item.sortOrder)
+        : index * 10;
+
+      if (!year && !title && !description && !detailContent && !imageUrl && !linkUrl) {
+        return null;
+      }
+
+      return {
+        id: itemId(item.id),
+        year,
+        title,
+        description,
+        detailContent,
+        imageUrl,
+        linkUrl,
+        type,
+        enabled: item.enabled !== false,
+        sortOrder,
+      };
+    })
+    .filter((item): item is HistoryMilestoneItem => Boolean(item));
+}
+
 function withDefaultPageAssets(items: PageAssetItem[]) {
   const byKey = new Map(items.map((item) => [item.key, item]));
 
@@ -505,12 +631,23 @@ function withDefaultPageAssets(items: PageAssetItem[]) {
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
   const source = isRecord(input) ? input : {};
   const pageAssets = normalizePageAssets(source.pageAssets);
+  const trustSections = normalizeTrustSections(source.trustSections);
+  const hasHistoryMilestones = Array.isArray(source.historyMilestones);
+  const hasLegacyTrustSections = Array.isArray(source.trustSections);
+  const legacyHistoryMilestones = hasLegacyTrustSections
+    ? buildHistoryMilestonesFromTrustSections(trustSections)
+    : [];
 
   return {
     press: normalizePress(source.press),
     feedback: normalizeFeedback(source.feedback),
     videos: normalizeVideos(source.videos),
     pageAssets: withDefaultPageAssets(pageAssets),
-    trustSections: normalizeTrustSections(source.trustSections),
+    trustSections,
+    historyMilestones: hasHistoryMilestones
+      ? normalizeHistoryMilestones(source.historyMilestones)
+      : legacyHistoryMilestones.length > 0
+        ? legacyHistoryMilestones
+        : DEFAULT_MARKETING_CONFIG.historyMilestones,
   };
 }
