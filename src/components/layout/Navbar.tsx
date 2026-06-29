@@ -431,13 +431,13 @@ export default function Navbar({
               <Search size={20} />
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 bg-slate-50/50 p-1 border border-orange-100 rounded-full">
+            <div className="hidden sm:flex items-center gap-2 rounded-full bg-slate-50/50 p-1">
               <button
                 type="button"
                 onClick={() => handleLanguageChange("vi")}
                 className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
                   language === "vi" 
-                    ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
+                    ? "scale-110 shadow-sm" 
                     : "opacity-45 hover:opacity-100 hover:scale-105"
                 }`}
                 aria-pressed={language === "vi"}
@@ -450,7 +450,7 @@ export default function Navbar({
                 onClick={() => handleLanguageChange("en")}
                 className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
                   language === "en" 
-                    ? "ring-2 ring-orange-500 scale-110 shadow-sm" 
+                    ? "scale-110 shadow-sm" 
                     : "opacity-45 hover:opacity-100 hover:scale-105"
                 }`}
                 aria-pressed={language === "en"}
@@ -564,7 +564,7 @@ export default function Navbar({
                 onClick={() => handleLanguageChange("vi")}
                 className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
                   language === "vi" 
-                    ? "bg-orange-50 border-orange-500 text-orange-700 font-extrabold shadow-sm" 
+                    ? "bg-orange-50 border-transparent text-orange-700 font-extrabold shadow-sm" 
                     : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
@@ -576,7 +576,7 @@ export default function Navbar({
                 onClick={() => handleLanguageChange("en")}
                 className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
                   language === "en" 
-                    ? "bg-orange-50 border-orange-500 text-orange-700 font-extrabold shadow-sm" 
+                    ? "bg-orange-50 border-transparent text-orange-700 font-extrabold shadow-sm" 
                     : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
                 }`}
               >
