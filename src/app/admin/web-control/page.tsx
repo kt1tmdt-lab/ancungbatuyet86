@@ -7,7 +7,9 @@ import { useAuth } from "@/lib/auth-context";
 import {
   Activity,
   ArrowRight,
+  AlertTriangle,
   Boxes,
+  CheckCircle2,
   ClipboardList,
   Eye,
   FileText,
@@ -46,10 +48,18 @@ type ControlGroup = {
   items: ControlItem[];
 };
 
+type CoverageItem = {
+  title: string;
+  detail: string;
+  href: string;
+  percent: number;
+  status: "done" | "partial" | "todo";
+};
+
 const statusText: Record<ControlItem["status"], string> = {
-  ready: "Sua truc tiep",
-  partial: "Dang gom tiep",
-  system: "He thong",
+  ready: "Sửa trực tiếp",
+  partial: "Đang gom tiếp",
+  system: "Hệ thống",
 };
 
 const statusClass: Record<ControlItem["status"], string> = {
@@ -58,205 +68,276 @@ const statusClass: Record<ControlItem["status"], string> = {
   system: "border-slate-200 bg-slate-100 text-slate-700",
 };
 
+const coverageClass: Record<CoverageItem["status"], string> = {
+  done: "bg-emerald-500",
+  partial: "bg-amber-500",
+  todo: "bg-slate-400",
+};
+
+const coverageText: Record<CoverageItem["status"], string> = {
+  done: "Đã quản lý tốt",
+  partial: "Còn một phần hard-code",
+  todo: "Cần chuyển tiếp",
+};
+
+const CMS_COVERAGE: CoverageItem[] = [
+  {
+    title: "Header, footer, SEO, liên hệ",
+    detail: "Menu, chân trang, thông tin liên hệ, hero trang chủ và SEO cơ bản đã có màn cấu hình.",
+    href: "/admin/settings",
+    percent: 100,
+    status: "done",
+  },
+  {
+    title: "Ảnh, link, video theo trang",
+    detail: "Các asset chính của Trang chủ, Giới thiệu và Quy trình đã gom vào Quản lý Marketing.",
+    href: "/admin/marketing?tab=assets",
+    percent: 100,
+    status: "done",
+  },
+  {
+    title: "Lịch sử, thành tựu, cộng đồng",
+    detail: "Các cột mốc, chứng nhận, hoạt động cộng đồng đã sửa được từng dòng và từng ảnh.",
+    href: "/admin/marketing?tab=history",
+    percent: 100,
+    status: "done",
+  },
+  {
+    title: "Sản phẩm, bài viết, trang tĩnh",
+    detail: "Dữ liệu chính đã chạy bằng CMS: sản phẩm, tin tức, danh mục, trang tùy chỉnh và SEO bài/trang.",
+    href: "/admin/web-control?focus=content",
+    percent: 95,
+    status: "done",
+  },
+  {
+    title: "Trang chủ",
+    detail: "Hero, sản phẩm, tin tức, ảnh chứng thực đã có dữ liệu động; một số tiêu đề section và CTA phụ vẫn nằm trong code.",
+    href: "/admin/settings",
+    percent: 78,
+    status: "partial",
+  },
+  {
+    title: "Giới thiệu chung và Quy trình",
+    detail: "Ảnh/link chính đã sửa được, nhưng vài headline, đoạn mô tả và block nội dung còn cần đưa tiếp vào cấu hình.",
+    href: "/admin/marketing?tab=assets",
+    percent: 70,
+    status: "partial",
+  },
+  {
+    title: "Theme, hiệu ứng, layout toàn web",
+    detail: "Màu sắc, bo góc, motion và thứ tự section hiện vẫn do code quyết định; muốn full page builder thì cần module riêng.",
+    href: "/admin/web-control",
+    percent: 35,
+    status: "todo",
+  },
+];
+
+const NEXT_ACTIONS = [
+  "Chuyển các headline/đoạn mô tả còn hard-code ở Trang chủ, Giới thiệu chung và Quy trình vào cấu hình CMS.",
+  "Thêm module bật/tắt và sắp xếp section theo từng trang.",
+  "Thêm cấu hình theme toàn web: màu chính, bo góc, shadow, mật độ spacing và motion.",
+  "Thêm preview trước khi lưu cho các khu vực marketing lớn.",
+];
+
 const CONTROL_GROUPS: ControlGroup[] = [
   {
-    title: "Ban dieu khien tong",
-    description: "Cac man hinh de kiem tra suc khoe website, thong tin chung, SEO va cau hinh nen.",
+    title: "Bảng điều khiển tổng",
+    description: "Các màn hình để kiểm tra sức khỏe website, thông tin chung, SEO và cấu hình nền.",
     icon: <LayoutDashboard size={20} />,
     items: [
       {
-        title: "Trung tam he thong",
-        description: "Rao soat DB, env, canh bao du lieu, nhat ky gan day va loi tat quan tri.",
+        title: "Trung tâm hệ thống",
+        description: "Rà soát DB, env, cảnh báo dữ liệu, nhật ký gần đây và lối tắt quản trị.",
         href: "/admin/system",
-        editLabel: "Kiem tra he thong",
-        tags: ["he thong", "db", "log", "canh bao", "tong quan"],
+        editLabel: "Kiểm tra hệ thống",
+        tags: ["hệ thống", "db", "log", "cảnh báo", "tổng quan"],
         status: "system",
         roles: ["ADMIN", "SUPER_ADMIN"],
       },
       {
-        title: "Cau hinh web co ban",
-        description: "Ten website, mo ta, thong tin lien he, SEO mac dinh va cac thiet lap chung.",
+        title: "Cấu hình web cơ bản",
+        description: "Tên website, mô tả, thông tin liên hệ, SEO mặc định và các thiết lập chung.",
         href: "/admin/settings",
-        editLabel: "Sua cau hinh",
-        tags: ["seo", "setting", "website", "lien he", "logo"],
+        editLabel: "Sửa cấu hình",
+        tags: ["seo", "setting", "website", "liên hệ", "logo"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING"],
       },
       {
-        title: "Thu vien anh",
-        description: "Upload, tim va lay anh de gan vao cac khu vuc tren website.",
+        title: "Thư viện ảnh",
+        description: "Upload, tìm và lấy ảnh để gắn vào các khu vực trên website.",
         href: "/admin/media",
-        editLabel: "Quan ly anh",
-        tags: ["anh", "media", "upload", "hinh"],
+        editLabel: "Quản lý ảnh",
+        tags: ["ảnh", "media", "upload", "hình"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR"],
       },
     ],
   },
   {
-    title: "Text va anh theo trang",
-    description: "Cac noi dung dang hien thi tren website duoc gom lai theo dung khu vuc can sua.",
+    title: "Text và ảnh theo trang",
+    description: "Các nội dung đang hiển thị trên website được gom lại theo đúng khu vực cần sửa.",
     icon: <MonitorCog size={20} />,
     items: [
       {
-        title: "Anh va link trang",
-        description: "Sua anh, link, video va cac asset dang gan tren Trang chu, Gioi thieu, Quy trinh.",
+        title: "Ảnh và link trang",
+        description: "Sửa ảnh, link, video và các asset đang gắn trên Trang chủ, Giới thiệu, Quy trình.",
         href: "/admin/marketing?tab=assets",
         publicHref: "/",
-        editLabel: "Sua anh/link",
-        tags: ["trang chu", "gioi thieu", "quy trinh", "anh", "video", "link"],
+        editLabel: "Sửa ảnh/link",
+        tags: ["trang chủ", "giới thiệu", "quy trình", "ảnh", "video", "link"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Lich su phat trien",
-        description: "Them, sua, xoa, sap xep tung cot moc lich su, nam, text chi tiet va anh minh hoa.",
+        title: "Lịch sử phát triển",
+        description: "Thêm, sửa, xóa, sắp xếp từng cột mốc lịch sử, năm, text chi tiết và ảnh minh họa.",
         href: "/admin/marketing?tab=history",
         publicHref: "/gioi-thieu/lich-su",
-        editLabel: "Sua cot moc",
-        tags: ["lich su", "cot moc", "timeline", "nam", "anh"],
+        editLabel: "Sửa cột mốc",
+        tags: ["lịch sử", "cột mốc", "timeline", "năm", "ảnh"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Thanh tuu va uy tin",
-        description: "Sua cac chung nhan, bang chung, thanh tuu, quy trinh sach va cau chuyen thuong hieu.",
+        title: "Thành tựu và uy tín",
+        description: "Sửa các chứng nhận, bằng chứng, thành tựu, quy trình sạch và câu chuyện thương hiệu.",
         href: "/admin/marketing?tab=trust",
         publicHref: "/gioi-thieu/thanh-tuu",
-        editLabel: "Sua thanh tuu",
-        tags: ["thanh tuu", "uy tin", "chung nhan", "phap ly", "anh"],
+        editLabel: "Sửa thành tựu",
+        tags: ["thành tựu", "uy tín", "chứng nhận", "pháp lý", "ảnh"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Cong dong",
-        description: "Sua cac hoat dong thien nguyen, livestream, doi tac va thong diep cong dong.",
+        title: "Cộng đồng",
+        description: "Sửa các hoạt động thiện nguyện, livestream, đối tác và thông điệp cộng đồng.",
         href: "/admin/marketing?tab=community",
         publicHref: "/gioi-thieu/cong-dong",
-        editLabel: "Sua cong dong",
-        tags: ["cong dong", "thien nguyen", "livestream", "doi tac"],
+        editLabel: "Sửa cộng đồng",
+        tags: ["cộng đồng", "thiện nguyện", "livestream", "đối tác"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Trang tinh",
-        description: "Quan ly cac trang noi dung tao bang CMS, slug, trang thai xuat ban va noi dung SEO.",
+        title: "Trang tĩnh",
+        description: "Quản lý các trang nội dung tạo bằng CMS, slug, trạng thái xuất bản và nội dung SEO.",
         href: "/admin/pages",
-        editLabel: "Quan ly trang",
-        tags: ["page", "trang tinh", "noi dung", "seo", "slug"],
+        editLabel: "Quản lý trang",
+        tags: ["page", "trang tĩnh", "nội dung", "seo", "slug"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR", "MARKETING"],
       },
     ],
   },
   {
-    title: "Noi dung va marketing",
-    description: "Bai viet, bao chi, phan hoi, video va cac du lieu truyen thong.",
+    title: "Nội dung và marketing",
+    description: "Bài viết, báo chí, phản hồi, video và các dữ liệu truyền thông.",
     icon: <Megaphone size={20} />,
     items: [
       {
-        title: "Bai viet",
-        description: "Viet bai, sua bai, xuat ban, len lich va quan ly noi dung tin tuc.",
+        title: "Bài viết",
+        description: "Viết bài, sửa bài, xuất bản, lên lịch và quản lý nội dung tin tức.",
         href: "/admin/posts",
         publicHref: "/tin-tuc",
-        editLabel: "Quan ly bai",
-        tags: ["tin tuc", "blog", "bai viet", "seo"],
+        editLabel: "Quản lý bài",
+        tags: ["tin tức", "blog", "bài viết", "seo"],
         status: "ready",
       },
       {
-        title: "Bai cho duyet",
-        description: "Kiem tra va phe duyet cac bai dang cho bien tap vien hoac admin xu ly.",
+        title: "Bài chờ duyệt",
+        description: "Kiểm tra và phê duyệt các bài đang chờ biên tập viên hoặc admin xử lý.",
         href: "/admin/posts/review",
-        editLabel: "Duyet bai",
-        tags: ["duyet bai", "pending", "review"],
+        editLabel: "Duyệt bài",
+        tags: ["duyệt bài", "pending", "review"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR"],
       },
       {
-        title: "Danh muc bai viet",
-        description: "Them, sua, xoa cac danh muc dung cho tin tuc va bai viet.",
+        title: "Danh mục bài viết",
+        description: "Thêm, sửa, xóa các danh mục dùng cho tin tức và bài viết.",
         href: "/admin/categories",
-        editLabel: "Sua danh muc",
-        tags: ["danh muc", "category", "tin tuc"],
+        editLabel: "Sửa danh mục",
+        tags: ["danh mục", "category", "tin tức"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR"],
       },
       {
-        title: "Tu lieu marketing",
-        description: "Bao chi, feedback khach hang, video va cac khoi noi dung truyen thong.",
+        title: "Tư liệu marketing",
+        description: "Báo chí, feedback khách hàng, video và các khối nội dung truyền thông.",
         href: "/admin/marketing",
-        editLabel: "Sua marketing",
-        tags: ["bao chi", "feedback", "video", "marketing"],
+        editLabel: "Sửa marketing",
+        tags: ["báo chí", "feedback", "video", "marketing"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Radar thuong hieu",
-        description: "Theo doi mention, nguon noi dung va viec can doi marketing/CSKH kiem tra.",
+        title: "Radar thương hiệu",
+        description: "Theo dõi mention, nguồn nội dung và việc cần đội marketing/CSKH kiểm tra.",
         href: "/admin/media-intelligence",
-        editLabel: "Mo radar",
-        tags: ["radar", "thuong hieu", "cskh", "mention"],
+        editLabel: "Mở radar",
+        tags: ["radar", "thương hiệu", "cskh", "mention"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
     ],
   },
   {
-    title: "San pham va ban hang",
-    description: "Du lieu san pham, diem ban, kenh online va cac duong dan mua hang.",
+    title: "Sản phẩm và bán hàng",
+    description: "Dữ liệu sản phẩm, điểm bán, kênh online và các đường dẫn mua hàng.",
     icon: <ShoppingBag size={20} />,
     items: [
       {
-        title: "San pham",
-        description: "Them, sua, an hien san pham, gia, anh, mo ta, slug va link mua hang.",
+        title: "Sản phẩm",
+        description: "Thêm, sửa, ẩn hiện sản phẩm, giá, ảnh, mô tả, slug và link mua hàng.",
         href: "/admin/products",
         publicHref: "/san-pham",
-        editLabel: "Quan ly san pham",
-        tags: ["san pham", "gia", "anh", "mua hang", "slug"],
+        editLabel: "Quản lý sản phẩm",
+        tags: ["sản phẩm", "giá", "ảnh", "mua hàng", "slug"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR"],
       },
       {
-        title: "He thong ban",
-        description: "Quan ly diem ban, kenh online, dia chi, trang thai hien thi va link ban hang.",
+        title: "Hệ thống bán",
+        description: "Quản lý điểm bán, kênh online, địa chỉ, trạng thái hiển thị và link bán hàng.",
         href: "/admin/sales-channels",
         publicHref: "/he-thong-ban",
-        editLabel: "Sua diem ban",
-        tags: ["diem ban", "kenh ban", "online", "store"],
+        editLabel: "Sửa điểm bán",
+        tags: ["điểm bán", "kênh bán", "online", "store"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "EDITOR"],
       },
     ],
   },
   {
-    title: "Van hanh va tai khoan",
-    description: "Lien he khach hang, tai khoan quan tri, phan quyen va dau vet thay doi.",
+    title: "Vận hành và tài khoản",
+    description: "Liên hệ khách hàng, tài khoản quản trị, phân quyền và dấu vết thay đổi.",
     icon: <ShieldCheck size={20} />,
     items: [
       {
-        title: "Lien he khach hang",
-        description: "Xem va xu ly form lien he, yeu cau hop tac, tu van tu website.",
+        title: "Liên hệ khách hàng",
+        description: "Xem và xử lý form liên hệ, yêu cầu hợp tác, tư vấn từ website.",
         href: "/admin/contacts",
-        editLabel: "Xu ly lien he",
-        tags: ["lien he", "khach hang", "form", "cskh"],
+        editLabel: "Xử lý liên hệ",
+        tags: ["liên hệ", "khách hàng", "form", "cskh"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"],
       },
       {
-        title: "Thanh vien",
-        description: "Quan ly tai khoan admin, editor, marketing, author va phan quyen truy cap.",
+        title: "Thành viên",
+        description: "Quản lý tài khoản admin, editor, marketing, author và phân quyền truy cập.",
         href: "/admin/users",
-        editLabel: "Quan ly user",
-        tags: ["user", "admin", "phan quyen", "tai khoan"],
+        editLabel: "Quản lý user",
+        tags: ["user", "admin", "phân quyền", "tài khoản"],
         status: "ready",
         roles: ["ADMIN", "SUPER_ADMIN"],
       },
       {
-        title: "Nhat ky hoat dong",
-        description: "Xem ai da sua gi, luc nao, o khu vuc nao trong he quan tri.",
+        title: "Nhật ký hoạt động",
+        description: "Xem ai đã sửa gì, lúc nào, ở khu vực nào trong hệ quản trị.",
         href: "/admin/activity-logs",
-        editLabel: "Xem nhat ky",
-        tags: ["log", "audit", "lich su", "hoat dong"],
+        editLabel: "Xem nhật ký",
+        tags: ["log", "audit", "lịch sử", "hoạt động"],
         status: "system",
         roles: ["ADMIN", "SUPER_ADMIN"],
       },
@@ -265,38 +346,43 @@ const CONTROL_GROUPS: ControlGroup[] = [
 ];
 
 const quickFilters = [
-  { label: "Tat ca", value: "" },
-  { label: "Trang chu", value: "trang chu" },
-  { label: "Anh", value: "anh" },
-  { label: "Lich su", value: "lich su" },
-  { label: "San pham", value: "san pham" },
+  { label: "Tất cả", value: "" },
+  { label: "Trang chủ", value: "trang chủ" },
+  { label: "Ảnh", value: "ảnh" },
+  { label: "Lịch sử", value: "lịch sử" },
+  { label: "Sản phẩm", value: "sản phẩm" },
   { label: "SEO", value: "seo" },
-  { label: "He thong", value: "he thong" },
+  { label: "Hệ thống", value: "hệ thống" },
 ];
 
 const iconByTitle: Record<string, React.ReactNode> = {
-  "Trung tam he thong": <ServerCog size={18} />,
-  "Cau hinh web co ban": <Settings size={18} />,
-  "Thu vien anh": <ImageIcon size={18} />,
-  "Anh va link trang": <Link2 size={18} />,
-  "Lich su phat trien": <Activity size={18} />,
-  "Thanh tuu va uy tin": <ShieldCheck size={18} />,
-  "Cong dong": <Users size={18} />,
-  "Trang tinh": <Globe2 size={18} />,
-  "Bai viet": <Newspaper size={18} />,
-  "Bai cho duyet": <ClipboardList size={18} />,
-  "Danh muc bai viet": <FolderKanban size={18} />,
-  "Tu lieu marketing": <Megaphone size={18} />,
-  "Radar thuong hieu": <Activity size={18} />,
-  "San pham": <Boxes size={18} />,
-  "He thong ban": <Store size={18} />,
-  "Lien he khach hang": <Users size={18} />,
-  "Thanh vien": <Users size={18} />,
-  "Nhat ky hoat dong": <ClipboardList size={18} />,
+  "Trung tâm hệ thống": <ServerCog size={18} />,
+  "Cấu hình web cơ bản": <Settings size={18} />,
+  "Thư viện ảnh": <ImageIcon size={18} />,
+  "Ảnh và link trang": <Link2 size={18} />,
+  "Lịch sử phát triển": <Activity size={18} />,
+  "Thành tựu và uy tín": <ShieldCheck size={18} />,
+  "Cộng đồng": <Users size={18} />,
+  "Trang tĩnh": <Globe2 size={18} />,
+  "Bài viết": <Newspaper size={18} />,
+  "Bài chờ duyệt": <ClipboardList size={18} />,
+  "Danh mục bài viết": <FolderKanban size={18} />,
+  "Tư liệu marketing": <Megaphone size={18} />,
+  "Radar thương hiệu": <Activity size={18} />,
+  "Sản phẩm": <Boxes size={18} />,
+  "Hệ thống bán": <Store size={18} />,
+  "Liên hệ khách hàng": <Users size={18} />,
+  "Thành viên": <Users size={18} />,
+  "Nhật ký hoạt động": <ClipboardList size={18} />,
 };
 
 function normalize(text: string) {
-  return text.toLowerCase().trim();
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .trim();
 }
 
 function itemMatches(item: ControlItem, query: string) {
@@ -327,6 +413,8 @@ export default function AdminWebControlPage() {
     (sum, group) => sum + group.items.filter((item) => item.status === "ready").length,
     0,
   );
+  const averageCoverage = Math.round(CMS_COVERAGE.reduce((sum, item) => sum + item.percent, 0) / CMS_COVERAGE.length);
+  const partialCount = CMS_COVERAGE.filter((item) => item.status !== "done").length;
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"]}>
@@ -336,25 +424,82 @@ export default function AdminWebControlPage() {
             <div>
               <div className="mb-4 inline-flex items-center gap-2 bg-orange-500 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
                 <MonitorCog size={15} />
-                Tong quan quan tri
+                Tổng quan quản trị
               </div>
-              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Tong quan ly website</h1>
+              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Tổng quản lý website</h1>
               <p className="mt-3 max-w-3xl text-sm font-medium leading-6 text-slate-300">
-                Mot noi gom tat ca khu vuc admin hay phai sua: text, anh, link, san pham, bai viet, diem ban, SEO, he thong va nhat ky.
+                Một nơi gom tất cả khu vực admin hay phải sửa: text, ảnh, link, sản phẩm, bài viết, điểm bán, SEO, hệ thống và nhật ký.
               </p>
             </div>
             <div className="grid grid-cols-2 border border-slate-800 bg-slate-900">
               <div className="border-r border-slate-800 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Muc tim thay</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Mục tìm thấy</p>
                 <p className="mt-2 text-3xl font-black text-white">{totalItems}</p>
               </div>
               <div className="p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sua truc tiep</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Sửa trực tiếp</p>
                 <p className="mt-2 text-3xl font-black text-orange-400">{readyItems}</p>
               </div>
             </div>
           </div>
         </div>
+
+        <section className="border border-slate-200 bg-white shadow-sm">
+          <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
+            <div className="border-b border-slate-100 p-5 lg:border-b-0 lg:border-r">
+              <div className="inline-flex h-11 w-11 items-center justify-center bg-orange-50 text-orange-600">
+                <CheckCircle2 size={22} />
+              </div>
+              <h2 className="mt-4 text-xl font-black text-slate-950">Độ phủ quản lý toàn web</h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                Rà soát nhanh khu vực nào admin đã sửa được, khu vực nào còn cần chuyển tiếp từ code sang CMS.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Độ phủ TB</p>
+                  <p className="mt-2 text-3xl font-black text-slate-950">{averageCoverage}%</p>
+                </div>
+                <div className="border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">Cần nâng</p>
+                  <p className="mt-2 text-3xl font-black text-amber-800">{partialCount}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-0 md:grid-cols-2 xl:grid-cols-3">
+              {CMS_COVERAGE.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group border-b border-r border-slate-100 p-5 transition hover:bg-orange-50"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-sm font-black text-slate-950">{item.title}</h3>
+                      <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{item.detail}</p>
+                    </div>
+                    {item.status === "done" ? (
+                      <CheckCircle2 size={18} className="shrink-0 text-emerald-600" />
+                    ) : (
+                      <AlertTriangle size={18} className="shrink-0 text-amber-600" />
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <div className="h-2 w-full bg-slate-100">
+                      <div className={`h-full ${coverageClass[item.status]}`} style={{ width: `${item.percent}%` }} />
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                        {coverageText[item.status]}
+                      </span>
+                      <span className="text-xs font-black text-slate-950">{item.percent}%</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <div className="border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -363,7 +508,7 @@ export default function AdminWebControlPage() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Tim: anh trang chu, lich su, san pham, SEO, lien he..."
+                placeholder="Tìm: ảnh trang chủ, lịch sử, sản phẩm, SEO, liên hệ..."
                 className="h-12 w-full border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-orange-500 focus:bg-white"
               />
             </label>
@@ -388,8 +533,8 @@ export default function AdminWebControlPage() {
 
         {visibleGroups.length === 0 ? (
           <div className="border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-lg font-black text-slate-950">Khong tim thay muc phu hop</p>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Thu tim bang tu ngan hon nhu anh, seo, san pham, lich su.</p>
+            <p className="text-lg font-black text-slate-950">Không tìm thấy mục phù hợp</p>
+            <p className="mt-2 text-sm font-semibold text-slate-500">Thử tìm bằng từ ngắn hơn như ảnh, seo, sản phẩm, lịch sử.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -406,7 +551,7 @@ export default function AdminWebControlPage() {
                     </div>
                   </div>
                   <span className="w-fit border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-600">
-                    {group.items.length} muc
+                    {group.items.length} mục
                   </span>
                 </div>
 
@@ -458,10 +603,17 @@ export default function AdminWebControlPage() {
         )}
 
         <div className="border border-amber-200 bg-amber-50 p-5">
-          <p className="text-sm font-black text-amber-800">Ghi chu de nang cap tiep</p>
-          <p className="mt-2 text-sm font-semibold leading-6 text-amber-700">
-            Trang nay da gom cac chuc nang dang co vao mot noi. De thanh full page builder dung nghia, buoc tiep theo la chuyen cac section con hard-code tren tung trang thanh du lieu CMS co the bat/tat, sap xep va sua inline.
+          <p className="flex items-center gap-2 text-sm font-black text-amber-800">
+            <AlertTriangle size={17} />
+            Việc nên nâng cấp tiếp
           </p>
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
+            {NEXT_ACTIONS.map((action) => (
+              <div key={action} className="border border-amber-200 bg-white/70 p-3 text-sm font-semibold leading-6 text-amber-800">
+                {action}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </ProtectedRoute>
