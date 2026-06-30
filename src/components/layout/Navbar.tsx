@@ -421,7 +421,7 @@ export default function Navbar({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 lg:h-18">
-          <Link href="/" className="flex min-w-[176px] shrink-0 flex-nowrap items-center gap-3 bg-white">
+          <Link href="/" className="flex min-w-[176px] shrink-0 flex-nowrap items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-visible sm:h-14 sm:w-14">
               <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
             </div>
