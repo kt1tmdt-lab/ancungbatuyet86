@@ -1539,7 +1539,7 @@ function FactoryProofSection() {
             description={homeTextValue(homeTexts, "factory_section_description", "Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết.")}
           />
 
-          <div className="mt-8 grid gap-2">
+          <div className="mt-8 grid gap-3">
               {proofs.map((proof, index) => {
                 const Icon = proof.icon;
                 const isActive = activeProofIndex === index;
@@ -1548,20 +1548,21 @@ function FactoryProofSection() {
                     key={`${proof.title}-${index}`}
                     type="button"
                     onClick={() => setActiveProofIndex(index)}
-                    className={`flex items-center gap-4 border p-4 text-left transition ${
+                    className={`group relative flex items-center gap-4 overflow-hidden border px-5 py-4 text-left transition-all duration-300 ${
                       isActive
-                        ? "border-orange-600 bg-orange-600 text-white shadow-[0_16px_35px_rgba(234,88,12,0.18)]"
-                        : "border-orange-100 bg-white text-slate-800 hover:border-orange-300"
+                        ? "border-orange-600 bg-orange-600 text-white shadow-[0_18px_42px_rgba(234,88,12,0.22)]"
+                        : "border-orange-100 bg-white/90 text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.04)] hover:-translate-y-0.5 hover:border-orange-300 hover:bg-white hover:shadow-[0_18px_42px_rgba(15,23,42,0.08)]"
                     }`}
                   >
-                    <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${isActive ? "bg-white text-orange-600" : "bg-orange-50 text-orange-600"}`}>
+                    <span className={`absolute inset-y-0 left-0 w-1 transition-all duration-300 ${isActive ? "bg-white/80" : "bg-orange-500/0 group-hover:bg-orange-500"}`} />
+                    <span className={`flex h-12 w-12 shrink-0 items-center justify-center border transition-all duration-300 ${isActive ? "border-white/25 bg-white text-orange-600" : "border-orange-100 bg-orange-50 text-orange-600 group-hover:border-orange-200 group-hover:bg-orange-100"}`}>
                       <Icon size={20} />
                     </span>
-                    <span>
-                      <span className="block text-[10px] font-black uppercase tracking-[0.16em] opacity-75">
-                        Mục 0{index + 1}
+                    <span className="min-w-0">
+                      <span className={`block text-[10px] font-black uppercase tracking-[0.18em] ${isActive ? "text-white/80" : "text-slate-400 group-hover:text-orange-500"}`}>
+                        Bằng chứng 0{index + 1}
                       </span>
-                      <span className="mt-1 block text-sm font-black">{proof.title}</span>
+                      <span className="mt-1 block text-sm font-black leading-5">{proof.title}</span>
                     </span>
                   </button>
                 );
