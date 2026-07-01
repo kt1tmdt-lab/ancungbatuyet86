@@ -724,8 +724,8 @@ function StatsSection() {
               Những con số tiêu biểu
             </h2>
           </div>
-          <p className="max-w-xl text-xl font-black leading-relaxed text-orange-600 md:text-2xl">
-            &ldquo;Ngon từng miếng, sạch từ quy trình&rdquo;
+          <p className="max-w-2xl font-serif text-2xl italic leading-relaxed text-orange-700 md:text-3xl">
+            &ldquo;Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm&rdquo;
           </p>
         </div>
 
