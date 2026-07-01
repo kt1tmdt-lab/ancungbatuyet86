@@ -476,7 +476,7 @@ function HeroSection() {
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
           >
             <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt, làm chỉn chu cho bữa ăn vặt Việt"}
+            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt, Vì người Việt"}
           </motion.div>
 
           <motion.h1
@@ -528,7 +528,7 @@ function HeroSection() {
             className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
           >
             {[
-              { label: "Không gian sản xuất", value: "Rõ ràng", icon: Factory },
+              { label: "Không gian sản xuất", value: "Quy mô", icon: Factory },
               { label: "Bảo hiểm trách nhiệm sản phẩm", value: "PVI", icon: ShieldCheck },
               { label: "Sản phẩm được phân phối", value: "Toàn quốc", icon: Truck },
             ].map((item) => {
@@ -566,7 +566,7 @@ function HeroSection() {
 
           <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-none bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
             <p className="mt-3 text-lg font-black leading-6 text-slate-950">
-              Ngon từng miếng, sạch từ quy trình.
+            Đừng tin những gì chúng tôi nói, hãy xem những gì chúng tôi làm.
             </p>
           </div>
 
@@ -1363,7 +1363,7 @@ function TrustEvidenceSections() {
               Bằng chứng thương hiệu
             </p>
             <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
-              Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết
+              Vì sao chúng ta nên chọn Ăn Cùng Bà Tuyết?
             </h2>
           </div>
           <Link

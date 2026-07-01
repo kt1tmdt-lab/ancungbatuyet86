@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 
 // Helper to escape CSV values
-function escapeCSV(val: any): string {
+function escapeCSV(val: unknown): string {
   if (val === null || val === undefined) return "";
   let str = "";
   if (typeof val === "object") {
@@ -29,6 +29,17 @@ export async function GET(req: NextRequest) {
     const products = await prisma.product.findMany({
       orderBy: { sortOrder: "asc" },
     });
+    const totalProducts = products.length;
+    const categoryTotals = products.reduce<Record<string, number>>((totals, product) => {
+      const key = product.categoryLabel || product.category || "Khác";
+      totals[key] = (totals[key] || 0) + 1;
+      return totals;
+    }, {});
+    const statusTotals = products.reduce<Record<string, number>>((totals, product) => {
+      const key = product.status || "UNKNOWN";
+      totals[key] = (totals[key] || 0) + 1;
+      return totals;
+    }, {});
 
     const headers = [
       "id",
@@ -49,11 +60,15 @@ export async function GET(req: NextRequest) {
       "status",
       "sortOrder",
       "shortDescription",
+      "soThuTuCongDon",
+      "tongSanPham",
+      "tongTheoDanhMuc",
+      "tongTheoTrangThai",
     ];
 
     const csvRows = [headers.join(",")];
 
-    for (const p of products) {
+    for (const [index, p] of products.entries()) {
       const row = [
         escapeCSV(p.id),
         escapeCSV(p.slug),
@@ -73,6 +88,10 @@ export async function GET(req: NextRequest) {
         escapeCSV(p.status),
         escapeCSV(p.sortOrder),
         escapeCSV(p.shortDescription),
+        escapeCSV(index + 1),
+        escapeCSV(totalProducts),
+        escapeCSV(categoryTotals[p.categoryLabel || p.category || "Khác"] || 0),
+        escapeCSV(statusTotals[p.status] || 0),
       ];
       csvRows.push(row.join(","));
     }
