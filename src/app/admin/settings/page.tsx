@@ -18,6 +18,8 @@ import {
   Clock, 
   Plus, 
   Trash2,
+  ArrowUp,
+  ArrowDown,
   Settings,
   Share2,
   Users,
@@ -123,12 +125,12 @@ export default function SettingsPage() {
   const { control, register, handleSubmit, reset, setValue, getValues, formState: { errors } } = form;
 
   // Field arrays for menus
-  const { fields: navbarFields, append: appendNavbar, remove: removeNavbar } = useFieldArray({
+  const { fields: navbarFields, append: appendNavbar, remove: removeNavbar, move: moveNavbar } = useFieldArray({
     control,
     name: "navbarLinks",
   });
 
-  const { fields: productMenuFields, append: appendProductMenu, remove: removeProductMenu } = useFieldArray({
+  const { fields: productMenuFields, append: appendProductMenu, remove: removeProductMenu, move: moveProductMenu } = useFieldArray({
     control,
     name: "productMenuLinks",
   });
@@ -667,6 +669,26 @@ export default function SettingsPage() {
                                 className="border border-slate-350 p-2 text-xs font-semibold outline-none focus:border-orange-500"
                               />
                             </div>
+                            <div className="flex border border-slate-200">
+                              <button
+                                type="button"
+                                onClick={() => moveNavbar(idx, idx - 1)}
+                                disabled={idx === 0}
+                                className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+                                aria-label="Đưa mục menu lên trên"
+                              >
+                                <ArrowUp size={14} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveNavbar(idx, idx + 1)}
+                                disabled={idx === navbarFields.length - 1}
+                                className="border-l border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+                                aria-label="Đưa mục menu xuống dưới"
+                              >
+                                <ArrowDown size={14} />
+                              </button>
+                            </div>
                             <button
                               type="button"
                               onClick={() => removeNavbar(idx)}
@@ -719,7 +741,7 @@ export default function SettingsPage() {
                           const selectedLabel = selectedItem?.label || "";
 
                           return (
-                            <div key={field.id} className="grid grid-cols-1 lg:grid-cols-[32px_1fr_220px_40px] gap-3 items-center">
+                            <div key={field.id} className="grid grid-cols-1 lg:grid-cols-[32px_1fr_220px_82px_40px] gap-3 items-center">
                               <span className="text-xs font-bold text-slate-400">#{idx + 1}</span>
                               <div>
                                 <select
@@ -747,6 +769,26 @@ export default function SettingsPage() {
                                 placeholder="Ghi chú nhỏ"
                                 className="border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
                               />
+                              <div className="flex border border-slate-200">
+                                <button
+                                  type="button"
+                                  onClick={() => moveProductMenu(idx, idx - 1)}
+                                  disabled={idx === 0}
+                                  className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+                                  aria-label="Đưa sản phẩm lên trên"
+                                >
+                                  <ArrowUp size={14} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => moveProductMenu(idx, idx + 1)}
+                                  disabled={idx === productMenuFields.length - 1}
+                                  className="border-l border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
+                                  aria-label="Đưa sản phẩm xuống dưới"
+                                >
+                                  <ArrowDown size={14} />
+                                </button>
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => removeProductMenu(idx)}

@@ -67,13 +67,11 @@ declare global {
 function mergeRequiredNavLinks(links: { href: string; label: string }[] | undefined) {
   if (!Array.isArray(links) || links.length === 0) return DEFAULT_NAV_LINKS;
 
-  const byHref = new Map(links.map((item) => [item.href, item]));
-  return DEFAULT_NAV_LINKS.map((requiredItem) => ({
-    ...requiredItem,
-    ...(byHref.get(requiredItem.href) || {}),
-  })).concat(
-    links.filter((item) => !DEFAULT_NAV_LINKS.some((requiredItem) => requiredItem.href === item.href)),
-  );
+  const configuredLinks = links.filter((item) => item.href && item.label);
+  const configuredHrefs = new Set(configuredLinks.map((item) => item.href));
+  const missingRequiredLinks = DEFAULT_NAV_LINKS.filter((item) => !configuredHrefs.has(item.href));
+
+  return [...configuredLinks, ...missingRequiredLinks];
 }
 
 function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
@@ -545,33 +543,23 @@ export default function Navbar({
               <Search size={20} />
             </button>
 
-            <div className="hidden sm:flex items-center gap-2 rounded-full bg-slate-50/50 p-1">
-              <button
-                type="button"
-                onClick={() => handleLanguageChange("vi")}
-                className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
-                  language === "vi" 
-                    ? "scale-110 shadow-sm" 
-                    : "opacity-45 hover:opacity-100 hover:scale-105"
-                }`}
-                aria-pressed={language === "vi"}
-                title="Tiếng Việt"
-              >
-                <VnFlag className="h-7 w-7" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLanguageChange("en")}
-                className={`flex h-8 w-8 items-center justify-center rounded-full p-0 transition-all duration-300 cursor-pointer ${
-                  language === "en" 
-                    ? "scale-110 shadow-sm" 
-                    : "opacity-45 hover:opacity-100 hover:scale-105"
-                }`}
-                aria-pressed={language === "en"}
-                title="English"
-              >
-                <EnFlag className="h-7 w-7" />
-              </button>
+            <div className="hidden items-center border border-slate-200 bg-white p-0.5 shadow-sm sm:flex">
+              {(["vi", "en"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => handleLanguageChange(item)}
+                  className={`h-8 px-3 text-[11px] font-black uppercase tracking-[0.12em] transition ${
+                    language === item
+                      ? "bg-slate-950 text-white"
+                      : "text-slate-500 hover:bg-orange-50 hover:text-orange-700"
+                  }`}
+                  aria-pressed={language === item}
+                  title={item === "vi" ? "Tiếng Việt" : "English"}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
 
             <Button
@@ -711,31 +699,21 @@ export default function Navbar({
             >
               {phone}
             </Button>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => handleLanguageChange("vi")}
-                className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
-                  language === "vi" 
-                    ? "bg-orange-50 border-transparent text-orange-700 font-extrabold shadow-sm" 
-                    : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
-                }`}
-              >
-                <VnFlag className="h-6 w-6" />
-                Tiếng Việt
-              </button>
-              <button
-                type="button"
-                onClick={() => handleLanguageChange("en")}
-                className={`flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-bold border transition-all duration-300 rounded-xl cursor-pointer ${
-                  language === "en" 
-                    ? "bg-orange-50 border-transparent text-orange-700 font-extrabold shadow-sm" 
-                    : "bg-white border-slate-100 text-slate-650 hover:bg-slate-50"
-                }`}
-              >
-                <EnFlag className="h-6 w-6" />
-                English
-              </button>
+            <div className="mt-3 grid grid-cols-2 border border-slate-200 bg-white p-1">
+              {(["vi", "en"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => handleLanguageChange(item)}
+                  className={`px-4 py-3 text-sm font-black uppercase tracking-[0.12em] transition ${
+                    language === item
+                      ? "bg-slate-950 text-white"
+                      : "text-slate-500 hover:bg-orange-50 hover:text-orange-700"
+                  }`}
+                >
+                  {item === "vi" ? "VI" : "EN"}
+                </button>
+              ))}
             </div>
           </nav>
         </div>
