@@ -596,9 +596,15 @@ function HeroSection() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65 }}
-          className="relative z-10 min-h-[700px] overflow-visible sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
+          className={`relative z-10 overflow-visible ${
+            showHeroProducts
+              ? "min-h-[700px] sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
+              : "min-h-[560px] sm:min-h-[600px] lg:min-h-[640px] xl:min-h-[680px]"
+          }`}
         >
-          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]">
+          <div className={`absolute left-1/2 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] xl:h-[520px] xl:w-[520px] ${
+            showHeroProducts ? "top-[8%] lg:top-[9%]" : "top-[14%] lg:top-[10%]"
+          }`}>
             <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
           </div>
           <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-orange-300/60 bg-orange-100/30 xl:block" />
@@ -622,7 +628,9 @@ function HeroSection() {
           <img
             src={heroBanner.characterImage}
             alt={heroBanner.characterAlt}
-            className="absolute left-1/2 top-[8%] z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] lg:top-[8%] xl:top-[7%] xl:h-[500px]"
+            className={`absolute left-1/2 z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
+              showHeroProducts ? "top-[8%] lg:top-[8%] xl:top-[7%]" : "top-[14%] lg:top-[10%] xl:top-[9%]"
+            }`}
           />
 
           {showHeroProducts && (
