@@ -45,7 +45,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Chỉnh sửa sản phẩm</h1>
-          <p className="text-slate-500 text-sm mt-1">Cập nhật thông tin chi tiết và liên kết sàn TMĐT của sản phẩm.</p>
+          <p className="text-slate-500 text-sm mt-1">Cập nhật hồ sơ giới thiệu, hình ảnh, quy cách và nội dung chi tiết của sản phẩm.</p>
         </div>
 
         {loading ? (

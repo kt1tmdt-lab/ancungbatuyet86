@@ -17,12 +17,12 @@ interface ProductData {
   description: string;
   category: string;
   categoryLabel: string;
-  price: string;
-  priceRange: string;
+  price?: string;
+  priceRange?: string;
   image: string;
   heroImage: string;
   featured: boolean;
-  purchaseUrl: string;
+  purchaseUrl?: string;
   ingredients: string[];
   specs?: { label: string; value: string }[];
   variants?: { name: string; weight: string; price: string; spiceLevel?: number }[];
@@ -41,11 +41,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "chan-ga");
   const [categoryLabel, setCategoryLabel] = useState(initialData?.categoryLabel || "Chân Gà");
-  const [price, setPrice] = useState(initialData?.price || "");
-  const [priceRange, setPriceRange] = useState(initialData?.priceRange || "");
   const [image, setImage] = useState(initialData?.image || "");
   const [heroImage, setHeroImage] = useState(initialData?.heroImage || "");
-  const [purchaseUrl, setPurchaseUrl] = useState(initialData?.purchaseUrl || "");
   const [featured, setFeatured] = useState(initialData?.featured || false);
   const [status, setStatus] = useState(initialData?.status || "PUBLISHED");
   const [sortOrder, setSortOrder] = useState(initialData?.sortOrder || 0);
@@ -66,7 +63,6 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   >(initialData?.variants || []);
   const [newVariantName, setNewVariantName] = useState("");
   const [newVariantWeight, setNewVariantWeight] = useState("");
-  const [newVariantPrice, setNewVariantPrice] = useState("");
   const [newVariantSpice, setNewVariantSpice] = useState(0);
 
   // Process steps state
@@ -170,12 +166,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       description,
       category,
       categoryLabel,
-      price,
-      priceRange: priceRange || price,
+      price: initialData?.price || "",
+      priceRange: initialData?.priceRange || null,
       image,
       heroImage: heroImage || image,
       featured,
-      purchaseUrl,
+      purchaseUrl: initialData?.purchaseUrl || "",
       ingredients,
       specs,
       variants,
@@ -309,42 +305,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               />
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Đơn giá hiển thị</label>
-                <input
-                  type="text"
-                  required
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Ví dụ: 89.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Khoảng giá</label>
-                <input
-                  type="text"
-                  value={priceRange}
-                  onChange={(e) => setPriceRange(e.target.value)}
-                  placeholder="Ví dụ: 45.000đ - 139.000đ"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Link mua hàng sàn TMĐT (Shopee/TikTok Shop)</label>
-              <input
-                type="url"
-                required
-                value={purchaseUrl}
-                onChange={(e) => setPurchaseUrl(e.target.value)}
-                placeholder="Ví dụ: https://shopee.vn/an-vat-ba-tuyet-chan-ga"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-              />
-              <p className="text-[11px] text-slate-400 mt-1">Khi khách hàng nhấn "Mua ngay" trên web sẽ tự động mở tab mới dẫn đến link này.</p>
+            <div className="border border-orange-100 bg-orange-50/60 p-4 text-sm leading-6 text-orange-900">
+              Website đang dùng sản phẩm như hồ sơ giới thiệu/landing page, nên form này không yêu cầu giá bán hoặc link mua hàng.
             </div>
           </div>
 
@@ -421,13 +383,6 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 placeholder="Trọng lượng (ví dụ: 52g)"
                 className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
-              <input
-                type="text"
-                value={newVariantPrice}
-                onChange={(e) => setNewVariantPrice(e.target.value)}
-                placeholder="Giá (ví dụ: 45.000đ)"
-                className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-              />
               <div className="flex gap-3">
                 <select
                   value={newVariantSpice}
@@ -442,19 +397,18 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 <button
                   type="button"
                   onClick={() => {
-                    if (newVariantName.trim() && newVariantPrice.trim()) {
+                    if (newVariantName.trim()) {
                       setVariants([
                         ...variants,
                         {
                           name: newVariantName.trim(),
                           weight: newVariantWeight.trim(),
-                          price: newVariantPrice.trim(),
+                          price: "",
                           spiceLevel: newVariantSpice,
                         },
                       ]);
                       setNewVariantName("");
                       setNewVariantWeight("");
-                      setNewVariantPrice("");
                       setNewVariantSpice(0);
                     }
                   }}
@@ -473,7 +427,9 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   <div key={idx} className="flex items-center justify-between p-3 bg-white hover:bg-slate-50 transition">
                     <div className="text-sm">
                       <p className="font-bold text-slate-900">{v.name} {v.weight && `(${v.weight})`}</p>
-                      <p className="text-xs text-primary-dark font-semibold mt-0.5">{v.price} {v.spiceLevel ? `| 🔥 x ${v.spiceLevel}` : ""}</p>
+                      {v.spiceLevel ? (
+                        <p className="text-xs text-primary-dark font-semibold mt-0.5">Độ cay: 🔥 x {v.spiceLevel}</p>
+                      ) : null}
                     </div>
                     <button
                       type="button"
@@ -665,8 +621,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 onChange={(e) => setStatus(e.target.value)}
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               >
-                <option value="PUBLISHED">Hiển thị (Đang bán)</option>
-                <option value="DRAFT">Ẩn (Bản nháp/Ngừng bán)</option>
+                <option value="PUBLISHED">Hiển thị trên website</option>
+                <option value="DRAFT">Ẩn khỏi website</option>
               </select>
             </div>
 

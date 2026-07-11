@@ -14,10 +14,8 @@ interface Product {
   name: string;
   slug: string;
   categoryLabel: string;
-  price: string;
   image: string;
   featured: boolean;
-  purchaseUrl: string;
   status: string;
   sortOrder: number;
 }
@@ -164,11 +162,6 @@ export default function AdminProductsPage() {
           {row.original.categoryLabel}
         </span>
       )
-    },
-    {
-      accessorKey: "price",
-      header: "Đơn giá",
-      cell: ({ row }) => <span className="font-semibold text-slate-900">{row.original.price}</span>
     },
     {
       accessorKey: "status",
