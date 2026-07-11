@@ -446,6 +446,7 @@ function buildConfiguredNewsEvidenceItems(items: HomeNewsItem[]) {
 // 1. HERO SECTION - BRAND STORY STYLE
 // ==========================================
 function HeroSection() {
+  const { homeSections } = useHomeMarketingConfig();
   const [products, setProducts] = useState<HeroProduct[]>(
     showcaseHeroProductsFallback,
   );
@@ -496,11 +497,12 @@ function HeroSection() {
     activeProduct?.orbitImage || getProductImage(activeProduct);
   const brandName = "Ăn Cùng Bà Tuyết";
   const heroTitle = heroBanner.title || DEFAULT_SITE_CONFIG.heroBanner.title;
+  const showHeroProducts = homeSectionEnabled(homeSections, "hero_products");
 
   return (
     <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
       <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#166534_100%)]" />
-      <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-green-50/55 lg:block" />
+      <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-orange-100/70 lg:block" />
       <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-red-200/25 blur-3xl" />
       <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-red-300/20 blur-3xl" />
       <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-red-300/50 xl:block" />
@@ -623,74 +625,78 @@ function HeroSection() {
             className="absolute left-1/2 top-[8%] z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] lg:top-[8%] xl:top-[7%] xl:h-[500px]"
           />
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={getProductKey(activeProduct)}
-              initial={{ opacity: 0, y: 26, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18, scale: 0.96 }}
-              transition={{ duration: 0.35 }}
-              className="absolute bottom-32 left-1/2 z-30 w-[min(100%,440px)] -translate-x-1/2 rounded-[1.7rem] bg-white/94 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur sm:bottom-36 sm:w-[min(100%,500px)] xl:bottom-40 xl:w-[min(92vw,530px)]"
-            >
-              <div className="grid gap-4 sm:grid-cols-[125px_1fr] sm:items-center xl:grid-cols-[145px_1fr]">
-                <div className="rounded-[1.2rem] bg-orange-50 p-4">
-                  {activeImage ? (
-                    <img
-                      src={activeImage}
-                      alt={activeProduct?.name || "Sản phẩm"}
-                      className="h-24 w-full object-contain xl:h-28"
-                    />
-                  ) : (
-                    <div className="flex h-28 items-center justify-center text-2xl font-black text-orange-500">
-                      BT
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
-                    Sản phẩm đại diện
-                  </p>
-                  <h3 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.04em] text-slate-950 xl:text-2xl">
-                    {activeProduct?.name}
-                  </h3>
-                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-                    {activeProduct?.tagline}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          <div className="absolute bottom-3 left-1/2 z-40 flex w-full -translate-x-1/2 gap-2 overflow-x-auto rounded-[1.4rem] bg-white/95 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur sm:bottom-4 xl:w-[min(94vw,680px)]">
-            {displayProducts.map((product) => {
-              const isActive =
-                getProductKey(activeProduct) === getProductKey(product);
-              const image = product.orbitImage || getProductImage(product);
-              return (
-                <button
-                  key={getProductKey(product)}
-                  type="button"
-                  onMouseEnter={() => setActiveProduct(product)}
-                  onFocus={() => setActiveProduct(product)}
-                  onClick={() => setActiveProduct(product)}
-                  className={`min-w-[118px] rounded-[1rem] border p-2 text-left transition-all ${isActive ? "border-orange-600 bg-orange-600 text-white shadow-[0_14px_30px_rgba(234,88,12,0.24)]" : "border-orange-100 bg-white text-slate-950 hover:border-orange-300"}`}
+          {showHeroProducts && (
+            <>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={getProductKey(activeProduct)}
+                  initial={{ opacity: 0, y: 26, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -18, scale: 0.96 }}
+                  transition={{ duration: 0.35 }}
+                  className="absolute bottom-32 left-1/2 z-30 w-[min(100%,440px)] -translate-x-1/2 rounded-[1.7rem] bg-white/94 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur sm:bottom-36 sm:w-[min(100%,500px)] xl:bottom-40 xl:w-[min(92vw,530px)]"
                 >
-                  <div className="mb-2 h-12 rounded-xl bg-white/80 p-1">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={product.name || "Sản phẩm"}
-                        className="h-full w-full object-contain"
-                      />
-                    ) : null}
+                  <div className="grid gap-4 sm:grid-cols-[125px_1fr] sm:items-center xl:grid-cols-[145px_1fr]">
+                    <div className="rounded-[1.2rem] bg-orange-50 p-4">
+                      {activeImage ? (
+                        <img
+                          src={activeImage}
+                          alt={activeProduct?.name || "Sản phẩm"}
+                          className="h-24 w-full object-contain xl:h-28"
+                        />
+                      ) : (
+                        <div className="flex h-28 items-center justify-center text-2xl font-black text-orange-500">
+                          BT
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
+                        Sản phẩm đại diện
+                      </p>
+                      <h3 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.04em] text-slate-950 xl:text-2xl">
+                        {activeProduct?.name}
+                      </h3>
+                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                        {activeProduct?.tagline}
+                      </p>
+                    </div>
                   </div>
-                  <p className="line-clamp-2 text-[10px] font-black leading-4">
-                    {product.name}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="absolute bottom-3 left-1/2 z-40 flex w-full -translate-x-1/2 gap-2 overflow-x-auto rounded-[1.4rem] bg-white/95 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur sm:bottom-4 xl:w-[min(94vw,680px)]">
+                {displayProducts.map((product) => {
+                  const isActive =
+                    getProductKey(activeProduct) === getProductKey(product);
+                  const image = product.orbitImage || getProductImage(product);
+                  return (
+                    <button
+                      key={getProductKey(product)}
+                      type="button"
+                      onMouseEnter={() => setActiveProduct(product)}
+                      onFocus={() => setActiveProduct(product)}
+                      onClick={() => setActiveProduct(product)}
+                      className={`min-w-[118px] rounded-[1rem] border p-2 text-left transition-all ${isActive ? "border-orange-600 bg-orange-600 text-white shadow-[0_14px_30px_rgba(234,88,12,0.24)]" : "border-orange-100 bg-white text-slate-950 hover:border-orange-300"}`}
+                    >
+                      <div className="mb-2 h-12 rounded-xl bg-white/80 p-1">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt={product.name || "Sản phẩm"}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : null}
+                      </div>
+                      <p className="line-clamp-2 text-[10px] font-black leading-4">
+                        {product.name}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </motion.div>
       </div>
     </section>

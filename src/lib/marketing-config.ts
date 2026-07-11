@@ -44,7 +44,7 @@ export type HomeTextItem = {
 
 export type HomeSectionItem = {
   id: string;
-  key: "process" | "brand_story";
+  key: "hero_products" | "process" | "brand_story";
   label: string;
   description: string;
   enabled: boolean;
@@ -369,6 +369,14 @@ export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
 ];
 
 export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
+  {
+    id: "home-section-hero-products",
+    key: "hero_products",
+    label: "Sản phẩm đại diện trong hero",
+    description: "Ẩn/hiện card sản phẩm đại diện và dãy chọn sản phẩm ở đầu trang chủ.",
+    enabled: true,
+    sortOrder: 5,
+  },
   {
     id: "home-section-process",
     key: "process",
@@ -777,7 +785,14 @@ function normalizeHomeSections(input: unknown): HomeSectionItem[] {
   return input
     .map((item, index) => {
       if (!isRecord(item)) return null;
-      const key = item.key === "brand_story" ? "brand_story" : item.key === "process" ? "process" : null;
+      const key =
+        item.key === "hero_products"
+          ? "hero_products"
+          : item.key === "brand_story"
+            ? "brand_story"
+            : item.key === "process"
+              ? "process"
+              : null;
       const label = stringValue(item.label);
       const description = stringValue(item.description);
       const sortOrder = Number.isFinite(Number(item.sortOrder))
