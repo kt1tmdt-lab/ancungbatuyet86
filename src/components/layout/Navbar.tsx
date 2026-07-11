@@ -444,7 +444,7 @@ export default function Navbar({
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               if (link.href === "/san-pham") {
                 const isProductsActive = pathname.startsWith("/san-pham");
@@ -593,19 +593,9 @@ export default function Navbar({
               )}
             </div>
 
-            <Button
-              href={phoneHref}
-              variant="primary"
-              size="sm"
-              className="hidden md:flex"
-              leftIcon={<Phone size={14} />}
-            >
-              {phone}
-            </Button>
-
             <button
               onClick={() => setOpen(!open)}
-              className="acbt-icon-btn p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark md:hidden"
+              className="acbt-icon-btn p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark lg:hidden"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
@@ -615,7 +605,7 @@ export default function Navbar({
       </div>
 
       {open && (
-        <div className="bg-white border-t border-gray-100 shadow-lg md:hidden">
+        <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
               if (link.href === "/san-pham") {

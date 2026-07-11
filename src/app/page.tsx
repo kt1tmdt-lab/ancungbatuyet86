@@ -601,9 +601,10 @@ function HeroSection() {
           </div>
           <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-red-300/60 bg-red-100/30 xl:block" />
 
-          <div className="absolute left-0 top-[27%] z-30 hidden w-fit min-w-0 max-w-[min(18rem,42vw)] rounded-none bg-white/92 px-4 py-3 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
-            <p className="text-[clamp(0.9rem,1.05vw,1.1rem)] font-black leading-snug text-slate-950">
-            {heroBanner.quote}
+          <div className="absolute left-0 top-[27%] z-30 hidden w-fit min-w-0 max-w-[min(20rem,42vw)] -rotate-2 border border-orange-100 bg-white/88 px-5 py-4 shadow-[10px_12px_0_rgba(234,88,12,0.16),0_26px_70px_rgba(15,23,42,0.12)] backdrop-blur xl:block">
+            <div className="mb-2 h-1 w-12 bg-orange-500" />
+            <p className="font-[var(--font-script)] text-[clamp(1.25rem,1.45vw,1.75rem)] font-bold italic leading-tight tracking-[-0.03em] text-orange-700">
+              {heroBanner.quote}
             </p>
           </div>
 
@@ -754,6 +755,9 @@ function StatsSection() {
       <div className="w-full">
         <div className="border-b border-orange-100 px-5 py-8 sm:px-8 lg:px-16">
           <div>
+            <p className="mb-3 inline-block -rotate-1 font-[var(--font-script)] text-3xl font-bold italic tracking-[-0.04em] text-primary drop-shadow-[0_10px_22px_rgba(234,88,12,0.14)] sm:text-4xl">
+              Ăn Cùng Bà Tuyết
+            </p>
             <h2 className="text-4xl font-black tracking-[-0.04em] text-slate-950">
               Những con số tiêu biểu
             </h2>
