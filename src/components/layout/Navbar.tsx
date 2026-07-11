@@ -74,12 +74,11 @@ function mergeRequiredNavLinks(links: { href: string; label: string }[] | undefi
   return [...configuredLinks, ...missingRequiredLinks];
 }
 
-type LanguageCode = "vi" | "en" | "ru";
+type LanguageCode = "vi" | "en";
 
 const LANGUAGE_OPTIONS: { code: LanguageCode; label: string; shortLabel: string }[] = [
   { code: "vi", label: "Vietnamese", shortLabel: "VN" },
   { code: "en", label: "English", shortLabel: "EN" },
-  { code: "ru", label: "Russian", shortLabel: "RU" },
 ];
 
 function VnFlag({ className = "w-4 h-3" }: { className?: string }) {
@@ -107,21 +106,8 @@ function EnFlag({ className = "w-4 h-3" }: { className?: string }) {
   );
 }
 
-function RuFlag({ className = "w-4 h-3" }: { className?: string }) {
-  return (
-    <span className={`${className} inline-flex overflow-hidden border border-slate-200 shadow-sm`}>
-      <svg viewBox="0 0 30 20" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
-        <rect width="30" height="20" y="0" fill="#ffffff" />
-        <rect width="30" height="20" y="6.66" fill="#0039a6" />
-        <rect width="30" height="20" y="13.33" fill="#d52b1e" />
-      </svg>
-    </span>
-  );
-}
-
 function LanguageFlag({ code, className }: { code: LanguageCode; className?: string }) {
   if (code === "en") return <EnFlag className={className} />;
-  if (code === "ru") return <RuFlag className={className} />;
   return <VnFlag className={className} />;
 }
 
@@ -303,7 +289,7 @@ export default function Navbar({
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const savedLanguage = window.localStorage.getItem("acbt-language");
-      if (savedLanguage === "en" || savedLanguage === "vi" || savedLanguage === "ru") {
+      if (savedLanguage === "en" || savedLanguage === "vi") {
         setLanguage(savedLanguage);
       }
     }, 0);
@@ -435,7 +421,7 @@ export default function Navbar({
           window.googleTranslateElementInit = function () {
             new window.google.translate.TranslateElement({
               pageLanguage: 'vi',
-              includedLanguages: 'vi,en,ru',
+              includedLanguages: 'vi,en',
               autoDisplay: false
             }, 'google_translate_element');
           };
@@ -744,7 +730,7 @@ export default function Navbar({
             >
               {phone}
             </Button>
-            <div className="mt-3 grid grid-cols-3 border border-slate-200 bg-white p-1">
+            <div className="mt-3 grid grid-cols-2 border border-slate-200 bg-white p-1">
               {LANGUAGE_OPTIONS.map((item) => (
                 <button
                   key={item.code}
