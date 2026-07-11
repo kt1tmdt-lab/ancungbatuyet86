@@ -862,17 +862,21 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
     <motion.div
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -10 }}
+      whileHover={{ y: -8 }}
       viewport={{ once: true, margin: "-70px" }}
       transition={{ duration: 0.55, delay: index * 0.08 }}
       className="h-full"
     >
       <Link
         href={href}
-        className="group block h-full overflow-hidden border-r border-b border-orange-100 bg-white shadow-sm outline-none transition-all duration-300 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] focus-visible:border-orange-400"
+        className="group relative block h-full overflow-hidden border border-slate-950 bg-white shadow-[10px_10px_0_rgba(15,23,42,0.08)] outline-none transition-all duration-300 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[16px_16px_0_rgba(234,88,12,0.22)] focus-visible:border-orange-500"
       >
-        <div className="relative overflow-hidden bg-[#fff8ed] p-5 lg:p-7">
-          <div className="relative aspect-[4/3] overflow-hidden bg-white p-5 lg:p-7">
+        <div className="absolute left-0 top-0 z-40 bg-slate-950 px-3 py-2 text-xs font-black text-white">
+          0{index + 1}
+        </div>
+
+        <div className="relative overflow-hidden border-b border-slate-950 bg-[linear-gradient(135deg,#fff7ed_0%,#fff_48%,#f0fdf4_100%)] p-5 lg:p-7">
+          <div className="relative aspect-[4/3] overflow-hidden border border-orange-200 bg-white p-5 lg:p-7">
             {image ? (
               <img
                 src={image}
@@ -888,7 +892,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             <div className="pointer-events-none absolute inset-0 z-20 flex translate-y-full items-end bg-orange-600/95 p-6 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-focus-visible:translate-y-0">
               <div className="translate-y-5 opacity-0 transition-all delay-100 duration-500 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
                 <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]">
-                  Xem sản phẩm
+                  Tìm hiểu sản phẩm
                   <ArrowRight
                     size={14}
                     className="transition-transform group-hover:translate-x-1"
@@ -896,28 +900,23 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 </span>
                 <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-orange-50">
                   {product.tagline ||
-                    "Xem chi tiết sản phẩm, giá bán và kênh mua hàng chính hãng."}
+                    "Tìm hiểu hương vị, bao bì và câu chuyện phía sau sản phẩm."}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="absolute left-5 top-5 z-30 flex gap-2">
-            <span className="bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-sm">
+            <span className="border border-orange-200 bg-white/95 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700 shadow-sm">
               {product.categoryLabel || "Ăn vặt"}
-            </span>
-            <span className="bg-green-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-sm">
-              Có sẵn
             </span>
           </div>
         </div>
 
         <div className="p-6">
-          <div className="mb-3 flex items-center gap-1 text-amber-500">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={15} fill="currentColor" />
-            ))}
-          </div>
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
+            Sản phẩm đại diện
+          </p>
 
           <h3 className="line-clamp-1 text-xl font-black tracking-[-0.03em] text-slate-950 transition-colors group-hover:text-orange-600">
             {product.name || "Sản phẩm nổi bật"}
@@ -925,16 +924,16 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 
           <p className="mt-2 line-clamp-2 min-h-[48px] text-sm leading-6 text-slate-600">
             {product.tagline ||
-              "Món ăn vặt đóng gói chỉn chu, vị ngon rõ ràng và phù hợp bán lẻ toàn quốc."}
+              "Món ăn vặt đóng gói chỉn chu, vị ngon rõ ràng và có thông tin sản phẩm minh bạch."}
           </p>
 
           <div className="mt-5 flex items-center justify-between border-t border-orange-100 pt-5">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                Giá từ
+                Câu chuyện sản phẩm
               </p>
               <p className="text-lg font-black text-slate-950">
-                Xem chi tiết sản phẩm
+                Xem chi tiết
               </p>
             </div>
 
@@ -972,34 +971,12 @@ function FeaturedProducts() {
     return fromDb.length > 0 ? fromDb : showcaseHeroProductsFallback;
   }, [featuredProducts]);
 
-  const loopProducts = useMemo(() => {
-    let repeated = [...displayProducts];
-    if (repeated.length > 0) {
-      while (repeated.length < 10) {
-        repeated = [...repeated, ...displayProducts];
-      }
-    }
-    return repeated;
-  }, [displayProducts]);
+  const showcaseProducts = useMemo(() => displayProducts.slice(0, 4), [displayProducts]);
 
   return (
-    <section className="relative overflow-hidden bg-white py-12">
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        @keyframes marqueeScroll {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(calc(-50% - 12px)); }
-        }
-        .marquee-container:hover .marquee-track-animation {
-          animation-play-state: paused;
-        }
-      `,
-        }}
-      />
-
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fff7ed_52%,#ffffff_100%)] py-16">
       <div className="w-full px-5 sm:px-8 lg:px-16">
-        <div className="flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
+        <div className="relative flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
           <SectionTitle
             label={homeTextValue(homeTexts, "products_section_label", "Sản phẩm chủ lực")}
             title={homeTextValue(homeTexts, "products_section_title", "Sản phẩm nổi bật")}
@@ -1012,11 +989,11 @@ function FeaturedProducts() {
             variant="white"
             className="w-fit rounded-none px-5 py-3 text-orange-700"
           >
-            Xem tất cả sản phẩm
+            Xem câu chuyện sản phẩm
           </CurtainAction>
         </div>
 
-        <div className="relative mt-10 w-full overflow-hidden marquee-container">
+        <div className="relative mt-10 w-full">
           <AnimatePresence mode="wait">
             {loading && displayProducts.length === 0 ? (
               <motion.div
@@ -1024,12 +1001,12 @@ function FeaturedProducts() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex gap-6 w-full"
+                className="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
               >
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[520px] w-[350px] shrink-0 animate-pulse border border-orange-100 bg-[#fff8ed]"
+                    className="h-[520px] animate-pulse border border-orange-100 bg-[#fff8ed]"
                   />
                 ))}
               </motion.div>
@@ -1039,35 +1016,16 @@ function FeaturedProducts() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex"
+                className="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
               >
-                <div
-                  className="flex gap-6 marquee-track-animation"
-                  style={{
-                    animation: "marqueeScroll 35s linear infinite",
-                    width: "max-content",
-                  }}
-                >
-                  {/* First set of items */}
-                  {loopProducts.map((product, i) => (
-                    <div
-                      key={`set1-${product.id || product.slug || ""}-${i}`}
-                      className="w-[310px] sm:w-[350px] shrink-0 h-full"
-                    >
-                      <ProductCard product={product} index={i} />
-                    </div>
-                  ))}
-
-                  {/* Second duplicate set of items for seamless looping */}
-                  {loopProducts.map((product, i) => (
-                    <div
-                      key={`set2-${product.id || product.slug || ""}-${i}`}
-                      className="w-[310px] sm:w-[350px] shrink-0 h-full"
-                    >
-                      <ProductCard product={product} index={i} />
-                    </div>
-                  ))}
-                </div>
+                {showcaseProducts.map((product, i) => (
+                  <div
+                    key={`${product.id || product.slug || product.name || ""}-${i}`}
+                    className={i % 2 === 1 ? "xl:mt-10" : ""}
+                  >
+                    <ProductCard product={product} index={i} />
+                  </div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
@@ -1770,16 +1728,15 @@ function CTASection() {
         <div className="p-5 sm:p-8 lg:p-16">
           <p className="mb-5 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
             <HeartHandshake size={14} />
-            Mua sản phẩm chính hãng
+            Tìm hiểu sản phẩm chính hãng
           </p>
 
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">
-            Đặt hàng qua kênh phân phối chính thức
+            Khám phá sản phẩm trước khi lựa chọn
           </h2>
 
           <p className="mt-6 max-w-xl text-base font-medium leading-8 text-slate-600 sm:text-lg">
-            Sản phẩm đóng gói chỉn chu, có thông tin rõ ràng và giao hàng toàn
-            quốc qua các nền tảng quen thuộc.
+            Xem câu chuyện sản phẩm, thành phần, quy trình và kênh phân phối chính thức của Ăn Cùng Bà Tuyết.
           </p>
 
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -1789,7 +1746,7 @@ function CTASection() {
               variant="dark"
               className="rounded-none px-8 py-5"
             >
-              Mua qua TikTok Shop
+              Xem kênh TikTok
             </CurtainAction>
 
             <CurtainAction
@@ -1798,7 +1755,7 @@ function CTASection() {
               variant="orange"
               className="rounded-none px-8 py-5"
             >
-              Đặt hàng Shopee
+              Xem sản phẩm Shopee
             </CurtainAction>
           </div>
         </div>
@@ -1833,13 +1790,13 @@ export default function HomePage() {
       <HeroSection />
       <StatsSection />
       <TrustSection />
-      <FeaturedProducts />
       <FactoryProofSection />
-      <WhyChooseUsFromDb />
-      <MarketingAssetsSection />
-      <TrustEvidenceSections />
       <ProcessSection />
       <BrandStory />
+      <FeaturedProducts />
+      <WhyChooseUsFromDb />
+      <TrustEvidenceSections />
+      <MarketingAssetsSection />
       <CTASection />
     </main>
   );
