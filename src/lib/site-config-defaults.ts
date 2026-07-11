@@ -182,14 +182,11 @@ function normalizeLinks(value: unknown, fallback: LinkItem[]) {
 
 function normalizeNavbarLinks(value: unknown) {
   const links = normalizeLinks(value, REQUIRED_NAV_LINKS);
-  const byHref = new Map(links.map((item) => [item.href, item]));
+  const configuredLinks = links.filter((item) => item.href && item.label);
+  const configuredHrefs = new Set(configuredLinks.map((item) => item.href));
+  const missingRequiredLinks = REQUIRED_NAV_LINKS.filter((item) => !configuredHrefs.has(item.href));
 
-  return REQUIRED_NAV_LINKS.map((requiredItem) => ({
-    ...requiredItem,
-    ...(byHref.get(requiredItem.href) || {}),
-  })).concat(
-    links.filter((item) => !REQUIRED_NAV_LINKS.some((requiredItem) => requiredItem.href === item.href)),
-  );
+  return [...configuredLinks, ...missingRequiredLinks];
 }
 
 function normalizeProductMenuLinks(value: unknown) {
