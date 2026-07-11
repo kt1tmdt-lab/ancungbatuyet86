@@ -165,6 +165,7 @@ export function AdminHeader() {
       items: [
         { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, show: true },
         { href: "/admin/web-control", label: "Quản lý website", icon: MonitorCog, show: isMarketingAllowed },
+        { href: "/admin/site-content", label: "Nội dung website", icon: Globe, show: isMarketingAllowed },
       ],
     },
     {
@@ -187,7 +188,7 @@ export function AdminHeader() {
     {
       group: "Truyền thông và khách hàng",
       items: [
-        { href: "/admin/marketing", label: "Báo chí & phản hồi", icon: Megaphone, show: isMarketingAllowed },
+        { href: "/admin/marketing", label: "Truyền thông", icon: Megaphone, show: isMarketingAllowed },
         { href: "/admin/media-intelligence", label: "Radar Thương Hiệu", icon: Radar, show: isMarketingAllowed },
         { href: "/admin/contacts", label: "Liên hệ khách hàng", icon: Users, show: isContactAllowed },
       ],

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
@@ -139,23 +139,37 @@ function getPageAssetMeta(item: PageAssetItem) {
   };
 }
 
+function getPageAssetScope(item: PageAssetItem) {
+  const previewPath = getPageAssetMeta(item).previewPath;
+
+  if (previewPath.startsWith("/gioi-thieu")) return "about";
+  if (previewPath.startsWith("/quy-trinh")) return "process";
+  if (previewPath.startsWith("/#") || previewPath === "/") return "home";
+
+  return "other";
+}
+
+type ContentTab = "press" | "feedback" | "videos" | "home" | "trust" | "history" | "community";
+
 function MarketingPageContent() {
   const { token } = useAuth();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const isWebsiteContent = pathname.startsWith("/admin/site-content");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"press" | "feedback" | "videos" | "homeTexts" | "trust" | "assets" | "history" | "community">(
+  const [activeTab, setActiveTab] = useState<ContentTab>(
     searchParams.get("tab") === "assets"
-      ? "assets"
+      ? "home"
       : searchParams.get("tab") === "homeTexts"
-        ? "homeTexts"
+        ? "home"
         : searchParams.get("tab") === "history"
           ? "history"
           : searchParams.get("tab") === "trust"
             ? "trust"
             : searchParams.get("tab") === "community"
               ? "community"
-              : "press",
+              : isWebsiteContent ? "home" : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
@@ -173,11 +187,14 @@ function MarketingPageContent() {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab === "assets" || tab === "homeTexts" || tab === "history" || tab === "trust" || tab === "community") {
-      const timer = window.setTimeout(() => setActiveTab(tab), 0);
+    const websiteTabs = ["home", "assets", "homeTexts", "history", "trust", "community"];
+    const communicationTabs = ["press", "feedback", "videos"];
+    if ((isWebsiteContent && tab && websiteTabs.includes(tab)) || (!isWebsiteContent && tab && communicationTabs.includes(tab))) {
+      const normalizedTab = tab === "assets" || tab === "homeTexts" ? "home" : tab;
+      const timer = window.setTimeout(() => setActiveTab(normalizedTab as ContentTab), 0);
       return () => window.clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [isWebsiteContent, searchParams]);
 
   useEffect(() => {
     if (!token) return;
@@ -317,7 +334,7 @@ function MarketingPageContent() {
   const addAsset = () => {
     const newItem: PageAssetItem = {
       id: Date.now().toString(),
-      key: "",
+      key: `custom_${Date.now()}`,
       label: "",
       imageUrl: "",
       linkUrl: "",
@@ -532,6 +549,8 @@ function MarketingPageContent() {
     await saveMarketingConfig({ pageAssets: nextAssetList });
   };
 
+  const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
+
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"]}>
       <div className="max-w-5xl mx-auto space-y-6 pb-20">
@@ -539,9 +558,13 @@ function MarketingPageContent() {
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
               <Settings className="text-orange-500" size={28} />
-              Quản lý truyền thông (Marketing)
+              {isWebsiteContent ? "Nội dung website" : "Truyền thông thương hiệu"}
             </h1>
-            <p className="text-slate-500 mt-1">Cấu hình danh sách bài báo viết về thương hiệu, nhận xét từ khách hàng và video clip nổi bật.</p>
+            <p className="text-slate-500 mt-1">
+              {isWebsiteContent
+                ? "Chỉnh nội dung trang chủ, hình ảnh, lịch sử và thông tin uy tín của thương hiệu."
+                : "Quản lý báo chí, đánh giá khách hàng và video truyền thông."}
+            </p>
           </div>
           <button
             onClick={handleSave}
@@ -553,96 +576,58 @@ function MarketingPageContent() {
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab("press")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "press"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <Newspaper size={16} />
-            Báo chí nhắc tới ({pressList.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("feedback")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "feedback"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <MessageSquare size={16} />
-            Đánh giá khách hàng ({feedbackList.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("videos")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "videos"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <Video size={16} />
-            Video truyền thông ({videoList.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("trust")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "trust"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <ShieldCheck size={16} />
-            Uy tin ({trustList.filter((item) => item.enabled).length})
-          </button>
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "history"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <Calendar size={16} />
-            Lịch sử ({historyList.filter((item) => item.enabled).length})
-          </button>
-          <button
-            onClick={() => setActiveTab("homeTexts")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "homeTexts"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <Settings size={16} />
-            Chữ trang chủ ({homeTextList.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("assets")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "assets"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <ImageIcon size={16} />
-            Ảnh & link trang ({assetList.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("community")}
-            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === "community"
-                ? "border-orange-500 text-orange-600 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-950"
-            }`}
-          >
-            <Heart size={16} />
-            Cong dong ({communityList.filter((item) => item.enabled).length})
-          </button>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {(isWebsiteContent ? [
+            {
+              title: "Trang chủ",
+              description: "Sửa nội dung và hình ảnh đang hiển thị trên trang chủ.",
+              tabs: [
+                { id: "home" as const, label: "Trang chủ", icon: Settings },
+              ],
+            },
+            {
+              title: "Giới thiệu thương hiệu",
+              description: "Quản lý câu chuyện, uy tín và hoạt động thương hiệu.",
+              tabs: [
+                { id: "history" as const, label: "Lịch sử phát triển", icon: Calendar },
+                { id: "trust" as const, label: "Chứng nhận & uy tín", icon: ShieldCheck },
+                { id: "community" as const, label: "Hoạt động cộng đồng", icon: Heart },
+              ],
+            },
+          ] : [{
+            title: "Truyền thông",
+            description: "Nội dung bên ngoài nói về thương hiệu.",
+            tabs: [
+              { id: "press" as const, label: "Báo chí", icon: Newspaper },
+              { id: "feedback" as const, label: "Đánh giá khách hàng", icon: MessageSquare },
+              { id: "videos" as const, label: "Video", icon: Video },
+            ],
+          }]).map((group) => (
+            <section key={group.title} className="border border-slate-200 bg-white p-4 shadow-sm">
+              <h2 className="text-sm font-black text-slate-950">{group.title}</h2>
+              <p className="mt-1 min-h-10 text-xs leading-5 text-slate-500">{group.description}</p>
+              <div className="mt-3 grid gap-2">
+                {group.tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-2 border px-3 py-2.5 text-left text-sm font-bold transition ${
+                        activeTab === tab.id
+                          ? "border-orange-500 bg-orange-50 text-orange-700"
+                          : "border-slate-200 text-slate-600 hover:border-orange-300 hover:text-slate-950"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
 
         {loading ? (
@@ -1411,7 +1396,7 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "homeTexts" && (
+            {activeTab === "home" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1484,7 +1469,6 @@ function MarketingPageContent() {
                             <div key={item.id} className="grid gap-2 lg:grid-cols-[220px_1fr] lg:items-start">
                               <div>
                                 <label className="block text-xs font-black text-slate-800">{item.label}</label>
-                                <p className="mt-1 font-mono text-[10px] font-bold text-slate-400">{item.key}</p>
                               </div>
                               {item.multiline ? (
                                 <textarea
@@ -1511,13 +1495,13 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "assets" && (
+            {activeTab === "home" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h2 className="text-base font-black text-slate-900 uppercase">Ảnh và link có thể cấu hình</h2>
+                    <h2 className="text-base font-black text-slate-900 uppercase">Hình ảnh trên website</h2>
                     <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
-                      Mỗi dòng là một vị trí đang dùng ngoài website. Bạn chỉ cần sửa ảnh, chữ hiển thị và link.
+                      Mỗi thẻ bên dưới tương ứng với một hình ảnh đang hiển thị trên website.
                     </p>
                   </div>
                   <button
@@ -1525,26 +1509,18 @@ function MarketingPageContent() {
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition"
                   >
                     <Plus size={14} />
-                    Thêm ảnh/link
+                    Thêm hình ảnh
                   </button>
                 </div>
 
-                <div className="border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-slate-700">
-                  <p className="font-bold text-slate-900">Logic sử dụng:</p>
-                  <p className="mt-1">
-                    Các vị trí có sẵn là những chỗ website đang đọc dữ liệu. Mặc định chỉ nên sửa
-                    <span className="font-bold"> nhãn hiển thị, URL ảnh, URL link</span>. Mã key chỉ để hệ thống nhận ra đúng vị trí.
-                  </p>
-                </div>
-
-                {assetList.length === 0 ? (
+                {homeAssetList.length === 0 ? (
                   <div className="text-center py-16 text-slate-400">
                     <AlertCircle className="mx-auto text-slate-300 mb-2" size={36} />
                     <p className="text-xs font-semibold">Chưa có ảnh/link nào được cấu hình.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {assetList.map((item, index) => {
+                    {homeAssetList.map((item) => {
                       const meta = getPageAssetMeta(item);
                       const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
                       const isFactoryProofAsset = FACTORY_PROOF_ASSET_KEYS.has(item.key);
@@ -1572,13 +1548,12 @@ function MarketingPageContent() {
                                   <span className="bg-orange-500 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white">
                                     {meta.page}
                                   </span>
-                                  <span className="text-xs font-black text-slate-400">#{index + 1}</span>
                                 </div>
                                 <h3 className="mt-2 text-base font-black text-slate-950">{meta.position}</h3>
                                 <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{meta.note}</p>
                                 {isFactoryProofAsset && (
                                   <p className="mt-1 text-xs font-bold leading-5 text-orange-600">
-                                    Tên mục sửa ở tab Text trang chủ. Ô nhãn bên dưới là nội dung/mô tả hiện dưới ảnh lớn.
+                                    Có thể đổi tên mục và hình ảnh ngay tại thẻ này.
                                   </p>
                                 )}
                               </div>
@@ -1597,7 +1572,7 @@ function MarketingPageContent() {
                               </div>
                             )}
 
-                            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_1fr]">
+                            <div>
                               <div>
                                 <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nhãn hiển thị</label>
                                 <input
@@ -1606,19 +1581,6 @@ function MarketingPageContent() {
                                   onChange={(e) => updateAsset(item.id, "label", e.target.value)}
                                   placeholder="Tên hiển thị cho vị trí này"
                                   className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mã vị trí</label>
-                                <input
-                                  type="text"
-                                  value={item.key}
-                                  onChange={(e) => updateAsset(item.id, "key", e.target.value)}
-                                  readOnly={isFixedSlot}
-                                  placeholder="process_factory"
-                                  className={`w-full border border-slate-300 p-2 text-xs font-mono font-bold outline-none focus:border-orange-500 ${
-                                    isFixedSlot ? "bg-slate-100 text-slate-500" : "bg-white text-slate-900"
-                                  }`}
                                 />
                               </div>
                             </div>

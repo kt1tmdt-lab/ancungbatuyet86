@@ -6,8 +6,6 @@ import {
   ArrowRight,
   History,
   Home,
-  Image as ImageIcon,
-  LayoutTemplate,
   Megaphone,
   Menu,
   Newspaper,
@@ -25,8 +23,7 @@ const pageGroups = [
     description: "Các phần đang xuất hiện ngay khi khách truy cập mở website.",
     items: [
       { title: "Hero đầu trang", description: "Ảnh Bà Tuyết, tiêu đề, mô tả, số liệu và hai nút bấm.", href: "/admin/settings?tab=hero", icon: Home },
-      { title: "Nội dung các khu vực", description: "Tiêu đề, mô tả, bật/tắt và nội dung từng section trang chủ.", href: "/admin/marketing?tab=homeTexts", icon: LayoutTemplate },
-      { title: "Ảnh trên trang chủ", description: "Ảnh nhà máy, thương hiệu, chứng thực và các hình minh họa.", href: "/admin/marketing?tab=assets", icon: ImageIcon },
+      { title: "Nội dung trang chủ", description: "Tiêu đề, mô tả, bật/tắt section, ảnh và link đang dùng trên trang chủ.", href: "/admin/site-content?tab=home", icon: Home },
       { title: "Sản phẩm nổi bật", description: "Chọn sản phẩm, ảnh, mô tả và liên kết mua hàng.", href: "/admin/products", icon: Package },
     ],
   },
@@ -43,9 +40,9 @@ const pageGroups = [
     title: "Giới thiệu thương hiệu",
     description: "Lịch sử, uy tín và hoạt động của Ăn Cùng Bà Tuyết.",
     items: [
-      { title: "Lịch sử phát triển", description: "Các cột mốc, năm, nội dung và ảnh minh họa.", href: "/admin/marketing?tab=history", icon: History },
-      { title: "Thành tựu và uy tín", description: "Chứng nhận, kiểm nghiệm và thông tin tạo niềm tin.", href: "/admin/marketing?tab=trust", icon: ShieldCheck },
-      { title: "Hoạt động cộng đồng", description: "Thiện nguyện, livestream, đối tác và hoạt động xã hội.", href: "/admin/marketing?tab=community", icon: Users },
+      { title: "Lịch sử phát triển", description: "Các cột mốc, năm, nội dung và ảnh minh họa.", href: "/admin/site-content?tab=history", icon: History },
+      { title: "Thành tựu và uy tín", description: "Chứng nhận, kiểm nghiệm và thông tin tạo niềm tin.", href: "/admin/site-content?tab=trust", icon: ShieldCheck },
+      { title: "Hoạt động cộng đồng", description: "Thiện nguyện, livestream, đối tác và hoạt động xã hội.", href: "/admin/site-content?tab=community", icon: Users },
     ],
   },
   {

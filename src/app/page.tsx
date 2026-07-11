@@ -484,7 +484,7 @@ function HeroSection() {
             {heroTitle.includes(brandName) ? (
               <>
                 {heroTitle.replace(brandName, "").trim()}{" "}
-                <span className="font-black text-orange-700">{brandName}</span>
+                <span className="font-black text-primary">{brandName}</span>
               </>
             ) : (
               heroTitle
