@@ -33,6 +33,7 @@ import {
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
+  type HomeNewsItem,
   type HomeTextItem,
   type MarketingConfigData,
   type PageAssetItem,
@@ -415,6 +416,23 @@ function buildNewsEvidenceItems(posts: PostItem[], pressItems: PressItem[] = [])
 
   return [...postItems, ...externalPressItems].slice(0, 4);
 }
+
+function buildConfiguredNewsEvidenceItems(items: HomeNewsItem[]) {
+  return items
+    .filter((item) => item.enabled && (item.title || item.linkUrl || item.imageUrl))
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .slice(0, 4)
+    .map(
+      (item): NewsEvidenceItem => ({
+        icon: Newspaper,
+        title: item.title || "Bài viết nổi bật",
+        desc: item.description || "Thông tin nổi bật được cấu hình trong CMS.",
+        image: item.imageUrl || undefined,
+        href: item.linkUrl || "/tin-tuc",
+        label: item.label || "Tin tức",
+      }),
+    );
+}
 // ==========================================
 // 1. HERO SECTION - BRAND STORY STYLE
 // ==========================================
@@ -574,8 +592,8 @@ function HeroSection() {
           </div>
           <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-red-300/60 bg-red-100/30 xl:block" />
 
-          <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-none bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
-            <p className="mt-3 text-lg font-black leading-6 text-slate-950">
+          <div className="absolute left-0 top-[27%] z-30 hidden w-fit min-w-0 max-w-[min(18rem,42vw)] rounded-none bg-white/92 px-4 py-3 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
+            <p className="text-[clamp(0.9rem,1.05vw,1.1rem)] font-black leading-snug text-slate-950">
             {heroBanner.quote}
             </p>
           </div>
@@ -727,9 +745,6 @@ function StatsSection() {
       <div className="w-full">
         <div className="flex flex-col gap-4 border-b border-orange-100 px-5 py-10 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-16">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              Năng lực thương hiệu
-            </p>
             <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">
               Những con số tiêu biểu
             </h2>
@@ -1065,10 +1080,13 @@ function FeaturedProducts() {
 }
 
 function WhyChooseUsFromDb() {
-  const { homeTexts, press } = useHomeMarketingConfig();
+  const { homeTexts, homeNewsItems, press } = useHomeMarketingConfig();
   const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const items = useMemo(() => buildNewsEvidenceItems(posts, press), [posts, press]);
+  const items = useMemo(() => {
+    const configuredItems = buildConfiguredNewsEvidenceItems(homeNewsItems);
+    return configuredItems.length > 0 ? configuredItems : buildNewsEvidenceItems(posts, press);
+  }, [homeNewsItems, posts, press]);
 
   useEffect(() => {
     fetchHomePosts()

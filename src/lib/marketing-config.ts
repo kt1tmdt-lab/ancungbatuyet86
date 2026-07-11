@@ -51,6 +51,17 @@ export type HomeSectionItem = {
   sortOrder: number;
 };
 
+export type HomeNewsItem = {
+  id: string;
+  title: string;
+  description: string;
+  label: string;
+  imageUrl: string;
+  linkUrl: string;
+  enabled: boolean;
+  sortOrder: number;
+};
+
 export type TrustSectionItem = {
   id: string;
   key: string;
@@ -94,6 +105,7 @@ export type MarketingConfigData = {
   videos: VideoItem[];
   homeTexts: HomeTextItem[];
   homeSections: HomeSectionItem[];
+  homeNewsItems: HomeNewsItem[];
   pageAssets: PageAssetItem[];
   trustSections: TrustSectionItem[];
   historyMilestones: HistoryMilestoneItem[];
@@ -368,12 +380,56 @@ export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
   },
 ];
 
+export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
+  {
+    id: "home-news-1",
+    title: "Ăn Cùng Bà Tuyết dẫn đầu TikTok Shop ngành hàng đồ ăn vặt",
+    description: "Thông tin nổi bật về thương hiệu, sản phẩm và hoạt động bán hàng.",
+    label: "Báo chí",
+    imageUrl: "/hero/tam-cay-pack.png",
+    linkUrl: "/tin-tuc",
+    enabled: true,
+    sortOrder: 10,
+  },
+  {
+    id: "home-news-2",
+    title: "5 cách biến tấu snack Bánh Tráng Bà Tuyết cực ngon tại nhà",
+    description: "Bài viết giới thiệu cách dùng sản phẩm trong các món ăn vặt quen thuộc.",
+    label: "Công thức",
+    imageUrl: "/hero/banh-trang-rong-bien.png",
+    linkUrl: "/tin-tuc",
+    enabled: true,
+    sortOrder: 20,
+  },
+  {
+    id: "home-news-3",
+    title: "Hậu trường: Quy trình chế biến chân gà rút xương sạch sẽ",
+    description: "Nội dung giúp khách hàng hiểu rõ hơn về quy trình sản xuất.",
+    label: "Hậu trường",
+    imageUrl: "/hero/chan-ga-poster.png",
+    linkUrl: "/quy-trinh",
+    enabled: true,
+    sortOrder: 30,
+  },
+  {
+    id: "home-news-4",
+    title: "Ăn Cùng Bà Tuyết hợp tác Bảo hiểm PVI",
+    description: "Thông tin tạo niềm tin về bảo hiểm trách nhiệm sản phẩm cho khách hàng.",
+    label: "Thông báo",
+    imageUrl: "/bento/bento-insurance.png",
+    linkUrl: "/gioi-thieu/thanh-tuu",
+    enabled: true,
+    sortOrder: 40,
+  },
+];
+
 export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   press: [],
   feedback: [],
   videos: [],
   homeTexts: DEFAULT_HOME_TEXTS,
   homeSections: DEFAULT_HOME_SECTIONS,
+  homeNewsItems: DEFAULT_HOME_NEWS_ITEMS,
   pageAssets: DEFAULT_PAGE_ASSETS,
   historyMilestones: [
     {
@@ -735,6 +791,37 @@ function normalizeHomeSections(input: unknown): HomeSectionItem[] {
     .filter((item): item is HomeSectionItem => Boolean(item));
 }
 
+function normalizeHomeNewsItems(input: unknown): HomeNewsItem[] {
+  if (!Array.isArray(input)) return [];
+
+  return input
+    .map((item, index) => {
+      if (!isRecord(item)) return null;
+      const title = stringValue(item.title);
+      const description = stringValue(item.description);
+      const label = stringValue(item.label);
+      const imageUrl = normalizeUploadPublicUrl(stringValue(item.imageUrl));
+      const linkUrl = stringValue(item.linkUrl);
+      const sortOrder = Number.isFinite(Number(item.sortOrder))
+        ? Number(item.sortOrder)
+        : index * 10;
+
+      if (!title && !description && !label && !imageUrl && !linkUrl) return null;
+
+      return {
+        id: itemId(item.id),
+        title,
+        description,
+        label,
+        imageUrl,
+        linkUrl,
+        enabled: item.enabled !== false,
+        sortOrder,
+      };
+    })
+    .filter((item): item is HomeNewsItem => Boolean(item));
+}
+
 function normalizeTrustSections(input: unknown): TrustSectionItem[] {
   if (!Array.isArray(input)) return DEFAULT_MARKETING_CONFIG.trustSections;
 
@@ -913,10 +1000,22 @@ function withDefaultHomeSections(items: HomeSectionItem[]) {
   })).concat(items.filter((item) => item.key && !DEFAULT_HOME_SECTIONS.some((defaultItem) => defaultItem.key === item.key)));
 }
 
+function withDefaultHomeNewsItems(items: HomeNewsItem[]) {
+  const byId = new Map(items.map((item) => [item.id, item]));
+
+  return DEFAULT_HOME_NEWS_ITEMS.map((defaultItem) => ({
+    ...defaultItem,
+    ...(byId.get(defaultItem.id) || {}),
+    id: byId.get(defaultItem.id)?.id || defaultItem.id,
+    sortOrder: byId.get(defaultItem.id)?.sortOrder ?? defaultItem.sortOrder,
+  })).concat(items.filter((item) => item.id && !DEFAULT_HOME_NEWS_ITEMS.some((defaultItem) => defaultItem.id === item.id)));
+}
+
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
   const source = isRecord(input) ? input : {};
   const homeTexts = normalizeHomeTexts(source.homeTexts);
   const homeSections = normalizeHomeSections(source.homeSections);
+  const homeNewsItems = normalizeHomeNewsItems(source.homeNewsItems);
   const pageAssets = normalizePageAssets(source.pageAssets);
   const trustSections = normalizeTrustSections(source.trustSections);
   const hasHistoryMilestones = Array.isArray(source.historyMilestones);
@@ -931,6 +1030,7 @@ export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
     videos: normalizeVideos(source.videos),
     homeTexts: withDefaultHomeTexts(homeTexts),
     homeSections: withDefaultHomeSections(homeSections),
+    homeNewsItems: withDefaultHomeNewsItems(homeNewsItems),
     pageAssets: withDefaultPageAssets(pageAssets),
     trustSections,
     historyMilestones: hasHistoryMilestones

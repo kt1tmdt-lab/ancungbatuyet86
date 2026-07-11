@@ -34,6 +34,7 @@ import {
   type CommunityActivityItem,
   type FeedbackItem,
   type HistoryMilestoneItem,
+  type HomeNewsItem,
   type HomeSectionItem,
   type HomeTextItem,
   type PageAssetItem,
@@ -184,6 +185,7 @@ function MarketingPageContent() {
   const [videoList, setVideoList] = useState<VideoItem[]>([]);
   const [homeTextList, setHomeTextList] = useState<HomeTextItem[]>([]);
   const [homeSectionList, setHomeSectionList] = useState<HomeSectionItem[]>([]);
+  const [homeNewsList, setHomeNewsList] = useState<HomeNewsItem[]>([]);
   const [assetList, setAssetList] = useState<PageAssetItem[]>([]);
   const [trustList, setTrustList] = useState<TrustSectionItem[]>([]);
   const [historyList, setHistoryList] = useState<HistoryMilestoneItem[]>([]);
@@ -221,6 +223,7 @@ function MarketingPageContent() {
         setVideoList(config.videos);
         setHomeTextList(config.homeTexts);
         setHomeSectionList(config.homeSections);
+        setHomeNewsList(config.homeNewsItems);
         setAssetList(config.pageAssets);
         setTrustList(config.trustSections);
         setHistoryList(config.historyMilestones);
@@ -246,6 +249,7 @@ function MarketingPageContent() {
     videos?: VideoItem[];
     homeTexts?: HomeTextItem[];
     homeSections?: HomeSectionItem[];
+    homeNewsItems?: HomeNewsItem[];
     pageAssets?: PageAssetItem[];
     trustSections?: TrustSectionItem[];
     historyMilestones?: HistoryMilestoneItem[];
@@ -258,6 +262,7 @@ function MarketingPageContent() {
       const nextVideos = nextConfig?.videos || videoList;
       const nextHomeTexts = nextConfig?.homeTexts || homeTextList;
       const nextHomeSections = nextConfig?.homeSections || homeSectionList;
+      const nextHomeNewsItems = nextConfig?.homeNewsItems || homeNewsList;
       const nextPageAssets = nextConfig?.pageAssets || assetList;
       const nextTrustSections = nextConfig?.trustSections || trustList;
       const nextHistoryMilestones = nextConfig?.historyMilestones || historyList;
@@ -275,6 +280,7 @@ function MarketingPageContent() {
           videos: nextVideos,
           homeTexts: nextHomeTexts,
           homeSections: nextHomeSections,
+          homeNewsItems: nextHomeNewsItems,
           pageAssets: nextPageAssets,
           trustSections: nextTrustSections,
           historyMilestones: nextHistoryMilestones,
@@ -290,6 +296,7 @@ function MarketingPageContent() {
       setVideoList(config.videos);
       setHomeTextList(config.homeTexts);
       setHomeSectionList(config.homeSections);
+      setHomeNewsList(config.homeNewsItems);
       setAssetList(config.pageAssets);
       setTrustList(config.trustSections);
       setHistoryList(config.historyMilestones);
@@ -494,6 +501,14 @@ function MarketingPageContent() {
     setHomeSectionList(homeSectionList.map((item) => item.id === id ? { ...item, enabled } : item));
   };
 
+  const updateHomeNewsItem = (
+    id: string,
+    field: keyof HomeNewsItem,
+    val: string | boolean | number,
+  ) => {
+    setHomeNewsList(homeNewsList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+  };
+
   const updateTrustSection = (
     id: string,
     field: keyof TrustSectionItem,
@@ -520,6 +535,17 @@ function MarketingPageContent() {
 
   const handleMediaSelect = async (url: string) => {
     if (!mediaPickerAssetId) return;
+
+    if (mediaPickerAssetId.startsWith("home-news:")) {
+      const itemId = mediaPickerAssetId.replace("home-news:", "");
+      const nextHomeNewsList = homeNewsList.map((item) =>
+        item.id === itemId ? { ...item, imageUrl: url } : item,
+      );
+      setHomeNewsList(nextHomeNewsList);
+      setMediaPickerAssetId(null);
+      await saveMarketingConfig({ homeNewsItems: nextHomeNewsList });
+      return;
+    }
 
     if (activeTab === "trust") {
       const nextTrustList = trustList.map((item) =>
@@ -1643,6 +1669,119 @@ function MarketingPageContent() {
                     </div>
                   </section>
                 ))}
+
+                <section className="border border-slate-200 bg-slate-50">
+                  <div className="border-b border-slate-200 bg-white px-4 py-3">
+                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Tin tức & bằng chứng ngoài trang chủ</h3>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-500">Tự chọn bài nào hiển thị ở block này: bài nội bộ, bài báo ngoài, link sản phẩm hoặc link bất kỳ.</p>
+                  </div>
+                  <div className="grid gap-4 p-4">
+                    {homeNewsList
+                      .slice()
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((item, index) => (
+                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-white p-4 lg:grid-cols-[180px_1fr]">
+                          <div className="space-y-3">
+                            <div className="overflow-hidden border border-slate-200 bg-slate-50">
+                              {item.imageUrl ? (
+                                <img src={item.imageUrl} alt={item.title || `Bài ${index + 1}`} className="h-32 w-full object-cover" />
+                              ) : (
+                                <div className="flex h-32 items-center justify-center px-4 text-center text-xs font-semibold text-slate-400">
+                                  Chưa có ảnh
+                                </div>
+                              )}
+                            </div>
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={item.enabled}
+                                onChange={(e) => updateHomeNewsItem(item.id, "enabled", e.target.checked)}
+                                className="h-4 w-4 accent-orange-600"
+                              />
+                              Hiển thị bài này
+                            </label>
+                          </div>
+
+                          <div className="grid gap-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <h4 className="text-sm font-black text-slate-950">Bài hiển thị #{index + 1}</h4>
+                              <input
+                                type="number"
+                                value={item.sortOrder}
+                                onChange={(e) => updateHomeNewsItem(item.id, "sortOrder", Number(e.target.value) || 0)}
+                                className="w-20 border border-slate-300 bg-white p-2 text-xs font-bold outline-none focus:border-orange-500"
+                                title="Thứ tự hiển thị"
+                              />
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div>
+                                <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Nhãn</label>
+                                <input
+                                  type="text"
+                                  value={item.label}
+                                  onChange={(e) => updateHomeNewsItem(item.id, "label", e.target.value)}
+                                  placeholder="VD: Báo chí, Công thức, Hậu trường"
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                              <div>
+                                <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">URL link khi bấm</label>
+                                <input
+                                  type="text"
+                                  value={item.linkUrl}
+                                  onChange={(e) => updateHomeNewsItem(item.id, "linkUrl", e.target.value)}
+                                  placeholder="/tin-tuc/bai-viet hoặc https://..."
+                                  className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Tiêu đề</label>
+                              <input
+                                type="text"
+                                value={item.title}
+                                onChange={(e) => updateHomeNewsItem(item.id, "title", e.target.value)}
+                                placeholder="Tiêu đề bài muốn hiển thị"
+                                className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Mô tả</label>
+                              <textarea
+                                value={item.description}
+                                onChange={(e) => updateHomeNewsItem(item.id, "description", e.target.value)}
+                                rows={3}
+                                placeholder="Mô tả ngắn hiện dưới tiêu đề"
+                                className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold leading-5 outline-none focus:border-orange-500"
+                              />
+                            </div>
+                            <div>
+                              <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-500">
+                                <ImageIcon size={11} /> URL ảnh
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  value={item.imageUrl}
+                                  onChange={(e) => updateHomeNewsItem(item.id, "imageUrl", e.target.value)}
+                                  placeholder="/uploads/anh.png hoặc https://..."
+                                  className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setMediaPickerAssetId(`home-news:${item.id}`)}
+                                  className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                                >
+                                  <ImagePlus size={14} />
+                                  Thư viện
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </section>
 
                 {looseHomeAssets.length > 0 && (
                   <section className="border border-slate-200 bg-slate-50">
