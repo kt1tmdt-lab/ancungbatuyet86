@@ -74,9 +74,17 @@ function mergeRequiredNavLinks(links: { href: string; label: string }[] | undefi
   return [...configuredLinks, ...missingRequiredLinks];
 }
 
-function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
+type LanguageCode = "vi" | "en" | "ru";
+
+const LANGUAGE_OPTIONS: { code: LanguageCode; label: string; shortLabel: string }[] = [
+  { code: "vi", label: "Vietnamese", shortLabel: "VN" },
+  { code: "en", label: "English", shortLabel: "EN" },
+  { code: "ru", label: "Russian", shortLabel: "RU" },
+];
+
+function VnFlag({ className = "w-4 h-3" }: { className?: string }) {
   return (
-    <span className={`${className} inline-flex overflow-hidden rounded-full border border-slate-100 shadow-sm`}>
+    <span className={`${className} inline-flex overflow-hidden border border-slate-200 shadow-sm`}>
       <svg viewBox="0 0 30 20" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
       <rect width="30" height="20" fill="#da251d"/>
       <polygon points="15,4 16.17,7.62 20,7.62 16.9,9.88 18.07,13.5 15,11.25 11.93,13.5 13.1,9.88 10,7.62 13.83,7.62" fill="#ffff00"/>
@@ -85,9 +93,9 @@ function VnFlag({ className = "w-6 h-6" }: { className?: string }) {
   );
 }
 
-function EnFlag({ className = "w-6 h-6" }: { className?: string }) {
+function EnFlag({ className = "w-4 h-3" }: { className?: string }) {
   return (
-    <span className={`${className} inline-flex overflow-hidden rounded-full border border-slate-100 shadow-sm`}>
+    <span className={`${className} inline-flex overflow-hidden border border-slate-200 shadow-sm`}>
       <svg viewBox="0 0 50 30" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
       <rect width="50" height="30" fill="#012169"/>
       <path d="M0,0 L50,30 M50,0 L0,30" stroke="#fff" stroke-width="6"/>
@@ -99,8 +107,26 @@ function EnFlag({ className = "w-6 h-6" }: { className?: string }) {
   );
 }
 
-function setTranslateCookie(language: "vi" | "en") {
-  const value = language === "vi" ? "/vi/vi" : "/vi/en";
+function RuFlag({ className = "w-4 h-3" }: { className?: string }) {
+  return (
+    <span className={`${className} inline-flex overflow-hidden border border-slate-200 shadow-sm`}>
+      <svg viewBox="0 0 30 20" preserveAspectRatio="xMidYMid slice" className="h-full w-full">
+        <rect width="30" height="20" y="0" fill="#ffffff" />
+        <rect width="30" height="20" y="6.66" fill="#0039a6" />
+        <rect width="30" height="20" y="13.33" fill="#d52b1e" />
+      </svg>
+    </span>
+  );
+}
+
+function LanguageFlag({ code, className }: { code: LanguageCode; className?: string }) {
+  if (code === "en") return <EnFlag className={className} />;
+  if (code === "ru") return <RuFlag className={className} />;
+  return <VnFlag className={className} />;
+}
+
+function setTranslateCookie(language: LanguageCode) {
+  const value = `/vi/${language}`;
   const maxAge = "Max-Age=31536000";
 
   document.cookie = `googtrans=${value}; Path=/; ${maxAge}`;
@@ -265,7 +291,8 @@ export default function Navbar({
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const [language, setLanguage] = useState<"vi" | "en">("vi");
+  const [language, setLanguage] = useState<LanguageCode>("vi");
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [currentProductMenuLinks, setCurrentProductMenuLinks] = useState<SiteConfigData["productMenuLinks"]>([]);
@@ -276,7 +303,7 @@ export default function Navbar({
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const savedLanguage = window.localStorage.getItem("acbt-language");
-      if (savedLanguage === "en" || savedLanguage === "vi") {
+      if (savedLanguage === "en" || savedLanguage === "vi" || savedLanguage === "ru") {
         setLanguage(savedLanguage);
       }
     }, 0);
@@ -389,14 +416,17 @@ export default function Navbar({
     router.push(firstResult.href);
   }
 
-  function handleLanguageChange(nextLanguage: "vi" | "en") {
+  function handleLanguageChange(nextLanguage: LanguageCode) {
     if (nextLanguage === language) return;
 
     window.localStorage.setItem("acbt-language", nextLanguage);
     setLanguage(nextLanguage);
+    setLanguageOpen(false);
     setTranslateCookie(nextLanguage);
     window.location.reload();
   }
+
+  const currentLanguage = LANGUAGE_OPTIONS.find((item) => item.code === language) || LANGUAGE_OPTIONS[0];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
@@ -405,7 +435,7 @@ export default function Navbar({
           window.googleTranslateElementInit = function () {
             new window.google.translate.TranslateElement({
               pageLanguage: 'vi',
-              includedLanguages: 'vi,en',
+              includedLanguages: 'vi,en,ru',
               autoDisplay: false
             }, 'google_translate_element');
           };
@@ -543,23 +573,38 @@ export default function Navbar({
               <Search size={20} />
             </button>
 
-            <div className="hidden items-center border border-slate-200 bg-white p-0.5 shadow-sm sm:flex">
-              {(["vi", "en"] as const).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleLanguageChange(item)}
-                  className={`h-8 px-3 text-[11px] font-black uppercase tracking-[0.12em] transition ${
-                    language === item
-                      ? "bg-slate-950 text-white"
-                      : "text-slate-500 hover:bg-orange-50 hover:text-orange-700"
-                  }`}
-                  aria-pressed={language === item}
-                  title={item === "vi" ? "Tiếng Việt" : "English"}
-                >
-                  {item}
-                </button>
-              ))}
+            <div className="relative hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setLanguageOpen((value) => !value)}
+                className="flex h-9 items-center gap-1.5 border border-transparent bg-white px-2 text-xs font-semibold uppercase tracking-wide text-slate-500 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+                aria-expanded={languageOpen}
+                aria-label="Chọn ngôn ngữ"
+              >
+                <LanguageFlag code={currentLanguage.code} />
+                <span>{currentLanguage.shortLabel}</span>
+                <ChevronDown size={13} className={`transition-transform ${languageOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {languageOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-24 border border-slate-200 bg-white py-1 shadow-[0_12px_30px_rgba(15,23,42,0.16)]">
+                  {LANGUAGE_OPTIONS.map((item) => (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => handleLanguageChange(item.code)}
+                      className={`flex w-full items-center gap-2 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide transition ${
+                        language === item.code
+                          ? "bg-orange-50 text-orange-700"
+                          : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                      }`}
+                    >
+                      <LanguageFlag code={item.code} />
+                      <span>{item.shortLabel}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button
@@ -699,19 +744,20 @@ export default function Navbar({
             >
               {phone}
             </Button>
-            <div className="mt-3 grid grid-cols-2 border border-slate-200 bg-white p-1">
-              {(["vi", "en"] as const).map((item) => (
+            <div className="mt-3 grid grid-cols-3 border border-slate-200 bg-white p-1">
+              {LANGUAGE_OPTIONS.map((item) => (
                 <button
-                  key={item}
+                  key={item.code}
                   type="button"
-                  onClick={() => handleLanguageChange(item)}
-                  className={`px-4 py-3 text-sm font-black uppercase tracking-[0.12em] transition ${
-                    language === item
+                  onClick={() => handleLanguageChange(item.code)}
+                  className={`flex items-center justify-center gap-2 px-3 py-3 text-sm font-black uppercase tracking-[0.12em] transition ${
+                    language === item.code
                       ? "bg-slate-950 text-white"
                       : "text-slate-500 hover:bg-orange-50 hover:text-orange-700"
                   }`}
                 >
-                  {item === "vi" ? "VI" : "EN"}
+                  <LanguageFlag code={item.code} className="h-3 w-4" />
+                  {item.shortLabel}
                 </button>
               ))}
             </div>
