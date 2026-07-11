@@ -1730,8 +1730,13 @@ function BrandStory() {
 // 9. CTA SECTION
 // ==========================================
 function CTASection() {
+  const { pageAssets } = useHomeMarketingConfig();
+  const ctaImage =
+    pageAssets.find((item) => item.key === "home_cta_image")?.imageUrl ||
+    "/hero/chan-ga-plate.png";
+
   return (
-    <section className="bg-[#fff8ed] px-0 py-0">
+    <section id="home-cta" className="bg-[#fff8ed] px-0 py-0">
       <div className="grid w-full overflow-hidden border-y border-orange-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.08)] lg:grid-cols-[1fr_0.9fr]">
         <div className="p-5 sm:p-8 lg:p-16">
           <p className="mb-5 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
@@ -1768,21 +1773,12 @@ function CTASection() {
           </div>
         </div>
 
-        <div className="relative min-h-[420px] bg-[#f7ead8] p-8 lg:min-h-[520px]">
-          <div className="absolute left-0 top-0 h-full w-8 bg-orange-600" />
+        <div className="relative min-h-[420px] overflow-hidden border-l border-orange-200 bg-[#f7ead8] lg:min-h-[520px]">
           <img
-            src="/hero/chan-ga-plate.png"
+            src={ctaImage}
             alt="Sản phẩm Bà Tuyết"
-            className="absolute bottom-12 left-1/2 h-64 w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_45px_rgba(15,23,42,0.22)]"
+            className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute bottom-0 right-0 bg-white p-5">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              Ăn Cùng Bà Tuyết
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-700">
-              Sản phẩm ăn vặt đóng gói
-            </p>
-          </div>
         </div>
       </div>
     </section>

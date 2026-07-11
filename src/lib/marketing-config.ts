@@ -131,6 +131,13 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     linkUrl: "/gioi-thieu",
   },
   {
+    id: "default-home-cta-image",
+    key: "home_cta_image",
+    label: "Ảnh CTA cuối trang chủ",
+    imageUrl: "/hero/chan-ga-plate.png",
+    linkUrl: "/san-pham",
+  },
+  {
     id: "default-home-factory-proof-1",
     key: "home_factory_proof_1",
     label: "Nguyên liệu được chọn lọc theo nguồn rõ ràng, ghi nhận thông tin và kiểm tra trước khi đưa vào sản xuất.",

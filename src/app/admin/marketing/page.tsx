@@ -56,6 +56,12 @@ const PAGE_ASSET_META: Record<string, { page: string; position: string; note: st
     note: "Ảnh lớn bên trái trong khối bằng chứng thương hiệu.",
     previewPath: "/#factory-proof",
   },
+  home_cta_image: {
+    page: "Trang chủ",
+    position: "Ảnh CTA cuối trang chủ",
+    note: "Ảnh lớn bên phải ở khối kêu gọi tìm hiểu sản phẩm cuối trang chủ.",
+    previewPath: "/#home-cta",
+  },
   home_factory_proof_1: {
     page: "Trang chủ",
     position: "Bằng chứng 1: Nguyên liệu đầu vào",
