@@ -159,9 +159,8 @@ function MarketingPageContent() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<ContentTab>(
-    searchParams.get("tab") === "assets"
-      ? "home"
-      : searchParams.get("tab") === "homeTexts"
+    isWebsiteContent
+      ? searchParams.get("tab") === "assets" || searchParams.get("tab") === "homeTexts"
         ? "home"
         : searchParams.get("tab") === "history"
           ? "history"
@@ -169,7 +168,12 @@ function MarketingPageContent() {
             ? "trust"
             : searchParams.get("tab") === "community"
               ? "community"
-              : isWebsiteContent ? "home" : "press",
+              : "home"
+      : searchParams.get("tab") === "feedback"
+        ? "feedback"
+        : searchParams.get("tab") === "videos"
+          ? "videos"
+          : "press",
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
@@ -189,11 +193,17 @@ function MarketingPageContent() {
     const tab = searchParams.get("tab");
     const websiteTabs = ["home", "assets", "homeTexts", "history", "trust", "community"];
     const communicationTabs = ["press", "feedback", "videos"];
-    if ((isWebsiteContent && tab && websiteTabs.includes(tab)) || (!isWebsiteContent && tab && communicationTabs.includes(tab))) {
-      const normalizedTab = tab === "assets" || tab === "homeTexts" ? "home" : tab;
-      const timer = window.setTimeout(() => setActiveTab(normalizedTab as ContentTab), 0);
-      return () => window.clearTimeout(timer);
-    }
+
+    const normalizedTab = isWebsiteContent
+      ? tab && websiteTabs.includes(tab)
+        ? tab === "assets" || tab === "homeTexts" ? "home" : tab
+        : "home"
+      : tab && communicationTabs.includes(tab)
+        ? tab
+        : "press";
+
+    const timer = window.setTimeout(() => setActiveTab(normalizedTab as ContentTab), 0);
+    return () => window.clearTimeout(timer);
   }, [isWebsiteContent, searchParams]);
 
   useEffect(() => {
@@ -550,6 +560,162 @@ function MarketingPageContent() {
   };
 
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
+  const homeTextByKey = homeTextList.reduce<Record<string, HomeTextItem>>((acc, item) => {
+    acc[item.key] = item;
+    return acc;
+  }, {});
+  const factoryMainAsset = homeAssetList.find((item) => item.key === "home_factory_proof_image");
+  const factoryProofAssets = Array.from(FACTORY_PROOF_ASSET_KEYS)
+    .map((key) => homeAssetList.find((item) => item.key === key))
+    .filter((item): item is PageAssetItem => Boolean(item));
+  const factoryHomeTextItems = homeTextList
+    .filter((item) => (item.group || "").includes("Bằng chứng"))
+    .filter((item) => !/^factory_proof_\d_title$/.test(item.key))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const groupedHomeTextItems = Array.from(new Set(homeTextList.map((item) => item.group || "Khác")))
+    .filter((group) => !group.includes("Bằng chứng"))
+    .map((group) => ({
+      group,
+      items: homeTextList
+        .filter((item) => (item.group || "Khác") === group)
+        .sort((a, b) => a.sortOrder - b.sortOrder),
+    }));
+  const looseHomeAssets = homeAssetList.filter((item) => (
+    item.key !== "home_factory_proof_image" && !FACTORY_PROOF_ASSET_KEYS.has(item.key)
+  ));
+
+  const renderHomeTextField = (item: HomeTextItem) => (
+    <div key={item.id} className="grid gap-2 lg:grid-cols-[220px_1fr] lg:items-start">
+      <div>
+        <label className="block text-xs font-black text-slate-800">{item.label}</label>
+      </div>
+      {item.multiline ? (
+        <textarea
+          value={item.value}
+          onChange={(e) => updateHomeText(item.id, e.target.value)}
+          rows={3}
+          className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition focus:border-orange-500"
+        />
+      ) : (
+        <input
+          type="text"
+          value={item.value}
+          onChange={(e) => updateHomeText(item.id, e.target.value)}
+          className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-orange-500"
+        />
+      )}
+    </div>
+  );
+
+  const renderAssetEditor = (item: PageAssetItem, compact = false) => {
+    const meta = getPageAssetMeta(item);
+    const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
+    const factoryProofTitleKey = getFactoryProofTitleKey(item.key);
+    const factoryProofTitle = factoryProofTitleKey ? homeTextByKey[factoryProofTitleKey]?.value || "" : "";
+
+    return (
+      <div key={item.id} className={`grid gap-4 border border-slate-200 bg-white p-4 ${compact ? "" : "lg:grid-cols-[180px_1fr_auto]"}`}>
+        <div className="overflow-hidden border border-slate-200 bg-slate-50">
+          {item.imageUrl ? (
+            <img src={item.imageUrl} alt={item.label || item.key} className={`${compact ? "h-28" : "h-36"} w-full object-cover`} />
+          ) : (
+            <div className={`flex ${compact ? "h-28" : "h-36"} items-center justify-center px-4 text-center text-xs font-semibold text-slate-400`}>
+              Không có ảnh
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 space-y-4">
+          <div>
+            <h3 className="text-base font-black text-slate-950">{meta.position}</h3>
+            <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{meta.note}</p>
+          </div>
+
+          {factoryProofTitleKey && (
+            <div>
+              <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Tên mục</label>
+              <input
+                type="text"
+                value={factoryProofTitle}
+                onChange={(e) => updateHomeTextByKey(factoryProofTitleKey, e.target.value)}
+                placeholder="VD: Quy trình sản xuất"
+                className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Nội dung / mô tả</label>
+            <input
+              type="text"
+              value={item.label}
+              onChange={(e) => updateAsset(item.id, "label", e.target.value)}
+              placeholder="Nội dung hiển thị cho vị trí này"
+              className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div>
+              <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-500">
+                <ImageIcon size={11} /> URL ảnh
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={item.imageUrl}
+                  onChange={(e) => updateAsset(item.id, "imageUrl", e.target.value)}
+                  placeholder="/uploads/anh-that.png hoặc https://..."
+                  className="min-w-0 flex-1 border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaPickerAssetId(item.id)}
+                  className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                >
+                  <ImagePlus size={14} />
+                  Thư viện
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-500">
+                <Link2 size={11} /> URL link khi bấm
+              </label>
+              <input
+                type="text"
+                value={item.linkUrl}
+                onChange={(e) => updateAsset(item.id, "linkUrl", e.target.value)}
+                placeholder="/tin-tuc/bai-viet hoặc https://..."
+                className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 lg:flex-col lg:items-end lg:justify-center">
+          <button
+            onClick={() => setPreviewAsset(item)}
+            className="flex items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+            title="Xem thử ảnh và link"
+          >
+            <Eye size={16} />
+            Xem thử
+          </button>
+          {!isFixedSlot && (
+            <button
+              onClick={() => removeAsset(item.id)}
+              className="flex items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+              title="Xóa dòng này"
+            >
+              <Trash2 size={16} />
+              Xóa
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"]}>
@@ -636,7 +802,7 @@ function MarketingPageContent() {
           <div className="space-y-6">
             
             {/* Press Tab Content */}
-            {activeTab === "press" && (
+            {!isWebsiteContent && activeTab === "press" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex justify-between items-center pb-4 border-b border-slate-100">
                   <h2 className="text-base font-black text-slate-900 uppercase">Bài báo nhắc đến Ăn Cùng Bà Tuyết</h2>
@@ -721,7 +887,7 @@ function MarketingPageContent() {
             )}
 
             {/* Feedback Tab Content */}
-            {activeTab === "feedback" && (
+            {!isWebsiteContent && activeTab === "feedback" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex justify-between items-center pb-4 border-b border-slate-100">
                   <h2 className="text-base font-black text-slate-900 uppercase">Phản hồi của khách hàng (Testimonials)</h2>
@@ -811,7 +977,7 @@ function MarketingPageContent() {
             )}
 
             {/* Videos Tab Content */}
-            {activeTab === "videos" && (
+            {!isWebsiteContent && activeTab === "videos" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex justify-between items-center pb-4 border-b border-slate-100">
                   <h2 className="text-base font-black text-slate-900 uppercase">Video clip truyền thông giới thiệu sản phẩm</h2>
@@ -897,7 +1063,7 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "trust" && (
+            {isWebsiteContent && activeTab === "trust" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -1047,7 +1213,7 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "history" && (
+            {isWebsiteContent && activeTab === "history" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1231,7 +1397,7 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "community" && (
+            {isWebsiteContent && activeTab === "community" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1396,7 +1562,102 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "home" && (
+            {isWebsiteContent && activeTab === "home" && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
+                <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-black uppercase text-slate-900">Trang chủ</h2>
+                    <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
+                      Mỗi khu vực gom chung chữ, ảnh và link đang hiển thị ngoài trang chủ.
+                    </p>
+                  </div>
+                  <a
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                  >
+                    <ExternalLink size={14} />
+                    Xem trang chủ
+                  </a>
+                </div>
+
+                <section className="border border-slate-200 bg-slate-50">
+                  <div className="border-b border-slate-200 bg-white px-4 py-3">
+                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Ẩn/hiện cụm trang chủ</h3>
+                  </div>
+                  <div className="grid gap-3 p-4 md:grid-cols-2">
+                    {homeSectionList
+                      .slice()
+                      .sort((a, b) => a.sortOrder - b.sortOrder)
+                      .map((item) => (
+                        <label key={item.id} className="flex cursor-pointer items-start gap-3 border border-slate-200 bg-white p-4">
+                          <input
+                            type="checkbox"
+                            checked={item.enabled}
+                            onChange={(e) => updateHomeSection(item.id, e.target.checked)}
+                            className="mt-1 h-4 w-4 accent-orange-600"
+                          />
+                          <span>
+                            <span className="block text-sm font-black text-slate-900">{item.label}</span>
+                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{item.description}</span>
+                          </span>
+                        </label>
+                      ))}
+                  </div>
+                </section>
+
+                <section className="border border-slate-200 bg-slate-50">
+                  <div className="border-b border-slate-200 bg-white px-4 py-3">
+                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Năng lực sản xuất / bằng chứng thương hiệu</h3>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-500">Chữ, ảnh lớn, ảnh từng mục và link đều nằm chung trong cụm này.</p>
+                  </div>
+                  <div className="grid gap-5 p-4">
+                    <div className="grid gap-4">
+                      {factoryHomeTextItems.map(renderHomeTextField)}
+                    </div>
+                    {factoryMainAsset && (
+                      <div>
+                        <p className="mb-2 text-xs font-black uppercase text-slate-500">Ảnh lớn của cụm</p>
+                        {renderAssetEditor(factoryMainAsset)}
+                      </div>
+                    )}
+                    {factoryProofAssets.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-black uppercase text-slate-500">Các mục nhỏ trong cụm</p>
+                        <div className="grid gap-4 xl:grid-cols-2">
+                          {factoryProofAssets.map((item) => renderAssetEditor(item, true))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                {groupedHomeTextItems.map(({ group, items }) => (
+                  <section key={group} className="border border-slate-200 bg-slate-50">
+                    <div className="border-b border-slate-200 bg-white px-4 py-3">
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">{group}</h3>
+                    </div>
+                    <div className="grid gap-4 p-4">
+                      {items.map(renderHomeTextField)}
+                    </div>
+                  </section>
+                ))}
+
+                {looseHomeAssets.length > 0 && (
+                  <section className="border border-slate-200 bg-slate-50">
+                    <div className="border-b border-slate-200 bg-white px-4 py-3">
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Hình ảnh khác trên trang chủ</h3>
+                    </div>
+                    <div className="grid gap-4 p-4">
+                      {looseHomeAssets.map((item) => renderAssetEditor(item))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            )}
+
+            {false && activeTab === "home" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
@@ -1495,7 +1756,7 @@ function MarketingPageContent() {
               </div>
             )}
 
-            {activeTab === "home" && (
+            {false && activeTab === "home" && (
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
