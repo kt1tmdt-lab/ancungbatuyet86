@@ -743,15 +743,12 @@ function StatsSection() {
   return (
     <section className="bg-white px-0 py-0">
       <div className="w-full">
-        <div className="flex flex-col gap-4 border-b border-orange-100 px-5 py-10 sm:px-8 lg:flex-row lg:items-end lg:justify-between lg:px-16">
+        <div className="border-b border-orange-100 px-5 py-8 sm:px-8 lg:px-16">
           <div>
-            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="text-4xl font-black tracking-[-0.04em] text-slate-950">
               Những con số tiêu biểu
             </h2>
           </div>
-          <p className="max-w-2xl font-serif text-2xl italic leading-relaxed text-orange-700 md:text-3xl">
-            &ldquo;Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm&rdquo;
-          </p>
         </div>
 
         <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
@@ -1109,18 +1106,18 @@ function WhyChooseUsFromDb() {
           description={homeTextValue(homeTexts, "news_section_description", "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.")}
         />
 
-        <div className="mt-10 grid gap-0 md:grid-cols-2">
+        <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {loading &&
             items.length === 0 &&
             Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="grid min-h-[320px] animate-pulse overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] lg:grid-cols-[0.95fr_1.05fr]"
+                className="min-h-[430px] animate-pulse overflow-hidden border border-orange-100 bg-[#fffaf3]"
               >
-                <div className="bg-orange-50" />
-                <div className="p-7">
+                <div className="aspect-[4/3] bg-orange-50" />
+                <div className="p-6">
                   <div className="h-9 w-9 bg-orange-100" />
-                  <div className="mt-16 h-6 w-2/3 bg-orange-100" />
+                  <div className="mt-12 h-6 w-2/3 bg-orange-100" />
                   <div className="mt-4 h-4 w-full bg-orange-100" />
                   <div className="mt-3 h-4 w-4/5 bg-orange-100" />
                 </div>
@@ -1153,9 +1150,9 @@ function WhyChooseUsFromDb() {
                   href={item.href}
                   target={item.href.startsWith("http") ? "_blank" : undefined}
                   rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="group/news relative grid h-full overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] shadow-sm outline-none transition-all hover:border-orange-300 hover:bg-white focus-visible:border-orange-400 lg:grid-cols-[0.95fr_1.05fr]"
+                  className="group/news relative flex h-full min-h-[430px] flex-col overflow-hidden border border-orange-100 bg-[#fffaf3] shadow-sm outline-none transition-all hover:-translate-y-1 hover:border-orange-300 hover:bg-white hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)] focus-visible:border-orange-400"
                 >
-                  <div className="relative min-h-[260px] bg-slate-100">
+                  <div className="relative aspect-[4/3] bg-slate-100">
                     {item.image ? (
                       <img
                         src={item.image}
@@ -1163,27 +1160,27 @@ function WhyChooseUsFromDb() {
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/news:scale-[1.035] group-focus-visible/news:scale-[1.035]"
                       />
                     ) : (
-                      <div className="flex h-full min-h-[260px] items-center justify-center bg-orange-50 text-4xl font-black text-orange-500">
+                      <div className="flex h-full items-center justify-center bg-orange-50 text-4xl font-black text-orange-500">
                         NEWS
                       </div>
                     )}
                   </div>
-                  <div className="relative z-10 flex flex-col justify-between p-7">
+                  <div className="relative z-10 flex flex-1 flex-col justify-between p-6">
                     <Icon
                       size={34}
                       className="text-orange-600 transition-colors duration-300 group-hover/news:text-orange-700"
                       strokeWidth={1.8}
                     />
-                    <div className="mt-10">
+                    <div className="mt-8">
                       {item.label && (
                         <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
                           {item.label}
                         </p>
                       )}
-                      <h3 className="text-2xl font-black tracking-[-0.04em] text-slate-950">
+                      <h3 className="text-xl font-black tracking-[-0.03em] text-slate-950">
                         {item.title}
                       </h3>
-                      <p className="mt-3 leading-7 text-slate-600">
+                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
                         {item.desc}
                       </p>
                       <span className="mt-5 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-orange-700">
