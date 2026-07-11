@@ -754,13 +754,18 @@ function StatsSection() {
     <section className="bg-white px-0 py-0">
       <div className="w-full">
         <div className="border-b border-orange-100 px-5 py-8 sm:px-8 lg:px-16">
-          <div>
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1fr] lg:items-center">
+            <div>
             <p className="mb-3 inline-block -rotate-1 font-[var(--font-script)] text-3xl font-bold italic tracking-[-0.04em] text-primary drop-shadow-[0_10px_22px_rgba(234,88,12,0.14)] sm:text-4xl">
               Ăn Cùng Bà Tuyết
             </p>
             <h2 className="text-4xl font-black tracking-[-0.04em] text-slate-950">
               Những con số tiêu biểu
             </h2>
+            </div>
+            <p className="max-w-2xl justify-self-start border-l-4 border-orange-500 pl-6 text-2xl font-black italic leading-[1.35] tracking-[-0.04em] text-slate-800 lg:justify-self-end lg:text-right xl:text-3xl">
+              Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm.
+            </p>
           </div>
         </div>
 
@@ -840,7 +845,7 @@ function TrustSection() {
           <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
             {sectionTitle}
           </h2>
-          <p className="mx-auto mt-7 max-w-4xl font-[Georgia,serif] text-2xl font-semibold italic leading-[1.55] tracking-[-0.03em] text-slate-800 sm:text-3xl">
+          <p className="mx-auto mt-7 max-w-4xl text-2xl font-black italic leading-[1.45] tracking-[-0.04em] text-slate-800 sm:text-3xl">
             “{sectionDescription}”
           </p>
         </div>
