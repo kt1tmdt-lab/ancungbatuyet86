@@ -822,16 +822,28 @@ function TrustSection() {
       icon: Award,
     },
   ];
+  const sectionLabel = homeTextValue(homeTexts, "trust_section_label", "Sứ mệnh");
+  const sectionTitle = homeTextValue(homeTexts, "trust_section_title", "Thay đổi định kiến về ăn vặt");
+  const sectionDescription = homeTextValue(
+    homeTexts,
+    "trust_section_description",
+    "Ăn vặt ngon hơn khi khách hàng biết rõ nguyên liệu, quy trình và bằng chứng phía sau sản phẩm.",
+  );
 
   return (
     <section className="bg-[#fff8ed] py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
-        <SectionTitle
-          label={homeTextValue(homeTexts, "trust_section_label", "Sứ mệnh")}
-          title={homeTextValue(homeTexts, "trust_section_title", "Thay đổi định kiến về ăn vặt")}
-          description={homeTextValue(homeTexts, "trust_section_description", "Ăn vặt ngon hơn khi khách hàng biết rõ nguyên liệu, quy trình và bằng chứng phía sau sản phẩm.")}
-          align="center"
-        />
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+            {sectionLabel}
+          </p>
+          <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
+            {sectionTitle}
+          </h2>
+          <p className="mx-auto mt-7 max-w-4xl font-[Georgia,serif] text-2xl font-semibold italic leading-[1.55] tracking-[-0.03em] text-slate-800 sm:text-3xl">
+            “{sectionDescription}”
+          </p>
+        </div>
 
         <div className="mt-10 grid gap-0 md:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item, i) => {
