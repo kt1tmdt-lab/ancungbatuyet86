@@ -429,7 +429,7 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
   videos: [],
   homeTexts: DEFAULT_HOME_TEXTS,
   homeSections: DEFAULT_HOME_SECTIONS,
-  homeNewsItems: DEFAULT_HOME_NEWS_ITEMS,
+  homeNewsItems: [],
   pageAssets: DEFAULT_PAGE_ASSETS,
   historyMilestones: [
     {
@@ -1001,10 +1001,7 @@ function withDefaultHomeSections(items: HomeSectionItem[]) {
 }
 
 function withDefaultHomeNewsItems(items: HomeNewsItem[]) {
-  if (items && items.length > 0) {
-    return items;
-  }
-  return DEFAULT_HOME_NEWS_ITEMS;
+  return items;
 }
 
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {
