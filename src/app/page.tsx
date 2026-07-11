@@ -503,9 +503,9 @@ function HeroSection() {
     <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
       <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#166534_100%)]" />
       <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-orange-100/70 lg:block" />
-      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-red-200/25 blur-3xl" />
-      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-red-300/20 blur-3xl" />
-      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-red-300/50 xl:block" />
+      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-orange-200/25 blur-3xl" />
+      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-orange-300/20 blur-3xl" />
+      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-orange-300/50 xl:block" />
 
       <div className="relative mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
         <motion.div
@@ -577,7 +577,7 @@ function HeroSection() {
                   key={item.label}
                   className="border-b border-orange-100 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
                 >
-                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-yellow-300">
+                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-orange-600 text-yellow-300">
                     <Icon size={20} strokeWidth={1.8} />
                   </div>
                   <p className="text-2xl font-black tracking-[-0.04em] text-slate-950">
@@ -598,10 +598,10 @@ function HeroSection() {
           transition={{ duration: 0.65 }}
           className="relative z-10 min-h-[700px] overflow-visible sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
         >
-          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-red-600 shadow-[0_35px_80px_rgba(185,28,28,0.20)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]">
+          <div className="absolute left-1/2 top-[8%] h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] lg:top-[9%] xl:h-[520px] xl:w-[520px]">
             <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
           </div>
-          <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-red-300/60 bg-red-100/30 xl:block" />
+          <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-orange-300/60 bg-orange-100/30 xl:block" />
 
           <div className="absolute left-0 top-[27%] z-30 hidden w-fit min-w-0 max-w-[min(20rem,42vw)] -rotate-2 border border-orange-100 bg-white/88 px-5 py-4 shadow-[10px_12px_0_rgba(234,88,12,0.16),0_26px_70px_rgba(15,23,42,0.12)] backdrop-blur xl:block">
             <div className="mb-2 h-1 w-12 bg-orange-500" />
