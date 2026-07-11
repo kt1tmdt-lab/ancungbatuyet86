@@ -1107,7 +1107,7 @@ function WhyChooseUsFromDb() {
           description={homeTextValue(homeTexts, "news_section_description", "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.")}
         />
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {loading &&
             items.length === 0 &&
             Array.from({ length: 4 }).map((_, i) => (
@@ -1137,7 +1137,7 @@ function WhyChooseUsFromDb() {
             </div>
           )}
 
-          {items.map((item, i) => {
+          {items.slice(0, 4).map((item, i) => {
             const Icon = item.icon;
             return (
               <motion.div
@@ -1404,7 +1404,7 @@ function TrustEvidenceSections() {
           </Link>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => {
             return (
               <article
