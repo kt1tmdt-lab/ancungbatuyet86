@@ -97,7 +97,6 @@ const stagger = {
   },
 };
 
-const HERO_CHARACTER_IMAGE = "/hero/ba-tuyet-character.png";
 const FEATURED_PRODUCT_PRIORITY = [
   "chan-ga-khong-lo",
   "chan-ga-rut-xuong",
@@ -452,7 +451,6 @@ function HeroSection() {
   const displayProducts = useMemo(() => products.slice(0, 5), [products]);
   const activeImage =
     activeProduct?.orbitImage || getProductImage(activeProduct);
-  const activeStat = activeProduct?.stats?.[0];
   const brandName = "Ăn Cùng Bà Tuyết";
   const heroTitle = heroBanner.title || DEFAULT_SITE_CONFIG.heroBanner.title;
 
@@ -476,7 +474,7 @@ function HeroSection() {
             className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
           >
             <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : "Thương hiệu Việt, Vì người Việt"}
+            {loading ? "Đang tải sản phẩm" : heroBanner.eyebrow}
           </motion.div>
 
           <motion.h1
@@ -514,12 +512,12 @@ function HeroSection() {
             </CurtainAction>
 
             <CurtainAction
-              href="/gioi-thieu"
+              href={heroBanner.secondaryCtaLink}
               icon={<ShoppingBag size={17} />}
               variant="white"
               className="shadow-[0_14px_36px_rgba(15,23,42,0.08)]"
             >
-              Giới thiệu
+              {heroBanner.secondaryCtaText}
             </CurtainAction>
           </motion.div>
 
@@ -527,12 +525,8 @@ function HeroSection() {
             variants={fadeUp}
             className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
           >
-            {[
-              { label: "Không gian sản xuất", value: "Quy mô", icon: Factory },
-              { label: "Bảo hiểm trách nhiệm sản phẩm", value: "PVI", icon: ShieldCheck },
-              { label: "Sản phẩm được phân phối", value: "Toàn quốc", icon: Truck },
-            ].map((item) => {
-              const Icon = item.icon;
+            {heroBanner.highlights.map((item, index) => {
+              const Icon = [Factory, ShieldCheck, Truck][index] || Factory;
               return (
                 <div
                   key={item.label}
@@ -566,22 +560,22 @@ function HeroSection() {
 
           <div className="absolute left-0 top-[27%] z-30 hidden max-w-[220px] rounded-none bg-white/92 p-5 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur xl:block">
             <p className="mt-3 text-lg font-black leading-6 text-slate-950">
-            Đừng tin những gì chúng tôi nói, hãy xem những gì chúng tôi làm.
+            {heroBanner.quote}
             </p>
           </div>
 
           <div className="absolute right-0 top-[14%] z-30 rounded-[1.35rem] border border-green-200 bg-green-50 px-5 py-4 text-center shadow-[0_24px_60px_rgba(22,101,52,0.12)] sm:right-4 xl:right-2 xl:px-6 xl:py-5">
             <p className="text-2xl font-black tracking-[-0.05em] text-green-700 xl:text-3xl">
-              {activeStat?.value || "4.000.000+"}
+              {heroBanner.statValue}
             </p>
             <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
-              {activeStat?.label || "Đơn đã bán"}
+              {heroBanner.statLabel}
             </p>
           </div>
 
           <img
-            src={HERO_CHARACTER_IMAGE}
-            alt="Nhân vật Bà Tuyết"
+            src={heroBanner.characterImage}
+            alt={heroBanner.characterAlt}
             className="absolute left-1/2 top-[8%] z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] lg:top-[8%] xl:top-[7%] xl:h-[500px]"
           />
 
@@ -1376,7 +1370,7 @@ function TrustEvidenceSections() {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          {items.map((item, index) => {
+          {items.map((item) => {
             return (
               <article
                 key={item.id}
@@ -1396,10 +1390,7 @@ function TrustEvidenceSections() {
                   )}
                 </div>
                 <div className="p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
-                    Bằng chứng 0{index + 1}
-                  </p>
-                  <h3 className="mt-2 line-clamp-2 text-base font-black leading-tight tracking-[-0.02em] text-slate-950">
+                  <h3 className="line-clamp-2 text-base font-black leading-tight tracking-[-0.02em] text-slate-950">
                     {item.title}
                   </h3>
                   <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">
@@ -1559,10 +1550,7 @@ function FactoryProofSection() {
                       <Icon size={20} />
                     </span>
                     <span className="min-w-0">
-                      <span className={`block text-[10px] font-black uppercase tracking-[0.18em] ${isActive ? "text-white/80" : "text-slate-400 group-hover:text-orange-500"}`}>
-                        Bằng chứng 0{index + 1}
-                      </span>
-                      <span className="mt-1 block text-sm font-black leading-5">{proof.title}</span>
+                      <span className="block text-sm font-black leading-5">{proof.title}</span>
                     </span>
                   </button>
                 );

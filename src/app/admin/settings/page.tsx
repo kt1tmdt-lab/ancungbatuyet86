@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +23,8 @@ import {
   Users,
   TrendingUp,
   Factory,
-  ShieldCheck
+  ShieldCheck,
+  ImagePlus
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { DEFAULT_SITE_CONFIG, normalizeSiteConfig } from "@/lib/site-config-defaults";
@@ -44,10 +46,22 @@ const statItemSchema = z.object({
 
 const settingsSchema = z.object({
   heroBanner: z.object({
+    eyebrow: z.string().min(1, "Vui lòng nhập nhãn thương hiệu"),
     title: z.string().min(1, "Vui lòng nhập tiêu đề"),
     subtitle: z.string().min(1, "Vui lòng nhập mô tả ngắn"),
+    characterImage: z.string().min(1, "Vui lòng chọn ảnh Hero"),
+    characterAlt: z.string().min(1, "Vui lòng nhập mô tả ảnh"),
+    quote: z.string().min(1, "Vui lòng nhập câu trích dẫn"),
+    statValue: z.string().min(1, "Vui lòng nhập số liệu"),
+    statLabel: z.string().min(1, "Vui lòng nhập nhãn số liệu"),
     ctaText: z.string().min(1, "Vui lòng nhập nút CTA"),
     ctaLink: z.string().min(1, "Vui lòng nhập link CTA"),
+    secondaryCtaText: z.string().min(1, "Vui lòng nhập nút phụ"),
+    secondaryCtaLink: z.string().min(1, "Vui lòng nhập link nút phụ"),
+    highlights: z.array(z.object({
+      value: z.string().min(1, "Vui lòng nhập giá trị"),
+      label: z.string().min(1, "Vui lòng nhập mô tả"),
+    })).length(3),
   }),
   seo: z.object({
     title: z.string().min(1, "Vui lòng nhập Meta Title"),
@@ -90,8 +104,16 @@ export default function SettingsPage() {
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"general" | "navigation" | "stats">("general");
+  const [activeTab, setActiveTab] = useState<"hero" | "seo" | "navigation" | "stats">("hero");
+  const [heroMediaOpen, setHeroMediaOpen] = useState(false);
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (tab === "hero" || tab === "seo" || tab === "navigation" || tab === "stats") {
+      setActiveTab(tab);
+    }
+  }, []);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -111,6 +133,7 @@ export default function SettingsPage() {
     name: "productMenuLinks",
   });
   const watchedProductMenuLinks = useWatch({ control, name: "productMenuLinks" });
+  const watchedHeroImage = useWatch({ control, name: "heroBanner.characterImage" });
 
   const { fields: footerProductsFields, append: appendFooterProduct, remove: removeFooterProduct } = useFieldArray({
     control,
@@ -228,9 +251,9 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
               <Settings className="text-orange-500" size={28} />
-              Cấu hình hệ thống & SEO
+              Cấu hình website
             </h1>
-            <p className="text-slate-500 mt-1">Tùy biến nội dung Trang chủ, Thẻ SEO, Menu chính và Chân trang Footer động.</p>
+            <p className="text-slate-500 mt-1">Chỉnh Hero, SEO, số liệu, menu và chân trang. Các nội dung khác mở từ trang Quản lý website.</p>
           </div>
           <button
             onClick={handleSubmit(onSubmit)}
@@ -243,16 +266,26 @@ export default function SettingsPage() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200">
+        <div className="flex overflow-x-auto border-b border-slate-200">
           <button
-            onClick={() => setActiveTab("general")}
+            onClick={() => setActiveTab("hero")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
-              activeTab === "general"
+              activeTab === "hero"
                 ? "border-orange-500 text-orange-600 bg-white"
                 : "border-transparent text-slate-500 hover:text-slate-950"
             }`}
           >
-            Nội dung chính & SEO
+            Hero trang chủ
+          </button>
+          <button
+            onClick={() => setActiveTab("seo")}
+            className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
+              activeTab === "seo"
+                ? "border-orange-500 text-orange-600 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-950"
+            }`}
+          >
+            SEO
           </button>
           <button
             onClick={() => setActiveTab("stats")}
@@ -280,15 +313,19 @@ export default function SettingsPage() {
           <div className="h-96 bg-slate-100 animate-pulse border border-slate-200"></div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {activeTab === "general" && (
+            {(activeTab === "hero" || activeTab === "seo") && (
               <div className="space-y-8 animate-fade-in">
                 {/* Section: Hero Banner */}
-                <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+                <div className={`${activeTab === "hero" ? "block" : "hidden"} bg-white border border-slate-200 shadow-sm overflow-hidden`}>
                   <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
                     <LayoutDashboard className="text-orange-500" size={20} />
                     <h2 className="text-lg font-bold text-slate-900">Nội dung Trang chủ (Hero Banner)</h2>
                   </div>
                   <div className="p-6 space-y-5">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Nhãn nhỏ phía trên tiêu đề</label>
+                      <input {...register("heroBanner.eyebrow")} className="w-full border border-slate-300 p-2.5 focus:border-orange-500 outline-none text-sm font-medium" />
+                    </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Tiêu đề chính (H1)</label>
                       <input
@@ -299,6 +336,38 @@ export default function SettingsPage() {
                       {errors.heroBanner?.title && (
                         <p className="text-red-500 text-xs mt-1">{errors.heroBanner.title.message}</p>
                       )}
+                    </div>
+
+                    <div className="grid gap-5 border-t border-slate-100 pt-5 lg:grid-cols-[220px_1fr]">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Ảnh nhân vật Hero</label>
+                        <div className="flex min-h-52 items-center justify-center border border-dashed border-slate-300 bg-slate-50 p-3">
+                          {watchedHeroImage ? (
+                            <img src={watchedHeroImage} alt="Xem trước ảnh Hero" className="max-h-48 w-full object-contain" />
+                          ) : <ImagePlus className="text-slate-300" size={40} />}
+                        </div>
+                        <button type="button" onClick={() => setHeroMediaOpen(true)} className="mt-2 w-full bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-orange-600">
+                          Chọn hoặc tải ảnh
+                        </button>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Đường dẫn ảnh</label>
+                          <input {...register("heroBanner.characterImage")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Mô tả ảnh (alt)</label>
+                          <input {...register("heroBanner.characterAlt")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-slate-700 mb-1">Câu trích dẫn bên cạnh ảnh</label>
+                          <textarea {...register("heroBanner.quote")} className="min-h-24 w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><label className="block text-sm font-bold text-slate-700 mb-1">Số liệu nổi bật</label><input {...register("heroBanner.statValue")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" /></div>
+                          <div><label className="block text-sm font-bold text-slate-700 mb-1">Nhãn số liệu</label><input {...register("heroBanner.statLabel")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" /></div>
+                        </div>
+                      </div>
                     </div>
 
                     <div>
@@ -337,11 +406,35 @@ export default function SettingsPage() {
                         )}
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Chữ nút phụ</label>
+                        <input {...register("heroBanner.secondaryCtaText")} className="w-full border border-slate-300 p-2.5 focus:border-orange-500 outline-none text-sm font-medium" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Nút phụ trỏ đến đâu?</label>
+                        <input {...register("heroBanner.secondaryCtaLink")} className="w-full border border-slate-300 p-2.5 focus:border-orange-500 outline-none text-sm font-medium" placeholder="/gioi-thieu" />
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-5">
+                      <h3 className="mb-3 font-bold text-slate-900">Ba ô thông tin dưới Hero</h3>
+                      <div className="grid gap-4 md:grid-cols-3">
+                        {[0, 1, 2].map((index) => (
+                          <div key={index} className="space-y-3 border border-slate-200 bg-slate-50 p-4">
+                            <div className="text-xs font-black uppercase text-orange-600">Ô {index + 1}</div>
+                            <input {...register(`heroBanner.highlights.${index}.value` as const)} className="w-full border border-slate-300 p-2.5 text-sm font-bold outline-none focus:border-orange-500" placeholder="Giá trị lớn" />
+                            <input {...register(`heroBanner.highlights.${index}.label` as const)} className="w-full border border-slate-300 p-2.5 text-sm outline-none focus:border-orange-500" placeholder="Dòng mô tả" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {/* Section: Global SEO */}
-                <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+                <div className={`${activeTab === "seo" ? "block" : "hidden"} bg-white border border-slate-200 shadow-sm overflow-hidden`}>
                   <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
                     <Globe className="text-blue-500" size={20} />
                     <h2 className="text-lg font-bold text-slate-900">SEO Toàn cục (Global SEO)</h2>
@@ -841,6 +934,14 @@ export default function SettingsPage() {
           </form>
         )}
       </div>
+      <MediaPickerModal
+        open={heroMediaOpen}
+        onClose={() => setHeroMediaOpen(false)}
+        onSelect={(url) => {
+          setValue("heroBanner.characterImage", url, { shouldDirty: true, shouldValidate: true });
+          setHeroMediaOpen(false);
+        }}
+      />
     </ProtectedRoute>
   );
 }

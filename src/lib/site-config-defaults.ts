@@ -15,10 +15,19 @@ export type StatItem = {
 
 export type SiteConfigData = {
   heroBanner: {
+    eyebrow: string;
     title: string;
     subtitle: string;
+    characterImage: string;
+    characterAlt: string;
+    quote: string;
+    statValue: string;
+    statLabel: string;
     ctaText: string;
     ctaLink: string;
+    secondaryCtaText: string;
+    secondaryCtaLink: string;
+    highlights: Array<{ value: string; label: string }>;
   };
   seo: {
     title: string;
@@ -63,11 +72,24 @@ export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [];
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   heroBanner: {
+    eyebrow: "Thương hiệu Việt, vì người Việt",
     title: "Ăn vặt thì phải Ăn Cùng Bà Tuyết",
     subtitle:
       "Thương hiệu đồ ăn vặt Việt Nam xây dựng niềm tin bằng nguyên liệu rõ ràng, quy trình sản xuất chỉn chu và hệ thống phân phối chính thức.",
+    characterImage: "/hero/ba-tuyet-character.png",
+    characterAlt: "Nhân vật Bà Tuyết",
+    quote: "Đừng tin những gì chúng tôi nói, hãy xem những gì chúng tôi làm.",
+    statValue: "900.000+",
+    statLabel: "Đơn đã bán",
     ctaText: "Xem sản phẩm nổi bật",
     ctaLink: "/san-pham",
+    secondaryCtaText: "Giới thiệu",
+    secondaryCtaLink: "/gioi-thieu",
+    highlights: [
+      { value: "Quy mô", label: "Không gian sản xuất" },
+      { value: "PVI", label: "Bảo hiểm trách nhiệm sản phẩm" },
+      { value: "Toàn quốc", label: "Sản phẩm được phân phối" },
+    ],
   },
   seo: {
     title: "Ăn Cùng Bà Tuyết - Đồ ăn vặt sạch hàng đầu Việt Nam",
@@ -190,6 +212,7 @@ function normalizeProductMenuLinks(value: unknown) {
 export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const source = isRecord(input) ? input : {};
   const heroBanner = isRecord(source.heroBanner) ? source.heroBanner : {};
+  const heroHighlights = Array.isArray(heroBanner.highlights) ? heroBanner.highlights : [];
   const seo = isRecord(source.seo) ? source.seo : {};
   const footerLinks = isRecord(source.footerLinks) ? source.footerLinks : {};
   const footerContact = isRecord(source.footerContact) ? source.footerContact : {};
@@ -201,10 +224,25 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
 
   return {
     heroBanner: {
+      eyebrow: stringOrDefault(heroBanner.eyebrow, DEFAULT_SITE_CONFIG.heroBanner.eyebrow),
       title: stringOrDefault(heroBanner.title, DEFAULT_SITE_CONFIG.heroBanner.title),
       subtitle: stringOrDefault(heroBanner.subtitle, DEFAULT_SITE_CONFIG.heroBanner.subtitle),
+      characterImage: stringOrDefault(heroBanner.characterImage, DEFAULT_SITE_CONFIG.heroBanner.characterImage),
+      characterAlt: stringOrDefault(heroBanner.characterAlt, DEFAULT_SITE_CONFIG.heroBanner.characterAlt),
+      quote: stringOrDefault(heroBanner.quote, DEFAULT_SITE_CONFIG.heroBanner.quote),
+      statValue: stringOrDefault(heroBanner.statValue, DEFAULT_SITE_CONFIG.heroBanner.statValue),
+      statLabel: stringOrDefault(heroBanner.statLabel, DEFAULT_SITE_CONFIG.heroBanner.statLabel),
       ctaText: stringOrDefault(heroBanner.ctaText, DEFAULT_SITE_CONFIG.heroBanner.ctaText),
       ctaLink: stringOrDefault(heroBanner.ctaLink, DEFAULT_SITE_CONFIG.heroBanner.ctaLink),
+      secondaryCtaText: stringOrDefault(heroBanner.secondaryCtaText, DEFAULT_SITE_CONFIG.heroBanner.secondaryCtaText),
+      secondaryCtaLink: stringOrDefault(heroBanner.secondaryCtaLink, DEFAULT_SITE_CONFIG.heroBanner.secondaryCtaLink),
+      highlights: DEFAULT_SITE_CONFIG.heroBanner.highlights.map((fallback, index) => {
+        const item = isRecord(heroHighlights[index]) ? heroHighlights[index] : {};
+        return {
+          value: stringOrDefault(item.value, fallback.value),
+          label: stringOrDefault(item.label, fallback.label),
+        };
+      }),
     },
     seo: {
       title: stringOrDefault(seo.title, DEFAULT_SITE_CONFIG.seo.title),

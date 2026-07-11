@@ -161,43 +161,42 @@ export function AdminHeader() {
 
   const groupedNavItems = [
     {
-      group: "Tổng quan",
+      group: "Bắt đầu",
       items: [
-        { href: "/admin", label: "Dashboard", icon: LayoutDashboard, show: true },
-        { href: "/admin/web-control", label: "Tổng quản lý web", icon: MonitorCog, show: isMarketingAllowed },
+        { href: "/admin", label: "Tổng quan", icon: LayoutDashboard, show: true },
+        { href: "/admin/web-control", label: "Quản lý website", icon: MonitorCog, show: isMarketingAllowed },
       ],
     },
     {
-      group: "Nội dung",
+      group: "Tin tức và hình ảnh",
       items: [
         { href: "/admin/posts", label: "Bài viết", icon: FileText, show: true },
         { href: "/admin/posts/review", label: "Bài chờ duyệt", icon: ClipboardCheck, show: isAdminOrEditor },
         { href: "/admin/categories", label: "Danh mục", icon: FolderKanban, show: isAdminOrEditor },
-        { href: "/admin/pages", label: "Trang", icon: Globe, show: isPageManager },
+        { href: "/admin/pages", label: "Trang tự tạo", icon: Globe, show: isPageManager },
         { href: "/admin/media", label: "Thư viện ảnh", icon: ImagePlus, show: isAdminOrEditor },
       ],
     },
     {
-      group: "Cửa hàng",
+      group: "Sản phẩm và bán hàng",
       items: [
         { href: "/admin/products", label: "Sản phẩm", icon: FolderPlus, show: isAdminOrEditor },
         { href: "/admin/sales-channels", label: "Hệ thống bán", icon: Store, show: isAdminOrEditor },
       ],
     },
     {
-      group: "Marketing & CSKH",
+      group: "Truyền thông và khách hàng",
       items: [
-        { href: "/admin/marketing", label: "Quản lý Marketing", icon: Megaphone, show: isMarketingAllowed },
+        { href: "/admin/marketing", label: "Báo chí & phản hồi", icon: Megaphone, show: isMarketingAllowed },
         { href: "/admin/media-intelligence", label: "Radar Thương Hiệu", icon: Radar, show: isMarketingAllowed },
-        { href: "/admin/marketing?tab=assets", label: "Ảnh & link trang", icon: ImagePlus, show: isMarketingAllowed },
-        { href: "/admin/contacts", label: "Liên hệ", icon: Users, show: isContactAllowed },
+        { href: "/admin/contacts", label: "Liên hệ khách hàng", icon: Users, show: isContactAllowed },
       ],
     },
     {
-      group: "Hệ thống",
+      group: "Quản trị hệ thống",
       items: [
         { href: "/admin/system", label: "Trung tâm hệ thống", icon: ServerCog, show: isAdminOrSuperAdmin },
-        { href: "/admin/settings", label: "Cấu hình Web", icon: Globe, show: isSettingsAllowed },
+        { href: "/admin/settings", label: "Cấu hình nâng cao", icon: Globe, show: isSettingsAllowed },
         { href: "/admin/activity-logs", label: "Nhật ký hoạt động", icon: ClipboardList, show: isAdminOrSuperAdmin },
         { href: "/admin/users", label: "Thành viên", icon: Users, show: isAdminOrSuperAdmin },
       ],
