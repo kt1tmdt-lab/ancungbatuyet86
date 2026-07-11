@@ -342,7 +342,8 @@ async function fetchHomePosts() {
   const response = await fetch("/api/posts");
   const data = await response.json();
 
-  return Array.isArray(data) ? (data as PostItem[]) : [];
+  // Giới hạn 4 bài để đồng bộ với giới hạn của marketing config (buildConfiguredNewsEvidenceItems cũng slice 4)
+  return Array.isArray(data) ? (data as PostItem[]).slice(0, 4) : [];
 }
 
 async function fetchHomeSiteConfig(): Promise<HeroBannerConfig> {
