@@ -36,6 +36,7 @@ import {
   type HomeTextItem,
   type MarketingConfigData,
   type PageAssetItem,
+  type PressItem,
 } from "@/lib/marketing-config";
 
 type Product = {
@@ -383,10 +384,10 @@ function homeSectionEnabled(
   return sections.find((item) => item.key === key)?.enabled !== false;
 }
 
-function buildNewsEvidenceItems(posts: PostItem[]) {
+function buildNewsEvidenceItems(posts: PostItem[], pressItems: PressItem[] = []) {
   const icons = [BadgeCheck, ClipboardCheck, Store, Truck];
 
-  return posts.slice(0, 4).map(
+  const postItems = posts.map(
     (post, index): NewsEvidenceItem => ({
       icon: icons[index] || BadgeCheck,
       title: post.title || "Tin tức mới nhất",
@@ -398,6 +399,21 @@ function buildNewsEvidenceItems(posts: PostItem[]) {
       label: post.category?.name || "Tin tức",
     }),
   );
+  const externalPressItems = pressItems
+    .filter((item) => item.title || item.sourceName || item.link)
+    .map(
+      (item): NewsEvidenceItem => ({
+        icon: Newspaper,
+        title: item.title || item.sourceName || "Bài báo nhắc tới Ăn Cùng Bà Tuyết",
+        desc: item.sourceName
+          ? `Bài viết từ ${item.sourceName}${item.publishDate ? `, đăng ngày ${item.publishDate}` : ""}.`
+          : "Bài báo bên ngoài nhắc tới thương hiệu Ăn Cùng Bà Tuyết.",
+        href: item.link || "/tin-tuc",
+        label: item.sourceName || "Báo chí",
+      }),
+    );
+
+  return [...postItems, ...externalPressItems].slice(0, 4);
 }
 // ==========================================
 // 1. HERO SECTION - BRAND STORY STYLE
@@ -1049,18 +1065,19 @@ function FeaturedProducts() {
 }
 
 function WhyChooseUsFromDb() {
-  const { homeTexts } = useHomeMarketingConfig();
-  const [items, setItems] = useState<NewsEvidenceItem[]>([]);
+  const { homeTexts, press } = useHomeMarketingConfig();
+  const [posts, setPosts] = useState<PostItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const items = useMemo(() => buildNewsEvidenceItems(posts, press), [posts, press]);
 
   useEffect(() => {
     fetchHomePosts()
       .then((posts) => {
-        setItems(buildNewsEvidenceItems(posts));
+        setPosts(posts);
       })
       .catch((error) => {
         console.error("Failed to load news evidence section from DB", error);
-        setItems([]);
+        setPosts([]);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -1116,6 +1133,8 @@ function WhyChooseUsFromDb() {
               >
                 <Link
                   href={item.href}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="group/news relative grid h-full overflow-hidden border-r border-b border-orange-100 bg-[#fffaf3] shadow-sm outline-none transition-all hover:border-orange-300 hover:bg-white focus-visible:border-orange-400 lg:grid-cols-[0.95fr_1.05fr]"
                 >
                   <div className="relative min-h-[260px] bg-slate-100">
