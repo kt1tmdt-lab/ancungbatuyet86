@@ -626,7 +626,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         {/* Right Column: Settings & Media */}
         <div className="space-y-6">
           <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-5">
-            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại & Đẩy bài</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại & hiển thị trang chủ</h3>
 
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Danh mục</label>
@@ -644,8 +644,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
 
             <div className="p-4 bg-orange-50/50  border border-orange-100 flex items-center justify-between">
               <div>
-                <span className="block text-sm font-bold text-orange-950">Push nổi bật</span>
-                <span className="block text-xs text-orange-700">Đẩy lên trang chủ website</span>
+                <span className="block text-sm font-bold text-orange-950">Hiện ở trang chủ</span>
+                <span className="block text-xs text-orange-700">Bật thì hiện ở hero và mục Sản phẩm nổi bật.</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -671,7 +671,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thứ tự ưu tiên (Sắp xếp)</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thứ tự trên trang chủ</label>
               <input
                 type="number"
                 value={sortOrder}
@@ -679,7 +679,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 placeholder="Ví dụ: 1"
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Số nhỏ hơn sẽ hiển thị trước (0, 1, 2...)</p>
+              <p className="text-[11px] text-slate-400 mt-1">Số nhỏ hiện trước. Dùng cho cả hero và mục Sản phẩm nổi bật.</p>
             </div>
           </div>
 

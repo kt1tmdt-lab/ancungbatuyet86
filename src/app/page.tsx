@@ -53,6 +53,7 @@ type Product = {
   price?: string;
   purchaseUrl?: string;
   shortDescription?: string | null;
+  sortOrder?: number | null;
 };
 
 type HeroProduct = Product & {
@@ -300,7 +301,14 @@ function getFeaturedProductRank(product: Product | HeroProduct) {
 }
 
 function sortFeaturedProducts<T extends Product | HeroProduct>(items: T[]) {
-  return [...items].sort((a, b) => getFeaturedProductRank(a) - getFeaturedProductRank(b));
+  return [...items].sort((a, b) => {
+    const orderA = typeof a.sortOrder === "number" ? a.sortOrder : Number.POSITIVE_INFINITY;
+    const orderB = typeof b.sortOrder === "number" ? b.sortOrder : Number.POSITIVE_INFINITY;
+
+    if (orderA !== orderB) return orderA - orderB;
+
+    return getFeaturedProductRank(a) - getFeaturedProductRank(b);
+  });
 }
 
 function toHeroProduct(product: HeroProduct): HeroProduct {

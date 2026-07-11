@@ -72,19 +72,12 @@ export default function CollectionPage() {
                   </Link>
                   <p className="text-slate-500 text-xs mt-1 line-clamp-2">{product.tagline}</p>
                 </div>
-                <div className="mt-4 space-y-3">
-                  <p className="text-orange-500 font-extrabold text-sm sm:text-base">{product.price}</p>
-                  {product.purchaseUrl && (
-                    <a
-                      href={product.purchaseUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-1 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 transition px-4 py-2 rounded-xl shadow-md shadow-orange-500/10"
-                    >
-                      <span>Mua ngay Shopee</span>
-                    </a>
-                  )}
-                </div>
+                <Link
+                  href={`/san-pham/${product.slug}`}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-1 bg-slate-950 px-4 py-2 text-xs font-bold text-white shadow-md transition hover:bg-orange-600"
+                >
+                  <span>Xem hồ sơ sản phẩm</span>
+                </Link>
               </motion.div>
             ))}
           </div>

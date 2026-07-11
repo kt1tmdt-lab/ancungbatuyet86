@@ -13,7 +13,6 @@ import {
   Factory,
   Loader,
   PackageCheck,
-  ShoppingBag,
   Star,
   Leaf,
   BadgeCheck,
@@ -200,27 +199,22 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Price & CTA */}
+              {/* Product profile CTA */}
               <div className="mt-8 flex flex-col gap-4 border-t border-orange-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Giá từ</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Hồ sơ sản phẩm</p>
                   <p className="mt-1 text-3xl font-black text-slate-950">
-                    {product.priceRange || product.price || "Liên hệ"}
+                    Hương vị, bao bì và quy trình
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {product.purchaseUrl && (
-                    <a
-                      href={product.purchaseUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 bg-orange-500 px-7 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg"
-                    >
-                      <ShoppingBag size={18} />
-                      Mua ngay
-                      <ArrowRight size={16} />
-                    </a>
-                  )}
+                  <Link
+                    href="/san-pham"
+                    className="inline-flex items-center gap-2 bg-slate-950 px-7 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg"
+                  >
+                    Xem thêm sản phẩm
+                    <ArrowRight size={16} />
+                  </Link>
                 </div>
               </div>
 
@@ -324,7 +318,9 @@ export default function ProductDetailPage() {
                           <p className="text-sm font-black text-slate-950 group-hover:text-orange-600">
                             {v.name} {v.weight ? `(${v.weight})` : ""}
                           </p>
-                          <p className="mt-1 text-lg font-black text-orange-600">{v.price}</p>
+                          {v.weight && (
+                            <p className="mt-1 text-sm font-bold text-orange-600">{v.weight}</p>
+                          )}
                           {v.spiceLevel !== undefined && v.spiceLevel > 0 && (
                             <p className="text-[10px] text-orange-600 font-bold mt-1">Độ cay: {"🔥".repeat(v.spiceLevel)}</p>
                           )}
@@ -390,35 +386,25 @@ export default function ProductDetailPage() {
 
             {/* Right Sidebar */}
             <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-              {/* Quick Buy Card */}
+              {/* Product profile card */}
               <div className="border border-orange-200 bg-[#fff7ed] p-6">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600 mb-4">Mua sản phẩm</p>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600 mb-4">Hồ sơ sản phẩm</p>
                 <img
                   src={product.image}
                   alt={product.name}
                   className="mx-auto mb-4 h-40 w-auto object-contain"
                 />
                 <h3 className="text-lg font-black text-slate-950">{product.name}</h3>
-                <p className="mt-2 text-2xl font-black text-orange-600">{product.priceRange || product.price}</p>
-
-                {product.purchaseUrl ? (
-                  <a
-                    href={product.purchaseUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 flex w-full items-center justify-center gap-2 bg-orange-500 py-4 text-sm font-black text-white transition hover:bg-orange-600"
-                  >
-                    <ShoppingBag size={18} />
-                    Đặt mua ngay
-                  </a>
-                ) : (
-                  <Link
-                    href="/lien-he"
-                    className="mt-4 flex w-full items-center justify-center gap-2 bg-slate-950 py-4 text-sm font-black text-white transition hover:bg-slate-800"
-                  >
-                    Liên hệ đặt hàng
-                  </Link>
-                )}
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                  Xem thông tin sản phẩm, thành phần, quy cách và câu chuyện phía sau món ăn vặt này.
+                </p>
+                <Link
+                  href="/san-pham"
+                  className="mt-4 flex w-full items-center justify-center gap-2 bg-slate-950 py-4 text-sm font-black text-white transition hover:bg-orange-600"
+                >
+                  Xem thêm sản phẩm
+                  <ArrowRight size={16} />
+                </Link>
               </div>
 
               {specs.length > 0 && (
@@ -481,7 +467,7 @@ export default function ProductDetailPage() {
                         {rp.name}
                       </p>
                       <p className="mt-2 text-xs font-black text-orange-600">
-                        {rp.priceRange || rp.price || "Liên hệ"}
+                        Xem hồ sơ sản phẩm
                       </p>
                     </div>
                   </Link>

@@ -15,7 +15,6 @@ import {
   Loader,
   PackageCheck,
   ShieldCheck,
-  ShoppingBag,
   Star,
   type LucideIcon,
 } from "lucide-react";
@@ -281,10 +280,10 @@ export default function ProductsPage() {
                         <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
                           <div>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                              Thông tin mua hàng
+                              Hồ sơ sản phẩm
                             </p>
                             <p className="mt-1 text-2xl font-black text-slate-950">
-                              Xem trong trang chi tiết
+                              Xem câu chuyện và quy cách
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-3">
@@ -297,20 +296,6 @@ export default function ProductsPage() {
                               Xem hồ sơ sản phẩm
                               <ChevronRight size={15} />
                             </Button>
-                            {product.purchaseUrl && (
-                              <Button
-                                href={product.purchaseUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                variant="primary"
-                                size="md"
-                                className="px-6 py-3 text-xs uppercase tracking-wider"
-                              >
-                                <ShoppingBag size={15} />
-                                Kênh chính thức
-                                <ArrowRight size={15} />
-                              </Button>
-                            )}
                           </div>
                         </div>
                       </div>

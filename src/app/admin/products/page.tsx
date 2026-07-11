@@ -105,7 +105,8 @@ export default function AdminProductsPage() {
       });
       if (res.ok) {
         setProducts(products.map((p) => (p.id === product.id ? { ...p, featured: !p.featured } : p)));
-      } else alert("Không thể thay đổi trạng thái nổi bật");
+        toast.success(!product.featured ? "Đã đưa sản phẩm lên 2 cụm trang chủ" : "Đã ẩn sản phẩm khỏi 2 cụm trang chủ");
+      } else alert("Không thể thay đổi trạng thái hiển thị trang chủ");
     } finally { setActionLoading(null); }
   };
 
@@ -180,12 +181,12 @@ export default function AdminProductsPage() {
     },
     {
       accessorKey: "sortOrder",
-      header: "Thứ tự",
-      cell: ({ row }) => <span className="font-semibold text-slate-900">{row.original.sortOrder}</span>
+      header: "Thứ tự trang chủ",
+      cell: ({ row }) => <span className="font-semibold text-slate-900">{row.original.sortOrder || 0}</span>
     },
     {
       accessorKey: "featured",
-      header: "Nổi bật (Push)",
+      header: "Hiện ở 2 cụm trang chủ",
       cell: ({ row }) => {
         const prod = row.original;
         return (
@@ -193,10 +194,10 @@ export default function AdminProductsPage() {
             onClick={() => handleToggleFeatured(prod)}
             disabled={actionLoading === prod.id}
             className={`acbt-btn acbt-btn--sm ${prod.featured ? "acbt-btn--admin" : "acbt-btn--admin-secondary"}`}
-            title={prod.featured ? "Hạ nổi bật" : "Đẩy lên nổi bật trang chủ"}
+            title={prod.featured ? "Ẩn khỏi hero và sản phẩm nổi bật" : "Hiện ở hero và sản phẩm nổi bật"}
           >
             <Heart size={12} fill={prod.featured ? "currentColor" : "none"} />
-            <span>{prod.featured ? "Đã đẩy" : "Push"}</span>
+            <span>{prod.featured ? "Đang hiện" : "Cho hiện"}</span>
           </button>
         );
       }

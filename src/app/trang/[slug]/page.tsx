@@ -346,7 +346,7 @@ export default function CustomDynamicPage({
                           )}
                           <div className="mt-5 flex items-center justify-between border-t border-orange-100 pt-4">
                             <span className="text-sm font-black text-orange-600">
-                              {product.priceRange || product.price || "Liên hệ"}
+                              Hồ sơ sản phẩm
                             </span>
                             <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-slate-500 group-hover:text-orange-600">
                               Xem
