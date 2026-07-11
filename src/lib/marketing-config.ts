@@ -1001,16 +1001,10 @@ function withDefaultHomeSections(items: HomeSectionItem[]) {
 }
 
 function withDefaultHomeNewsItems(items: HomeNewsItem[]) {
-  const byId = new Map(items.map((item) => [item.id, item]));
-
-  const merged = DEFAULT_HOME_NEWS_ITEMS.map((defaultItem) => ({
-    ...defaultItem,
-    ...(byId.get(defaultItem.id) || {}),
-    id: byId.get(defaultItem.id)?.id || defaultItem.id,
-    sortOrder: byId.get(defaultItem.id)?.sortOrder ?? defaultItem.sortOrder,
-  })).concat(items.filter((item) => item.id && !DEFAULT_HOME_NEWS_ITEMS.some((defaultItem) => defaultItem.id === item.id)));
-
-  return merged.slice(0, 4);
+  if (items && items.length > 0) {
+    return items;
+  }
+  return DEFAULT_HOME_NEWS_ITEMS;
 }
 
 export function normalizeMarketingConfig(input: unknown): MarketingConfigData {

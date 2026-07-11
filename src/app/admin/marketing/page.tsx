@@ -348,6 +348,22 @@ function MarketingPageContent() {
     setVideoList([...videoList, newItem]);
   };
 
+  const addHomeNewsItem = () => {
+    const newItem: HomeNewsItem = {
+      id: `custom_${Date.now()}`,
+      title: "",
+      description: "",
+      label: "",
+      imageUrl: "",
+      linkUrl: "",
+      enabled: true,
+      sortOrder: homeNewsList.length > 0
+        ? Math.max(...homeNewsList.map((item) => Number(item.sortOrder) || 0)) + 10
+        : 10,
+    };
+    setHomeNewsList([...homeNewsList, newItem]);
+  };
+
   const addAsset = () => {
     const newItem: PageAssetItem = {
       id: Date.now().toString(),
@@ -436,6 +452,10 @@ function MarketingPageContent() {
 
   const removeCommunityActivity = (id: string) => {
     setCommunityList(communityList.filter((item) => item.id !== id));
+  };
+
+  const removeHomeNewsItem = (id: string) => {
+    setHomeNewsList(homeNewsList.filter((item) => item.id !== id));
   };
 
   // Update Field Helpers
@@ -1671,16 +1691,26 @@ function MarketingPageContent() {
                 ))}
 
                 <section className="border border-slate-200 bg-slate-50">
-                  <div className="border-b border-slate-200 bg-white px-4 py-3">
-                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Tin tức & bằng chứng ngoài trang chủ</h3>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-500">Tự chọn bài nào hiển thị ở block này: bài nội bộ, bài báo ngoài, link sản phẩm hoặc link bất kỳ.</p>
+                  <div className="flex flex-col gap-3 border-b border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Tin tức & bằng chứng ngoài trang chủ</h3>
+                      <p className="mt-1 text-[11px] font-semibold text-slate-500">Tự chọn bài nào hiển thị ở block này: bài nội bộ, bài báo ngoài, link sản phẩm hoặc link bất kỳ.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addHomeNewsItem}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow cursor-pointer transition w-fit"
+                    >
+                      <Plus size={14} />
+                      Thêm bài
+                    </button>
                   </div>
                   <div className="grid gap-4 p-4">
                     {homeNewsList
                       .slice()
                       .sort((a, b) => a.sortOrder - b.sortOrder)
                       .map((item, index) => (
-                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-white p-4 lg:grid-cols-[180px_1fr]">
+                        <div key={item.id} className="grid gap-4 border border-slate-200 bg-white p-4 lg:grid-cols-[180px_1fr_auto]">
                           <div className="space-y-3">
                             <div className="overflow-hidden border border-slate-200 bg-slate-50">
                               {item.imageUrl ? (
@@ -1778,6 +1808,15 @@ function MarketingPageContent() {
                               </div>
                             </div>
                           </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removeHomeNewsItem(item.id)}
+                            className="flex h-fit items-center gap-1.5 border border-transparent px-3 py-2 text-xs font-bold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500 lg:self-center"
+                          >
+                            <Trash2 size={16} />
+                            Xóa
+                          </button>
                         </div>
                       ))}
                   </div>
