@@ -96,6 +96,30 @@ const defaultImage = "/bento/bento-factory.png";
 const productImage = "/hero/chan-ga-plate.png";
 const proofImage = "/bento/bento-insurance.png";
 
+const BRAND_STORY_HTML = `
+<h2>Tôi cũng có một nỗi sợ</h2>
+<p>Một nỗi sợ giống như rất nhiều người tiêu dùng khác: <strong>sợ chân gà không rõ nguồn gốc, sợ những sản phẩm được gắn mác “chân gà Trung Quốc”.</strong></p>
+<p>Tôi là một người mẹ, cũng là một người bà. Tôi không thể để con cháu mình ăn những sản phẩm không biết được làm từ đâu, sản xuất như thế nào và có thực sự bảo đảm an toàn hay không.</p>
+<p>Bởi sức khỏe của chúng hôm nay cũng chính là tương lai của chúng sau này.</p>
+<p>Nhưng nỗi ám ảnh mang tên “chân gà Trung Quốc” đã ăn sâu vào suy nghĩ của nhiều người đến mức, dù tôi có làm thật, nói thật và công khai mọi thứ, vẫn có người không tin.</p>
+<p>Họ nghi ngờ. Họ chỉ trích. Họ để lại những bình luận cay nghiệt và lan truyền những tin đồn không có căn cứ về Chân Gà Bà Tuyết.</p>
+<p>Sức ép từ dư luận, chỉ có thể diễn tả bằng hai chữ: <strong>khủng khiếp</strong>.</p>
+<p>Có những ngày tôi ngồi đọc từng bình luận ác ý, từng lời phủ nhận mọi công sức mà mình đã bỏ ra. Tôi thấy mệt mỏi, thấy tủi thân và dường như già đi sau mỗi đêm mất ngủ.</p>
+<p>Tôi biết con đường mình lựa chọn chưa bao giờ là dễ dàng.</p>
+<p>Làm tốt vẫn có thể bị nói. Làm đúng vẫn có thể bị nghi ngờ.</p>
+<p>Có những lúc tôi không chịu đựng nổi nữa. Tôi đã từng muốn nói: “Hay là mình dừng lại thôi.”</p>
+<blockquote>Nếu ai cũng sợ hãi và bỏ cuộc, vậy ai sẽ là người đứng lên để xóa bỏ nỗi sợ ấy?</blockquote>
+<p>Chính vì vậy, tôi quyết định tiếp tục.</p>
+<p>Tôi tin rằng nơi này sẽ tạo ra những sản phẩm có nguồn gốc rõ ràng, quy trình sản xuất minh bạch và chất lượng được kiểm soát nghiêm túc.</p>
+<p>Tôi tin rằng nơi này không chỉ tạo ra những gói chân gà ngon, mà còn tạo thêm công ăn việc làm ổn định cho bà con tại Thái Nguyên.</p>
+<p>Tôi tin rằng nơi này sẽ đóng góp một phần nhỏ bé vào hành trình xây dựng, phát triển quê hương và từng bước đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam.</p>
+<p>Tôi không mong mọi người tin tôi chỉ bằng những lời tôi nói.</p>
+<p>Tôi mong mọi người hãy nhìn vào những gì chúng tôi đang làm, nhìn vào nhà máy, nguyên liệu, quy trình sản xuất và từng sản phẩm được làm ra mỗi ngày.</p>
+<p>Hãy để tôi và những con người tại đây từng bước xóa đi nỗi sợ mang tên <strong>“chân gà Trung Quốc”.</strong></p>
+<p>Để khi cầm trên tay một gói Chân Gà Bà Tuyết, mọi người không chỉ cảm nhận được vị ngon, mà còn cảm nhận được sự minh bạch, trách nhiệm và niềm tự hào của một sản phẩm được làm nên tại Thái Nguyên.</p>
+<h3>Chân Gà Bà Tuyết – ngon phải rõ nguồn gốc, ăn phải thật an tâm.</h3>
+`;
+
 function page(
   routePath: string,
   title: string,
@@ -558,15 +582,15 @@ DEFAULT_INFO_PAGES["/gioi-thieu/cau-chuyen-thuong-hieu"] = page(
   "/gioi-thieu/cau-chuyen-thuong-hieu",
   "Câu chuyện thương hiệu",
   "Giới thiệu",
-  "Ăn Cùng Bà Tuyết được xây dựng từ một tinh thần rất đơn giản: món ăn vặt ngon phải đi cùng nguồn gốc rõ ràng, quy trình rõ ràng và trách nhiệm rõ ràng.",
+  "Hành trình đứng lên trước nỗi sợ chân gà không rõ nguồn gốc, để làm một sản phẩm ngon phải rõ nguồn gốc và ăn phải thật an tâm.",
   [
     {
       id: "brand-story-origin",
       type: "split",
       data: {
-        title: "Từ món ăn quen thuộc đến thương hiệu có quy trình",
+        title: "Ngon phải rõ nguồn gốc, ăn phải thật an tâm",
         description:
-          "Ăn Cùng Bà Tuyết không chỉ kể câu chuyện bằng hình ảnh vui vẻ trên bao bì. Thương hiệu cần được nhìn thấy qua cách chọn nguyên liệu, cách sản xuất, cách công bố thông tin và cách xử lý trách nhiệm với khách hàng sau khi bán.",
+          "Câu chuyện Chân Gà Bà Tuyết bắt đầu từ một nỗi sợ rất thật của người tiêu dùng: sợ sản phẩm không rõ nguồn gốc. Vì vậy, thương hiệu chọn cách trả lời bằng nhà máy, nguyên liệu, quy trình và những sản phẩm được làm ra mỗi ngày.",
         imageUrl: "/hero/ba-tuyet-character.png",
         imagePosition: "right",
         ctaText: "Xem chất lượng kiểm chứng",
@@ -577,12 +601,12 @@ DEFAULT_INFO_PAGES["/gioi-thieu/cau-chuyen-thuong-hieu"] = page(
       id: "brand-story-principles",
       type: "features",
       data: {
-        title: "Tinh thần thương hiệu",
-        subtitle: "Không nói quá. Không tự phong. Cái gì có bằng chứng thì công bố, cái gì chưa đủ hồ sơ thì ghi rõ cần bổ sung.",
+        title: "Ba điều giữ lại trong câu chuyện này",
+        subtitle: "Không bắt khách hàng tin bằng lời nói. Hãy để những gì thương hiệu đang làm tự trả lời.",
         items: [
-          { icon: "Heart", title: "Gần gũi", description: "Giữ tinh thần món ăn vặt Việt: dễ ăn, dễ nhớ, có cá tính riêng." },
-          { icon: "Factory", title: "Có quy trình", description: "Sản phẩm cần được đặt trong hệ thống sản xuất, kiểm soát và phân phối rõ ràng." },
-          { icon: "FileSearch", title: "Có hồ sơ", description: "Thông tin về nguyên liệu, nhà máy, chứng nhận và bảo hiểm cần có tài liệu đi kèm." },
+          { icon: "Heart", title: "Nỗi sợ rất thật", description: "Sợ chân gà không rõ nguồn gốc, sợ sản phẩm gắn mác nhập nhèm và không biết được làm từ đâu." },
+          { icon: "Factory", title: "Trả lời bằng việc làm", description: "Nhìn vào nhà máy, nguyên liệu, quy trình sản xuất và từng sản phẩm được làm ra mỗi ngày." },
+          { icon: "MapPin", title: "Tự hào Thái Nguyên", description: "Tạo sản phẩm rõ nguồn gốc, tạo việc làm và góp phần đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam." },
         ],
       },
     },
@@ -591,8 +615,7 @@ DEFAULT_INFO_PAGES["/gioi-thieu/cau-chuyen-thuong-hieu"] = page(
       type: "text",
       data: {
         backgroundColor: "white",
-        content:
-          "<h2>Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm</h2><p>Câu chuyện thương hiệu nên dẫn người xem tới những bằng chứng cụ thể: nguyên liệu nhập khẩu, quy trình sản xuất, chứng nhận nhà máy, phiếu kiểm nghiệm, bảo hiểm trách nhiệm sản phẩm và chính sách bảo vệ khách hàng.</p><p><strong>[cần bổ sung]</strong> timeline hình thành thương hiệu, hình ảnh người sáng lập/đội ngũ và các cột mốc truyền thông đã được xác minh.</p>",
+        content: BRAND_STORY_HTML,
       },
     },
   ],
