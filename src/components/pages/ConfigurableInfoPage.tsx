@@ -33,6 +33,52 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
 
+  // Form states for partnership contact submission
+  const [formName, setFormName] = useState("");
+  const [formPhone, setFormPhone] = useState("");
+  const [formEmail, setFormEmail] = useState("");
+  const [formType, setFormType] = useState("Hợp tác Đại lý / NPP");
+  const [formContent, setFormContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const handlePartnershipSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess(false);
+
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formName,
+          phone: formPhone,
+          email: formEmail,
+          content: formContent,
+          source: formType,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Gửi thông tin thất bại");
+      }
+
+      setSubmitSuccess(true);
+      setFormName("");
+      setFormPhone("");
+      setFormEmail("");
+      setFormContent("");
+    } catch (err: any) {
+      setSubmitError(err.message || "Đã xảy ra lỗi khi gửi. Vui lòng thử lại.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   useEffect(() => {
     fetch("/api/products")
       .then((res) => (res.ok ? res.json() : []))
@@ -366,6 +412,261 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
         return null;
       })}
+
+      {/* Why partner with us & Partnership contact form */}
+      {fallback.routePath?.startsWith("/hop-tac") && (
+        <>
+          <section className="bg-gradient-to-b from-white to-[#fffaf3] border-t border-orange-100 px-5 py-20 sm:px-8 lg:px-16">
+            <div className="max-w-5xl mx-auto space-y-16">
+              <div className="text-center space-y-4">
+                <span className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-orange-100 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+                  Hợp tác cùng Bà Tuyết
+                </span>
+                <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl leading-none">
+                  Vì sao nên đồng hành cùng chúng tôi?
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+                  Ăn Cùng Bà Tuyết tự hào là đối tác tin cậy, mang lại giá trị bền vững và sự phát triển vượt trội cho doanh nghiệp của bạn.
+                </p>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    num: "01",
+                    icon: <Icons.Flame size={20} />,
+                    title: "Thương hiệu triệu view",
+                    desc: "Sức hút truyền thông cực lớn từ Bà Tuyết và đội ngũ sáng tạo giúp sản phẩm luôn có nhu cầu mua sắm cực cao trên thị trường."
+                  },
+                  {
+                    num: "02",
+                    icon: <Icons.Award size={20} />,
+                    title: "Chất lượng vượt trội",
+                    desc: "Đạt chứng nhận VSATTP ISO 22000, quy trình sản xuất hiện đại khép kín đảm bảo sản phẩm luôn thơm ngon, sạch sẽ."
+                  },
+                  {
+                    num: "03",
+                    icon: <Icons.Percent size={20} />,
+                    title: "Chiết khấu hấp dẫn",
+                    desc: "Chính sách giá sỉ ưu đãi, tỷ suất lợi nhuận cao cùng các chương trình thưởng doanh số hấp dẫn cho đại lý và NPP."
+                  },
+                  {
+                    num: "04",
+                    icon: <Icons.ShieldCheck size={20} />,
+                    title: "Hỗ trợ toàn diện",
+                    desc: "Cung cấp đầy đủ hình ảnh, video truyền thông, hỗ trợ kỹ năng bán hàng và tư vấn vận hành phân phối tối ưu."
+                  }
+                ].map((item, keyIdx) => (
+                  <div
+                    key={keyIdx}
+                    className="relative overflow-hidden group bg-white border border-slate-100 p-8 hover:border-orange-500 hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300 rounded-2xl transform hover:-translate-y-1"
+                  >
+                    {/* Big background number */}
+                    <div className="absolute -right-4 -bottom-6 text-[110px] font-black text-slate-50/70 select-none group-hover:text-orange-50/50 transition duration-300">
+                      {item.num}
+                    </div>
+
+                    <div className="space-y-5 relative z-10">
+                      <div className="w-11 h-11 bg-orange-50 text-orange-600 flex items-center justify-center rounded-xl group-hover:bg-orange-500 group-hover:text-white transition duration-300 group-hover:rotate-6">
+                        {item.icon}
+                      </div>
+                      <h3 className="text-base font-black text-slate-950">{item.title}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-[#fff8ed] border-t border-orange-100 px-5 py-20 sm:px-8 lg:px-16">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr]">
+                
+                {/* Left col: Decorative support card */}
+                <div className="bg-slate-950 text-white p-8 sm:p-10 rounded-3xl relative overflow-hidden flex flex-col justify-between shadow-xl border border-slate-900">
+                  <div className="absolute -top-12 -right-12 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl" />
+                  <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl" />
+
+                  <div className="space-y-6 relative z-10">
+                    <span className="inline-flex bg-orange-500/10 text-orange-400 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-orange-500/20">
+                      Đồng hành phát triển
+                    </span>
+                    <h3 className="text-3xl font-black tracking-tight leading-tight sm:text-4xl">
+                      Khởi đầu hành trình cùng Bà Tuyết
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                      Chúng tôi không chỉ tìm kiếm các nhà phân phối hay đại lý đơn thuần, mà là tìm kiếm những người đồng đội cùng chia sẻ niềm tin đem lại thực phẩm sạch, cay ngon, chất lượng tới mọi người dân.
+                    </p>
+                  </div>
+
+                  <div className="space-y-6 pt-12 relative z-10 border-t border-slate-900 mt-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-orange-400 border border-slate-800">
+                        <Icons.Phone size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Hotline hỗ trợ gấp</p>
+                        <p className="text-sm font-black text-white">1900 6868 - Ext 2</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-orange-400 border border-slate-800">
+                        <Icons.Mail size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Email đối tác</p>
+                        <p className="text-sm font-black text-white">hoptac@ancungbatuyet.vn</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-orange-400 border border-slate-800">
+                        <Icons.MapPin size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Trụ sở chính</p>
+                        <p className="text-sm font-medium text-white line-clamp-1">Hà Nội & TP. Hồ Chí Minh</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right col: Form */}
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-black text-slate-950 tracking-tight">Đăng ký thông tin hợp tác</h2>
+                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                      Vui lòng điền thông tin chi tiết dưới đây. Đội ngũ phát triển thị trường của chúng tôi sẽ liên hệ lại trong vòng 24 giờ làm việc.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handlePartnershipSubmit} className="bg-white border border-orange-100 p-8 sm:p-10 shadow-xl shadow-orange-500/5 space-y-5 rounded-3xl">
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700">Họ và tên *</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Icons.User size={14} />
+                        </div>
+                        <input
+                          type="text"
+                          required
+                          value={formName}
+                          onChange={(e) => setFormName(e.target.value)}
+                          placeholder="Ví dụ: Nguyễn Văn A"
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Số điện thoại *</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <Icons.Phone size={14} />
+                          </div>
+                          <input
+                            type="tel"
+                            required
+                            value={formPhone}
+                            onChange={(e) => setFormPhone(e.target.value)}
+                            placeholder="Ví dụ: 0912345678"
+                            className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Địa chỉ Email</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <Icons.Mail size={14} />
+                          </div>
+                          <input
+                            type="email"
+                            value={formEmail}
+                            onChange={(e) => setFormEmail(e.target.value)}
+                            placeholder="Ví dụ: partner@gmail.com"
+                            className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700">Hình thức muốn hợp tác *</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Icons.Settings size={14} />
+                        </div>
+                        <select
+                          value={formType}
+                          onChange={(e) => setFormType(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                        >
+                          <option value="Hợp tác Đại lý / NPP">Trở thành Đại lý / Nhà phân phối (NPP)</option>
+                          <option value="Hợp tác truyền thông / KOL / KOC">Hợp tác truyền thông / KOL / KOC</option>
+                          <option value="Ý kiến / Đề xuất khác">Ý kiến / Đề xuất hợp tác khác</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-slate-700">Nội dung đề xuất hợp tác *</label>
+                      <div className="relative">
+                        <div className="absolute top-3 left-3 pointer-events-none text-slate-400">
+                          <Icons.MessageSquare size={14} />
+                        </div>
+                        <textarea
+                          required
+                          rows={4}
+                          value={formContent}
+                          onChange={(e) => setFormContent(e.target.value)}
+                          placeholder="Vui lòng giới thiệu ngắn gọn về thế mạnh phân phối, khu vực hoạt động hoặc đề xuất của bạn..."
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200 leading-relaxed font-sans"
+                        />
+                      </div>
+                    </div>
+
+                    {submitError && (
+                      <p className="text-xs text-red-500 font-semibold">{submitError}</p>
+                    )}
+
+                    {submitSuccess && (
+                      <div className="bg-green-50 border border-green-200 text-green-700 p-4 text-xs rounded-xl font-medium animate-bounce">
+                        🎉 Gửi thông tin hợp tác thành công! Chúng tôi đã nhận được yêu cầu và sẽ liên hệ lại với bạn sớm nhất.
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-655 hover:to-amber-600 text-white font-black uppercase tracking-wider text-xs py-3.5 transition flex items-center justify-center gap-2 rounded-xl disabled:opacity-50 shadow-md shadow-orange-500/10 hover:shadow-lg"
+                    >
+                      {submitting ? (
+                        <>
+                          <Icons.Loader className="animate-spin" size={14} />
+                          Đang gửi thông tin...
+                        </>
+                      ) : (
+                        <>
+                          Gửi Yêu Cầu Hợp Tác
+                          <Icons.ArrowRight size={14} className="group-hover:translate-x-1 transition" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+            </div>
+          </section>
+        </>
+      )}
     </main>
   );
 }
