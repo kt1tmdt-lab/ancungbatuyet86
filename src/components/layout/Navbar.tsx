@@ -50,6 +50,114 @@ const PRODUCT_MENU_LINKS = [
   { href: "/san-pham/snack-banh-trang", label: "Snack / Bánh tráng", note: "Đóng gói tiện lợi" },
 ];
 
+type NavLinkItem = { href: string; label: string };
+
+type HeaderSubmenu = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  accent: string;
+  overviewHref?: string;
+  links: Array<{ href: string; label: string; note?: string }>;
+};
+
+function normalizeMenuText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d");
+}
+
+function menuIdentity(link: NavLinkItem) {
+  return normalizeMenuText(`${link.label} ${link.href}`);
+}
+
+function getHeaderSubmenu(
+  link: NavLinkItem,
+  productMenuLinks: SiteConfigData["productMenuLinks"],
+): HeaderSubmenu | null {
+  const identity = menuIdentity(link);
+
+  if (link.href === "/gioi-thieu" || identity.includes("gioi thieu")) {
+    return {
+      eyebrow: "Về thương hiệu",
+      title: "Giới thiệu",
+      description: "Câu chuyện, thông tin doanh nghiệp và hành trình phát triển của Ăn Cùng Bà Tuyết.",
+      accent: "01",
+      links: [
+        { href: "/gioi-thieu", label: "Câu chuyện thương hiệu", note: "Tinh thần và định hướng thương hiệu" },
+        { href: "/gioi-thieu/thanh-tuu", label: "Thông tin doanh nghiệp", note: "Uy tín, chứng nhận và năng lực" },
+        { href: "/gioi-thieu/lich-su", label: "Hành trình phát triển", note: "Các dấu mốc quan trọng" },
+      ],
+    };
+  }
+
+  if (link.href === "/quy-trinh" || identity.includes("chat luong") || identity.includes("quy trinh")) {
+    return {
+      eyebrow: "Chất lượng",
+      title: "Minh bạch & tiêu chuẩn",
+      description: "Các bằng chứng giúp khách hàng hiểu sản phẩm được làm ra như thế nào.",
+      accent: "02",
+      overviewHref: "/chat-luong",
+      links: [
+        { href: "/chat-luong/minh-bach-nguon-nguyen-lieu", label: "Minh bạch nguồn nguyên liệu", note: "Đầu vào rõ ràng, dễ kiểm chứng" },
+        { href: "/chat-luong/nha-may-quy-trinh-san-xuat", label: "Nhà máy & Quy trình sản xuất", note: "Không gian sản xuất và kiểm soát" },
+        { href: "/chat-luong/ho-so-phap-ly-chung-nhan", label: "Hồ sơ pháp lý & chứng nhận", note: "Chứng từ, kiểm nghiệm, bảo chứng" },
+        { href: "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi", label: "Bảo hiểm trách nhiệm sản phẩm - PVI", note: "Cam kết bảo vệ người tiêu dùng" },
+        { href: "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang", label: "Chính sách bảo vệ quyền lợi khách hàng", note: "Lắng nghe và xử lý phản hồi" },
+      ],
+    };
+  }
+
+  if (link.href === "/san-pham" || identity.includes("san pham")) {
+    return {
+      eyebrow: "Danh mục",
+      title: "Sản phẩm",
+      description: "Các dòng sản phẩm đại diện đang được giới thiệu trên website.",
+      accent: "03",
+      links: [
+        ...(productMenuLinks.length
+          ? productMenuLinks.map((item) => ({ href: item.href, label: item.label, note: item.note }))
+          : PRODUCT_MENU_LINKS),
+        { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác", note: "Các dòng bổ sung" },
+      ],
+    };
+  }
+
+  if (link.href === "/he-thong-ban" || identity.includes("diem ban") || identity.includes("he thong ban")) {
+    return {
+      eyebrow: "Điểm bán",
+      title: "Hệ thống phân phối",
+      description: "Nơi khách hàng nhận diện kênh chính thức và tìm thông tin phân phối.",
+      accent: "04",
+      overviewHref: "/diem-ban",
+      links: [
+        { href: "/diem-ban/he-thong-diem-ban-offline", label: "Hệ thống điểm bán offline", note: "Điểm bán và khu vực phân phối" },
+        { href: "/diem-ban/kenh-online-chinh-thuc", label: "Kênh online chính thức", note: "Các kênh thương mại điện tử" },
+        { href: "/diem-ban/nhan-dien-hang-chinh-hang", label: "Nhận diện hàng chính hãng", note: "Dấu hiệu và thông tin cần kiểm tra" },
+      ],
+    };
+  }
+
+  if (identity.includes("hop tac")) {
+    return {
+      eyebrow: "Kết nối",
+      title: "Hợp tác",
+      description: "Thông tin dành cho đại lý, nhà phân phối, truyền thông và khách hàng cần hỗ trợ.",
+      accent: "05",
+      overviewHref: "/hop-tac",
+      links: [
+        { href: "/hop-tac/dai-ly-nha-phan-phoi", label: "Trở thành Đại lý/Nhà phân phối", note: "Gửi thông tin hợp tác kinh doanh" },
+        { href: "/hop-tac/truyen-thong", label: "Hợp tác truyền thông", note: "Liên hệ PR, báo chí và cộng đồng" },
+        { href: "/lien-he", label: "Liên hệ hỗ trợ khách hàng", note: "Gửi phản hồi hoặc yêu cầu hỗ trợ" },
+      ],
+    };
+  }
+
+  return null;
+}
+
 declare global {
   interface Window {
     googleTranslateElementInit?: () => void;
@@ -279,8 +387,7 @@ export default function Navbar({
   const [searchError, setSearchError] = useState("");
   const [language, setLanguage] = useState<LanguageCode>("vi");
   const [languageOpen, setLanguageOpen] = useState(false);
-  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
-  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
   const [currentProductMenuLinks, setCurrentProductMenuLinks] = useState<SiteConfigData["productMenuLinks"]>([]);
   const [productMenuLoaded, setProductMenuLoaded] = useState(false);
   const pathname = usePathname();
@@ -446,89 +553,75 @@ export default function Navbar({
 
           <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
-              if (link.href === "/san-pham") {
-                const isProductsActive = pathname.startsWith("/san-pham");
-                return (
-                  <div key={link.href} className="relative group py-2">
-                    <Link
-                      href={link.href}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
-                        isProductsActive
-                          ? "bg-primary-light text-primary-dark font-semibold"
-                          : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
-                      }`}
-                    >
-                      <span>{link.label}</span>
-                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
-                    </Link>
-                    <div className="absolute top-full left-0 z-50 hidden w-64 border border-gray-100 bg-white py-1 shadow-xl group-hover:block animate-fade-in">
-                      <Link
-                        href="/san-pham"
-                        className="block border-b border-orange-50 px-4 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition-colors hover:bg-orange-50"
-                      >
-                        Tất cả sản phẩm
-                      </Link>
-                      {productMenuLinks.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="block px-4 py-3 text-sm font-bold text-gray-800 transition-colors hover:bg-orange-50 hover:text-orange-700"
-                        >
-                          <span className="block">{item.label}</span>
-                          <span className="mt-0.5 block text-[11px] font-semibold text-gray-400">{item.note}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-
-              if (link.href === "/gioi-thieu") {
-                const isAboutActive = pathname.startsWith("/gioi-thieu");
-                return (
-                  <div key={link.href} className="relative group py-2">
-                    <Link
-                      href={link.href}
-                      className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
-                        isAboutActive
-                          ? "bg-primary-light text-primary-dark font-semibold"
-                          : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
-                      }`}
-                    >
-                      <span>{link.label}</span>
-                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
-                    </Link>
-                    <div className="absolute top-full left-0 w-48 bg-white border border-gray-100 shadow-xl py-1 hidden group-hover:block z-50 animate-fade-in">
-                      <Link
-                        href="/gioi-thieu"
-                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-                      >
-                        Giới thiệu chung
-                      </Link>
-                      <Link
-                        href="/gioi-thieu/lich-su"
-                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-                      >
-                        Lịch sử phát triển
-                      </Link>
-                      <Link
-                        href="/gioi-thieu/thanh-tuu"
-                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-                      >
-                        Thành tựu & Uy tín
-                      </Link>
-                      <Link
-                        href="/gioi-thieu/cong-dong"
-                        className="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
-                      >
-                        Cộng đồng
-                      </Link>
-                    </div>
-                  </div>
-                );
-              }
-
+              const submenu = getHeaderSubmenu(link, productMenuLinks);
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+
+              if (submenu) {
+                const overviewHref = submenu.overviewHref || link.href;
+                return (
+                  <div key={link.href} className="relative group py-2">
+                    <Link
+                      href={overviewHref}
+                      className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-primary-light text-primary-dark font-semibold"
+                          : "text-gray-600 hover:bg-primary-light hover:text-primary-dark"
+                      }`}
+                    >
+                      <span>{link.label}</span>
+                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                    </Link>
+                    <div className="absolute left-1/2 top-full z-50 hidden w-[min(90vw,520px)] -translate-x-1/2 pt-3 group-hover:block">
+                      <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
+                        <div className="grid grid-cols-[150px_1fr]">
+                          <div className="relative bg-slate-950 p-5 text-white">
+                            <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-300">
+                              {submenu.eyebrow}
+                            </p>
+                            <p className="mt-3 text-4xl font-black tracking-[-0.08em] text-white/15">
+                              {submenu.accent}
+                            </p>
+                            <p className="mt-4 text-sm font-black leading-5">
+                              {submenu.title}
+                            </p>
+                            <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-300">
+                              {submenu.description}
+                            </p>
+                          </div>
+                          <div className="grid gap-1 bg-[#fffaf3] p-3">
+                            <Link
+                              href={overviewHref}
+                              className="group/item flex items-center justify-between border border-orange-100 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-orange-700 transition hover:border-orange-300 hover:bg-orange-50"
+                            >
+                              <span>Xem tổng quan</span>
+                              <span className="transition group-hover/item:translate-x-1">→</span>
+                            </Link>
+                            {submenu.links.map((item) => (
+                              <Link
+                                key={`${link.href}-${item.href}-${item.label}`}
+                                href={item.href}
+                                className="group/item block border border-transparent px-4 py-3 transition hover:border-orange-100 hover:bg-white"
+                              >
+                                <span className="flex items-center justify-between gap-4 text-sm font-black text-slate-900 group-hover/item:text-orange-700">
+                                  {item.label}
+                                  <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
+                                </span>
+                                {item.note && (
+                                  <span className="mt-1 block text-[11px] font-semibold leading-5 text-slate-500">
+                                    {item.note}
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={link.href}
@@ -608,37 +701,48 @@ export default function Navbar({
         <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
-              if (link.href === "/san-pham") {
-                const isProductsActive = pathname.startsWith("/san-pham");
+              const submenu = getHeaderSubmenu(link, productMenuLinks);
+              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+
+              if (submenu) {
+                const isSubmenuOpen = mobileSubmenuOpen === link.href;
+                const overviewHref = submenu.overviewHref || link.href;
                 return (
                   <div key={link.href} className="flex flex-col">
                     <button
                       type="button"
-                      onClick={() => setMobileProductsOpen(!mobileProductsOpen)}
+                      onClick={() => setMobileSubmenuOpen(isSubmenuOpen ? null : link.href)}
                       className={`flex items-center justify-between px-4 py-3 rounded-none text-base font-medium transition-colors text-left ${
-                        isProductsActive ? "bg-primary-light text-primary-dark font-semibold" : "text-gray-600 hover:bg-primary-light"
+                        isActive ? "bg-primary-light text-primary-dark font-semibold" : "text-gray-600 hover:bg-primary-light"
                       }`}
                     >
                       <span>{link.label}</span>
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${mobileProductsOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
+                      <ChevronDown size={18} className={`transition-transform duration-200 ${isSubmenuOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
                     </button>
-                    {mobileProductsOpen && (
-                      <div className="bg-orange-50/30 flex flex-col pl-4 border-l-2 border-orange-200">
+                    {isSubmenuOpen && (
+                      <div className="border-l-2 border-orange-300 bg-orange-50/40 p-3">
+                        <div className="mb-2 border border-orange-100 bg-white p-3">
+                          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">{submenu.eyebrow}</p>
+                          <p className="mt-1 text-sm font-black text-slate-950">{submenu.title}</p>
+                          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{submenu.description}</p>
+                        </div>
                         <Link
-                          href="/san-pham"
+                          href={overviewHref}
                           onClick={() => setOpen(false)}
-                          className="px-4 py-2.5 text-sm font-black uppercase tracking-[0.12em] text-orange-700"
+                          className="mb-1 flex items-center justify-between border border-orange-100 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-orange-700"
                         >
-                          Tất cả sản phẩm
+                          Xem tổng quan
+                          <span>→</span>
                         </Link>
-                        {productMenuLinks.map((item) => (
+                        {submenu.links.map((item) => (
                           <Link
-                            key={item.href}
+                            key={`${link.href}-${item.href}-${item.label}`}
                             href={item.href}
                             onClick={() => setOpen(false)}
-                            className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
+                            className="block border border-transparent px-4 py-3 text-sm font-bold text-gray-700 hover:border-orange-100 hover:bg-white hover:text-orange-700"
                           >
-                            {item.label}
+                            <span className="block">{item.label}</span>
+                            {item.note && <span className="mt-1 block text-xs font-semibold text-slate-500">{item.note}</span>}
                           </Link>
                         ))}
                       </div>
@@ -647,57 +751,6 @@ export default function Navbar({
                 );
               }
 
-              if (link.href === "/gioi-thieu") {
-                const isAboutActive = pathname.startsWith("/gioi-thieu");
-                return (
-                  <div key={link.href} className="flex flex-col">
-                    <button
-                      type="button"
-                      onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-none text-base font-medium transition-colors text-left ${
-                        isAboutActive ? "bg-primary-light text-primary-dark font-semibold" : "text-gray-600 hover:bg-primary-light"
-                      }`}
-                    >
-                      <span>{link.label}</span>
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${mobileAboutOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
-                    </button>
-                    {mobileAboutOpen && (
-                      <div className="bg-orange-50/30 flex flex-col pl-4 border-l-2 border-orange-200">
-                        <Link
-                          href="/gioi-thieu"
-                          onClick={() => setOpen(false)}
-                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
-                        >
-                          Giới thiệu chung
-                        </Link>
-                        <Link
-                          href="/gioi-thieu/lich-su"
-                          onClick={() => setOpen(false)}
-                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
-                        >
-                          Lịch sử phát triển
-                        </Link>
-                        <Link
-                          href="/gioi-thieu/thanh-tuu"
-                          onClick={() => setOpen(false)}
-                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
-                        >
-                          Thành tựu & Uy tín
-                        </Link>
-                        <Link
-                          href="/gioi-thieu/cong-dong"
-                          onClick={() => setOpen(false)}
-                          className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-orange-700"
-                        >
-                          Cộng đồng
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
               return (
                 <Link
                   key={link.href}

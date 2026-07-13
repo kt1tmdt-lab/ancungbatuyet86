@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
@@ -11,9 +12,11 @@ import {
   Edit3,
   Trash2,
   ExternalLink,
-  Globe
+  Globe,
+  Wand2
 } from "lucide-react";
 import Link from "next/link";
+import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
 
 interface PageData {
   id: string;
@@ -24,6 +27,7 @@ interface PageData {
 }
 
 export default function AdminPagesList() {
+  const router = useRouter();
   const [pages, setPages] = useState<PageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -84,6 +88,48 @@ export default function AdminPagesList() {
     }
   };
 
+  const systemPages = Object.values(DEFAULT_INFO_PAGES).map((page) => ({
+    ...page,
+    cmsPage: pages.find((existing) => existing.slug === page.cmsSlug)
+  }));
+
+  const handleCreateSystemPage = async (cmsSlug: string) => {
+    const fallback = Object.values(DEFAULT_INFO_PAGES).find((page) => page.cmsSlug === cmsSlug);
+    if (!fallback || !token) return;
+
+    setActionLoading(cmsSlug);
+    try {
+      const res = await fetch("/api/pages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: fallback.title,
+          slug: fallback.cmsSlug,
+          status: "PUBLISHED",
+          content: fallback.blocks
+        })
+      });
+
+      if (res.ok) {
+        const created = await res.json();
+        setPages((currentPages) => [created, ...currentPages]);
+        router.push(`/admin/pages/${created.id}/edit`);
+        return;
+      }
+
+      const errData = await res.json();
+      alert(errData.error || "Khong the tao trang cau hinh");
+    } catch (err) {
+      console.error(err);
+      alert("Da xay ra loi khi tao trang cau hinh");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Filter search
   const filteredPages = pages.filter((page) =>
     page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -111,6 +157,75 @@ export default function AdminPagesList() {
         </div>
 
         <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-4">
+          <div className="border border-primary/20 bg-orange-50/50 p-5">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-lg font-extrabold text-slate-950 flex items-center gap-2">
+                  <Wand2 size={19} className="text-primary-dark" />
+                  Trang menu can cau hinh
+                </h2>
+                <p className="text-xs text-slate-600 mt-1 max-w-3xl">
+                  Cac trang nay da co route that tren header. Neu chua tao ban CMS, website se dung noi dung mac dinh.
+                  Bam Tao & sua de cau hinh tung chu, tung anh va them/sua/xoa cac khoi lap lai.
+                </p>
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-primary-dark bg-white border border-primary/20 px-3 py-1">
+                {systemPages.filter((page) => page.cmsPage).length}/{systemPages.length} da co CMS
+              </span>
+            </div>
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {systemPages.map((page) => {
+                const cmsPage = page.cmsPage;
+                return (
+                  <div key={page.routePath} className="bg-white border border-slate-200 p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-extrabold text-slate-950 leading-tight line-clamp-2">{page.title}</p>
+                        <p className="text-[11px] font-mono text-slate-500 mt-1 break-all">{page.routePath}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 break-all">CMS slug: {page.cmsSlug}</p>
+                      </div>
+                      <span className={`shrink-0 border px-2 py-0.5 text-[10px] font-extrabold uppercase ${
+                        cmsPage ? "bg-green-50 text-green-700 border-green-200" : "bg-slate-50 text-slate-500 border-slate-200"
+                      }`}>
+                        {cmsPage ? "Co CMS" : "Mac dinh"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4">
+                      {cmsPage ? (
+                        <Link
+                          href={`/admin/pages/${cmsPage.id}/edit`}
+                          className="acbt-btn acbt-btn--admin acbt-btn--sm"
+                        >
+                          <Edit3 size={14} />
+                          Sua noi dung
+                        </Link>
+                      ) : (
+                        <button
+                          onClick={() => handleCreateSystemPage(page.cmsSlug)}
+                          disabled={actionLoading === page.cmsSlug}
+                          className="acbt-btn acbt-btn--admin acbt-btn--sm disabled:opacity-60"
+                        >
+                          {actionLoading === page.cmsSlug ? <Loader size={14} className="animate-spin" /> : <Plus size={14} />}
+                          Tao & sua
+                        </button>
+                      )}
+                      <Link
+                        href={page.routePath}
+                        target="_blank"
+                        className="acbt-icon-btn p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-dark"
+                        title="Xem route public"
+                      >
+                        <ExternalLink size={15} />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Toolbar */}
           <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-2">
             <div className="flex-1 max-w-md relative">
