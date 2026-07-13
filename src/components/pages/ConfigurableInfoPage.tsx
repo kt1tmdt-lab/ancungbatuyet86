@@ -40,10 +40,12 @@ function BrandStoryPosterPage({
   title,
   blocks,
   fallbackBlocks,
+  products,
 }: {
   title: string;
   blocks: InfoPageBlock[];
   fallbackBlocks: InfoPageBlock[];
+  products: any[];
 }) {
   const findBlock = (type: InfoPageBlock["type"]) =>
     blocks.find((block) => block.type === type) || fallbackBlocks.find((block) => block.type === type);
@@ -55,15 +57,20 @@ function BrandStoryPosterPage({
   const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
   const safeStoryHtml = DOMPurify.sanitize(textData.content || "");
 
+  const excludedIds = ["brand-story-origin", "brand-story-principles", "brand-story-text"];
+  const remainingBlocks = blocks.filter(
+    (block) => block.type !== "hero" && !excludedIds.includes(block.id)
+  );
+
   return (
-    <main className="min-h-screen bg-[#fff4e4] px-4 py-16 text-slate-950 sm:px-6 lg:px-10 lg:py-20">
-      <section className="relative mx-auto max-w-6xl overflow-hidden border border-orange-200 bg-[#fffaf0] shadow-[0_34px_120px_rgba(234,88,12,0.16)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(251,146,60,0.16),transparent_32%),linear-gradient(135deg,#fffaf0_0%,#fff7e9_52%,#fffdf8_100%)]" />
-        <div className="absolute -right-10 -top-8 select-none text-[180px] font-black leading-none text-orange-100/60">BT</div>
+    <main className="min-h-screen bg-[#fffaf0] text-slate-950">
+      <section className="relative w-full overflow-hidden border-b border-orange-200 bg-[#fffaf0]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(251,146,60,0.08),transparent_32%),linear-gradient(135deg,#fffaf0_0%,#fff7e9_52%,#fffdf8_100%)]" />
+        <div className="absolute -right-10 -top-8 select-none text-[180px] font-black leading-none text-orange-100/40">BT</div>
         <div className="absolute bottom-0 left-0 h-1.5 w-full bg-orange-600" />
 
-        <div className="relative grid lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="px-6 py-8 sm:px-10 lg:px-12 lg:py-12">
+        <div className="relative max-w-7xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="px-5 py-12 sm:px-8 lg:px-14 lg:py-20">
             <p className="mb-4 w-fit border-b border-orange-300 pb-2 text-[11px] font-black uppercase tracking-[0.26em] text-orange-600">
               {heroData.label || "Câu chuyện thương hiệu"}
             </p>
@@ -80,7 +87,7 @@ function BrandStoryPosterPage({
 
             <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_190px] lg:items-start">
               <div
-                className="max-w-none text-[15px] leading-8 text-slate-800 [&_blockquote]:my-6 [&_blockquote]:-rotate-1 [&_blockquote]:border-l-4 [&_blockquote]:border-orange-600 [&_blockquote]:bg-orange-50 [&_blockquote]:p-5 [&_blockquote]:text-2xl [&_blockquote]:font-black [&_blockquote]:leading-tight [&_blockquote]:text-orange-800 [&_h2]:mb-4 [&_h2]:text-3xl [&_h2]:font-black [&_h2]:tracking-[-0.04em] [&_h2]:text-orange-900 [&_h3]:mt-8 [&_h3]:border-t [&_h3]:border-orange-200 [&_h3]:pt-5 [&_h3]:text-2xl [&_h3]:font-black [&_h3]:leading-tight [&_h3]:text-orange-800 [&_p]:mb-4 [&_p]:text-slate-800 [&_strong]:font-black [&_strong]:text-orange-800"
+                className="max-w-none text-[15px] leading-8 text-slate-800 [&_blockquote]:my-6 [&_blockquote]:-rotate-1 [&_blockquote]:border-l-4 [&_blockquote]:border-orange-600 [&_blockquote]:bg-orange-50 [&_blockquote]:p-5 [&_blockquote]:text-2xl [&_blockquote]:font-black [&_blockquote]:leading-tight [&_blockquote]:text-orange-800 [&_h2]:mb-4 [&_h2]:text-3xl [&_h2]:font-black [&_h2]:tracking-[-0.04em] [&_h2]:text-orange-900 [&_h3]:mt-8 [&_h3]:border-t [&_h3]:border-orange-200 [&_h3]:pt-5 [&_h3]:text-2xl [&_h3]:font-black [&_h3]:leading-tight [&_h3]:text-orange-800 [&_p]:mb-4 [&_p]:text-slate-800 [&_strong]:font-black [&_strong]:text-orange-800 [&_p:first-of-type::first-letter]:text-5xl [&_p:first-of-type::first-letter]:font-black [&_p:first-of-type::first-letter]:text-orange-600 [&_p:first-of-type::first-letter]:float-left [&_p:first-of-type::first-letter]:mr-2 [&_p:first-of-type::first-letter]:leading-none"
                 dangerouslySetInnerHTML={{ __html: safeStoryHtml }}
               />
 
@@ -94,8 +101,8 @@ function BrandStoryPosterPage({
             </div>
           </div>
 
-          <div className="relative border-t border-orange-200 bg-orange-50/70 p-6 lg:border-l lg:border-t-0 lg:p-8">
-            <div className="sticky top-24 space-y-5">
+          <div className="relative border-t border-orange-200 bg-orange-50/20 p-6 lg:border-l lg:border-t-0 lg:p-12">
+            <div className="sticky top-24 space-y-6">
               <div className="relative overflow-hidden border border-orange-200 bg-white shadow-[0_24px_60px_rgba(234,88,12,0.18)]">
                 <div className="aspect-[4/5] bg-orange-100">
                   <img src={storyImage} alt={title} className="h-full w-full object-cover object-top" />
@@ -128,10 +135,277 @@ function BrandStoryPosterPage({
                 <p className="text-3xl font-black uppercase leading-none tracking-[-0.04em]">Chân Gà Bà Tuyết</p>
                 <p className="mt-2 text-sm font-black italic text-orange-50">Ngon phải rõ nguồn gốc – Ăn phải thật an tâm</p>
               </div>
+
+              {/* Official Social Media Channels Widget */}
+              <div className="border border-orange-200 bg-white p-5 space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-wider text-orange-955 text-slate-900 flex items-center gap-1.5 border-b border-orange-100 pb-2">
+                  <Icons.Flame size={14} className="text-orange-500 animate-pulse" />
+                  Kênh truyền thông chính thức
+                </h4>
+                <div className="space-y-3">
+                  {[
+                    {
+                      name: "TikTok Shop",
+                      handle: "@ancungbatuyet",
+                      stat: "3.2M+ followers",
+                      subStat: "80M+ likes",
+                      icon: <Icons.Smartphone size={15} className="text-orange-600" />,
+                      pillColor: "bg-orange-50 text-orange-755 text-orange-700 border-orange-100"
+                    },
+                    {
+                      name: "YouTube Channel",
+                      handle: "Ăn Cùng Bà Tuyết",
+                      stat: "1.2M+ subs",
+                      subStat: "Hành trình ẩm thực",
+                      icon: <Icons.Play size={15} className="text-red-600" />,
+                      pillColor: "bg-red-50 text-red-755 text-red-700 border-red-100"
+                    },
+                    {
+                      name: "Facebook Page",
+                      handle: "Ăn Cùng Bà Tuyết",
+                      stat: "600k+ followers",
+                      subStat: "Cộng đồng ẩm thực",
+                      icon: <Icons.Users size={15} className="text-blue-600" />,
+                      pillColor: "bg-blue-50 text-blue-755 text-blue-700 border-blue-100"
+                    }
+                  ].map((chan) => (
+                    <div key={chan.name} className="flex items-start justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-orange-300 hover:bg-white transition duration-200">
+                      <div className="flex gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                          {chan.icon}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{chan.name}</p>
+                          <p className="text-xs font-black text-slate-800 line-clamp-1">{chan.handle}</p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border rounded-full ${chan.pillColor}`}>
+                          {chan.stat}
+                        </span>
+                        <p className="text-[9px] text-slate-400 font-semibold mt-0.5">{chan.subStat}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quality & Trust Seals Widget */}
+              <div className="border border-orange-200 bg-[#fffdfa] p-5 space-y-3.5">
+                <h4 className="text-xs font-black uppercase tracking-wider text-orange-955 text-slate-900 flex items-center gap-1.5 border-b border-orange-100 pb-2">
+                  <Icons.ShieldCheck size={14} className="text-green-600" />
+                  Bảo chứng uy tín & Chất lượng
+                </h4>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {[
+                    { title: "Chứng nhận ISO 22000", desc: "Hệ thống quản lý an toàn thực phẩm đạt chuẩn quốc tế.", icon: <Icons.Award className="text-amber-500" size={16} /> },
+                    { title: "Bảo hiểm sản phẩm PVI", desc: "Cam kết bảo vệ sức khỏe người tiêu dùng lên tới 10 tỷ VNĐ.", icon: <Icons.ShieldCheck className="text-blue-500" size={16} /> },
+                    { title: "Nguyên liệu sạch Việt Nam", desc: "100% nông sản rõ nguồn gốc từ các trang trại VietGAP.", icon: <Icons.CheckCircle2 className="text-green-500" size={16} /> }
+                  ].map((seal) => (
+                    <div key={seal.title} className="flex gap-3">
+                      <div className="w-5 h-5 flex items-center justify-center shrink-0 mt-0.5">
+                        {seal.icon}
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-slate-900 leading-none">{seal.title}</p>
+                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-0.5">{seal.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
       </section>
+
+      {remainingBlocks.length > 0 && (
+        <div className="mt-16 pb-24 space-y-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {remainingBlocks.map((block, index) => {
+            const data = (block.data || {}) as any;
+
+            if (block.type === "products") {
+              return (
+                <section key={block.id || index} className="border border-orange-200 bg-white p-8 sm:p-10 shadow-[0_24px_70px_rgba(234,88,12,0.06)] rounded-3xl">
+                  <div className="space-y-10">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
+                      {data.subtitle && (
+                        <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                      {products
+                        .filter(p => (data.productIds || []).includes(p.id))
+                        .map(p => (
+                          <div key={p.id} className="bg-[#fffbf5] border border-orange-100 overflow-hidden shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition rounded-2xl">
+                            <div className="relative aspect-square overflow-hidden bg-slate-50">
+                              <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                              <span className="absolute top-3 left-3 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 uppercase tracking-wider rounded">
+                                {p.categoryLabel || "Sản phẩm"}
+                              </span>
+                            </div>
+                            <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                              <div className="space-y-1">
+                                <h3 className="text-xs font-bold text-slate-900 group-hover:text-orange-500 transition line-clamp-1">{p.name}</h3>
+                                <p className="text-xs font-black text-orange-500">{p.price}</p>
+                              </div>
+                              <Link href={`/san-pham/${p.slug}`} className="w-full text-center bg-slate-900 text-white text-[10px] font-bold py-2 block cursor-pointer transition hover:bg-orange-500 rounded-xl">
+                                Đặt Mua Ngay
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            if (block.type === "testimonials") {
+              return (
+                <section key={block.id || index} className="border border-orange-200 bg-[#fff8ed] p-8 sm:p-10 shadow-[0_24px_70px_rgba(234,88,12,0.06)] rounded-3xl">
+                  <div className="space-y-12">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
+                      {data.subtitle && (
+                        <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {(data.items || []).map((item: any, tIdx: number) => (
+                        <div key={tIdx} className="bg-white border border-orange-100 p-6 shadow-sm hover:shadow transition relative flex flex-col justify-between rounded-2xl">
+                          <div className="space-y-4">
+                            <div className="flex gap-1 text-amber-500">
+                              {Array.from({ length: item.rating || 5 }).map((_, i) => (
+                                <Icons.Star key={i} size={14} fill="currentColor" />
+                              ))}
+                            </div>
+                            <p className="text-xs text-slate-650 italic leading-relaxed">"{item.review}"</p>
+                          </div>
+                          <div className="flex items-center gap-3 pt-6 border-t border-slate-55 border-slate-100 mt-6">
+                            {item.avatarUrl ? (
+                              <img src={item.avatarUrl} alt={item.name} className="w-9 h-9 rounded-full object-cover border border-orange-150" />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
+                                {item.name.charAt(0)}
+                              </div>
+                            )}
+                            <div>
+                              <h4 className="text-xs font-bold text-slate-900">{item.name}</h4>
+                              <p className="text-[10px] text-slate-400 font-semibold">{item.role}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            if (block.type === "gallery") {
+              return (
+                <section key={block.id || index} className="border border-orange-200 bg-white p-8 sm:p-10 shadow-[0_24px_70px_rgba(234,88,12,0.06)] rounded-3xl">
+                  <div className="space-y-10">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
+                      {data.subtitle && (
+                        <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {(data.images || []).map((imgUrl: string, gIdx: number) => (
+                        <div key={gIdx} className="relative aspect-square overflow-hidden border border-orange-100 bg-slate-50 shadow-sm hover:shadow transition group rounded-2xl">
+                          <img src={imgUrl} alt={`Gallery Image ${gIdx}`} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            if (block.type === "combos") {
+              return (
+                <section key={block.id || index} className="border border-orange-200 bg-[#fff8ed] p-8 sm:p-10 shadow-[0_24px_70px_rgba(234,88,12,0.06)] rounded-3xl">
+                  <div className="space-y-12">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
+                      {data.subtitle && (
+                        <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>
+                      )}
+                    </div>
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 justify-center">
+                      {(data.items || []).map((combo: any, cIdx: number) => (
+                        <div key={cIdx} className="bg-white border-2 border-orange-100 hover:border-orange-505 transition p-6 flex flex-col justify-between relative shadow-sm hover:shadow-lg rounded-2xl">
+                          {combo.tag && (
+                            <span className="absolute -top-3 right-4 bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 uppercase tracking-wider rounded">
+                              {combo.tag}
+                            </span>
+                          )}
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-black text-slate-950">{combo.name}</h3>
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-2xl font-black text-orange-600">{combo.price}</span>
+                              {combo.originalPrice && (
+                                <span className="text-xs text-slate-400 line-through font-semibold">{combo.originalPrice}</span>
+                              )}
+                            </div>
+                            <ul className="space-y-2 pt-4 border-t border-slate-100">
+                              {(combo.benefits || []).map((benefit: string, bIdx: number) => (
+                                <li key={bIdx} className="flex items-start gap-2 text-xs text-slate-650 text-slate-600 font-medium leading-relaxed">
+                                  <Icons.Check size={14} className="text-green-500 mt-0.5 shrink-0" />
+                                  <span>{benefit}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <Link href={combo.ctaLink || "#"} className="mt-8 text-center bg-slate-950 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-wider py-3 block transition rounded-xl">
+                            Đặt Combo Ngay
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            if (block.type === "faq") {
+              return (
+                <section key={block.id || index} className="border border-orange-200 bg-white p-8 sm:p-10 shadow-[0_24px_70px_rgba(234,88,12,0.06)] rounded-3xl">
+                  <div className="space-y-10">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
+                    </div>
+                    <div className="space-y-4">
+                      {(data.items || []).map((faqItem: any, fIdx: number) => (
+                        <div key={fIdx} className="border border-orange-100 bg-[#fffbf5] rounded-xl overflow-hidden">
+                          <details className="group">
+                            <summary className="flex items-center justify-between p-4 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer select-none">
+                              <span>{faqItem.question}</span>
+                              <span className="transition group-open:rotate-180 text-orange-500">
+                                <Icons.ChevronDown size={16} />
+                              </span>
+                            </summary>
+                            <div className="p-4 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-orange-100 bg-white">
+                              {faqItem.answer}
+                            </div>
+                          </details>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
+            return null;
+          })}
+        </div>
+      )}
     </main>
   );
 }
@@ -274,7 +548,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   }
 
   if (fallback.routePath === "/gioi-thieu/cau-chuyen-thuong-hieu") {
-    return <BrandStoryPosterPage title={title} blocks={blocks} fallbackBlocks={fallback.blocks} />;
+    return <BrandStoryPosterPage title={title} blocks={blocks} fallbackBlocks={fallback.blocks} products={products} />;
   }
 
   return (
