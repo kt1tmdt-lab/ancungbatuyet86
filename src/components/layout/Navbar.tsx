@@ -95,18 +95,7 @@ function getHeaderSubmenu(
   if (link.href === "/chat-luong") return null;
 
   if (link.href === "/diem-ban") {
-    return {
-      eyebrow: "Điểm bán",
-      title: "Kênh phân phối",
-      description: "Nơi mua chính thức và cách nhận diện hàng chính hãng.",
-      accent: "04",
-      overviewHref: "/diem-ban",
-      links: [
-        { href: "/diem-ban/he-thong-diem-ban-offline", label: "Hệ thống điểm bán offline", note: "Cửa hàng, đại lý và khu vực phân phối" },
-        { href: "/diem-ban/kenh-online-chinh-thuc", label: "Kênh online chính thức", note: "Sàn TMĐT và kênh bán công bố" },
-        { href: "/diem-ban/nhan-dien-hang-chinh-hang", label: "Nhận diện hàng chính hãng", note: "Tem nhãn, bao bì và nguồn mua" },
-      ],
-    };
+    return null;
   }
 
   if (link.href === "/hop-tac") {
@@ -165,18 +154,7 @@ function getHeaderSubmenu(
   }
 
   if (link.href === "/diem-ban" || identity.includes("diem ban")) {
-    return {
-      eyebrow: "Điểm bán",
-      title: "Hệ thống phân phối",
-      description: "Nơi khách hàng nhận diện kênh chính thức và tìm thông tin phân phối.",
-      accent: "04",
-      overviewHref: "/diem-ban",
-      links: [
-        { href: "/diem-ban/he-thong-diem-ban-offline", label: "Hệ thống điểm bán offline", note: "Điểm bán và khu vực phân phối" },
-        { href: "/diem-ban/kenh-online-chinh-thuc", label: "Kênh online chính thức", note: "Các kênh thương mại điện tử" },
-        { href: "/diem-ban/nhan-dien-hang-chinh-hang", label: "Nhận diện hàng chính hãng", note: "Dấu hiệu và thông tin cần kiểm tra" },
-      ],
-    };
+    return null;
   }
 
   if (identity.includes("hop tac")) {
