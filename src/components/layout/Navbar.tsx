@@ -21,10 +21,10 @@ const HEADER_NAV_LINKS = [
 export const LEGACY_NAV_LINKS = [
   { href: "/", label: "Trang chủ" },
   { href: "/san-pham", label: "Sản phẩm" },
-  { href: "/quy-trinh", label: "Quy trình" },
-  { href: "/he-thong-ban", label: "Hệ thống bán" },
+  { href: "/chat-luong", label: "Chất lượng" },
+  { href: "/diem-ban", label: "Điểm bán" },
   { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/tin-tuc", label: "Tin tức" },
+  { href: "/hop-tac", label: "Hợp tác" },
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
@@ -182,7 +182,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/chat-luong" || link.href === "/quy-trinh" || identity.includes("chat luong") || identity.includes("quy trinh")) {
+  if (link.href === "/chat-luong" || identity.includes("chat luong")) {
     return {
       eyebrow: "Chất lượng",
       title: "Minh bạch & tiêu chuẩn",
@@ -214,7 +214,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/diem-ban" || link.href === "/he-thong-ban" || identity.includes("diem ban") || identity.includes("he thong ban")) {
+  if (link.href === "/diem-ban" || identity.includes("diem ban")) {
     return {
       eyebrow: "Điểm bán",
       title: "Hệ thống phân phối",

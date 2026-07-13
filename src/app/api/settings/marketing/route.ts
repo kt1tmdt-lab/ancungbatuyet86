@@ -78,7 +78,8 @@ export async function PUT(req: NextRequest) {
     revalidatePath("/gioi-thieu/thanh-tuu");
     revalidatePath("/gioi-thieu/lich-su");
     revalidatePath("/gioi-thieu/cong-dong");
-    revalidatePath("/quy-trinh");
+    revalidatePath("/chat-luong");
+    revalidatePath("/diem-ban");
 
     return NextResponse.json(config);
   } catch (error) {

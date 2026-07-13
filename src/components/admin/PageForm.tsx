@@ -240,7 +240,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
           imageUrl: "/uploads/process-preview.jpg",
           imagePosition: "right",
           ctaText: "Xem quy trình chi tiết",
-          ctaLink: "/quy-trinh"
+          ctaLink: "/chat-luong/nha-may-quy-trinh-san-xuat"
         };
         break;
       case "products":
@@ -1769,7 +1769,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 </div>
                 <div className="flex gap-4 text-xs font-bold text-slate-650">
                   <span>Sản phẩm</span>
-                  <span>Quy trình</span>
+                  <span>Chất lượng</span>
                   <span>Giới thiệu</span>
                 </div>
               </div>

@@ -51,7 +51,7 @@ const pageGroups = [
     description: "Những dữ liệu được cập nhật thường xuyên.",
     items: [
       { title: "Sản phẩm", description: "Thêm, sửa, ẩn hiện sản phẩm, giá, ảnh và link mua.", href: "/admin/products", icon: Package },
-      { title: "Hệ thống bán", description: "Điểm bán, kênh online và đường dẫn mua hàng.", href: "/admin/sales-channels", icon: Store },
+      { title: "Điểm bán", description: "Điểm bán, kênh online và đường dẫn mua hàng.", href: "/admin/sales-channels", icon: Store },
       { title: "Tin tức", description: "Viết, sửa và xuất bản bài viết trên website.", href: "/admin/posts", icon: Newspaper },
       { title: "Báo chí và phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
     ],

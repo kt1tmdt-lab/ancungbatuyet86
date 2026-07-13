@@ -59,11 +59,11 @@ export type SiteConfigData = {
 
 export const REQUIRED_NAV_LINKS: LinkItem[] = [
   { href: "/", label: "Trang chủ" },
-  { href: "/san-pham", label: "Sản phẩm" },
-  { href: "/quy-trinh", label: "Quy trình" },
-  { href: "/he-thong-ban", label: "Hệ thống bán" },
   { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/tin-tuc", label: "Tin tức" },
+  { href: "/chat-luong", label: "Chất lượng" },
+  { href: "/san-pham", label: "Sản phẩm" },
+  { href: "/diem-ban", label: "Điểm bán" },
+  { href: "/hop-tac", label: "Hợp tác" },
   { href: "/lien-he", label: "Liên hệ" },
 ];
 
@@ -99,11 +99,11 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
   },
   navbarLinks: [
     { href: "/", label: "Trang chủ" },
-    { href: "/san-pham", label: "Sản phẩm" },
-    { href: "/quy-trinh", label: "Quy trình" },
-    { href: "/he-thong-ban", label: "Hệ thống bán" },
     { href: "/gioi-thieu", label: "Giới thiệu" },
-    { href: "/tin-tuc", label: "Tin tức" },
+    { href: "/chat-luong", label: "Chất lượng" },
+    { href: "/san-pham", label: "Sản phẩm" },
+    { href: "/diem-ban", label: "Điểm bán" },
+    { href: "/hop-tac", label: "Hợp tác" },
     { href: "/lien-he", label: "Liên hệ" },
   ],
   productMenuLinks: DEFAULT_PRODUCT_MENU_LINKS,
@@ -117,8 +117,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
       { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác" },
     ],
     explore: [
-      { href: "/quy-trinh", label: "Quy trình sản xuất" },
-      { href: "/he-thong-ban", label: "Hệ thống điểm bán" },
+      { href: "/chat-luong", label: "Chất lượng" },
+      { href: "/diem-ban", label: "Điểm bán" },
       { href: "/gioi-thieu", label: "Về chúng tôi" },
       { href: "/tin-tuc", label: "Tin tức" },
       { href: "/lien-he", label: "Liên hệ" },
@@ -182,7 +182,24 @@ function normalizeLinks(value: unknown, fallback: LinkItem[]) {
 
 function normalizeNavbarLinks(value: unknown) {
   const links = normalizeLinks(value, REQUIRED_NAV_LINKS);
-  const configuredLinks = links.filter((item) => item.href && item.label);
+  const canonicalByHref = new Map(REQUIRED_NAV_LINKS.map((item) => [item.href, item]));
+  const legacyHrefMap: Record<string, string | null> = {
+    "/quy-trinh": "/chat-luong",
+    "/he-thong-ban": "/diem-ban",
+    "/tin-tuc": null,
+  };
+
+  const configuredLinks = links
+    .map((item) => {
+      const mappedHref = Object.prototype.hasOwnProperty.call(legacyHrefMap, item.href)
+        ? legacyHrefMap[item.href]
+        : item.href;
+
+      if (!mappedHref) return null;
+      return canonicalByHref.get(mappedHref) || item;
+    })
+    .filter((item): item is LinkItem => item !== null && canonicalByHref.has(item.href));
+
   const configuredHrefs = new Set(configuredLinks.map((item) => item.href));
   const missingRequiredLinks = REQUIRED_NAV_LINKS.filter((item) => !configuredHrefs.has(item.href));
 

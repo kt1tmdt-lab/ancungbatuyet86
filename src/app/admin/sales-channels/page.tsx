@@ -400,11 +400,11 @@ export default function AdminSalesChannelsPage() {
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Quản lý hệ thống bán</h1>
             <p className="mt-1 text-sm text-slate-500">
-              Cập nhật điểm bán offline và kênh online đang hiển thị ở trang Hệ thống bán / Liên hệ.
+              Cập nhật điểm bán offline và kênh online đang hiển thị ở trang Điểm bán / Liên hệ.
             </p>
           </div>
           <a
-            href="/he-thong-ban"
+            href="/diem-ban"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800"

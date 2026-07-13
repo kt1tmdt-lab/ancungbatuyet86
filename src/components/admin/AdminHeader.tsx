@@ -182,7 +182,7 @@ export function AdminHeader() {
       group: "Sản phẩm và bán hàng",
       items: [
         { href: "/admin/products", label: "Sản phẩm", icon: FolderPlus, show: isAdminOrEditor },
-        { href: "/admin/sales-channels", label: "Hệ thống bán", icon: Store, show: isAdminOrEditor },
+        { href: "/admin/sales-channels", label: "Điểm bán", icon: Store, show: isAdminOrEditor },
       ],
     },
     {

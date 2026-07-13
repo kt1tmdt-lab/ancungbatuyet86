@@ -23,15 +23,15 @@ const STATIC_RESULTS: SearchResult[] = [
     type: "page",
   },
   {
-    title: "Quy trình",
-    description: "Quy trình sản xuất, đóng gói và kiểm soát chất lượng.",
-    href: "/quy-trinh",
+    title: "Chất lượng",
+    description: "Nguyên liệu, nhà máy, hồ sơ pháp lý và bảo hiểm trách nhiệm sản phẩm.",
+    href: "/chat-luong",
     type: "page",
   },
   {
-    title: "Hệ thống bán",
-    description: "Các điểm bán và kênh phân phối chính thức.",
-    href: "/he-thong-ban",
+    title: "Điểm bán",
+    description: "Điểm bán offline, kênh online chính thức và nhận diện hàng chính hãng.",
+    href: "/diem-ban",
     type: "page",
   },
   {
@@ -215,13 +215,13 @@ export async function GET(req: NextRequest) {
       ...locations.map((location) => ({
         title: location.name,
         description: `${location.address}, ${location.province}`,
-        href: "/he-thong-ban",
+        href: "/diem-ban",
         type: "location" as const,
       })),
       ...channels.map((channel) => ({
         title: channel.name,
         description: channel.description,
-        href: "/he-thong-ban",
+        href: "/diem-ban",
         type: "channel" as const,
       })),
     ].slice(0, 24);

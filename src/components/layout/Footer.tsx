@@ -17,8 +17,8 @@ interface FooterContact {
 }
 
 const DEFAULT_FOOTER_EXPLORE = [
-  { href: "/quy-trinh", label: "Quy trình sản xuất" },
-  { href: "/he-thong-ban", label: "Hệ thống điểm bán" },
+  { href: "/chat-luong", label: "Chất lượng" },
+  { href: "/diem-ban", label: "Điểm bán" },
   { href: "/gioi-thieu", label: "Về chúng tôi" },
   { href: "/tin-tuc", label: "Tin tức" },
   { href: "/lien-he", label: "Liên hệ" },
@@ -33,6 +33,12 @@ const DEFAULT_FOOTER_PRODUCTS = [
   { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác" },
 ];
 
+function normalizeFooterLink(link: FooterLink): FooterLink {
+  if (link.href === "/quy-trinh") return { href: "/chat-luong", label: "Chất lượng" };
+  if (link.href === "/he-thong-ban") return { href: "/diem-ban", label: "Điểm bán" };
+  return link;
+}
+
 export default function Footer({
   initialLinks,
   initialContact,
@@ -41,7 +47,7 @@ export default function Footer({
   initialContact?: FooterContact;
 }) {
   const productLinks = initialLinks?.products || DEFAULT_FOOTER_PRODUCTS;
-  const exploreLinks = initialLinks?.explore || DEFAULT_FOOTER_EXPLORE;
+  const exploreLinks = (initialLinks?.explore || DEFAULT_FOOTER_EXPLORE).map(normalizeFooterLink);
 
   const contact = {
     phone: initialContact?.phone || "0989 852 948",

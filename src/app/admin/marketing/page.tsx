@@ -114,14 +114,14 @@ const PAGE_ASSET_META: Record<string, { page: string; position: string; note: st
   about_process_factory: { page: "Giới thiệu", position: "Thẻ quy trình: Nhà máy", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
   about_process_packaging: { page: "Giới thiệu", position: "Thẻ quy trình: Đóng gói", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
   about_process_distribution: { page: "Giới thiệu", position: "Thẻ quy trình: Phân phối", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
-  process_farm: { page: "Quy trình", position: "Nguyên liệu đầu vào", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_inspect: { page: "Quy trình", position: "Kiểm định nguyên liệu", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_cooking: { page: "Quy trình", position: "Sơ chế và chế biến", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_qc: { page: "Quy trình", position: "Kiểm soát chất lượng", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_packaging: { page: "Quy trình", position: "Đóng gói", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_delivery: { page: "Quy trình", position: "Giao hàng và phân phối", note: "Ảnh/link bước quy trình.", previewPath: "/quy-trinh#process-steps" },
-  process_factory: { page: "Quy trình", position: "Khu vực nhà máy", note: "Ảnh/link phần nhà máy.", previewPath: "/quy-trinh#process-factory" },
-  process_documents: { page: "Quy trình", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ.", previewPath: "/quy-trinh#process-documents" },
+  process_farm: { page: "Chất lượng", position: "Nguyên liệu đầu vào", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_inspect: { page: "Chất lượng", position: "Kiểm định nguyên liệu", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_cooking: { page: "Chất lượng", position: "Sơ chế và chế biến", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_qc: { page: "Chất lượng", position: "Kiểm soát chất lượng", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_packaging: { page: "Chất lượng", position: "Đóng gói", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_delivery: { page: "Chất lượng", position: "Giao hàng và phân phối", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
+  process_factory: { page: "Chất lượng", position: "Khu vực nhà máy", note: "Ảnh/link phần nhà máy trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-factory" },
+  process_documents: { page: "Chất lượng", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ trong trang Chất lượng.", previewPath: "/chat-luong/ho-so-phap-ly-chung-nhan" },
 };
 
 const FACTORY_PROOF_ASSET_KEYS = new Set([
@@ -150,7 +150,7 @@ function getPageAssetScope(item: PageAssetItem) {
   const previewPath = getPageAssetMeta(item).previewPath;
 
   if (previewPath.startsWith("/gioi-thieu")) return "about";
-  if (previewPath.startsWith("/quy-trinh")) return "process";
+  if (previewPath.startsWith("/chat-luong")) return "process";
   if (previewPath.startsWith("/#") || previewPath === "/") return "home";
 
   return "other";

@@ -206,6 +206,11 @@ export default function SettingsPage() {
     setValue(`productMenuLinks.${index}.note`, getProductNote(product), { shouldDirty: true, shouldValidate: true });
   };
 
+  const resetHeaderMenu = () => {
+    setValue("navbarLinks", DEFAULT_SITE_CONFIG.navbarLinks, { shouldDirty: true, shouldValidate: true });
+    toast.success("Đã đưa menu header về sitemap chuẩn");
+  };
+
   const addProductMenuItem = () => {
     const selectedHrefs = new Set((getValues("productMenuLinks") || []).map((item) => item.href));
     const product = productOptions.find((item) => !selectedHrefs.has(getProductHref(item)));
@@ -642,14 +647,17 @@ export default function SettingsPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => appendNavbar({ label: "", href: "" })}
+                      onClick={resetHeaderMenu}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-500 text-white font-bold text-xs hover:bg-orange-600 transition shadow cursor-pointer"
                     >
-                      <Plus size={14} />
-                      Thêm liên kết
+                      <Settings size={14} />
+                      Reset menu chuẩn
                     </button>
                   </div>
                   <div className="p-6 space-y-4">
+                    <div className="border border-orange-100 bg-orange-50 px-4 py-3 text-xs font-semibold leading-6 text-orange-900">
+                      Menu header đang dùng sitemap hệ thống để đồng bộ với dropdown và các trang nội dung. Không sửa tay từng dòng ở đây; nếu dữ liệu cũ bị lệch, bấm <span className="font-black">Reset menu chuẩn</span> rồi lưu lại.
+                    </div>
                     {navbarFields.length === 0 ? (
                       <p className="text-center py-6 text-xs text-slate-400 font-semibold italic">Chưa có liên kết nào, hệ thống sẽ sử dụng danh sách tĩnh mặc định.</p>
                     ) : (
@@ -660,20 +668,22 @@ export default function SettingsPage() {
                             <div className="grid grid-cols-2 gap-3 flex-1">
                               <input
                                 {...register(`navbarLinks.${idx}.label` as const)}
+                                readOnly
                                 placeholder="Tên hiển thị (VD: Giới thiệu)"
-                                className="border border-slate-350 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                className="border border-slate-200 bg-slate-50 p-2 text-xs font-semibold text-slate-600 outline-none"
                               />
                               <input
                                 {...register(`navbarLinks.${idx}.href` as const)}
+                                readOnly
                                 placeholder="Liên kết (VD: /gioi-thieu)"
-                                className="border border-slate-350 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                                className="border border-slate-200 bg-slate-50 p-2 text-xs font-semibold text-slate-600 outline-none"
                               />
                             </div>
                             <div className="flex border border-slate-200">
                               <button
                                 type="button"
                                 onClick={() => moveNavbar(idx, idx - 1)}
-                                disabled={idx === 0}
+                                disabled
                                 className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
                                 aria-label="Đưa mục menu lên trên"
                               >
@@ -682,7 +692,7 @@ export default function SettingsPage() {
                               <button
                                 type="button"
                                 onClick={() => moveNavbar(idx, idx + 1)}
-                                disabled={idx === navbarFields.length - 1}
+                                disabled
                                 className="border-l border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
                                 aria-label="Đưa mục menu xuống dưới"
                               >
@@ -691,8 +701,9 @@ export default function SettingsPage() {
                             </div>
                             <button
                               type="button"
+                              disabled
                               onClick={() => removeNavbar(idx)}
-                              className="p-2 border border-red-200 hover:bg-red-50 text-red-500 hover:text-red-700 transition"
+                              className="p-2 border border-slate-200 text-slate-300 cursor-not-allowed"
                             >
                               <Trash2 size={16} />
                             </button>

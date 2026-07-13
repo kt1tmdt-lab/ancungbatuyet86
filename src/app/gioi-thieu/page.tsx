@@ -93,25 +93,25 @@ const processSteps: Array<IconBlock & { image?: string; linkUrl?: string }> = [
     icon: Leaf,
     title: "Chọn nguyên liệu",
     text: "Ưu tiên nguồn đầu vào rõ ràng, phù hợp tiêu chuẩn chế biến và kiểm soát chất lượng trước khi đưa vào sản xuất.",
-    linkUrl: "/quy-trinh",
+    linkUrl: "/chat-luong/minh-bach-nguon-nguyen-lieu",
   },
   {
     icon: Factory,
     title: "Sản xuất tại xưởng",
     text: "Quy trình được tổ chức theo từng khu vực để giữ độ ổn định, hạn chế rủi ro và đảm bảo năng suất.",
-    linkUrl: "/quy-trinh",
+    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
   },
   {
     icon: PackageCheck,
     title: "Đóng gói chỉn chu",
     text: "Bao bì được chuẩn hóa để sản phẩm dễ vận chuyển, dễ nhận diện và giữ được trải nghiệm tốt khi đến tay khách.",
-    linkUrl: "/quy-trinh",
+    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
   },
   {
     icon: Truck,
     title: "Phân phối toàn quốc",
     text: "Kết nối các sàn thương mại điện tử và hệ thống vận chuyển để khách hàng đặt mua thuận tiện hơn.",
-    linkUrl: "/he-thong-ban",
+    linkUrl: "/diem-ban",
   },
 ];
 
@@ -405,7 +405,7 @@ export default function AboutPage() {
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href="/quy-trinh"
+                href="/chat-luong/nha-may-quy-trinh-san-xuat"
                 className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-7 py-4 text-sm font-black text-slate-950 transition hover:border-orange-300 hover:text-orange-700"
               >
                 Xem quy trình sản xuất
@@ -587,7 +587,7 @@ export default function AboutPage() {
 
           <div className="grid border-t border-white/10 lg:border-l lg:border-t-0">
             <Link
-              href="/quy-trinh"
+              href="/chat-luong/nha-may-quy-trinh-san-xuat"
               className="group flex items-center justify-between border-b border-white/10 bg-orange-600 p-8 text-lg font-black text-white transition hover:bg-orange-700"
             >
               Xem quy trình sản xuất
