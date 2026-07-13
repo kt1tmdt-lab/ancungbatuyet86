@@ -39,9 +39,27 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [formEmail, setFormEmail] = useState("");
   const [formType, setFormType] = useState("Hợp tác Đại lý / NPP");
   const [formContent, setFormContent] = useState("");
+
+  // Specific partnership fields
+  const [formProvince, setFormProvince] = useState("");
+  const [formChannel, setFormChannel] = useState("Cửa hàng tạp hóa");
+  const [formMediaChannel, setFormMediaChannel] = useState("TikTok");
+  const [formMediaLink, setFormMediaLink] = useState("");
+  const [formFollowers, setFormFollowers] = useState("");
+  const [formSubject, setFormSubject] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  // Initialize and sync formType based on current route
+  useEffect(() => {
+    if (fallback.routePath === "/hop-tac/dai-ly-nha-phan-phoi") {
+      setFormType("Hợp tác Đại lý / NPP");
+    } else if (fallback.routePath === "/hop-tac/truyen-thong") {
+      setFormType("Hợp tác truyền thông / KOL / KOC");
+    }
+  }, [fallback.routePath]);
 
   const handlePartnershipSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,14 +68,38 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
     setSubmitSuccess(false);
 
     try {
+      let contentText = "";
+      if (formType === "Hợp tác Đại lý / NPP") {
+        contentText = 
+          `ĐĂNG KÝ HỢP TÁC ĐẠI LÝ / NHÀ PHÂN PHỐI\n` +
+          `-------------------------------\n` +
+          `- Địa bàn hoạt động (Tỉnh/Thành): ${formProvince}\n` +
+          `- Kênh phân phối hiện tại: ${formChannel}\n` +
+          `- Nội dung đề xuất: ${formContent}`;
+      } else if (formType === "Hợp tác truyền thông / KOL / KOC") {
+        contentText = 
+          `ĐĂNG KÝ HỢP TÁC TRUYỀN THÔNG / KOL / KOC\n` +
+          `-------------------------------\n` +
+          `- Kênh truyền thông chính: ${formMediaChannel}\n` +
+          `- Link kênh của bạn: ${formMediaLink}\n` +
+          `- Số lượng follower/độc giả: ${formFollowers}\n` +
+          `- Nội dung đề xuất: ${formContent}`;
+      } else {
+        contentText = 
+          `ĐĂNG KÝ LIÊN HỆ HỢP TÁC KHÁC\n` +
+          `-------------------------------\n` +
+          `- Tiêu đề đề xuất: ${formSubject}\n` +
+          `- Nội dung chi tiết: ${formContent}`;
+      }
+
       const res = await fetch("/api/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formName,
           phone: formPhone,
-          email: formEmail,
-          content: formContent,
+          email: formEmail || null,
+          content: contentText,
           source: formType,
         }),
       });
@@ -71,6 +113,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       setFormName("");
       setFormPhone("");
       setFormEmail("");
+      setFormProvince("");
+      setFormMediaLink("");
+      setFormFollowers("");
+      setFormSubject("");
       setFormContent("");
     } catch (err: any) {
       setSubmitError(err.message || "Đã xảy ra lỗi khi gửi. Vui lòng thử lại.");
@@ -539,15 +585,29 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                 {/* Right col: Form */}
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-black text-slate-950 tracking-tight">Đăng ký thông tin hợp tác</h2>
+                    <h2 className="text-3xl font-black text-slate-950 tracking-tight">
+                      {fallback.routePath === "/hop-tac/dai-ly-nha-phan-phoi" 
+                        ? "Đăng ký làm Đại lý / Nhà phân phối" 
+                        : fallback.routePath === "/hop-tac/truyen-thong"
+                        ? "Hợp tác Truyền thông / KOL / KOC"
+                        : "Đăng ký thông tin hợp tác"}
+                    </h2>
                     <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                      Vui lòng điền thông tin chi tiết dưới đây. Đội ngũ phát triển thị trường của chúng tôi sẽ liên hệ lại trong vòng 24 giờ làm việc.
+                      {fallback.routePath === "/hop-tac/dai-ly-nha-phan-phoi"
+                        ? "Gửi đề xuất hợp tác kinh doanh để trở thành đại lý, nhận chính sách giá sỉ ưu đãi nhất từ Ăn Cùng Bà Tuyết."
+                        : fallback.routePath === "/hop-tac/truyen-thong"
+                        ? "Chúng tôi luôn chào đón các KOC, KOL, Reviewer và đơn vị báo chí hợp tác quảng bá thương hiệu ẩm thực."
+                        : "Vui lòng điền thông tin chi tiết dưới đây. Đội ngũ phát triển thị trường sẽ liên hệ lại trong vòng 24 giờ làm việc."}
                     </p>
                   </div>
 
                   <form onSubmit={handlePartnershipSubmit} className="bg-white border border-orange-100 p-8 sm:p-10 shadow-xl shadow-orange-500/5 space-y-5 rounded-3xl">
+                    
+                    {/* Basic Name field */}
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">Họ và tên *</label>
+                      <label className="block text-xs font-bold text-slate-700">
+                        {formType === "Hợp tác truyền thông / KOL / KOC" ? "Họ và tên / Tên tổ chức *" : "Họ và tên *"}
+                      </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                           <Icons.User size={14} />
@@ -557,12 +617,13 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           required
                           value={formName}
                           onChange={(e) => setFormName(e.target.value)}
-                          placeholder="Ví dụ: Nguyễn Văn A"
+                          placeholder={formType === "Hợp tác truyền thông / KOL / KOC" ? "Ví dụ: KOC Nguyễn Văn A hoặc Công ty ABC" : "Ví dụ: Nguyễn Văn A"}
                           className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
                         />
                       </div>
                     </div>
 
+                    {/* Phone & Email Fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <label className="block text-xs font-bold text-slate-700">Số điện thoại *</label>
@@ -581,13 +642,16 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                         </div>
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Địa chỉ Email</label>
+                        <label className="block text-xs font-bold text-slate-700">
+                          {formType === "Hợp tác truyền thông / KOL / KOC" ? "Địa chỉ Email *" : "Địa chỉ Email"}
+                        </label>
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <Icons.Mail size={14} />
                           </div>
                           <input
                             type="email"
+                            required={formType === "Hợp tác truyền thông / KOL / KOC"}
                             value={formEmail}
                             onChange={(e) => setFormEmail(e.target.value)}
                             placeholder="Ví dụ: partner@gmail.com"
@@ -597,26 +661,152 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">Hình thức muốn hợp tác *</label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                          <Icons.Settings size={14} />
+                    {/* Show cooperation type selection ONLY on the general overview page /hop-tac */}
+                    {fallback.routePath === "/hop-tac" && (
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Hình thức muốn hợp tác *</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <Icons.Settings size={14} />
+                          </div>
+                          <select
+                            value={formType}
+                            onChange={(e) => setFormType(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                          >
+                            <option value="Hợp tác Đại lý / NPP">Trở thành Đại lý / Nhà phân phối (NPP)</option>
+                            <option value="Hợp tác truyền thông / KOL / KOC">Hợp tác truyền thông / KOL / KOC</option>
+                            <option value="Ý kiến / Đề xuất khác">Ý kiến / Đề xuất hợp tác khác</option>
+                          </select>
                         </div>
-                        <select
-                          value={formType}
-                          onChange={(e) => setFormType(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
-                        >
-                          <option value="Hợp tác Đại lý / NPP">Trở thành Đại lý / Nhà phân phối (NPP)</option>
-                          <option value="Hợp tác truyền thông / KOL / KOC">Hợp tác truyền thông / KOL / KOC</option>
-                          <option value="Ý kiến / Đề xuất khác">Ý kiến / Đề xuất hợp tác khác</option>
-                        </select>
                       </div>
-                    </div>
+                    )}
 
+                    {/* DYNAMIC FIELDS based on formType */}
+                    {formType === "Hợp tác Đại lý / NPP" && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700">Khu vực hoạt động (Tỉnh/Thành) *</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                              <Icons.MapPin size={14} />
+                            </div>
+                            <input
+                              type="text"
+                              required
+                              value={formProvince}
+                              onChange={(e) => setFormProvince(e.target.value)}
+                              placeholder="Ví dụ: Hà Nội, Hải Phòng..."
+                              className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700">Kênh phân phối hiện tại *</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                              <Icons.Store size={14} />
+                            </div>
+                            <select
+                              value={formChannel}
+                              onChange={(e) => setFormChannel(e.target.value)}
+                              className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                            >
+                              <option value="Cửa hàng tạp hóa">Cửa hàng tạp hóa</option>
+                              <option value="Siêu thị / Mini mart">Siêu thị / Mini mart</option>
+                              <option value="Bán lẻ online">Bán lẻ online</option>
+                              <option value="Quán ăn / Căng tin">Quán ăn / Căng tin</option>
+                              <option value="Kênh phân phối khác">Kênh phân phối khác</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {formType === "Hợp tác truyền thông / KOL / KOC" && (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-slate-700">Kênh truyền thông chính *</label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <Icons.Globe size={14} />
+                              </div>
+                              <select
+                                value={formMediaChannel}
+                                onChange={(e) => setFormMediaChannel(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                              >
+                                <option value="TikTok">TikTok</option>
+                                <option value="Facebook / Reels">Facebook / Reels</option>
+                                <option value="YouTube">YouTube</option>
+                                <option value="Báo chí / PR">Báo chí / PR</option>
+                                <option value="Kênh khác">Kênh khác</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="block text-xs font-bold text-slate-700">Số lượng follower / độc giả</label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <Icons.Users size={14} />
+                              </div>
+                              <input
+                                type="text"
+                                value={formFollowers}
+                                onChange={(e) => setFormFollowers(e.target.value)}
+                                placeholder="Ví dụ: 100k follower"
+                                className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="block text-xs font-bold text-slate-700">Link kênh của bạn *</label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                              <Icons.Link size={14} />
+                            </div>
+                            <input
+                              type="text"
+                              required
+                              value={formMediaLink}
+                              onChange={(e) => setFormMediaLink(e.target.value)}
+                              placeholder="Ví dụ: tiktok.com/@username hoặc youtube.com/c/tenkenh"
+                              className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {formType === "Ý kiến / Đề xuất khác" && (
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-bold text-slate-700">Tiêu đề liên hệ hợp tác *</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <Icons.FileText size={14} />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={formSubject}
+                            onChange={(e) => setFormSubject(e.target.value)}
+                            placeholder="Ví dụ: Thuê gian hàng hội chợ, Hợp tác quảng cáo..."
+                            className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Common Content Textarea */}
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">Nội dung đề xuất hợp tác *</label>
+                      <label className="block text-xs font-bold text-slate-700">
+                        {formType === "Ý kiến / Đề xuất khác" ? "Nội dung chi tiết *" : "Nội dung đề xuất hợp tác *"}
+                      </label>
                       <div className="relative">
                         <div className="absolute top-3 left-3 pointer-events-none text-slate-400">
                           <Icons.MessageSquare size={14} />
@@ -626,7 +816,13 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           rows={4}
                           value={formContent}
                           onChange={(e) => setFormContent(e.target.value)}
-                          placeholder="Vui lòng giới thiệu ngắn gọn về thế mạnh phân phối, khu vực hoạt động hoặc đề xuất của bạn..."
+                          placeholder={
+                            formType === "Hợp tác Đại lý / NPP"
+                              ? "Mô tả ngắn gọn về quy mô kinh doanh của bạn, địa điểm bán hàng hoặc dòng sản phẩm Bà Tuyết bạn quan tâm..."
+                              : formType === "Hợp tác truyền thông / KOL / KOC"
+                              ? "Chi tiết về chiến dịch truyền thông bạn đề xuất hoặc hình thức cộng tác mong muốn..."
+                              : "Nhập nội dung chi tiết bạn muốn gửi tới Ăn Cùng Bà Tuyết..."
+                          }
                           className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200 leading-relaxed font-sans"
                         />
                       </div>
@@ -645,7 +841,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-655 hover:to-amber-600 text-white font-black uppercase tracking-wider text-xs py-3.5 transition flex items-center justify-center gap-2 rounded-xl disabled:opacity-50 shadow-md shadow-orange-500/10 hover:shadow-lg"
+                      className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black uppercase tracking-wider text-xs py-3.5 transition flex items-center justify-center gap-2 rounded-xl disabled:opacity-50 shadow-md shadow-orange-500/10 hover:shadow-lg"
                     >
                       {submitting ? (
                         <>
