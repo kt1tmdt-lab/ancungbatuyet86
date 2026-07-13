@@ -39,6 +39,50 @@ export type InfoPageBlock =
         ctaText?: string;
         ctaLink?: string;
       };
+    }
+  | {
+      id: string;
+      type: "products";
+      data: {
+        title: string;
+        subtitle?: string;
+        productIds: string[];
+      };
+    }
+  | {
+      id: string;
+      type: "testimonials";
+      data: {
+        title: string;
+        subtitle?: string;
+        items: Array<{ name: string; role: string; review: string; rating: number; avatarUrl?: string }>;
+      };
+    }
+  | {
+      id: string;
+      type: "gallery";
+      data: {
+        title: string;
+        subtitle?: string;
+        images: string[];
+      };
+    }
+  | {
+      id: string;
+      type: "combos";
+      data: {
+        title: string;
+        subtitle?: string;
+        items: Array<{ name: string; price: string; originalPrice?: string; benefits: string[]; tag?: string; ctaLink?: string }>;
+      };
+    }
+  | {
+      id: string;
+      type: "faq";
+      data: {
+        title: string;
+        items: Array<{ question: string; answer: string }>;
+      };
     };
 
 export type DefaultInfoPage = {

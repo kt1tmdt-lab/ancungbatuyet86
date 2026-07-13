@@ -27,7 +27,11 @@ import {
   Globe,
   Monitor,
   Tablet,
-  Smartphone
+  Smartphone,
+  MessageSquare,
+  Tag,
+  HelpCircle,
+  Star
 } from "lucide-react";
 import Link from "next/link";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
@@ -37,7 +41,7 @@ import { uploadAdminImage } from "@/lib/admin-upload-client";
 // Define block interfaces
 interface Block {
   id: string;
-  type: "hero" | "text" | "features" | "split" | "products";
+  type: "hero" | "text" | "features" | "split" | "products" | "testimonials" | "gallery" | "combos" | "faq";
   // Builder blocks carry different schemas depending on their type.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
@@ -89,6 +93,29 @@ export function PageForm({ pageId }: { pageId?: string }) {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null);
   const [activePane, setActivePane] = useState<"edit" | "preview">("edit");
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+    const newBlocks = [...blocks];
+    const draggedItem = newBlocks[draggedIndex];
+    newBlocks.splice(draggedIndex, 1);
+    newBlocks.splice(targetIndex, 0, draggedItem);
+
+    setBlocks(newBlocks);
+    setDraggedIndex(null);
+  };
 
   // System Products (for product block selector)
   const [productsList, setProductsList] = useState<Product[]>([]);
@@ -176,7 +203,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
   };
 
   // Add a new block
-  const addBlock = (type: "hero" | "text" | "features" | "split" | "products") => {
+  const addBlock = (type: "hero" | "text" | "features" | "split" | "products" | "testimonials" | "gallery" | "combos" | "faq") => {
     const id = `${type}-${Date.now()}`;
     let data = {};
 
@@ -221,6 +248,45 @@ export function PageForm({ pageId }: { pageId?: string }) {
           title: "Món ngon phải thử ngay!",
           subtitle: "Sản phẩm bán chạy nhất tuần qua trên toàn hệ thống",
           productIds: []
+        };
+        break;
+      case "testimonials":
+        data = {
+          title: "Khách hàng nói gì về Bà Tuyết?",
+          subtitle: "Hơn 1 triệu khách hàng đã tin tưởng và ủng hộ",
+          items: [
+            { name: "Nguyễn Văn A", role: "Khách hàng thân thiết", review: "Đồ ăn vặt siêu ngon, chân gà cay giòn giòn ăn cực cuốn!", rating: 5, avatarUrl: "" },
+            { name: "Trần Thị B", role: "Đại lý phân phối", review: "Giao hàng nhanh chóng, bao bì đẹp đẽ, hỗ trợ nhiệt tình.", rating: 5, avatarUrl: "" }
+          ]
+        };
+        break;
+      case "gallery":
+        data = {
+          title: "Hình ảnh hoạt động sản xuất",
+          subtitle: "Minh bạch từ nông trại tới bàn ăn",
+          images: [
+            "/uploads/process-preview.jpg",
+            "/hero-bg-default.jpg"
+          ]
+        };
+        break;
+      case "combos":
+        data = {
+          title: "Các Gói Combo Tiết Kiệm",
+          subtitle: "Lựa chọn hoàn hảo để cùng ăn với bạn bè",
+          items: [
+            { name: "Combo Ăn Thử", price: "99.000đ", originalPrice: "120.000đ", benefits: ["1 Chân gà rút xương", "1 Khô gà lá chanh", "Tặng kèm 1 khăn lau"], tag: "Thử Thách", ctaLink: "/san-pham" },
+            { name: "Combo Siêu Cay", price: "199.000đ", originalPrice: "250.000đ", benefits: ["2 Chân gà cay nồng", "2 Tai heo giòn sần sật", "Giao hàng hỏa tốc"], tag: "BÁN CHẠY", ctaLink: "/san-pham" }
+          ]
+        };
+        break;
+      case "faq":
+        data = {
+          title: "Câu Hỏi Thường Gặp (FAQs)",
+          items: [
+            { question: "Sản phẩm có đạt chứng nhận an toàn thực phẩm không?", answer: "Tất cả sản phẩm của Ăn Cùng Bà Tuyết đều đạt chứng nhận ISO 22000 và vệ sinh an toàn thực phẩm nghiêm ngặt." },
+            { question: "Thời gian giao hàng mất bao lâu?", answer: "Chúng tôi giao hàng hỏa tốc trong 2h tại khu vực nội thành Hà Nội và Hồ Chí Minh, các khu vực khác mất khoảng 1-3 ngày." }
+          ]
         };
         break;
     }
@@ -506,28 +572,54 @@ export function PageForm({ pageId }: { pageId?: string }) {
                   return (
                     <div
                       key={block.id}
-                      className={`border overflow-hidden transition-all ${
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDrop={(e) => handleDrop(e, index)}
+                      className={`border overflow-hidden transition-all cursor-grab active:cursor-grabbing ${
+                        draggedIndex === index ? "opacity-40 border-dashed border-orange-450 bg-orange-50/20" : ""
+                      } ${
                         isExpanded ? "border-orange-200 shadow-sm shadow-orange-500/5 bg-white" : "border-slate-200 bg-slate-50/20"
                       }`}
                     >
                       {/* Block Accordion Header */}
                       <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 select-none">
                         <div
-                          className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
+                          className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
                           onClick={() => handleToggleExpand(block.id)}
                         >
+                          {/* Drag handle dots */}
+                          <div className="text-slate-300 shrink-0 flex items-center pr-1.5 cursor-grab">
+                            <span className="grid grid-cols-2 gap-0.5 w-3 opacity-60">
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                              <span className="w-1 h-1 bg-slate-400 rounded-full"></span>
+                            </span>
+                          </div>
+
                           <div className={`p-1.5 ${
                             block.type === "hero" ? "bg-purple-50 text-purple-600" :
                             block.type === "text" ? "bg-blue-50 text-blue-600" :
                             block.type === "features" ? "bg-teal-50 text-teal-600" :
                             block.type === "split" ? "bg-amber-50 text-amber-600" :
-                            "bg-orange-50 text-orange-600"
+                            block.type === "products" ? "bg-orange-50 text-orange-600" :
+                            block.type === "testimonials" ? "bg-emerald-50 text-emerald-600" :
+                            block.type === "gallery" ? "bg-blue-50 text-blue-600" :
+                            block.type === "combos" ? "bg-rose-50 text-rose-600" :
+                            "bg-indigo-50 text-indigo-600"
                           }`}>
                             {block.type === "hero" && <ImageIcon size={16} />}
                             {block.type === "text" && <Type size={16} />}
                             {block.type === "features" && <LayoutGrid size={16} />}
                             {block.type === "split" && <Columns size={16} />}
                             {block.type === "products" && <ShoppingBag size={16} />}
+                            {block.type === "testimonials" && <MessageSquare size={16} />}
+                            {block.type === "gallery" && <ImageIcon size={16} />}
+                            {block.type === "combos" && <Tag size={16} />}
+                            {block.type === "faq" && <HelpCircle size={16} />}
                           </div>
                           
                           <div className="flex flex-col min-w-0">
@@ -536,7 +628,11 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                      block.type === "text" ? "Văn bản chữ" :
                                      block.type === "features" ? "Lưới tính năng" :
                                      block.type === "split" ? "Ảnh & Chữ song song" :
-                                     "Sản phẩm nổi bật"}
+                                     block.type === "products" ? "Sản phẩm nổi bật" :
+                                     block.type === "testimonials" ? "Đánh giá khách hàng" :
+                                     block.type === "gallery" ? "Thư viện hình ảnh" :
+                                     block.type === "combos" ? "Bảng gói Combo" :
+                                     "Câu hỏi thường gặp (FAQ)"}
                             </span>
                             <span className="text-[10px] text-slate-400 truncate">
                               {block.type === "hero" && (block.data.title || "Chưa nhập tiêu đề")}
@@ -544,6 +640,10 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               {block.type === "features" && (block.data.title || "Lưới đặc trưng")}
                               {block.type === "split" && (block.data.title || "Khối 2 cột")}
                               {block.type === "products" && `${block.data.productIds?.length || 0} sản phẩm đã chọn`}
+                              {block.type === "testimonials" && `${block.data.items?.length || 0} phản hồi khách hàng`}
+                              {block.type === "gallery" && `${block.data.images?.length || 0} hình ảnh thư viện`}
+                              {block.type === "combos" && `${block.data.items?.length || 0} gói combo`}
+                              {block.type === "faq" && `${block.data.items?.length || 0} câu hỏi`}
                             </span>
                           </div>
                         </div>
@@ -985,6 +1085,464 @@ export function PageForm({ pageId }: { pageId?: string }) {
                             </div>
                           )}
 
+                          {/* 6. TESTIMONIALS BLOCK EDIT */}
+                          {block.type === "testimonials" && (
+                            <div className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Tiêu đề lớn</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.title || ""}
+                                    onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Phụ đề</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.subtitle || ""}
+                                    onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <label className="block text-xs font-black text-slate-800">Danh sách ý kiến phản hồi</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const currentItems = block.data.items || [];
+                                      updateBlockData(block.id, {
+                                        items: [...currentItems, { name: "Tên khách hàng", role: "Khách mua hàng", review: "Đồ ăn rất vừa vị, ngon, sạch sẽ.", rating: 5, avatarUrl: "" }]
+                                      });
+                                    }}
+                                    className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 flex items-center gap-1 rounded"
+                                  >
+                                    <Plus size={10} /> Thêm ý kiến
+                                  </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
+                                  {(block.data.items || []).map((item: any, idx: number) => (
+                                    <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          updateBlockData(block.id, { items: newItems });
+                                        }}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        title="Xóa phản hồi này"
+                                      >
+                                        <Trash size={12} />
+                                      </button>
+
+                                      <div className="grid grid-cols-3 gap-2">
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Tên</label>
+                                          <input
+                                            type="text"
+                                            value={item.name || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].name = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Vai trò</label>
+                                          <input
+                                            type="text"
+                                            value={item.role || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].role = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Đánh giá sao (1-5)</label>
+                                          <select
+                                            value={item.rating || 5}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].rating = parseInt(e.target.value);
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-700"
+                                          >
+                                            <option value="5">5 Sao ⭐⭐⭐⭐⭐</option>
+                                            <option value="4">4 Sao ⭐⭐⭐⭐</option>
+                                            <option value="3">3 Sao ⭐⭐⭐</option>
+                                            <option value="2">2 Sao ⭐⭐</option>
+                                            <option value="1">1 Sao ⭐</option>
+                                          </select>
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-0.5">
+                                        <label className="text-[9px] font-bold text-slate-500">Bình luận</label>
+                                        <textarea
+                                          value={item.review || ""}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].review = e.target.value;
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          rows={2}
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-0.5">
+                                        <label className="text-[9px] font-bold text-slate-500">Ảnh đại diện (URL)</label>
+                                        <input
+                                          type="text"
+                                          value={item.avatarUrl || ""}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].avatarUrl = e.target.value;
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          placeholder="https://..."
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {(block.data.items || []).length === 0 && (
+                                    <p className="text-[10px] italic text-slate-400 py-4 text-center">Chưa có phản hồi khách hàng nào.</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 7. GALLERY BLOCK EDIT */}
+                          {block.type === "gallery" && (
+                            <div className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Tiêu đề lớn</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.title || ""}
+                                    onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Phụ đề</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.subtitle || ""}
+                                    onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <label className="block text-xs font-black text-slate-800">Danh sách hình ảnh</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const currentImages = block.data.images || [];
+                                      updateBlockData(block.id, {
+                                        images: [...currentImages, ""]
+                                      });
+                                    }}
+                                    className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 flex items-center gap-1 rounded"
+                                  >
+                                    <Plus size={10} /> Thêm ảnh URL
+                                  </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
+                                  {(block.data.images || []).map((imgUrl: string, idx: number) => (
+                                    <div key={idx} className="bg-white border border-slate-200 p-3 relative flex flex-col gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newImages = (block.data.images || []).filter((_: any, i: number) => i !== idx);
+                                          updateBlockData(block.id, { images: newImages });
+                                        }}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        title="Xóa ảnh"
+                                      >
+                                        <Trash size={12} />
+                                      </button>
+
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-500">Đường dẫn hình ảnh (URL)</label>
+                                        <input
+                                          type="text"
+                                          value={imgUrl}
+                                          onChange={(e) => {
+                                            const newImages = [...(block.data.images || [])];
+                                            newImages[idx] = e.target.value;
+                                            updateBlockData(block.id, { images: newImages });
+                                          }}
+                                          placeholder="https://..."
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                        />
+                                      </div>
+
+                                      {imgUrl && (
+                                        <div className="relative aspect-video w-24 overflow-hidden border border-slate-200 bg-slate-50 mt-1">
+                                          <img src={imgUrl} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  {(block.data.images || []).length === 0 && (
+                                    <p className="text-[10px] italic text-slate-400 py-4 text-center">Chưa chọn ảnh nào.</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 8. COMBOS BLOCK EDIT */}
+                          {block.type === "combos" && (
+                            <div className="space-y-4">
+                              <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Tiêu đề lớn</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.title || ""}
+                                    onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="block text-xs font-bold text-slate-700">Phụ đề</label>
+                                  <input
+                                    type="text"
+                                    value={block.data.subtitle || ""}
+                                    onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <label className="block text-xs font-black text-slate-800">Danh sách các gói combo</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const currentItems = block.data.items || [];
+                                      updateBlockData(block.id, {
+                                        items: [...currentItems, { name: "Gói Combo Mới", price: "150.000đ", originalPrice: "200.000đ", benefits: ["Chi tiết quyền lợi 1", "Quyền lợi 2"], tag: "HOT", ctaLink: "/san-pham" }]
+                                      });
+                                    }}
+                                    className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 flex items-center gap-1 rounded"
+                                  >
+                                    <Plus size={10} /> Thêm gói Combo
+                                  </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
+                                  {(block.data.items || []).map((combo: any, idx: number) => (
+                                    <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          updateBlockData(block.id, { items: newItems });
+                                        }}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        title="Xóa combo"
+                                      >
+                                        <Trash size={12} />
+                                      </button>
+
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Tên Combo</label>
+                                          <input
+                                            type="text"
+                                            value={combo.name || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].name = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Nhãn nổi bật (Tag)</label>
+                                          <input
+                                            type="text"
+                                            value={combo.tag || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].tag = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            placeholder="BÁN CHẠY"
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Giá bán combo</label>
+                                          <input
+                                            type="text"
+                                            value={combo.price || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].price = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                        <div className="space-y-0.5">
+                                          <label className="text-[9px] font-bold text-slate-500">Giá gốc (nếu có)</label>
+                                          <input
+                                            type="text"
+                                            value={combo.originalPrice || ""}
+                                            onChange={(e) => {
+                                              const newItems = [...(block.data.items || [])];
+                                              newItems[idx].originalPrice = e.target.value;
+                                              updateBlockData(block.id, { items: newItems });
+                                            }}
+                                            className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                          />
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-0.5">
+                                        <label className="text-[9px] font-bold text-slate-500">CTA Link (Link nút mua)</label>
+                                        <input
+                                          type="text"
+                                          value={combo.ctaLink || ""}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].ctaLink = e.target.value;
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-1">
+                                        <div className="flex justify-between items-center">
+                                          <label className="text-[9px] font-bold text-slate-500">Chi tiết ưu đãi / Quyền lợi (Dòng cách dòng)</label>
+                                        </div>
+                                        <textarea
+                                          value={(combo.benefits || []).join("\n")}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].benefits = e.target.value.split("\n");
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          rows={3}
+                                          placeholder="Chân gà rút xương thơm cay&#10;Tai heo giòn sần sật&#10;Giao hàng hỏa tốc"
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none leading-normal font-sans"
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 9. FAQ BLOCK EDIT */}
+                          {block.type === "faq" && (
+                            <div className="space-y-4">
+                              <div className="space-y-1">
+                                <label className="block text-xs font-bold text-slate-700">Tiêu đề lớn FAQ</label>
+                                <input
+                                  type="text"
+                                  value={block.data.title || ""}
+                                  onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
+                                />
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <label className="block text-xs font-black text-slate-800">Danh sách câu hỏi & Trả lời</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const currentItems = block.data.items || [];
+                                      updateBlockData(block.id, {
+                                        items: [...currentItems, { question: "Câu hỏi của bạn là gì?", answer: "Nội dung câu trả lời tương ứng." }]
+                                      });
+                                    }}
+                                    className="text-[10px] bg-orange-500 hover:bg-orange-600 text-white font-bold px-2 py-1 flex items-center gap-1 rounded"
+                                  >
+                                    <Plus size={10} /> Thêm FAQ
+                                  </button>
+                                </div>
+
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
+                                  {(block.data.items || []).map((faqItem: any, idx: number) => (
+                                    <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          updateBlockData(block.id, { items: newItems });
+                                        }}
+                                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                        title="Xóa FAQ"
+                                      >
+                                        <Trash size={12} />
+                                      </button>
+
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-500">Câu hỏi</label>
+                                        <input
+                                          type="text"
+                                          value={faqItem.question || ""}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].question = e.target.value;
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none"
+                                        />
+                                      </div>
+
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-slate-500">Trả lời</label>
+                                        <textarea
+                                          value={faqItem.answer || ""}
+                                          onChange={(e) => {
+                                            const newItems = [...(block.data.items || [])];
+                                            newItems[idx].answer = e.target.value;
+                                            updateBlockData(block.id, { items: newItems });
+                                          }}
+                                          rows={3}
+                                          className="w-full px-2 py-1 border border-slate-200 text-[10px] text-slate-800 focus:outline-none leading-normal font-sans"
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                         </div>
                       )}
                     </div>
@@ -996,50 +1554,167 @@ export function PageForm({ pageId }: { pageId?: string }) {
             {/* Quick Add Block Bar */}
             <div className="border-t border-slate-100 pt-6 space-y-3">
               <label className="block text-xs font-bold text-slate-700">Nhấp chọn khối để chèn thêm vào trang:</label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-9 gap-2">
                 <button
                   type="button"
                   onClick={() => addBlock("hero")}
-                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
                 >
-                  <ImageIcon size={18} className="group-hover:scale-110 transition" />
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Khối Hero Banner</p>
+                      <p>Khối biểu ngữ lớn ở đầu trang. Dùng để tạo ấn tượng đầu tiên cho khách hàng. Chứa Tiêu đề nổi bật, Phụ đề, Nút kêu gọi hành động (CTA) và Ảnh nền lớn.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <ImageIcon size={18} />
                   <span className="text-[10px] font-bold">Hero Banner</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => addBlock("text")}
-                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
                 >
-                  <Type size={18} className="group-hover:scale-110 transition" />
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Khối Văn Bản</p>
+                      <p>Dùng để nhập nội dung chữ, bài viết, các cam kết pháp lý hoặc mô tả chi tiết. Hỗ trợ nhập mã HTML thông thường để định dạng văn bản (đậm, nghiêng, danh sách).</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <Type size={18} />
                   <span className="text-[10px] font-bold">Khối Văn Bản</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => addBlock("features")}
-                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
                 >
-                  <LayoutGrid size={18} className="group-hover:scale-110 transition" />
-                  <span className="text-[10px] font-bold">Khối Tính Năng</span>
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Khối Tính Năng</p>
+                      <p>Hiển thị các ưu điểm nổi bật (như Giao hàng nhanh, Chất lượng sạch sẽ, Độc quyền) dưới dạng lưới kèm các biểu tượng (icons) sinh động.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <LayoutGrid size={18} />
+                  <span className="text-[10px] font-bold">Tính Năng</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => addBlock("split")}
-                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
                 >
-                  <Columns size={18} className="group-hover:scale-110 transition" />
-                  <span className="text-[10px] font-bold">Khối Ảnh & Chữ</span>
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Khối Ảnh & Chữ</p>
+                      <p>Khối chia làm 2 cột: 1 cột ảnh minh họa và 1 cột văn bản mô tả. Thích hợp để kể câu chuyện sản phẩm hoặc quy trình chế biến sản phẩm.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <Columns size={18} />
+                  <span className="text-[10px] font-bold">Ảnh & Chữ</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => addBlock("products")}
-                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600 col-span-2 sm:col-span-1"
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
                 >
-                  <ShoppingBag size={18} className="group-hover:scale-110 transition" />
-                  <span className="text-[10px] font-bold">Khối Sản Phẩm</span>
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1 font-sans">
+                      <p className="font-bold text-orange-400">Khối Sản Phẩm</p>
+                      <p>Hiển thị lưới danh sách sản phẩm bán chạy hoặc nổi bật. Bạn chọn sản phẩm, hệ thống tự lấy giá cả, ảnh và link mua hàng thật để render ra ngoài.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <ShoppingBag size={18} />
+                  <span className="text-[10px] font-bold">Sản Phẩm</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addBlock("testimonials")}
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
+                >
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Đánh Giá Khách Hàng</p>
+                      <p>Hiển thị danh sách phản hồi và chấm điểm bằng các biểu tượng ngôi sao để nâng cao uy tín thương hiệu.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <MessageSquare size={18} />
+                  <span className="text-[10px] font-bold">Ý Kiến Khách</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addBlock("gallery")}
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
+                >
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Thư Viện Ảnh</p>
+                      <p>Trưng bày hình ảnh xưởng sản xuất, sản phẩm thực tế hoặc chứng chỉ chứng nhận vệ sinh ATTP.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <ImageIcon size={18} />
+                  <span className="text-[10px] font-bold">Thư Viện Ảnh</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addBlock("combos")}
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
+                >
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Gói Combo Ưu Đãi</p>
+                      <p>Thiết kế thẻ giá so sánh các combo ưu đãi, làm nổi bật nhãn khuyến mãi kèm danh sách quà tặng đi kèm.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <Tag size={18} />
+                  <span className="text-[10px] font-bold">Gói Combo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => addBlock("faq")}
+                  className="relative group flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition gap-1 text-slate-600"
+                >
+                  {/* Tooltip cách dùng */}
+                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-30 w-64 pointer-events-none">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-lg shadow-xl border border-slate-800 leading-normal text-left font-normal space-y-1">
+                      <p className="font-bold text-orange-400">Câu Hỏi FAQ</p>
+                      <p>Khối hỏi đáp mở rộng thu gọn (accordion), gỡ rối mọi lo lắng, thắc mắc về mua hàng và giao nhận cho khách hàng.</p>
+                    </div>
+                    <div className="w-2 h-2 bg-slate-900 rotate-45 -mt-1 border-r border-b border-slate-800"></div>
+                  </div>
+
+                  <HelpCircle size={18} />
+                  <span className="text-[10px] font-bold">Hỏi Đáp FAQ</span>
                 </button>
               </div>
             </div>
@@ -1247,6 +1922,161 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               {productsList.filter(p => (block.data.productIds || []).includes(p.id)).length === 0 && (
                                 <div className="col-span-3 text-center text-slate-400 italic text-xs py-8">
                                   Chưa có sản phẩm nào được chọn để hiển thị ở đây.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 6. TESTIMONIALS RENDER */}
+                      {block.type === "testimonials" && (
+                        <section className="py-16 px-6 sm:px-12 bg-cream">
+                          <div className="max-w-5xl mx-auto space-y-10">
+                            <div className="text-center space-y-2">
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title || "Khách hàng nói gì?"}</h2>
+                              {block.data.subtitle && (
+                                <p className="text-[11px] text-slate-400 font-semibold">{block.data.subtitle}</p>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                              {(block.data.items || []).map((item: any, tIdx: number) => (
+                                <div key={tIdx} className="bg-white border border-slate-100 p-4 shadow-sm relative flex flex-col justify-between rounded">
+                                  <div className="space-y-2">
+                                    <div className="flex gap-1 text-amber-500">
+                                      {Array.from({ length: item.rating || 5 }).map((_, i) => (
+                                        <Star key={i} size={10} fill="currentColor" className="text-amber-500" />
+                                      ))}
+                                    </div>
+                                    <p className="text-[10px] text-slate-600 italic leading-relaxed">"{item.review}"</p>
+                                  </div>
+                                  <div className="flex items-center gap-2 pt-4 border-t border-slate-50 mt-4">
+                                    {item.avatarUrl ? (
+                                      <img src={item.avatarUrl} alt={item.name} className="w-6 h-6 rounded-full object-cover border border-slate-150" />
+                                    ) : (
+                                      <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px]">
+                                        {item.name ? item.name.charAt(0) : "K"}
+                                      </div>
+                                    )}
+                                    <div>
+                                      <h4 className="text-[10px] font-bold text-slate-900">{item.name}</h4>
+                                      <p className="text-[8px] text-slate-400 font-semibold">{item.role}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {(block.data.items || []).length === 0 && (
+                                <div className="col-span-3 text-center text-slate-400 italic text-xs py-8">
+                                  Chưa có ý kiến phản hồi nào được nhập.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 7. GALLERY RENDER */}
+                      {block.type === "gallery" && (
+                        <section className="py-16 px-6 sm:px-12 bg-white">
+                          <div className="max-w-5xl mx-auto space-y-10">
+                            <div className="text-center space-y-2">
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title || "Thư viện ảnh"}</h2>
+                              {block.data.subtitle && (
+                                <p className="text-[11px] text-slate-400 font-semibold">{block.data.subtitle}</p>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                              {(block.data.images || []).map((imgUrl: string, gIdx: number) => (
+                                <div key={gIdx} className="relative aspect-square overflow-hidden border border-slate-100 bg-slate-50 shadow-sm group">
+                                  {imgUrl ? (
+                                    <img src={imgUrl} alt={`Gallery ${gIdx}`} className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-350 text-[10px] italic">Ảnh trống</div>
+                                  )}
+                                </div>
+                              ))}
+                              {(block.data.images || []).length === 0 && (
+                                <div className="col-span-3 text-center text-slate-400 italic text-xs py-8">
+                                  Chưa có hình ảnh nào được chọn.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 8. COMBOS RENDER */}
+                      {block.type === "combos" && (
+                        <section className="py-16 px-6 sm:px-12 bg-cream">
+                          <div className="max-w-5xl mx-auto space-y-10">
+                            <div className="text-center space-y-2">
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title || "Các Gói Combo"}</h2>
+                              {block.data.subtitle && (
+                                <p className="text-[11px] text-slate-400 font-semibold">{block.data.subtitle}</p>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
+                              {(block.data.items || []).map((combo: any, cIdx: number) => (
+                                <div key={cIdx} className="bg-white border-2 border-orange-100 p-5 flex flex-col justify-between relative shadow-sm rounded">
+                                  {combo.tag && (
+                                    <span className="absolute -top-2.5 right-4 bg-orange-600 text-white text-[8px] font-black px-2 py-0.5 uppercase tracking-wider rounded">
+                                      {combo.tag}
+                                    </span>
+                                  )}
+                                  <div className="space-y-3">
+                                    <h3 className="text-xs font-black text-slate-950">{combo.name}</h3>
+                                    <div className="flex items-baseline gap-2">
+                                      <span className="text-lg font-black text-orange-600">{combo.price}</span>
+                                      {combo.originalPrice && (
+                                        <span className="text-[10px] text-slate-400 line-through font-semibold">{combo.originalPrice}</span>
+                                      )}
+                                    </div>
+                                    <ul className="space-y-1.5 pt-3 border-t border-slate-100">
+                                      {(combo.benefits || []).map((benefit: string, bIdx: number) => (
+                                        <li key={bIdx} className="flex items-start gap-1.5 text-[10px] text-slate-600 font-medium">
+                                          <span className="text-green-500 font-bold">✓</span>
+                                          <span>{benefit}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                  <span className="mt-6 text-center bg-slate-950 text-white text-[10px] font-black uppercase tracking-wider py-2 block rounded-sm">
+                                    Đặt Combo Ngay
+                                  </span>
+                                </div>
+                              ))}
+                              {(block.data.items || []).length === 0 && (
+                                <div className="col-span-2 text-center text-slate-400 italic text-xs py-8">
+                                  Chưa thiết lập gói combo nào.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 9. FAQ RENDER */}
+                      {block.type === "faq" && (
+                        <section className="py-16 px-6 sm:px-12 bg-white">
+                          <div className="max-w-3xl mx-auto space-y-8">
+                            <div className="text-center">
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title || "Câu hỏi thường gặp"}</h2>
+                            </div>
+                            <div className="space-y-3">
+                              {(block.data.items || []).map((faqItem: any, fIdx: number) => (
+                                <div key={fIdx} className="border border-orange-100 bg-[#fffbf5] rounded overflow-hidden text-xs">
+                                  <div className="flex items-center justify-between p-3 font-bold text-slate-900 border-b border-orange-100">
+                                    <span>{faqItem.question}</span>
+                                    <span className="text-orange-500 font-bold">?</span>
+                                  </div>
+                                  <div className="p-3 text-slate-600 leading-normal bg-white">
+                                    {faqItem.answer}
+                                  </div>
+                                </div>
+                              ))}
+                              {(block.data.items || []).length === 0 && (
+                                <div className="text-center text-slate-400 italic text-xs py-8">
+                                  Chưa nhập câu hỏi nào.
                                 </div>
                               )}
                             </div>
