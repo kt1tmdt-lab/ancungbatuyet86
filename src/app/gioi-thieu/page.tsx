@@ -9,6 +9,8 @@ import {
   normalizeMarketingConfig,
   type PageAssetItem,
   type TrustSectionItem,
+  type HistoryMilestoneItem,
+  type CommunityActivityItem,
 } from "@/lib/marketing-config";
 import {
   ArrowRight,
@@ -25,6 +27,9 @@ import {
   Truck,
   BadgeCheck,
   CheckCircle2,
+  Calendar,
+  MessageSquare,
+  HandHelping,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,19 +98,19 @@ const processSteps: Array<IconBlock & { image?: string; linkUrl?: string }> = [
     icon: Leaf,
     title: "Chọn nguyên liệu",
     text: "Ưu tiên nguồn đầu vào rõ ràng, phù hợp tiêu chuẩn chế biến và kiểm soát chất lượng trước khi đưa vào sản xuất.",
-    linkUrl: "/chat-luong/minh-bach-nguon-nguyen-lieu",
+    linkUrl: "/chat-luong",
   },
   {
     icon: Factory,
     title: "Sản xuất tại xưởng",
     text: "Quy trình được tổ chức theo từng khu vực để giữ độ ổn định, hạn chế rủi ro và đảm bảo năng suất.",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong",
   },
   {
     icon: PackageCheck,
     title: "Đóng gói chỉn chu",
     text: "Bao bì được chuẩn hóa để sản phẩm dễ vận chuyển, dễ nhận diện và giữ được trải nghiệm tốt khi đến tay khách.",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong",
   },
   {
     icon: Truck,
@@ -321,6 +326,9 @@ function ValueCard({
 
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
+  const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(DEFAULT_MARKETING_CONFIG.trustSections);
+  const [historyMilestones, setHistoryMilestones] = useState<HistoryMilestoneItem[]>(DEFAULT_MARKETING_CONFIG.historyMilestones);
+  const [communityActivities, setCommunityActivities] = useState<CommunityActivityItem[]>(DEFAULT_MARKETING_CONFIG.communityActivities);
 
   useEffect(() => {
     async function fetchPageAssets() {
@@ -330,6 +338,9 @@ export default function AboutPage() {
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);
         setPageAssets(marketingConfig.pageAssets);
+        setTrustSections(marketingConfig.trustSections);
+        setHistoryMilestones(marketingConfig.historyMilestones);
+        setCommunityActivities(marketingConfig.communityActivities);
       } catch (error) {
         console.error("Failed to fetch configurable page assets:", error);
       }
@@ -351,6 +362,15 @@ export default function AboutPage() {
   const teamImage = assetByKey.about_team_quote?.imageUrl || "/bento/bento-factory.png";
   const teamLink = assetByKey.about_team_quote?.linkUrl;
   const aboutVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0");
+  const visibleTrustSections = trustSections.filter((item) => item.enabled).slice(0, 6);
+  const visibleHistoryMilestones = historyMilestones
+    .filter((item) => item.enabled)
+    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0))
+    .slice(0, 6);
+  const visibleCommunityActivities = communityActivities
+    .filter((item) => item.enabled)
+    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0))
+    .slice(0, 4);
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 antialiased selection:bg-orange-500 selection:text-white">
@@ -405,7 +425,7 @@ export default function AboutPage() {
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href="/chat-luong/nha-may-quy-trinh-san-xuat"
+                href="/chat-luong"
                 className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-7 py-4 text-sm font-black text-slate-950 transition hover:border-orange-300 hover:text-orange-700"
               >
                 Xem quy trình sản xuất
@@ -570,6 +590,105 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section id="about-trust" className="scroll-mt-24 border-b border-orange-100 bg-[#fffaf2] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+        <SectionIntro
+          label="Thông tin doanh nghiệp"
+          title="Uy tín, chứng nhận và năng lực được gom ngay trong trang Giới thiệu."
+          description="Các nội dung này lấy từ phần quản trị thương hiệu: chứng nhận, bảo hiểm, năng lực sản xuất và bằng chứng tạo niềm tin."
+        />
+        <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {visibleTrustSections.map((item, index) => (
+            <motion.article
+              key={item.id}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+              className="group border border-orange-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(234,88,12,0.10)]"
+            >
+              {item.imageUrl ? (
+                <div className="mb-5 aspect-[16/10] overflow-hidden bg-orange-50">
+                  <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                </div>
+              ) : (
+                <div className="mb-5 flex aspect-[16/10] items-center justify-center bg-orange-50 text-orange-600">
+                  <ShieldCheck size={34} />
+                </div>
+              )}
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">Hồ sơ thương hiệu</p>
+              <h3 className="mt-3 text-xl font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+            </motion.article>
+          ))}
+        </div>
+      </section>
+
+      <section id="about-history" className="scroll-mt-24 border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+        <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+          <SectionIntro
+            label="Hành trình phát triển"
+            title="Các dấu mốc chính nằm chung trong trang Giới thiệu."
+            description="Không cần tách trang lịch sử riêng nữa. Admin sửa từng mốc, năm, ảnh và nội dung tại phần cấu hình Giới thiệu."
+          />
+          <div className="space-y-4">
+            {visibleHistoryMilestones.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className="grid gap-4 border border-orange-100 bg-[#fffaf2] p-5 sm:grid-cols-[120px_1fr]"
+              >
+                <div>
+                  <p className="text-3xl font-black tracking-[-0.06em] text-orange-600">{item.year || item.title.match(/\b(20\d\d|19\d\d)\b/)?.[0] || String(index + 1).padStart(2, "0")}</p>
+                  <p className="mt-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">{item.type === "achievement" ? "Thành tựu" : "Cột mốc"}</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="about-community" className="scroll-mt-24 border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+        <SectionIntro
+          label="Cộng đồng"
+          title="Hoạt động cộng đồng và khách hàng cũng nằm trong trang Giới thiệu."
+          description="Các hoạt động này giúp trang giới thiệu không chỉ nói về công ty, mà còn cho thấy thương hiệu đang sống cùng khách hàng thế nào."
+        />
+        <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {visibleCommunityActivities.map((item, index) => {
+            const Icon = item.iconKey === "users" ? Users : item.iconKey === "message" ? MessageSquare : item.iconKey === "hand" ? HandHelping : Heart;
+            return (
+              <motion.article
+                key={item.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                className="border border-orange-100 bg-white p-6 shadow-sm"
+              >
+                {item.imageUrl ? (
+                  <div className="mb-5 aspect-square overflow-hidden bg-orange-50">
+                    <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="mb-5 flex aspect-square items-center justify-center bg-orange-50 text-orange-600">
+                    <Icon size={34} />
+                  </div>
+                )}
+                <h3 className="text-lg font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
+              </motion.article>
+            );
+          })}
+        </div>
+      </section>
+
       <section className="bg-slate-950 text-white">
         <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
           <div className="px-5 py-16 sm:px-8 lg:px-14 xl:px-20">
@@ -587,7 +706,7 @@ export default function AboutPage() {
 
           <div className="grid border-t border-white/10 lg:border-l lg:border-t-0">
             <Link
-              href="/chat-luong/nha-may-quy-trinh-san-xuat"
+              href="/chat-luong"
               className="group flex items-center justify-between border-b border-white/10 bg-orange-600 p-8 text-lg font-black text-white transition hover:bg-orange-700"
             >
               Xem quy trình sản xuất

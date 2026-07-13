@@ -89,17 +89,7 @@ function getHeaderSubmenu(
   const identity = menuIdentity(link);
 
   if (link.href === "/gioi-thieu") {
-    return {
-      eyebrow: "Về thương hiệu",
-      title: "Giới thiệu",
-      description: "Câu chuyện, thông tin doanh nghiệp và hành trình phát triển.",
-      accent: "01",
-      links: [
-        { href: "/gioi-thieu/cau-chuyen-thuong-hieu", label: "Câu chuyện thương hiệu", note: "Tinh thần và định hướng thương hiệu" },
-        { href: "/gioi-thieu/thong-tin-doanh-nghiep", label: "Thông tin doanh nghiệp", note: "Uy tín, chứng nhận và năng lực" },
-        { href: "/gioi-thieu/hanh-trinh-phat-trien", label: "Hành trình phát triển", note: "Các dấu mốc quan trọng" },
-      ],
-    };
+    return null;
   }
 
   if (link.href === "/chat-luong") return null;
@@ -154,17 +144,7 @@ function getHeaderSubmenu(
   }
 
   if (link.href === "/gioi-thieu" || identity.includes("gioi thieu")) {
-    return {
-      eyebrow: "Về thương hiệu",
-      title: "Giới thiệu",
-      description: "Câu chuyện, thông tin doanh nghiệp và hành trình phát triển của Ăn Cùng Bà Tuyết.",
-      accent: "01",
-      links: [
-        { href: "/gioi-thieu", label: "Câu chuyện thương hiệu", note: "Tinh thần và định hướng thương hiệu" },
-        { href: "/gioi-thieu/thanh-tuu", label: "Thông tin doanh nghiệp", note: "Uy tín, chứng nhận và năng lực" },
-        { href: "/gioi-thieu/lich-su", label: "Hành trình phát triển", note: "Các dấu mốc quan trọng" },
-      ],
-    };
+    return null;
   }
 
   if (link.href === "/chat-luong" || identity.includes("chat luong")) return null;

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
   ArrowRight,
-  History,
   Home,
   Megaphone,
   Menu,
@@ -14,13 +13,12 @@ import {
   ShieldCheck,
   ShoppingBag,
   Store,
-  Users,
 } from "lucide-react";
 
 const pageGroups = [
   {
     title: "Trang chủ",
-    description: "Các phần đang xuất hiện ngay khi khách truy cập mở website.",
+    description: "Các phần đang xuất hiện ngay khi khách truy cập website.",
     items: [
       { title: "Hero đầu trang", description: "Ảnh Bà Tuyết, tiêu đề, mô tả, số liệu và hai nút bấm.", href: "/admin/settings?tab=hero", icon: Home },
       { title: "Nội dung trang chủ", description: "Tiêu đề, mô tả, bật/tắt section, ảnh và link đang dùng trên trang chủ.", href: "/admin/site-content?tab=home", icon: Home },
@@ -28,31 +26,19 @@ const pageGroups = [
     ],
   },
   {
-    title: "Thanh đầu trang và chân trang",
+    title: "Header & Footer",
     description: "Các thành phần dùng chung trên toàn bộ website.",
     items: [
-      { title: "Menu website", description: "Tên mục menu và đường dẫn khi khách bấm vào.", href: "/admin/settings?tab=navigation", icon: Menu },
-      { title: "Chân trang và liên hệ", description: "Các link footer, hotline, email, địa chỉ và mạng xã hội.", href: "/admin/settings?tab=navigation", icon: ShoppingBag },
+      { title: "Menu website", description: "Tên mục menu, thứ tự và đường dẫn khi khách bấm vào.", href: "/admin/settings?tab=navigation", icon: Menu },
+      { title: "Chân trang & liên hệ", description: "Link footer, hotline, email, địa chỉ và mạng xã hội.", href: "/admin/settings?tab=navigation", icon: ShoppingBag },
       { title: "SEO website", description: "Tiêu đề và mô tả hiển thị trên Google.", href: "/admin/settings?tab=seo", icon: Search },
     ],
   },
   {
     title: "Giới thiệu thương hiệu",
-    description: "Lịch sử, uy tín và hoạt động của Ăn Cùng Bà Tuyết.",
+    description: "Một trang tổng gồm câu chuyện, thông tin doanh nghiệp, hành trình phát triển và cộng đồng.",
     items: [
-      { title: "Lịch sử phát triển", description: "Các cột mốc, năm, nội dung và ảnh minh họa.", href: "/admin/site-content?tab=history", icon: History },
-      { title: "Thành tựu và uy tín", description: "Chứng nhận, kiểm nghiệm và thông tin tạo niềm tin.", href: "/admin/site-content?tab=trust", icon: ShieldCheck },
-      { title: "Hoạt động cộng đồng", description: "Thiện nguyện, livestream, đối tác và hoạt động xã hội.", href: "/admin/site-content?tab=community", icon: Users },
-    ],
-  },
-  {
-    title: "Bán hàng và truyền thông",
-    description: "Những dữ liệu được cập nhật thường xuyên.",
-    items: [
-      { title: "Sản phẩm", description: "Thêm, sửa, ẩn hiện sản phẩm, giá, ảnh và link mua.", href: "/admin/products", icon: Package },
-      { title: "Điểm bán", description: "Điểm bán, kênh online và đường dẫn mua hàng.", href: "/admin/sales-channels", icon: Store },
-      { title: "Tin tức", description: "Viết, sửa và xuất bản bài viết trên website.", href: "/admin/posts", icon: Newspaper },
-      { title: "Báo chí và phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
+      { title: "Trang Giới thiệu", description: "Sửa video, gallery, quy trình, câu chuyện, thành tựu, lịch sử phát triển và cộng đồng.", href: "/admin/about", icon: ShieldCheck },
     ],
   },
   {
@@ -60,6 +46,16 @@ const pageGroups = [
     description: "Cấu hình riêng trang Chất lượng đúng layout đang hiển thị ngoài website.",
     items: [
       { title: "Trang Chất lượng", description: "Sửa hero, nguồn nguyên liệu, nhà máy, hồ sơ pháp lý, PVI, chính sách, FAQ và ảnh popup.", href: "/admin/quality", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "Bán hàng & truyền thông",
+    description: "Những dữ liệu được cập nhật thường xuyên.",
+    items: [
+      { title: "Sản phẩm", description: "Thêm, sửa, ẩn hiện sản phẩm, ảnh và link mua.", href: "/admin/products", icon: Package },
+      { title: "Điểm bán", description: "Điểm bán, kênh online và đường dẫn mua hàng.", href: "/admin/sales-channels", icon: Store },
+      { title: "Tin tức", description: "Viết, sửa và xuất bản bài viết trên website.", href: "/admin/posts", icon: Newspaper },
+      { title: "Báo chí & phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
     ],
   },
 ];
@@ -72,7 +68,7 @@ export default function AdminWebControlPage() {
           <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Quản lý website</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Anh muốn sửa khu vực nào?</h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Chọn đúng khu vực đang nhìn thấy trên website. Mỗi nút dưới đây dẫn thẳng tới màn hình chỉnh sửa tương ứng.
+            Chọn đúng khu vực đang nhìn thấy trên website. Các trang lớn như Giới thiệu và Chất lượng có màn cấu hình riêng để admin sửa giống layout ngoài web.
           </p>
           <Link href="/" target="_blank" className="mt-5 inline-flex items-center gap-2 border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-orange-500 hover:text-orange-600">
             Xem website hiện tại <ArrowRight size={16} />
@@ -100,12 +96,6 @@ export default function AdminWebControlPage() {
             </div>
           </section>
         ))}
-
-        <div className="border border-blue-200 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-          <span className="font-black">Trang nội dung tự tạo:</span>{" "}
-          Nếu cần tạo một trang hoàn toàn mới, vào <Link href="/admin/pages" className="font-bold underline">Quản lý trang</Link>.
-          Đây là chức năng nâng cao, không dùng để sửa các khu vực có sẵn ở trên.
-        </div>
       </div>
     </ProtectedRoute>
   );
