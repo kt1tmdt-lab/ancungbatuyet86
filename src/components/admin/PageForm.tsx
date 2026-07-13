@@ -258,6 +258,20 @@ export function PageForm({ pageId }: { pageId?: string }) {
     );
   };
 
+  const handleToggleExpand = (blockId: string) => {
+    const isExpanded = expandedBlockId === blockId;
+    const nextId = isExpanded ? null : blockId;
+    setExpandedBlockId(nextId);
+    if (nextId) {
+      setTimeout(() => {
+        const element = document.getElementById(`preview-block-${nextId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
+  };
+
   // Image Upload handler for block field
   const handleBlockImageUpload = async (blockId: string, fieldName: string, file: File) => {
     setUploadingBlock({ blockId, fieldName, progress: 0 });
@@ -500,7 +514,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                       <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 select-none">
                         <div
                           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
-                          onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
+                          onClick={() => handleToggleExpand(block.id)}
                         >
                           <div className={`p-1.5 ${
                             block.type === "hero" ? "bg-purple-50 text-purple-600" :
@@ -565,7 +579,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           </button>
                           <button
                             type="button"
-                            onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
+                            onClick={() => handleToggleExpand(block.id)}
                             className="p-1 text-slate-400 hover:text-slate-700 transition ml-1"
                           >
                             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -1092,8 +1106,24 @@ export function PageForm({ pageId }: { pageId?: string }) {
                     Chưa thiết lập khối nội dung nào. Bắt đầu chèn khối từ cột bên trái để hiển thị.
                   </div>
                 ) : (
-                  blocks.map((block) => (
-                    <div key={block.id} className="relative">
+                  blocks.map((block) => {
+                    const isExpanded = expandedBlockId === block.id;
+                    return (
+                      <div
+                        key={block.id}
+                        id={`preview-block-${block.id}`}
+                        className={`relative transition-all duration-300 ${
+                          isExpanded
+                            ? "ring-4 ring-orange-500 ring-offset-2 z-10 scale-[1.01] shadow-lg"
+                            : ""
+                        }`}
+                      >
+                        {isExpanded && (
+                          <div className="absolute top-2 left-2 z-30 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 shadow-md uppercase tracking-wider animate-pulse flex items-center gap-1 rounded-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                            Đang chỉnh sửa
+                          </div>
+                        )}
                       {/* 1. HERO RENDER */}
                       {block.type === "hero" && (
                         <section
@@ -1223,8 +1253,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           </div>
                         </section>
                       )}
-                    </div>
-                  ))
+                      </div>
+                    );
+                  })
                 )}
               </div>
 
