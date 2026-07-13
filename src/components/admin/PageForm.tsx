@@ -88,6 +88,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
   // Page Blocks List
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [expandedBlockId, setExpandedBlockId] = useState<string | null>(null);
+  const [activePane, setActivePane] = useState<"edit" | "preview">("edit");
 
   // System Products (for product block selector)
   const [productsList, setProductsList] = useState<Product[]>([]);
@@ -361,18 +362,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => setPreviewOpen(true)}
-            className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2  text-xs font-bold transition-all shadow-sm"
-          >
-            <Eye size={14} />
-            <span>Xem trước trực tiếp</span>
-          </button>
-          
-          <button
-            type="button"
             disabled={loading}
             onClick={handleSubmit}
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5  text-xs font-bold transition-all disabled:opacity-50 shadow-md shadow-orange-500/10"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 text-xs font-bold transition-all disabled:opacity-50 shadow-md shadow-orange-500/10"
           >
             {loading ? <Loader className="animate-spin" size={14} /> : <Save size={14} />}
             <span>Lưu thiết kế</span>
@@ -381,23 +373,104 @@ export function PageForm({ pageId }: { pageId?: string }) {
       </div>
 
       {error && (
-        <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200 ">
+        <div className="flex items-start gap-2.5 p-4 bg-red-50 border border-red-200">
           <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={18} />
           <p className="text-sm text-red-700 font-semibold leading-relaxed">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="flex items-start gap-2.5 p-4 bg-green-50 border border-green-200 ">
+        <div className="flex items-start gap-2.5 p-4 bg-green-50 border border-green-200">
           <Check className="text-green-600 mt-0.5 shrink-0" size={18} />
           <p className="text-sm text-green-700 font-semibold leading-relaxed">{success}</p>
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Left Side: Blocks Editor (2/3) */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white  border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
+      {/* Mobile Tab Switcher */}
+      <div className="flex border border-slate-200 bg-white lg:hidden rounded-lg overflow-hidden shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActivePane("edit")}
+          className={`flex-1 py-3 text-center text-xs font-bold uppercase tracking-wider transition ${
+            activePane === "edit"
+              ? "bg-orange-500 text-white"
+              : "bg-white text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          Thiết kế & Cấu hình
+        </button>
+        <button
+          type="button"
+          onClick={() => setActivePane("preview")}
+          className={`flex-1 py-3 text-center text-xs font-bold uppercase tracking-wider transition ${
+            activePane === "preview"
+              ? "bg-orange-500 text-white"
+              : "bg-white text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          Xem trước thực tế
+        </button>
+      </div>
+
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Left Side: Page settings & Blocks Editor (lg:col-span-5) */}
+        <div className={`lg:col-span-5 space-y-6 ${activePane === "edit" ? "block" : "hidden lg:block"}`}>
+          {/* Page Settings block */}
+          <div className="bg-white border border-slate-100 p-6 shadow-sm space-y-6">
+            <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-wider border-b border-slate-100 pb-3">
+              <Settings size={15} />
+              Cài đặt cấu hình trang
+            </h3>
+
+            {/* Page Title */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700">Tiêu đề trang</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                placeholder="Ví dụ: Khuyến Mãi Hè 2026..."
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none"
+                required
+              />
+            </div>
+
+            {/* Page Slug */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                <span>Đường dẫn tĩnh (Slug)</span>
+                <span className="text-[9px] text-slate-400">/trang/slug-cua-ban</span>
+              </label>
+              <div className="flex">
+                <span className="bg-slate-100 border border-r-0 border-slate-200 px-2 py-2 rounded-l-xl text-[10px] text-slate-500 flex items-center font-medium">
+                  /trang/
+                </span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="khuyen-mai-he-2026"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-medium text-slate-700 focus:outline-none"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Status selection */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700">Trạng thái công khai</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as "DRAFT" | "PUBLISHED")}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 focus:outline-none"
+              >
+                <option value="DRAFT">Draft (Bản nháp - Chỉ Admin xem)</option>
+                <option value="PUBLISHED">Published (Xuất bản - Mọi người xem)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Cấu trúc các khối nội dung</h2>
@@ -407,7 +480,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
             {/* Block List */}
             {blocks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-200  bg-slate-50/50 p-6 text-center">
+              <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center">
                 <LayoutGrid className="text-slate-350 mb-3" size={36} />
                 <h3 className="text-sm font-bold text-slate-800">Trang chưa có khối nào</h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-[280px]">Hãy nhấn chọn các khối giao diện ở bảng dưới đây để bắt đầu thiết kế.</p>
@@ -419,7 +492,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                   return (
                     <div
                       key={block.id}
-                      className={`border  overflow-hidden transition-all ${
+                      className={`border overflow-hidden transition-all ${
                         isExpanded ? "border-orange-200 shadow-sm shadow-orange-500/5 bg-white" : "border-slate-200 bg-slate-50/20"
                       }`}
                     >
@@ -429,7 +502,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           className="flex items-center gap-3 cursor-pointer flex-1 min-w-0"
                           onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
                         >
-                          <div className={`p-1.5  ${
+                          <div className={`p-1.5 ${
                             block.type === "hero" ? "bg-purple-50 text-purple-600" :
                             block.type === "text" ? "bg-blue-50 text-blue-600" :
                             block.type === "features" ? "bg-teal-50 text-teal-600" :
@@ -467,7 +540,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                             type="button"
                             disabled={index === 0}
                             onClick={() => moveBlock(index, "up")}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100  transition disabled:opacity-30"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition disabled:opacity-30"
                             title="Di chuyển lên"
                           >
                             <ArrowUp size={14} />
@@ -476,7 +549,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                             type="button"
                             disabled={index === blocks.length - 1}
                             onClick={() => moveBlock(index, "down")}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100  transition disabled:opacity-30"
+                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition disabled:opacity-30"
                             title="Di chuyển xuống"
                           >
                             <ArrowDown size={14} />
@@ -485,7 +558,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           <button
                             type="button"
                             onClick={() => deleteBlock(block.id)}
-                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50  transition"
+                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 transition"
                             title="Xóa khối"
                           >
                             <Trash size={14} />
@@ -493,7 +566,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                           <button
                             type="button"
                             onClick={() => setExpandedBlockId(isExpanded ? null : block.id)}
-                            className="p-1 text-slate-400 hover:text-slate-700  transition ml-1"
+                            className="p-1 text-slate-400 hover:text-slate-700 transition ml-1"
                           >
                             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </button>
@@ -502,7 +575,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
                       {/* Block Form Content */}
                       {isExpanded && (
-                        <div className="p-5 border-t border-slate-100 bg-white space-y-4 animate-slide-down">
+                        <div className="p-5 border-t border-slate-100 bg-white space-y-4">
                           
                           {/* 1. HERO BLOCK EDIT */}
                           {block.type === "hero" && (
@@ -514,7 +587,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -523,7 +596,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     value={block.data.subtitle}
                                     onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
                                     rows={2}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                   />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
@@ -533,7 +606,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaText}
                                       onChange={(e) => updateBlockData(block.id, { ctaText: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -542,7 +615,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaLink}
                                       onChange={(e) => updateBlockData(block.id, { ctaLink: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
                                   </div>
                                 </div>
@@ -557,9 +630,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       value={block.data.backgroundImage}
                                       onChange={(e) => updateBlockData(block.id, { backgroundImage: e.target.value })}
                                       placeholder="https://..."
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                     />
-                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
+                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
                                       {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "backgroundImage" ? (
                                         <UploadProgressCircle progress={uploadingBlock.progress} size={28} />
                                       ) : (
@@ -588,7 +661,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   </div>
                                 </div>
                                 {block.data.backgroundImage && (
-                                  <div className="relative aspect-video  overflow-hidden border border-slate-200 bg-slate-50">
+                                  <div className="relative aspect-video overflow-hidden border border-slate-200 bg-slate-50">
                                     <img src={block.data.backgroundImage} alt="Background Preview" className="w-full h-full object-cover" />
                                   </div>
                                 )}
@@ -606,7 +679,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   <select
                                     value={block.data.backgroundColor || "cream"}
                                     onChange={(e) => updateBlockData(block.id, { backgroundColor: e.target.value })}
-                                    className="px-2 py-1 bg-slate-50 border border-slate-200  text-xs font-bold text-slate-700"
+                                    className="px-2 py-1 bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700"
                                   >
                                     <option value="cream">Vàng kem dịu (Mặc định)</option>
                                     <option value="white">Trắng tinh tế</option>
@@ -619,7 +692,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 onChange={(e) => updateBlockData(block.id, { content: e.target.value })}
                                 placeholder="<h3>Tiêu đề đoạn</h3><p>Nội dung chi tiết...</p>"
                                 rows={8}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200  text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 text-xs text-slate-900 font-mono focus:outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed"
                               />
                               <p className="text-[10px] text-slate-400 italic">Mách nhỏ: Bạn có thể nhập mã HTML thông thường như &lt;h2&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt; để định dạng đẹp đẽ.</p>
                             </div>
@@ -635,7 +708,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   value={block.data.title}
                                   onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
                                   placeholder="Vì sao chọn chúng tôi?"
-                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-orange-500"
                                 />
                               </div>
 
@@ -643,7 +716,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 <label className="block text-xs font-bold text-slate-700">Danh sách tính năng</label>
                                 <div className="space-y-2">
                                   {(block.data.items || []).map((item: FeatureItem, fIndex: number) => (
-                                    <div key={fIndex} className="flex gap-2 items-start border border-slate-100 p-3  bg-slate-50/50">
+                                    <div key={fIndex} className="flex gap-2 items-start border border-slate-100 p-3 bg-slate-50/50">
                                       <div className="grid grid-cols-1 gap-1 shrink-0 w-24">
                                         <span className="text-[9px] font-bold text-slate-500">Biểu tượng</span>
                                         <select
@@ -653,7 +726,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                             newItems[fIndex] = { ...newItems[fIndex], icon: e.target.value };
                                             updateBlockData(block.id, { items: newItems });
                                           }}
-                                          className="px-2 py-1 bg-white border border-slate-200  text-[10px] font-semibold text-slate-700"
+                                          className="px-2 py-1 bg-white border border-slate-200 text-[10px] font-semibold text-slate-700"
                                         >
                                           {FEATURE_ICONS.map((i) => (
                                             <option key={i.name} value={i.name}>{i.label}</option>
@@ -672,7 +745,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                               newItems[fIndex] = { ...newItems[fIndex], title: e.target.value };
                                               updateBlockData(block.id, { items: newItems });
                                             }}
-                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200  text-xs text-slate-900 font-bold"
+                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 text-xs text-slate-900 font-bold"
                                           />
                                         </div>
                                         <div className="space-y-1">
@@ -685,7 +758,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                               newItems[fIndex] = { ...newItems[fIndex], description: e.target.value };
                                               updateBlockData(block.id, { items: newItems });
                                             }}
-                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200  text-xs text-slate-750"
+                                            className="w-full px-2.5 py-1.5 bg-white border border-slate-200 text-xs text-slate-750"
                                           />
                                         </div>
                                       </div>
@@ -696,7 +769,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                           const newItems = (block.data.items || []).filter((_item: FeatureItem, idx: number) => idx !== fIndex);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
-                                        className="p-1 text-red-500 hover:bg-red-50  shrink-0 mt-1"
+                                        className="p-1 text-red-500 hover:bg-red-50 shrink-0 mt-1"
                                       >
                                         <Trash size={14} />
                                       </button>
@@ -727,7 +800,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -736,7 +809,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     value={block.data.description}
                                     onChange={(e) => updateBlockData(block.id, { description: e.target.value })}
                                     rows={4}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
@@ -746,7 +819,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaText || ""}
                                       onChange={(e) => updateBlockData(block.id, { ctaText: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                     />
                                   </div>
                                   <div className="space-y-1">
@@ -755,7 +828,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       type="text"
                                       value={block.data.ctaLink || ""}
                                       onChange={(e) => updateBlockData(block.id, { ctaLink: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                     />
                                   </div>
                                 </div>
@@ -768,7 +841,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     <select
                                       value={block.data.imagePosition}
                                       onChange={(e) => updateBlockData(block.id, { imagePosition: e.target.value })}
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-700"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-700"
                                     >
                                       <option value="right">Bên phải</option>
                                       <option value="left">Bên trái</option>
@@ -783,9 +856,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       value={block.data.imageUrl}
                                       onChange={(e) => updateBlockData(block.id, { imageUrl: e.target.value })}
                                       placeholder="https://..."
-                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                     />
-                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-750 px-3 py-2  flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
+                                    <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-755 px-3 py-2 flex items-center justify-center shrink-0 transition text-xs font-bold border border-slate-250">
                                       {uploadingBlock?.blockId === block.id && uploadingBlock.fieldName === "imageUrl" ? (
                                         <UploadProgressCircle progress={uploadingBlock.progress} size={28} />
                                       ) : (
@@ -814,7 +887,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                   </div>
                                 </div>
                                 {block.data.imageUrl && (
-                                  <div className="relative aspect-video  overflow-hidden border border-slate-200 bg-slate-50">
+                                  <div className="relative aspect-video overflow-hidden border border-slate-200 bg-slate-50">
                                     <img src={block.data.imageUrl} alt="Split Image Preview" className="w-full h-full object-cover" />
                                   </div>
                                 )}
@@ -832,7 +905,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.title}
                                     onChange={(e) => updateBlockData(block.id, { title: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -841,7 +914,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                     type="text"
                                     value={block.data.subtitle}
                                     onChange={(e) => updateBlockData(block.id, { subtitle: e.target.value })}
-                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs text-slate-900 focus:outline-none"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none"
                                   />
                                 </div>
                               </div>
@@ -856,13 +929,13 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 ) : productsList.length === 0 ? (
                                   <p className="text-xs italic text-slate-400">Không tìm thấy sản phẩm nào trong hệ thống. Vui lòng thêm sản phẩm trước.</p>
                                 ) : (
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto border border-slate-200 p-4  bg-slate-50/50">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto border border-slate-200 p-4 bg-slate-50/50">
                                     {productsList.map((product) => {
                                       const isChecked = (block.data.productIds || []).includes(product.id);
                                       return (
                                         <label
                                           key={product.id}
-                                          className={`flex items-center gap-3 p-2  border cursor-pointer select-none bg-white transition-all ${
+                                          className={`flex items-center gap-3 p-2 border cursor-pointer select-none bg-white transition-all ${
                                             isChecked ? "border-orange-500 ring-2 ring-orange-500/10" : "border-slate-100 hover:border-slate-300"
                                           }`}
                                         >
@@ -881,7 +954,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                             }}
                                             className="w-3.5 h-3.5 text-orange-500 border-slate-300 rounded focus:ring-orange-500"
                                           />
-                                          <div className="w-8 h-8  overflow-hidden shrink-0 border border-slate-100">
+                                          <div className="w-8 h-8 overflow-hidden shrink-0 border border-slate-100">
                                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                                           </div>
                                           <div className="flex flex-col min-w-0">
@@ -913,7 +986,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("hero")}
-                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <ImageIcon size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Hero Banner</span>
@@ -922,7 +995,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("text")}
-                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <Type size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Văn Bản</span>
@@ -931,7 +1004,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("features")}
-                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <LayoutGrid size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Tính Năng</span>
@@ -940,7 +1013,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("split")}
-                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
+                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600"
                 >
                   <Columns size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Ảnh & Chữ</span>
@@ -949,7 +1022,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <button
                   type="button"
                   onClick={() => addBlock("products")}
-                  className="flex flex-col items-center justify-center p-3  border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600 col-span-2 sm:col-span-1"
+                  className="flex flex-col items-center justify-center p-3 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/10 hover:text-orange-600 transition group gap-1 text-slate-600 col-span-2 sm:col-span-1"
                 >
                   <ShoppingBag size={18} className="group-hover:scale-110 transition" />
                   <span className="text-[10px] font-bold">Khối Sản Phẩm</span>
@@ -959,322 +1032,212 @@ export function PageForm({ pageId }: { pageId?: string }) {
           </div>
         </div>
 
-        {/* Right Side: Page settings & publishing status (1/3) */}
-        <div className="space-y-6">
-          <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-6">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <Settings size={15} />
-              Cài đặt cấu hình trang
-            </h3>
-
-            {/* Page Title */}
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Tiêu đề trang</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Ví dụ: Khuyến Mãi Hè 2026..."
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-semibold text-slate-900 focus:outline-none"
-                required
-              />
-            </div>
-
-            {/* Page Slug */}
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700 flex items-center justify-between">
-                <span>Đường dẫn tĩnh (Slug)</span>
-                <span className="text-[9px] text-slate-400">/trang/slug-cua-ban</span>
-              </label>
-              <div className="flex">
-                <span className="bg-slate-100 border border-r-0 border-slate-200 px-2 py-2 rounded-l-xl text-[10px] text-slate-500 flex items-center font-medium">
-                  /trang/
-                </span>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="khuyen-mai-he-2026"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-medium text-slate-700 focus:outline-none"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Status selection */}
-            <div className="space-y-1">
-              <label className="block text-xs font-bold text-slate-700">Trạng thái công khai</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as "DRAFT" | "PUBLISHED")}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200  text-xs font-bold text-slate-700 focus:outline-none"
+        {/* Right Side: Sticky Live Preview (lg:col-span-7) */}
+        <div className={`lg:col-span-7 lg:sticky lg:top-[90px] space-y-4 ${activePane === "preview" ? "block" : "hidden lg:block"}`}>
+          <div className="bg-white border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+            <span className="text-xs font-black text-slate-800 uppercase tracking-wider">Xem trước trực tiếp (Real-time)</span>
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setPreviewDevice("desktop")}
+                className={`p-1.5 rounded transition ${previewDevice === "desktop" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-slate-800"}`}
+                title="Desktop View"
               >
-                <option value="DRAFT">Draft (Bản nháp - Chỉ Admin xem)</option>
-                <option value="PUBLISHED">Published (Xuất bản - Mọi người xem)</option>
-              </select>
+                <Monitor size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewDevice("tablet")}
+                className={`p-1.5 rounded transition ${previewDevice === "tablet" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-slate-800"}`}
+                title="Tablet View"
+              >
+                <Tablet size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewDevice("mobile")}
+                className={`p-1.5 rounded transition ${previewDevice === "mobile" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-slate-800"}`}
+                title="Mobile View"
+              >
+                <Smartphone size={14} />
+              </button>
             </div>
           </div>
 
-          <div className="bg-slate-900 text-white  p-6 shadow-sm space-y-4">
-            <h4 className="text-xs font-bold text-orange-400 tracking-wider uppercase">Tóm tắt thiết kế</h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between border-b border-slate-800 pb-1.5">
-                <span className="text-slate-400">Số khối thiết kế:</span>
-                <span className="font-bold">{blocks.length} khối</span>
+          <div className="bg-slate-100 border border-slate-250 rounded-xl overflow-hidden flex justify-center items-start p-4 min-h-[550px] max-h-[75vh] overflow-y-auto">
+            <div
+              className={`bg-cream shadow-xl min-h-[100%] overflow-hidden border border-slate-200 transition-all duration-300 ${
+                previewDevice === "desktop" ? "w-full" :
+                previewDevice === "tablet" ? "w-[768px]" :
+                "w-[375px]"
+              }`}
+            >
+              {/* Simulated Header */}
+              <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
+                <div className="flex items-center gap-2">
+                  <img src="/logo-acbt.png" alt="Logo" className="w-8 h-8 border border-slate-150" />
+                  <span className="font-black text-slate-900 text-sm tracking-wide">BÀ TUYẾT</span>
+                </div>
+                <div className="flex gap-4 text-xs font-bold text-slate-650">
+                  <span>Sản phẩm</span>
+                  <span>Quy trình</span>
+                  <span>Giới thiệu</span>
+                </div>
               </div>
-              <div className="flex justify-between border-b border-slate-800 pb-1.5">
-                <span className="text-slate-400">Đường dẫn xem trang:</span>
-                <span className="font-bold text-orange-350 truncate max-w-[120px]" title={`/trang/${slug || "..."}`}>
-                  /trang/{slug || "..."}
-                </span>
+
+              {/* Main Render List */}
+              <div className="divide-y divide-slate-100/55 bg-cream">
+                {blocks.length === 0 ? (
+                  <div className="py-24 text-center text-slate-400 italic text-xs">
+                    Chưa thiết lập khối nội dung nào. Bắt đầu chèn khối từ cột bên trái để hiển thị.
+                  </div>
+                ) : (
+                  blocks.map((block) => (
+                    <div key={block.id} className="relative">
+                      {/* 1. HERO RENDER */}
+                      {block.type === "hero" && (
+                        <section
+                          className="relative min-h-[300px] flex items-center justify-center bg-cover bg-center py-20 px-6 text-center text-white"
+                          style={{
+                            backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), url(${block.data.backgroundImage || "/hero-bg-default.jpg"})`
+                          }}
+                        >
+                          <div className="max-w-2xl space-y-4">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+                              {block.data.title || "Tiêu đề Hero"}
+                            </h1>
+                            <p className="text-xs sm:text-sm text-slate-200 max-w-xl mx-auto leading-relaxed">
+                              {block.data.subtitle}
+                            </p>
+                            {block.data.ctaText && (
+                              <div className="pt-2">
+                                <span className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs px-6 py-2.5 shadow transition-all">
+                                  {block.data.ctaText}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 2. TEXT RENDER */}
+                      {block.type === "text" && (
+                        <section className={`py-12 px-6 sm:px-12 flex justify-center ${
+                          block.data.backgroundColor === "slate-900" ? "bg-slate-950 text-slate-200" :
+                          block.data.backgroundColor === "white" ? "bg-white text-slate-900" :
+                          "bg-cream text-slate-900"
+                        }`}>
+                          <div
+                            className={`prose prose-orange max-w-2xl w-full text-xs leading-relaxed ${
+                              block.data.backgroundColor === "slate-900" ? "prose-invert" : ""
+                            }`}
+                            dangerouslySetInnerHTML={{ __html: block.data.content || "" }}
+                          />
+                        </section>
+                      )}
+
+                      {/* 3. FEATURES RENDER */}
+                      {block.type === "features" && (
+                        <section className="py-16 px-6 sm:px-12 bg-white">
+                          <div className="max-w-5xl mx-auto text-center space-y-10">
+                            {block.data.title && (
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title}</h2>
+                            )}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                              {(block.data.items || []).map((item: FeatureItem, fIdx: number) => (
+                                <div key={fIdx} className="bg-cream border border-slate-100 p-6 flex flex-col items-center text-center space-y-3 transition transform hover:-translate-y-0.5">
+                                  <div className="w-9 h-9 bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 shadow-sm border border-orange-100">
+                                    <Globe size={16} />
+                                  </div>
+                                  <h3 className="text-xs font-extrabold text-slate-950">{item.title}</h3>
+                                  <p className="text-[11px] text-slate-600 leading-relaxed">{item.description}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 4. SPLIT COLUMN RENDER */}
+                      {block.type === "split" && (
+                        <section className="py-16 px-6 sm:px-12 bg-cream">
+                          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+                            <div className={`space-y-4 ${block.data.imagePosition === "left" ? "md:order-2" : "md:order-1"}`}>
+                              <h2 className="text-xl font-black text-slate-900 leading-tight">{block.data.title}</h2>
+                              <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line">{block.data.description}</p>
+                              {block.data.ctaText && (
+                                <div className="pt-2">
+                                  <span className="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2 cursor-pointer shadow transition-all">
+                                    {block.data.ctaText}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <div className={`relative aspect-video overflow-hidden border border-slate-100 shadow ${
+                              block.data.imagePosition === "left" ? "md:order-1" : "md:order-2"
+                            }`}>
+                              <img src={block.data.imageUrl || "/uploads/process-preview.jpg"} alt={block.data.title} className="w-full h-full object-cover" />
+                            </div>
+                          </div>
+                        </section>
+                      )}
+
+                      {/* 5. PRODUCTS RENDER */}
+                      {block.type === "products" && (
+                        <section className="py-16 px-6 sm:px-12 bg-white">
+                          <div className="max-w-5xl mx-auto space-y-10">
+                            <div className="text-center space-y-2">
+                              <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title}</h2>
+                              {block.data.subtitle && (
+                                <p className="text-[11px] text-slate-400 font-semibold">{block.data.subtitle}</p>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                              {productsList
+                                .filter(p => (block.data.productIds || []).includes(p.id))
+                                .map(p => (
+                                  <div key={p.id} className="bg-cream border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between h-full group hover:shadow transition">
+                                    <div className="relative aspect-square overflow-hidden bg-slate-50">
+                                      <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                                      <span className="absolute top-2 left-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 uppercase tracking-wider">
+                                        {p.categoryLabel}
+                                      </span>
+                                    </div>
+                                    <div className="p-3 space-y-3 flex-1 flex flex-col justify-between">
+                                      <div className="space-y-1">
+                                        <h3 className="text-[11px] font-bold text-slate-900 group-hover:text-orange-500 transition line-clamp-1">{p.name}</h3>
+                                        <p className="text-[11px] font-black text-orange-500">{p.price}</p>
+                                      </div>
+                                      <span className="w-full text-center bg-slate-900 text-white text-[9px] font-bold py-1.5 block cursor-pointer transition hover:bg-orange-500">
+                                        Đặt Mua Ngay
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              {productsList.filter(p => (block.data.productIds || []).includes(p.id)).length === 0 && (
+                                <div className="col-span-3 text-center text-slate-400 italic text-xs py-8">
+                                  Chưa có sản phẩm nào được chọn để hiển thị ở đây.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </section>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Trạng thái lưu:</span>
-                <span className={`font-bold ${status === "PUBLISHED" ? "text-green-400" : "text-amber-400"}`}>
-                  {status === "PUBLISHED" ? "Xuất Bản" : "Nháp"}
-                </span>
+
+              {/* Simulated Footer */}
+              <div className="bg-slate-900 text-slate-400 p-8 text-center text-[9px] border-t border-slate-800 space-y-1">
+                <p className="font-bold text-slate-200">© 2026 Ăn Cùng Bà Tuyết. All rights reserved.</p>
+                <p>Hệ thống sản xuất thực phẩm sạch hàng đầu Việt Nam.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* FULL SCREEN LIVE PREVIEW DRAWER MODAL */}
-      {previewOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex flex-col justify-end lg:justify-center lg:items-center">
-          <div className="bg-cream w-full h-[90vh] lg:w-[90vw] lg:h-[88vh] lg: shadow-2xl flex flex-col overflow-hidden animate-slide-up">
-            
-            {/* Preview Toolbar */}
-            <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
-              <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5  bg-red-500" />
-                <span className="w-2.5 h-2.5  bg-yellow-500" />
-                <span className="w-2.5 h-2.5  bg-green-500" />
-                <div className="h-4 w-px bg-slate-800 mx-2" />
-                <h3 className="text-sm font-bold tracking-wide">Live Preview: <span className="text-orange-400">{title || "Trang mới"}</span></h3>
-              </div>
-
-              {/* Device simulation controls */}
-              <div className="hidden sm:flex items-center gap-1 bg-slate-800 p-1 ">
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice("desktop")}
-                  className={`p-1.5  transition ${previewDevice === "desktop" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
-                  title="Desktop View"
-                >
-                  <Monitor size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice("tablet")}
-                  className={`p-1.5  transition ${previewDevice === "tablet" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
-                  title="Tablet View"
-                >
-                  <Tablet size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice("mobile")}
-                  className={`p-1.5  transition ${previewDevice === "mobile" ? "bg-orange-500 text-white" : "text-slate-400 hover:text-white"}`}
-                  title="Mobile View"
-                >
-                  <Smartphone size={14} />
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(false)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-350 hover:text-white px-3 py-1.5  text-xs font-bold transition"
-              >
-                Đóng Xem Trước
-              </button>
-            </div>
-
-            {/* Simulated website frame */}
-            <div className="flex-1 overflow-y-auto bg-slate-800/20 p-4 sm:p-8 flex justify-center items-start">
-              <div
-                className={`bg-cream shadow-xl min-h-[100%]  overflow-hidden border border-slate-100 transition-all duration-300 ${
-                  previewDevice === "desktop" ? "w-full" :
-                  previewDevice === "tablet" ? "w-[768px]" :
-                  "w-[375px]"
-                }`}
-              >
-                {/* Simulated Header */}
-                <div className="bg-white px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <img src="/logo-acbt.png" alt="Logo" className="w-8 h-8  border border-slate-150" />
-                    <span className="font-black text-slate-900 text-sm tracking-wide">BÀ TUYẾT</span>
-                  </div>
-                  <div className="flex gap-4 text-xs font-bold text-slate-600">
-                    <span>Sản phẩm</span>
-                    <span>Quy trình</span>
-                    <span>Giới thiệu</span>
-                  </div>
-                </div>
-
-                {/* Main Render List */}
-                <div className="divide-y divide-slate-100/50">
-                  {blocks.length === 0 ? (
-                    <div className="py-20 text-center text-slate-400 italic text-xs">
-                      Không có khối nào được thiết lập. Hãy chèn các khối từ trang cấu trúc.
-                    </div>
-                  ) : (
-                    blocks.map((block) => {
-                      return (
-                        <div key={block.id} className="relative">
-                          
-                          {/* 1. HERO RENDER */}
-                          {block.type === "hero" && (
-                            <section
-                              className="relative min-h-[300px] flex items-center justify-center bg-cover bg-center py-20 px-6 text-center text-white"
-                              style={{
-                                backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.65)), url(${block.data.backgroundImage || "/hero-bg-default.jpg"})`
-                              }}
-                            >
-                              <div className="max-w-2xl space-y-4">
-                                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-sm leading-tight text-white">
-                                  {block.data.title || "Tiêu đề Hero"}
-                                </h1>
-                                <p className="text-sm text-slate-200 drop-shadow-sm max-w-xl mx-auto leading-relaxed">
-                                  {block.data.subtitle}
-                                </p>
-                                {block.data.ctaText && (
-                                  <div className="pt-2">
-                                    <span className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-xs px-6 py-3  shadow-md cursor-pointer transition transform hover:scale-105 active:scale-95">
-                                      {block.data.ctaText}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                            </section>
-                          )}
-
-                          {/* 2. TEXT RENDER */}
-                          {block.type === "text" && (
-                            <section className={`py-12 px-6 sm:px-12 flex justify-center ${
-                              block.data.backgroundColor === "slate-900" ? "bg-slate-900 text-slate-100" :
-                              block.data.backgroundColor === "white" ? "bg-white text-slate-900" :
-                              "bg-cream text-slate-900"
-                            }`}>
-                              <div
-                                className={`prose prose-orange max-w-2xl w-full text-sm leading-relaxed ${
-                                  block.data.backgroundColor === "slate-900" ? "prose-invert" : ""
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: block.data.content || "" }}
-                              />
-                            </section>
-                          )}
-
-                          {/* 3. FEATURES RENDER */}
-                          {block.type === "features" && (
-                            <section className="py-16 px-6 sm:px-12 bg-white">
-                              <div className="max-w-5xl mx-auto text-center space-y-10">
-                                {block.data.title && (
-                                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">{block.data.title}</h2>
-                                )}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                  {(block.data.items || []).map((item: FeatureItem, fIdx: number) => {
-                                    return (
-                                      <div key={fIdx} className="bg-cream  border border-slate-100/50 p-6 flex flex-col items-center text-center space-y-3 transition transform hover:-translate-y-1">
-                                        <div className="w-10 h-10  bg-orange-50 text-orange-500 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">
-                                          {/* Mock icon displaying */}
-                                          <Globe size={18} />
-                                        </div>
-                                        <h3 className="text-sm font-extrabold text-slate-950">{item.title}</h3>
-                                        <p className="text-xs text-slate-650 leading-relaxed">{item.description}</p>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </section>
-                          )}
-
-                          {/* 4. SPLIT COLUMN RENDER */}
-                          {block.type === "split" && (
-                            <section className="py-16 px-6 sm:px-12 bg-cream">
-                              <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
-                                <div className={`space-y-4 ${block.data.imagePosition === "left" ? "md:order-2" : "md:order-1"}`}>
-                                  <h2 className="text-2xl font-black text-slate-900 leading-tight">{block.data.title}</h2>
-                                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">{block.data.description}</p>
-                                  {block.data.ctaText && (
-                                    <div className="pt-2">
-                                      <span className="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5  cursor-pointer shadow transition-all">
-                                        {block.data.ctaText}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className={`relative aspect-video sm:aspect-square md:aspect-video  overflow-hidden border border-slate-100 shadow-md ${
-                                  block.data.imagePosition === "left" ? "md:order-1" : "md:order-2"
-                                }`}>
-                                  <img src={block.data.imageUrl || "/uploads/process-preview.jpg"} alt={block.data.title} className="w-full h-full object-cover" />
-                                </div>
-                              </div>
-                            </section>
-                          )}
-
-                          {/* 5. PRODUCTS RENDER */}
-                          {block.type === "products" && (
-                            <section className="py-16 px-6 sm:px-12 bg-white">
-                              <div className="max-w-5xl mx-auto space-y-10">
-                                <div className="text-center space-y-2">
-                                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">{block.data.title}</h2>
-                                  {block.data.subtitle && (
-                                    <p className="text-xs text-slate-400 font-semibold">{block.data.subtitle}</p>
-                                  )}
-                                </div>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                  {/* Filter products that are checked */}
-                                  {productsList
-                                    .filter(p => (block.data.productIds || []).includes(p.id))
-                                    .map(p => (
-                                      <div key={p.id} className="bg-cream  border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between h-full group hover:shadow-md transition">
-                                        <div className="relative aspect-square overflow-hidden bg-slate-50">
-                                          <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                                          <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1  uppercase tracking-wider">
-                                            {p.categoryLabel}
-                                          </span>
-                                        </div>
-                                        <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                                          <div className="space-y-1">
-                                            <h3 className="text-xs font-bold text-slate-900 group-hover:text-orange-500 transition line-clamp-1">{p.name}</h3>
-                                            <p className="text-xs font-black text-orange-500">{p.price}</p>
-                                          </div>
-                                          <span className="w-full text-center bg-slate-900 text-white text-[10px] font-bold py-2  block cursor-pointer transition hover:bg-orange-500">
-                                            Đặt Mua Ngay
-                                          </span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  {productsList.filter(p => (block.data.productIds || []).includes(p.id)).length === 0 && (
-                                    <div className="col-span-3 text-center text-slate-400 italic text-xs py-8">
-                                      Chưa có sản phẩm nào được chọn để hiển thị ở đây.
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </section>
-                          )}
-
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Simulated Footer */}
-                <div className="bg-slate-900 text-slate-400 p-8 text-center text-[10px] border-t border-slate-800 space-y-1">
-                  <p className="font-bold text-slate-200">© 2026 Ăn Cùng Bà Tuyết. All rights reserved.</p>
-                  <p>Hệ thống sản xuất thực phẩm sạch hàng đầu Việt Nam.</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      )}
       <MediaPickerModal
         open={Boolean(mediaPickerTarget)}
         onClose={() => setMediaPickerTarget(null)}
