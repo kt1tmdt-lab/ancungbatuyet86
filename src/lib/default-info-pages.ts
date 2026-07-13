@@ -554,6 +554,498 @@ DEFAULT_INFO_PAGES["/diem-ban/nhan-dien-hang-chinh-hang"] = page(
   ],
 );
 
+DEFAULT_INFO_PAGES["/gioi-thieu/cau-chuyen-thuong-hieu"] = page(
+  "/gioi-thieu/cau-chuyen-thuong-hieu",
+  "Câu chuyện thương hiệu",
+  "Giới thiệu",
+  "Ăn Cùng Bà Tuyết được xây dựng từ một tinh thần rất đơn giản: món ăn vặt ngon phải đi cùng nguồn gốc rõ ràng, quy trình rõ ràng và trách nhiệm rõ ràng.",
+  [
+    {
+      id: "brand-story-origin",
+      type: "split",
+      data: {
+        title: "Từ món ăn quen thuộc đến thương hiệu có quy trình",
+        description:
+          "Ăn Cùng Bà Tuyết không chỉ kể câu chuyện bằng hình ảnh vui vẻ trên bao bì. Thương hiệu cần được nhìn thấy qua cách chọn nguyên liệu, cách sản xuất, cách công bố thông tin và cách xử lý trách nhiệm với khách hàng sau khi bán.",
+        imageUrl: "/hero/ba-tuyet-character.png",
+        imagePosition: "right",
+        ctaText: "Xem chất lượng kiểm chứng",
+        ctaLink: "/chat-luong",
+      },
+    },
+    {
+      id: "brand-story-principles",
+      type: "features",
+      data: {
+        title: "Tinh thần thương hiệu",
+        subtitle: "Không nói quá. Không tự phong. Cái gì có bằng chứng thì công bố, cái gì chưa đủ hồ sơ thì ghi rõ cần bổ sung.",
+        items: [
+          { icon: "Heart", title: "Gần gũi", description: "Giữ tinh thần món ăn vặt Việt: dễ ăn, dễ nhớ, có cá tính riêng." },
+          { icon: "Factory", title: "Có quy trình", description: "Sản phẩm cần được đặt trong hệ thống sản xuất, kiểm soát và phân phối rõ ràng." },
+          { icon: "FileSearch", title: "Có hồ sơ", description: "Thông tin về nguyên liệu, nhà máy, chứng nhận và bảo hiểm cần có tài liệu đi kèm." },
+        ],
+      },
+    },
+    {
+      id: "brand-story-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm</h2><p>Câu chuyện thương hiệu nên dẫn người xem tới những bằng chứng cụ thể: nguyên liệu nhập khẩu, quy trình sản xuất, chứng nhận nhà máy, phiếu kiểm nghiệm, bảo hiểm trách nhiệm sản phẩm và chính sách bảo vệ khách hàng.</p><p><strong>[cần bổ sung]</strong> timeline hình thành thương hiệu, hình ảnh người sáng lập/đội ngũ và các cột mốc truyền thông đã được xác minh.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/gioi-thieu/thong-tin-doanh-nghiep"] = page(
+  "/gioi-thieu/thong-tin-doanh-nghiep",
+  "Thông tin doanh nghiệp",
+  "Giới thiệu",
+  "Trang tổng hợp thông tin nền tảng về pháp nhân, định hướng vận hành, năng lực sản xuất liên quan và các kênh liên hệ chính thức.",
+  [
+    {
+      id: "company-info-split",
+      type: "split",
+      data: {
+        title: "Thông tin cần công khai để đối tác dễ kiểm chứng",
+        description:
+          "Trang này dùng cho khách hàng, đại lý, báo chí và đối tác muốn hiểu thương hiệu đang vận hành trên nền tảng nào. Các thông tin pháp nhân, địa chỉ, kênh liên hệ, giấy tờ liên quan nên được cập nhật rõ và thống nhất.",
+        imageUrl: "/bento/bento-factory.png",
+        imagePosition: "right",
+        ctaText: "Liên hệ doanh nghiệp",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "company-info-features",
+      type: "features",
+      data: {
+        title: "Nhóm thông tin nên hiển thị",
+        subtitle: "Các mục chưa có dữ liệu chính thức để [cần bổ sung], tránh tự bịa hoặc ghi sai pháp nhân.",
+        items: [
+          { icon: "Building2", title: "Pháp nhân & địa chỉ", description: "Tên doanh nghiệp, mã số thuế, địa chỉ đăng ký, địa chỉ liên hệ. [cần bổ sung]" },
+          { icon: "Phone", title: "Kênh liên hệ chính thức", description: "Hotline, email, website, fanpage và thời gian làm việc." },
+          { icon: "ShieldCheck", title: "Hồ sơ liên quan", description: "Giấy phép, chứng nhận, bảo hiểm, chính sách khách hàng và tài liệu kiểm chứng." },
+        ],
+      },
+    },
+    {
+      id: "company-info-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>Gợi ý nội dung doanh nghiệp</h2><ul><li><strong>Tên thương hiệu:</strong> Ăn Cùng Bà Tuyết.</li><li><strong>Lĩnh vực:</strong> sản phẩm ăn vặt đóng gói.</li><li><strong>Định hướng:</strong> phát triển sản phẩm có nguồn nguyên liệu rõ, quy trình sản xuất rõ và hệ thống phân phối chính thức.</li><li><strong>[cần bổ sung]</strong> tên pháp nhân, mã số thuế, địa chỉ, người đại diện nếu được phép public.</li></ul>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/gioi-thieu/hanh-trinh-phat-trien"] = page(
+  "/gioi-thieu/hanh-trinh-phat-trien",
+  "Hành trình phát triển",
+  "Giới thiệu",
+  "Các cột mốc giúp thương hiệu đi từ món ăn quen thuộc đến hệ thống sản phẩm có quy trình, có kênh bán và có hồ sơ kiểm chứng.",
+  [
+    {
+      id: "journey-split",
+      type: "split",
+      data: {
+        title: "Mỗi giai đoạn phải chứng minh bằng việc đã làm",
+        description:
+          "Hành trình phát triển không nên chỉ là các câu tự hào. Mỗi mốc nên gắn với một bằng chứng: ra mắt sản phẩm, mở rộng kênh phân phối, hoàn thiện bao bì, công bố hồ sơ chất lượng hoặc ký bảo hiểm trách nhiệm sản phẩm.",
+        imageUrl: "/hero/ba-tuyet-character.png",
+        imagePosition: "left",
+        ctaText: "Xem tin tức & bằng chứng",
+        ctaLink: "/tin-tuc",
+      },
+    },
+    {
+      id: "journey-features",
+      type: "features",
+      data: {
+        title: "Các mốc nên cập nhật",
+        subtitle: "Admin có thể thay từng mốc bằng năm/tháng thật khi có dữ liệu.",
+        items: [
+          { icon: "Sparkles", title: "Khởi đầu sản phẩm", description: "Giai đoạn hình thành món ăn/nhóm sản phẩm chủ lực. [cần bổ sung thời gian]" },
+          { icon: "PackageCheck", title: "Chuẩn hóa đóng gói", description: "Hoàn thiện bao bì, nhãn, thông tin sản phẩm và nhận diện thương hiệu." },
+          { icon: "Truck", title: "Mở rộng phân phối", description: "Phát triển kênh online, offline, đại lý và đối tác phân phối." },
+          { icon: "FileCheck2", title: "Công bố hồ sơ", description: "Bổ sung chứng nhận, kiểm nghiệm, bảo hiểm và chính sách khách hàng." },
+        ],
+      },
+    },
+    {
+      id: "journey-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>[cần bổ sung] Timeline chính thức</h2><p>Nên cập nhật bằng các mốc có ngày/tháng/năm rõ ràng. Mỗi mốc nên có ảnh, bài viết, giấy tờ hoặc link chứng minh để tránh biến trang này thành lời kể chung chung.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/chat-luong/minh-bach-nguon-nguyen-lieu"] = page(
+  "/chat-luong/minh-bach-nguon-nguyen-lieu",
+  "Minh bạch nguồn nguyên liệu",
+  "Chất lượng",
+  "Nơi trình bày nguồn nguyên liệu, hồ sơ nhập khẩu, C/O, kiểm dịch và điều kiện lưu kho trước khi đưa vào sản xuất.",
+  [
+    {
+      id: "ingredient-proof-split",
+      type: "split",
+      data: {
+        title: "Nguyên liệu nhập khẩu từ châu Âu — cần có hồ sơ đi kèm",
+        description:
+          "Thông tin nguồn nguyên liệu chính như chân gà nhập từ Ba Lan, Hungary và các nước châu Âu khác chỉ nên công bố đầy đủ khi có C/O, phiếu kiểm dịch và hồ sơ lô hàng có thể đối chiếu.",
+        imageUrl: "/bento/bento-ingredients.png",
+        imagePosition: "right",
+        ctaText: "Xem hồ sơ pháp lý",
+        ctaLink: "/chat-luong/ho-so-phap-ly-chung-nhan",
+      },
+    },
+    {
+      id: "ingredient-proof-features",
+      type: "features",
+      data: {
+        title: "Hồ sơ cần bổ sung cho nguyên liệu",
+        subtitle: "Claim nào có bằng chứng thì hiển thị; chưa có thì giữ nhãn [cần bổ sung].",
+        items: [
+          { icon: "FileCheck2", title: "C/O", description: "Chứng nhận xuất xứ theo từng lô hàng. [cần bổ sung ảnh/PDF]" },
+          { icon: "ClipboardCheck", title: "Phiếu kiểm dịch", description: "Tài liệu kiểm dịch nhập khẩu. [cần bổ sung]" },
+          { icon: "Snowflake", title: "Kho lạnh", description: "Ảnh/video kho lạnh và quy chuẩn lưu trữ. [cần bổ sung]" },
+        ],
+      },
+    },
+    {
+      id: "ingredient-proof-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Video truy xuất nguồn nguyên liệu</h2><p>[cần xác nhận] Link video truy xuất nguồn nguyên liệu từ Ba Lan để embed vào trang này. Khi có video, nên kèm mô tả ngắn: lô hàng nào, nguồn nào, giấy tờ nào liên quan.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/chat-luong/nha-may-quy-trinh-san-xuat"] = page(
+  "/chat-luong/nha-may-quy-trinh-san-xuat",
+  "Nhà máy & Quy trình sản xuất",
+  "Chất lượng",
+  "Giới thiệu nhà máy sản xuất NMV Food, quy trình 6 bước có kiểm soát và các hình ảnh thực tế cần công bố.",
+  [
+    {
+      id: "factory-process-split",
+      type: "split",
+      data: {
+        title: "Nhà máy sản xuất NMV Food — Thái Nguyên",
+        description:
+          "NMV Food đạt chứng nhận ISO 22000:2018. Nội dung public nên ghi đúng chủ thể chứng nhận, không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Quy trình nên dùng cách nói: quy trình 6 bước có kiểm soát.",
+        imageUrl: "/bento/bento-factory.png",
+        imagePosition: "left",
+        ctaText: "Xem hồ sơ chứng nhận",
+        ctaLink: "/chat-luong/ho-so-phap-ly-chung-nhan",
+      },
+    },
+    {
+      id: "factory-process-features",
+      type: "features",
+      data: {
+        title: "Quy trình 6 bước có kiểm soát",
+        subtitle: "Không dùng các cụm như an toàn tuyệt đối, vô trùng hoặc kiểm soát nghiêm ngặt nếu không có cơ sở pháp lý.",
+        items: [
+          { icon: "Wheat", title: "1. Nguyên liệu", description: "Tiếp nhận và kiểm tra thông tin đầu vào." },
+          { icon: "Droplets", title: "2. Sơ chế", description: "Sơ chế theo quy trình nội bộ đã thiết lập." },
+          { icon: "Flame", title: "3. Chế biến", description: "Chế biến theo công thức và quy trình được kiểm soát." },
+          { icon: "SearchCheck", title: "4. QC", description: "Kiểm tra trước khi đóng gói. [cần bổ sung tiêu chí QC]" },
+          { icon: "PackageCheck", title: "5. Đóng gói", description: "Đóng gói, nhãn, NSX/HSD và thông tin sản phẩm." },
+          { icon: "Truck", title: "6. Giao hàng", description: "Lưu kho và phân phối tới kênh bán." },
+        ],
+      },
+    },
+    {
+      id: "factory-process-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>[cần bổ sung] Gallery nhà máy thật</h2><p>Nên bổ sung 4–6 ảnh/video tại NMV Food: dây chuyền, kho, sơ chế, đóng gói, QC. Không dùng ảnh minh họa gây hiểu nhầm là ảnh nhà máy thật.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/chat-luong/ho-so-phap-ly-chung-nhan"] = page(
+  "/chat-luong/ho-so-phap-ly-chung-nhan",
+  "Hồ sơ pháp lý & chứng nhận",
+  "Chất lượng",
+  "Trang tập trung giấy tờ, chứng nhận, phiếu kiểm nghiệm và tài liệu pháp lý để khách hàng, đối tác, báo chí kiểm chứng.",
+  [
+    {
+      id: "legal-documents-split",
+      type: "split",
+      data: {
+        title: "Bằng chứng phải mở ra xem được",
+        description:
+          "Mỗi chứng nhận nên có ảnh scan hoặc PDF đi kèm. Nếu chưa có file public, cần ghi rõ [cần bổ sung] thay vì để khách hàng hiểu nhầm là đã có hồ sơ đầy đủ.",
+        imageUrl: "/bento/bento-insurance.png",
+        imagePosition: "right",
+        ctaText: "Liên hệ nhận hồ sơ",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "legal-documents-features",
+      type: "features",
+      data: {
+        title: "Nhóm hồ sơ cần có",
+        subtitle: "Ghi đúng chủ thể được cấp, ví dụ ISO 22000:2018 cấp cho NMV Food.",
+        items: [
+          { icon: "BadgeCheck", title: "ISO 22000:2018", description: "Cấp cho NMV Food. [cần bổ sung scan]" },
+          { icon: "ClipboardCheck", title: "HACCP", description: "Chương trình đào tạo, NMV Food. [cần bổ sung]" },
+          { icon: "FileCheck2", title: "Giấy phép ATTP", description: "Giấy đủ điều kiện ATTP. [cần bổ sung ảnh/PDF]" },
+          { icon: "FileSearch", title: "Phiếu kiểm nghiệm", description: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]" },
+        ],
+      },
+    },
+    {
+      id: "legal-documents-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Nguyên tắc công bố hồ sơ</h2><p>Không gộp chứng nhận của nhà máy thành chứng nhận của thương hiệu nếu giấy tờ không thể hiện như vậy. Không gọi bảo hiểm PVI là bảo chứng chất lượng. Mỗi tài liệu nên có ngày cấp, đơn vị cấp, chủ thể được cấp và file xem chi tiết.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi"] = page(
+  "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi",
+  "Bảo hiểm trách nhiệm sản phẩm - PVI",
+  "Chất lượng",
+  "Giải thích đúng về bảo hiểm trách nhiệm sản phẩm PVI: đây là cam kết trách nhiệm, không phải chứng nhận chất lượng.",
+  [
+    {
+      id: "pvi-insurance-split",
+      type: "split",
+      data: {
+        title: "Bảo hiểm trách nhiệm sản phẩm — PVI",
+        description:
+          "ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Nội dung này không được trình bày như PVI xác nhận chất lượng sản phẩm.",
+        imageUrl: "/bento/bento-insurance.png",
+        imagePosition: "left",
+        ctaText: "Xem chính sách khách hàng",
+        ctaLink: "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang",
+      },
+    },
+    {
+      id: "pvi-insurance-features",
+      type: "features",
+      data: {
+        title: "Viết đúng về PVI",
+        subtitle: "Tránh các cụm từ dễ gây hiểu nhầm.",
+        items: [
+          { icon: "CheckCircle2", title: "Được dùng", description: "Bảo hiểm trách nhiệm sản phẩm." },
+          { icon: "Ban", title: "Không dùng", description: "Bảo chứng chất lượng, bảo chứng niềm tin, PVI xác nhận chất lượng." },
+          { icon: "FileSearch", title: "Cần xác nhận", description: "Pháp nhân trên hợp đồng và phạm vi bảo hiểm cụ thể." },
+        ],
+      },
+    },
+    {
+      id: "pvi-insurance-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>[cần bổ sung] Scan hợp đồng hoặc xác nhận được phép public</h2><p>Trước khi đưa hình hợp đồng lên website, cần xác nhận phần nào được phép công khai và có che thông tin nhạy cảm hay không.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang"] = page(
+  "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang",
+  "Chính sách bảo vệ quyền lợi khách hàng",
+  "Chất lượng",
+  "Tóm tắt các quyền lợi chính của khách hàng khi mua sản phẩm: được thông tin, đổi trả, khiếu nại, hỗ trợ và bảo hiểm trách nhiệm sản phẩm.",
+  [
+    {
+      id: "customer-policy-split",
+      type: "split",
+      data: {
+        title: "Khách hàng cần biết họ được bảo vệ như thế nào",
+        description:
+          "Trang này tóm tắt chính sách CSKH theo cách dễ hiểu. Bản đầy đủ nên dẫn sang PDF hoặc trang riêng khi đã chốt đủ 11 điều.",
+        imageUrl: "/hero/ba-tuyet-character.png",
+        imagePosition: "right",
+        ctaText: "Liên hệ hỗ trợ",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "customer-policy-features-full",
+      type: "features",
+      data: {
+        title: "5 điểm chính trong chính sách",
+        subtitle: "Các dòng [cần bổ sung] để admin điền chính xác theo quy định CSKH.",
+        items: [
+          { icon: "Info", title: "Quyền được thông tin", description: "Sản phẩm ghi rõ thành phần, NSX, HSD và thông tin cần thiết." },
+          { icon: "RefreshCw", title: "Quyền đổi trả", description: "Quy trình đổi trả khi sản phẩm lỗi. [cần bổ sung điều kiện]" },
+          { icon: "MessageCircle", title: "Quyền khiếu nại", description: "Kênh tiếp nhận và thời gian xử lý. [cần bổ sung SLA]" },
+          { icon: "ShieldCheck", title: "Bảo hiểm sản phẩm", description: "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng." },
+          { icon: "Headphones", title: "Kênh hỗ trợ", description: "Hotline, email và thời gian làm việc. [cần bổ sung]" },
+        ],
+      },
+    },
+    {
+      id: "customer-policy-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>[cần bổ sung] Link chính sách đầy đủ</h2><p>Khi có bản chính sách 11 điều, gắn link PDF hoặc tạo trang chi tiết riêng. Trang này chỉ nên là bản tóm tắt dễ đọc.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/hop-tac"] = page(
+  "/hop-tac",
+  "Hợp tác",
+  "Kết nối",
+  "Thông tin dành cho đại lý, nhà phân phối, đối tác truyền thông và các bên muốn làm việc cùng Ăn Cùng Bà Tuyết.",
+  [
+    {
+      id: "partner-overview-split",
+      type: "split",
+      data: {
+        title: "Hợp tác phải rõ vai trò, khu vực và cách liên hệ",
+        description:
+          "Trang này giúp đối tác hiểu các hướng hợp tác chính: phân phối sản phẩm, mở rộng điểm bán, hợp tác truyền thông hoặc liên hệ thương hiệu. Mỗi nhóm hợp tác nên có form/đầu mối tiếp nhận riêng.",
+        imageUrl: "/bento/bento-factory.png",
+        imagePosition: "right",
+        ctaText: "Trở thành đại lý",
+        ctaLink: "/hop-tac/dai-ly-nha-phan-phoi",
+      },
+    },
+    {
+      id: "partner-overview-features",
+      type: "features",
+      data: {
+        title: "Nhóm hợp tác chính",
+        subtitle: "Tách rõ nhu cầu để người liên hệ không bị lạc.",
+        items: [
+          { icon: "Store", title: "Đại lý/Nhà phân phối", description: "Dành cho đối tác muốn bán, phân phối hoặc mở điểm bán." },
+          { icon: "Megaphone", title: "Truyền thông", description: "Dành cho báo chí, KOL/KOC, cộng đồng và đơn vị sáng tạo nội dung." },
+          { icon: "Headphones", title: "Liên hệ hỗ trợ", description: "Dành cho khách hàng cần phản hồi, xác minh thông tin hoặc hỗ trợ mua hàng." },
+        ],
+      },
+    },
+    {
+      id: "partner-overview-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Thông tin nên chuẩn bị trước khi liên hệ</h2><ul><li>Họ tên/người phụ trách.</li><li>Doanh nghiệp/kênh truyền thông/khu vực hoạt động.</li><li>Nhu cầu hợp tác cụ thể.</li><li>Sản lượng/kênh bán/tệp khách hàng nếu là đại lý.</li><li>Link kênh hoặc media kit nếu là truyền thông.</li></ul>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/hop-tac/dai-ly-nha-phan-phoi"] = page(
+  "/hop-tac/dai-ly-nha-phan-phoi",
+  "Trở thành Đại lý/Nhà phân phối",
+  "Hợp tác",
+  "Trang dành cho đối tác muốn phân phối sản phẩm, mở điểm bán hoặc phát triển kênh bán chính thức cùng thương hiệu.",
+  [
+    {
+      id: "dealer-partner-split",
+      type: "split",
+      data: {
+        title: "Cùng mở rộng kênh phân phối chính thức",
+        description:
+          "Đối tác đại lý/nhà phân phối cần cung cấp khu vực kinh doanh, mô hình bán hàng, năng lực phân phối và thông tin liên hệ. Thương hiệu nên phản hồi theo quy trình rõ ràng để tránh bỏ sót cơ hội hợp tác.",
+        imageUrl: "/hero/chan-ga-plate.png",
+        imagePosition: "left",
+        ctaText: "Gửi thông tin hợp tác",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "dealer-partner-features",
+      type: "features",
+      data: {
+        title: "Thông tin đối tác cần cung cấp",
+        subtitle: "Các mục này có thể chuyển thành form sau.",
+        items: [
+          { icon: "MapPin", title: "Khu vực phân phối", description: "Tỉnh/thành, quận/huyện hoặc hệ thống điểm bán đang có." },
+          { icon: "Store", title: "Mô hình bán hàng", description: "Cửa hàng, đại lý, tạp hóa, siêu thị mini, online hoặc kênh riêng." },
+          { icon: "Truck", title: "Năng lực vận hành", description: "Sản lượng dự kiến, kho bãi, đội giao hàng hoặc năng lực bán hàng." },
+          { icon: "Phone", title: "Thông tin liên hệ", description: "Người phụ trách, số điện thoại, email và thời gian tiện trao đổi." },
+        ],
+      },
+    },
+    {
+      id: "dealer-partner-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>[cần bổ sung] Chính sách đại lý</h2><p>Cần bổ sung điều kiện hợp tác, mức chiết khấu, khu vực ưu tiên, yêu cầu nhận diện hàng chính hãng và quy trình đặt hàng/đổi trả dành cho đối tác.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/hop-tac/truyen-thong"] = page(
+  "/hop-tac/truyen-thong",
+  "Hợp tác truyền thông",
+  "Hợp tác",
+  "Thông tin dành cho báo chí, KOL/KOC, cộng đồng và các đơn vị truyền thông muốn làm việc với thương hiệu.",
+  [
+    {
+      id: "media-partner-split",
+      type: "split",
+      data: {
+        title: "Truyền thông cần đúng thông tin, đúng hồ sơ",
+        description:
+          "Các hợp tác truyền thông nên dùng thông tin đã kiểm chứng: câu chuyện thương hiệu, sản phẩm đại diện, hồ sơ chất lượng, kênh mua chính thức và chính sách khách hàng. Không dùng claim chưa có bằng chứng.",
+        imageUrl: "/hero/ba-tuyet-character.png",
+        imagePosition: "right",
+        ctaText: "Xem hồ sơ chất lượng",
+        ctaLink: "/chat-luong",
+      },
+    },
+    {
+      id: "media-partner-features",
+      type: "features",
+      data: {
+        title: "Nhóm hợp tác truyền thông",
+        subtitle: "Mỗi nhóm cần đầu mối và brief rõ ràng.",
+        items: [
+          { icon: "Newspaper", title: "Báo chí", description: "Cung cấp thông tin thương hiệu, hình ảnh, hồ sơ và đầu mối xác minh." },
+          { icon: "Video", title: "KOL/KOC & video", description: "Review sản phẩm, trải nghiệm nhà máy, nội dung hướng dẫn mua chính hãng." },
+          { icon: "Users", title: "Cộng đồng", description: "Hoạt động cộng đồng, livestream, sampling hoặc chương trình đồng hành." },
+        ],
+      },
+    },
+    {
+      id: "media-partner-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>[cần bổ sung] Media kit</h2><p>Nên có bộ tài liệu truyền thông: logo, ảnh sản phẩm, ảnh nhân vật, mô tả thương hiệu ngắn, thông tin pháp lý được phép công bố, các claim được phép dùng và danh sách claim không được dùng.</p>",
+      },
+    },
+  ],
+);
+
 export function getDefaultInfoPage(routePath: string) {
   return DEFAULT_INFO_PAGES[routePath] || null;
 }

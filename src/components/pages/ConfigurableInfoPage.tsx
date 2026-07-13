@@ -28,6 +28,14 @@ function sectionTone(backgroundColor?: string) {
   return "bg-[#fff8ed] text-slate-950";
 }
 
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d");
+}
+
 export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultInfoPage }) {
   const [page, setPage] = useState<CmsPage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,17 +180,20 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
         if (block.type === "hero") {
           return (
-            <section key={block.id || index} className="border-b border-orange-100 bg-[#fff3df] px-5 pb-12 pt-16 sm:px-8 lg:px-16">
-              <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
-                <div>
-                  <p className="inline-flex border-l-4 border-orange-500 bg-white/80 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+            <section key={block.id || index} className="relative overflow-hidden bg-[#fff4df] px-5 py-20 sm:px-8 lg:px-16">
+              <div className="absolute inset-0 bg-[linear-gradient(115deg,#fff4df_0%,#fff4df_54%,#ffffff_54%,#ffffff_100%)]" />
+              <div className="absolute -left-24 bottom-0 h-72 w-72 bg-orange-200/30 blur-3xl" />
+              <div className="absolute -right-28 top-10 h-96 w-96 border border-orange-200/70" />
+              <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:items-center">
+                <div className="relative z-10">
+                  <p className="inline-flex bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700 shadow-sm">
                     {data.label || title}
                   </p>
-                  <h1 className="mt-5 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] text-slate-950 sm:text-5xl lg:text-6xl">
+                  <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.08em] text-slate-950 sm:text-6xl lg:text-7xl">
                     {data.title || title}
                   </h1>
                   {data.subtitle && (
-                    <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
+                    <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
                       {data.subtitle}
                     </p>
                   )}
@@ -198,7 +209,14 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                 </div>
 
                 {data.backgroundImage && (
-                  <div className="relative min-h-[280px] overflow-hidden border border-orange-200 bg-white shadow-[12px_12px_0_rgba(234,88,12,0.12)]">
+                  <div className="relative min-h-[430px] overflow-hidden bg-white shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
+                    <div className="absolute left-5 top-5 z-10 bg-slate-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                      Trang nội dung
+                    </div>
+                    <div className="absolute bottom-6 left-6 z-10 max-w-xs bg-white/90 p-5 backdrop-blur">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
+                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">Nội dung có thể chỉnh trong admin</p>
+                    </div>
                     <img
                       src={data.backgroundImage}
                       alt={data.title || title}
@@ -213,12 +231,16 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
         if (block.type === "text") {
           return (
-            <section key={block.id || index} className={`border-b border-orange-100 px-5 py-14 sm:px-8 lg:px-16 ${sectionTone(data.backgroundColor)}`}>
+            <section key={block.id || index} className={`border-b border-orange-100 px-5 py-16 sm:px-8 lg:px-16 ${sectionTone(data.backgroundColor)}`}>
+              <div className="mb-6 flex items-center gap-3">
+                <span className="h-px w-14 bg-orange-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">Ghi chú / hồ sơ</span>
+              </div>
               <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className={`prose prose-orange max-w-5xl prose-headings:font-black prose-headings:tracking-[-0.04em] prose-p:leading-8 ${
+                className={`prose prose-orange max-w-5xl border-l-4 border-orange-500 bg-white/70 p-7 shadow-sm prose-headings:font-black prose-headings:tracking-[-0.04em] prose-p:leading-8 ${
                   data.backgroundColor === "slate-900" || data.backgroundColor === "neutral" ? "prose-invert text-slate-200" : "text-slate-800"
                 }`}
                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.content || "") }}
@@ -228,22 +250,79 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         }
 
         if (block.type === "features") {
+          const items = data.items || [];
+          const titleIdentity = normalizeText(`${data.title || ""} ${data.subtitle || ""}`);
+          const isProcess = titleIdentity.includes("quy trinh") || items.some((item: any) => /^\s*\d+[.)]/.test(item.title || ""));
+          const featureGridClass = items.length === 4
+            ? "md:grid-cols-2 xl:grid-cols-4"
+            : items.length > 4
+              ? "md:grid-cols-2 xl:grid-cols-3"
+              : "md:grid-cols-2 lg:grid-cols-3";
+
+          if (isProcess) {
+            return (
+              <section key={block.id || index} className="relative overflow-hidden bg-slate-950 px-5 py-24 text-white sm:px-8 lg:px-16">
+                <div className="absolute inset-y-0 right-0 w-1/3 bg-orange-600/10" />
+                <div className="relative mx-auto max-w-7xl">
+                  <div className="mb-12 grid gap-5 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+                    <div>
+                      <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-300">
+                        Sơ đồ quy trình
+                      </p>
+                      <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-white sm:text-5xl">
+                        {data.title}
+                      </h2>
+                    </div>
+                    {data.subtitle && <p className="max-w-3xl text-sm font-semibold leading-7 text-slate-300">{data.subtitle}</p>}
+                  </div>
+
+                  <div className="relative grid gap-5 lg:grid-cols-6">
+                    <div className="absolute left-0 right-0 top-12 hidden h-px bg-gradient-to-r from-orange-500/0 via-orange-400/60 to-orange-500/0 lg:block" />
+                    {items.map((item: any, itemIndex: number) => (
+                      <div key={`${item.title}-${itemIndex}`} className={`relative bg-white/[0.06] p-6 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.10] ${itemIndex % 2 ? "lg:mt-12" : ""}`}>
+                        <div className="mb-6 flex h-14 w-14 items-center justify-center bg-orange-600 text-sm font-black text-white shadow-[8px_8px_0_rgba(255,255,255,0.10)]">
+                          {String(itemIndex + 1).padStart(2, "0")}
+                        </div>
+                        <DynIcon name={item.icon || "Check"} className="mb-4 h-7 w-7 text-orange-300" />
+                        <h3 className="text-lg font-black leading-tight tracking-[-0.03em] text-white">{item.title.replace(/^\s*\d+[.)]\s*/, "")}</h3>
+                        <p className="mt-3 text-sm font-medium leading-7 text-slate-300">{item.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }
+
           return (
-            <section key={block.id || index} className="border-b border-orange-100 bg-white px-5 py-14 sm:px-8 lg:px-16">
-              <div className="mb-10 grid gap-4 lg:grid-cols-[0.6fr_1.4fr] lg:items-end">
-                <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
-                  {data.title}
-                </h2>
+            <section key={block.id || index} className={`px-5 py-20 sm:px-8 lg:px-16 ${index % 2 === 0 ? "bg-white" : "bg-[#fff8ed]"}`}>
+              <div className="mx-auto max-w-7xl">
+              <div className="mb-12 grid gap-5 lg:grid-cols-[0.55fr_1.45fr] lg:items-end">
+                <div>
+                  <p className="mb-3 inline-flex border-l-4 border-orange-500 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
+                    {String(index + 1).padStart(2, "0")} · Nội dung chính
+                  </p>
+                  <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
+                    {data.title}
+                  </h2>
+                </div>
                 {data.subtitle && <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>}
               </div>
-              <div className="grid gap-0 md:grid-cols-2 lg:grid-cols-3">
-                {(data.items || []).map((item: any, itemIndex: number) => (
-                  <div key={`${item.title}-${itemIndex}`} className="border border-orange-100 bg-[#fffaf3] p-7 transition hover:border-orange-300 hover:bg-white">
-                    <DynIcon name={item.icon || "Check"} className="h-8 w-8 text-orange-600" />
-                    <h3 className="mt-6 text-xl font-black tracking-[-0.03em] text-slate-950">{item.title}</h3>
+              <div className={`grid auto-rows-fr gap-4 ${featureGridClass}`}>
+                {items.map((item: any, itemIndex: number) => (
+                  <div key={`${item.title}-${itemIndex}`} className={`group relative overflow-hidden bg-white p-7 shadow-[0_18px_45px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] ${itemIndex === 0 && items.length >= 4 ? "md:col-span-2 xl:row-span-2 xl:p-10" : ""}`}>
+                    <div className="absolute inset-x-0 top-0 h-1 bg-orange-500 opacity-0 transition group-hover:opacity-100" />
+                    <span className="absolute right-4 top-4 text-4xl font-black tracking-[-0.08em] text-orange-100 transition group-hover:text-orange-200">
+                      {String(itemIndex + 1).padStart(2, "0")}
+                    </span>
+                    <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600 transition group-hover:bg-orange-600 group-hover:text-white">
+                      <DynIcon name={item.icon || "Check"} className="h-7 w-7" />
+                    </div>
+                    <h3 className={`${itemIndex === 0 && items.length >= 4 ? "text-2xl sm:text-3xl" : "text-xl"} mt-6 font-black tracking-[-0.04em] text-slate-950`}>{item.title}</h3>
                     <p className="mt-3 text-sm font-medium leading-7 text-slate-600">{item.description}</p>
                   </div>
                 ))}
+              </div>
               </div>
             </section>
           );
@@ -252,14 +331,25 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         if (block.type === "split") {
           const imageLeft = data.imagePosition === "left";
           return (
-            <section key={block.id || index} className="border-b border-orange-100 bg-[#fff8ed] px-5 py-14 sm:px-8 lg:px-16">
-              <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+            <section key={block.id || index} className={`relative overflow-hidden px-5 py-24 sm:px-8 lg:px-16 ${index % 2 === 0 ? "bg-[#fff8ed]" : "bg-white"}`}>
+              <div className="absolute left-0 top-0 h-full w-24 bg-orange-50/70" />
+              <div className="relative mx-auto grid max-w-7xl gap-0 lg:grid-cols-2 lg:items-center">
                 {data.imageUrl && (
-                  <div className={`relative aspect-[4/3] overflow-hidden border border-orange-200 bg-white ${imageLeft ? "lg:order-1" : "lg:order-2"}`}>
+                  <div className={`relative aspect-[4/3] min-h-[360px] overflow-hidden bg-white shadow-[0_28px_70px_rgba(15,23,42,0.14)] ${imageLeft ? "lg:order-1" : "lg:order-2"}`}>
+                    <div className="absolute left-4 top-4 z-10 bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                      Hồ sơ / hình ảnh
+                    </div>
+                    <div className="absolute bottom-0 right-0 z-10 bg-white/90 px-5 py-3 text-right backdrop-blur">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
+                      <p className="text-sm font-black text-slate-950">Minh bạch thông tin</p>
+                    </div>
                     <img src={data.imageUrl} alt={data.title} className="absolute inset-0 h-full w-full object-cover" />
                   </div>
                 )}
-                <div className={imageLeft ? "lg:order-2" : "lg:order-1"}>
+                <div className={`relative z-10 bg-white p-8 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-10 lg:-ml-10 ${imageLeft ? "lg:order-2" : "lg:order-1 lg:-mr-10 lg:ml-0"}`}>
+                  <div className="absolute right-6 top-6 text-6xl font-black tracking-[-0.08em] text-orange-100">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
                   <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
                     Nội dung
                   </p>

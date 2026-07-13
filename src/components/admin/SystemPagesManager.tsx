@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Edit3, ExternalLink, Loader, Plus, Wand2 } from "lucide-react";
+import { Edit3, ExternalLink, Loader, Plus, RotateCcw, Wand2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
 
@@ -117,6 +117,7 @@ export function SystemPagesManager() {
   const [pages, setPages] = useState<PageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [bulkLoading, setBulkLoading] = useState<"create" | "reload" | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -186,6 +187,141 @@ export function SystemPagesManager() {
     }
   };
 
+  const handleReloadSampleContent = async (pageId: string, cmsSlug: string) => {
+    const fallback = Object.values(DEFAULT_INFO_PAGES).find((page) => page.cmsSlug === cmsSlug);
+    if (!fallback || !token) return;
+    if (!confirm("Nạp lại dữ liệu mẫu sẽ ghi đè nội dung hiện tại của trang này. Tiếp tục chứ?")) return;
+
+    setActionLoading(`reload-${cmsSlug}`);
+    try {
+      const res = await fetch(`/api/pages/${pageId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: fallback.title,
+          slug: fallback.cmsSlug,
+          status: "PUBLISHED",
+          content: getSystemPageSeedContent(fallback),
+        }),
+      });
+
+      if (res.ok) {
+        const updated = await res.json();
+        setPages((currentPages) => currentPages.map((page) => (page.id === updated.id ? updated : page)));
+        router.push(`/admin/pages/${updated.id}/edit`);
+        return;
+      }
+
+      const errData = await res.json();
+      alert(errData.error || "Không thể nạp dữ liệu mẫu");
+    } catch (err) {
+      console.error(err);
+      alert("Đã xảy ra lỗi khi nạp dữ liệu mẫu");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCreateAllMissingPages = async () => {
+    const missingPages = systemPages.filter((page) => !page.cmsPage);
+    if (!missingPages.length) {
+      alert("Tất cả trang menu hệ thống đã có CMS rồi.");
+      return;
+    }
+
+    setBulkLoading("create");
+    try {
+      let createdCount = 0;
+      for (const page of missingPages) {
+        const fallback = Object.values(DEFAULT_INFO_PAGES).find((item) => item.cmsSlug === page.cmsSlug);
+        if (!fallback || !token) continue;
+
+        const res = await fetch("/api/pages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: fallback.title,
+            slug: fallback.cmsSlug,
+            status: "PUBLISHED",
+            content: getSystemPageSeedContent(fallback),
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `Không thể tạo ${fallback.title}`);
+        }
+
+        const created = await res.json();
+        createdCount += 1;
+        setPages((currentPages) => [created, ...currentPages.filter((item) => item.id !== created.id)]);
+      }
+
+      alert(`Đã tạo ${createdCount} trang mẫu vào CMS.`);
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Có lỗi khi tạo hàng loạt trang mẫu");
+    } finally {
+      setBulkLoading(null);
+      setActionLoading(null);
+    }
+  };
+
+  const handleReloadAllSampleContent = async () => {
+    const existingPages = systemPages.filter((page) => page.cmsPage);
+    if (!existingPages.length) {
+      alert("Chưa có trang CMS nào để nạp mẫu. Bấm tạo tất cả mẫu trước.");
+      return;
+    }
+    if (!confirm("Nạp mẫu toàn bộ sẽ ghi đè nội dung hiện tại của tất cả trang menu hệ thống đã có CMS. Tiếp tục chứ?")) return;
+
+    setBulkLoading("reload");
+    try {
+      let updatedCount = 0;
+      for (const page of existingPages) {
+        const fallback = Object.values(DEFAULT_INFO_PAGES).find((item) => item.cmsSlug === page.cmsSlug);
+        if (!fallback || !token || !page.cmsPage) continue;
+
+        const res = await fetch(`/api/pages/${page.cmsPage.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: fallback.title,
+            slug: fallback.cmsSlug,
+            status: "PUBLISHED",
+            content: getSystemPageSeedContent(fallback),
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `Không thể nạp mẫu ${fallback.title}`);
+        }
+
+        const updated = await res.json();
+        updatedCount += 1;
+        setPages((currentPages) => currentPages.map((item) => (item.id === updated.id ? updated : item)));
+      }
+
+      alert(`Đã nạp lại mẫu cho ${updatedCount} trang.`);
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Có lỗi khi nạp mẫu hàng loạt");
+    } finally {
+      setBulkLoading(null);
+      setActionLoading(null);
+    }
+  };
+
   return (
     <section className="border border-orange-200 bg-orange-50/50 p-5 shadow-sm sm:p-6">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -197,6 +333,26 @@ export function SystemPagesManager() {
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
             Các trang nằm trên header như Giới thiệu, Chất lượng, Điểm bán, Hợp tác. Bấm tạo để có bản CMS, rồi sửa từng chữ, từng ảnh và các block lặp lại.
           </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleCreateAllMissingPages}
+            disabled={loading || bulkLoading !== null}
+            className="inline-flex items-center gap-2 bg-orange-600 px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white transition hover:bg-slate-950 disabled:opacity-60"
+          >
+            {bulkLoading === "create" ? <Loader size={14} className="animate-spin" /> : <Plus size={14} />}
+            Tạo tất cả mẫu
+          </button>
+          <button
+            type="button"
+            onClick={handleReloadAllSampleContent}
+            disabled={loading || bulkLoading !== null}
+            className="inline-flex items-center gap-2 border border-orange-200 bg-white px-4 py-2.5 text-xs font-black uppercase tracking-wide text-orange-700 transition hover:border-orange-400 hover:bg-orange-50 disabled:opacity-60"
+          >
+            {bulkLoading === "reload" ? <Loader size={14} className="animate-spin" /> : <RotateCcw size={14} />}
+            Nạp mẫu toàn bộ
+          </button>
         </div>
         <span className="w-fit border border-orange-200 bg-white px-3 py-1 text-[11px] font-black uppercase tracking-wider text-orange-700">
           {loading ? "Đang tải" : `${systemPages.filter((page) => page.cmsPage).length}/${systemPages.length} đã có CMS`}
@@ -223,10 +379,21 @@ export function SystemPagesManager() {
 
               <div className="mt-4 flex items-center gap-2">
                 {cmsPage ? (
-                  <Link href={`/admin/pages/${cmsPage.id}/edit`} className="acbt-btn acbt-btn--admin acbt-btn--sm">
-                    <Edit3 size={14} />
-                    Sửa nội dung
-                  </Link>
+                  <>
+                    <Link href={`/admin/pages/${cmsPage.id}/edit`} className="acbt-btn acbt-btn--admin acbt-btn--sm">
+                      <Edit3 size={14} />
+                      Sửa nội dung
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => handleReloadSampleContent(cmsPage.id, page.cmsSlug)}
+                      disabled={actionLoading === `reload-${page.cmsSlug}`}
+                      className="inline-flex items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600 transition hover:border-orange-300 hover:text-orange-600 disabled:opacity-60"
+                    >
+                      {actionLoading === `reload-${page.cmsSlug}` ? <Loader size={13} className="animate-spin" /> : <RotateCcw size={13} />}
+                      Nạp mẫu
+                    </button>
+                  </>
                 ) : (
                   <button
                     type="button"
