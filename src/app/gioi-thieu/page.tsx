@@ -40,6 +40,13 @@ const ABOUT_PROCESS_ASSET_KEYS = [
   "about_process_distribution",
 ];
 
+const COMMUNITY_FALLBACK_IMAGES = [
+  "/hero/ba-tuyet-character.png",
+  "/bento/bento-factory.png",
+  "/bento/bento-tiktok.png",
+  "/hero/chan-ga-plate.png",
+];
+
 function toYouTubeEmbedUrl(url: string) {
   if (!url) return "";
   if (url.includes("/embed/")) return url;
@@ -663,6 +670,7 @@ export default function AboutPage() {
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {visibleCommunityActivities.map((item, index) => {
             const Icon = item.iconKey === "users" ? Users : item.iconKey === "message" ? MessageSquare : item.iconKey === "hand" ? HandHelping : Heart;
+            const imageUrl = item.imageUrl || COMMUNITY_FALLBACK_IMAGES[index % COMMUNITY_FALLBACK_IMAGES.length];
             return (
               <motion.article
                 key={item.id}
@@ -672,15 +680,12 @@ export default function AboutPage() {
                 transition={{ delay: index * 0.05 }}
                 className="border border-orange-100 bg-white p-6 shadow-sm"
               >
-                {item.imageUrl ? (
-                  <div className="mb-5 aspect-square overflow-hidden bg-orange-50">
-                    <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                <div className="relative mb-5 aspect-square overflow-hidden bg-orange-50">
+                  <img src={imageUrl} alt={item.title} className="h-full w-full object-cover transition duration-700 hover:scale-105" />
+                  <div className="absolute left-4 top-4 flex h-11 w-11 items-center justify-center bg-white/90 text-orange-600 shadow-sm">
+                    <Icon size={22} />
                   </div>
-                ) : (
-                  <div className="mb-5 flex aspect-square items-center justify-center bg-orange-50 text-orange-600">
-                    <Icon size={34} />
-                  </div>
-                )}
+                </div>
                 <h3 className="text-lg font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
                 <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
               </motion.article>
