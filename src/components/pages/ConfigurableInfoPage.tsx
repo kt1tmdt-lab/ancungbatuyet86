@@ -410,6 +410,274 @@ function BrandStoryPosterPage({
   );
 }
 
+function QualityDetailPage({
+  title,
+  routePath,
+  blocks,
+  fallbackBlocks,
+}: {
+  title: string;
+  routePath: string;
+  blocks: InfoPageBlock[];
+  fallbackBlocks: InfoPageBlock[];
+}) {
+  const findBlock = (type: InfoPageBlock["type"]) =>
+    blocks.find((block) => block.type === type) || fallbackBlocks.find((block) => block.type === type);
+  const heroData = (findBlock("hero")?.data || {}) as any;
+  const splitData = (findBlock("split")?.data || {}) as any;
+  const featuresData = (findBlock("features")?.data || {}) as any;
+  const textData = (findBlock("text")?.data || {}) as any;
+  const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
+  const imageUrl = splitData.imageUrl || heroData.backgroundImage || "/bento/bento-factory.png";
+  const safeTextHtml = DOMPurify.sanitize(textData.content || "");
+  const isProcess = routePath.includes("nha-may");
+  const isLegal = routePath.includes("ho-so");
+  const isPvi = routePath.includes("pvi");
+
+  const navItems = [
+    ["Tổng quan", "/chat-luong"],
+    ["Nguồn nguyên liệu", "/chat-luong/minh-bach-nguon-nguyen-lieu"],
+    ["Nhà máy & Quy trình", "/chat-luong/nha-may-quy-trinh-san-xuat"],
+    ["Hồ sơ pháp lý", "/chat-luong/ho-so-phap-ly-chung-nhan"],
+    ["PVI", "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi"],
+    ["Chính sách khách hàng", "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang"],
+  ];
+
+  const extra = routePath.includes("minh-bach")
+    ? {
+        label: "Bộ hồ sơ nguồn nguyên liệu",
+        checklist: ["C/O theo từng lô hàng", "Phiếu kiểm dịch nhập khẩu", "Ảnh container/kho lạnh", "Mã lô và ngày nhập", "Video truy xuất nguồn nguyên liệu"],
+        questions: [
+          ["Có phải chân gà Trung Quốc không?", "Trang này cần trả lời bằng hồ sơ xuất xứ, không trả lời bằng lời khẳng định chung chung."],
+          ["Nguồn Ba Lan/Hungary chứng minh bằng gì?", "Bằng C/O, phiếu kiểm dịch và hồ sơ lô hàng có thể đối chiếu."],
+          ["Có cần công khai hết giấy tờ không?", "Nên công khai phần được phép public, che thông tin nhạy cảm nếu cần."],
+        ],
+        compliance: "Chỉ ghi nguồn nhập khẩu khi có hồ sơ đi kèm. Không dùng cụm “100% châu Âu” nếu chưa có đủ hồ sơ cho mọi lô hàng.",
+      }
+    : routePath.includes("nha-may")
+      ? {
+          label: "Bộ hồ sơ nhà máy",
+          checklist: ["Ảnh dây chuyền thật", "Ảnh khu sơ chế", "Ảnh khu đóng gói", "Sơ đồ quy trình 6 bước", "Chứng nhận ISO 22000:2018 cấp cho NMV Food"],
+          questions: [
+            ["ACBT hay NMV Food được cấp ISO?", "Copy public phải ghi đúng: NMV Food đạt chứng nhận ISO 22000:2018."],
+            ["Quy trình có an toàn tuyệt đối không?", "Không dùng “an toàn tuyệt đối”. Dùng “quy trình 6 bước có kiểm soát”."],
+            ["Ảnh nhà máy nên dùng ảnh nào?", "Ưu tiên ảnh/video quay tại NMV Food và có thể xác minh."],
+          ],
+          compliance: "Không dùng từ “vô trùng”, “an toàn tuyệt đối”, “kiểm soát nghiêm ngặt” nếu không có cơ sở pháp lý rõ.",
+        }
+      : routePath.includes("ho-so")
+        ? {
+            label: "Bộ hồ sơ pháp lý",
+            checklist: ["ISO 22000:2018", "HACCP", "Giấy đủ điều kiện ATTP", "Phiếu kiểm nghiệm VNTEST", "Ngày cấp và đơn vị cấp"],
+            questions: [
+              ["Khách xem giấy tờ ở đâu?", "Mỗi card nên mở lightbox ảnh scan hoặc PDF."],
+              ["Có được ghi ACBT đạt ISO không?", "Chỉ ghi như vậy nếu giấy chứng nhận cấp cho đúng pháp nhân ACBT."],
+              ["Phiếu kiểm nghiệm cần mới không?", "Nên dùng phiếu mới nhất và ghi rõ ngày kiểm nghiệm."],
+            ],
+            compliance: "Mỗi chứng nhận phải ghi đúng chủ thể được cấp. Hồ sơ nhà máy không tự động trở thành hồ sơ của thương hiệu nếu pháp nhân khác.",
+          }
+        : routePath.includes("pvi")
+          ? {
+              label: "Bộ hồ sơ PVI",
+              checklist: ["Logo PVI được phép dùng", "Scan hợp đồng đã che thông tin nhạy cảm", "Pháp nhân đứng tên hợp đồng", "Phạm vi bảo hiểm", "Thời hạn hiệu lực"],
+              questions: [
+                ["PVI có chứng nhận chất lượng sản phẩm không?", "Không. PVI là bảo hiểm trách nhiệm sản phẩm, không phải chứng nhận chất lượng."],
+                ["Có được gọi là bảo chứng không?", "Không nên. Dùng “bảo hiểm trách nhiệm sản phẩm”."],
+                ["Khách được bảo vệ thế nào?", "Theo phạm vi hợp đồng bảo hiểm và quy trình xử lý khiếu nại."],
+              ],
+              compliance: "Không frame PVI như đơn vị xác nhận chất lượng. Đây là cam kết trách nhiệm, không phải tem chất lượng.",
+            }
+          : {
+              label: "Bộ chính sách khách hàng",
+              checklist: ["Quyền được thông tin", "Điều kiện đổi trả", "Kênh khiếu nại", "Thời gian xử lý", "Hotline/email hỗ trợ"],
+              questions: [
+                ["Khi sản phẩm lỗi thì làm gì?", "Giữ sản phẩm, bao bì, hóa đơn/ảnh đơn hàng và gửi về kênh CSKH."],
+                ["Bao lâu xử lý khiếu nại?", "Cần bổ sung SLA chính thức từ bộ phận CSKH."],
+                ["Bảo hiểm PVI liên quan thế nào?", "Chỉ áp dụng theo phạm vi hợp đồng bảo hiểm trách nhiệm sản phẩm."],
+              ],
+              compliance: "Chính sách phải dễ hiểu, nhưng không hứa quá phạm vi vận hành hoặc phạm vi bảo hiểm.",
+            };
+
+  return (
+    <main className="min-h-screen bg-[#fff8ed] text-slate-950">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff3df] px-5 py-20 sm:px-8 lg:px-16">
+        <div className="absolute inset-0 bg-[linear-gradient(112deg,#fff3df_0%,#fff3df_52%,#ffffff_52%,#ffffff_100%)]" />
+        <div className="absolute -right-28 top-16 h-[420px] w-[420px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:items-end">
+          <div>
+            <p className="inline-flex border-l-4 border-orange-600 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] text-orange-700">
+              {heroData.label || "Chất lượng"}
+            </p>
+            <h1 className="mt-6 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
+              {title}
+            </h1>
+            <p className="mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700">
+              {heroData.subtitle || splitData.description || "Mọi thông tin chất lượng cần được trình bày bằng hồ sơ, hình ảnh và dữ liệu có thể kiểm chứng."}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/chat-luong/ho-so-phap-ly-chung-nhan" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
+                Xem hồ sơ <ArrowRight size={15} />
+              </Link>
+              <Link href="/san-pham" className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
+                Xem sản phẩm <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="border border-orange-200 bg-white p-4 shadow-[16px_16px_0_rgba(234,88,12,0.12)]">
+            <div className="relative min-h-[420px] overflow-hidden bg-slate-950">
+              <img src={imageUrl} alt={title} className="absolute inset-0 h-full w-full object-cover opacity-85" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/35 to-orange-500/20" />
+              <div className="absolute bottom-0 left-0 max-w-xl p-7 text-white">
+                <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-200">Hồ sơ kiểm chứng</p>
+                <h2 className="mt-3 text-3xl font-black tracking-[-0.05em]">{splitData.title || title}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav className="sticky top-[76px] z-20 border-b border-orange-100 bg-white/95 px-5 backdrop-blur sm:px-8 lg:px-16">
+        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto py-3">
+          {navItems.map(([label, href]) => (
+            <Link
+              key={href}
+              href={href}
+              className={`shrink-0 border px-4 py-2 text-[11px] font-black uppercase tracking-wider transition ${
+                href === routePath ? "border-orange-600 bg-orange-600 text-white" : "border-orange-100 bg-orange-50 text-orange-800 hover:border-orange-400"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      <section className="border-b border-orange-100 bg-white px-5 py-18 sm:px-8 lg:px-16">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
+          <aside className="space-y-5">
+            <p className="border-l-4 border-orange-600 bg-orange-50 px-4 py-3 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+              {isLegal ? "Tài liệu cần mở được" : isPvi ? "Viết đúng về PVI" : isProcess ? "Quy trình có kiểm soát" : "Điểm cần kiểm chứng"}
+            </p>
+            <div className="border border-orange-200 bg-[#fffaf3] p-6">
+              <h2 className="text-3xl font-black tracking-[-0.055em] text-slate-950">{splitData.title || title}</h2>
+              <p className="mt-4 text-sm font-semibold leading-7 text-slate-650">{splitData.description || heroData.subtitle}</p>
+              {splitData.ctaText && (
+                <Link href={splitData.ctaLink || "/chat-luong"} className="mt-6 inline-flex items-center gap-2 bg-slate-950 px-5 py-3 text-xs font-black uppercase tracking-wider text-white hover:bg-orange-600">
+                  {splitData.ctaText} <ArrowRight size={14} />
+                </Link>
+              )}
+            </div>
+          </aside>
+
+          <div>
+            <div className={isProcess ? "grid gap-0" : "grid gap-4 md:grid-cols-2"}>
+              {featureItems.map((item: any, index: number) => {
+                const isStep = isProcess || /^\s*\d+[.)]/.test(item.title || "");
+                return (
+                  <article
+                    key={`${item.title}-${index}`}
+                    className={`${isStep ? "grid grid-cols-[72px_1fr] border-x border-t border-orange-200 last:border-b" : "border border-orange-200 bg-[#fffaf3] p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-[0_20px_60px_rgba(234,88,12,0.1)]"}`}
+                  >
+                    {isStep ? (
+                      <>
+                        <div className="flex items-center justify-center bg-slate-950 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</div>
+                        <div className="bg-white p-5">
+                          <h3 className="text-xl font-black tracking-[-0.04em]">{item.title?.replace(/^\s*\d+[.)]\s*/, "")}</h3>
+                          <p className="mt-1 text-sm font-semibold leading-7 text-slate-600">{item.description}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex h-11 w-11 items-center justify-center bg-orange-600 text-white">
+                          <DynIcon name={item.icon || "FileSearch"} className="h-5 w-5" />
+                        </div>
+                        <h3 className="mt-5 text-xl font-black tracking-[-0.04em]">{item.title}</h3>
+                        <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.description}</p>
+                      </>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+
+            {safeTextHtml && (
+              <div
+                className="mt-8 border-l-4 border-orange-600 bg-[#fffaf3] p-7 text-sm font-semibold leading-8 text-slate-700 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-black [&_h2]:tracking-[-0.04em] [&_h2]:text-slate-950 [&_p]:mb-3 [&_strong]:text-orange-700"
+                dangerouslySetInnerHTML={{ __html: safeTextHtml }}
+              />
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-orange-100 bg-[#fff8ed] px-5 py-16 sm:px-8 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <div>
+              <p className="inline-flex border-l-4 border-orange-600 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-orange-700">
+                Thông tin bổ sung
+              </p>
+              <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                {extra.label}
+              </h2>
+            </div>
+            <p className="text-base font-semibold leading-8 text-slate-700">
+              Phần này dùng để biến trang từ “một đoạn giới thiệu” thành một hồ sơ thật: có danh sách tài liệu cần chuẩn bị, câu hỏi khách hay thắc mắc và nguyên tắc viết copy để không nói quá.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="border border-orange-200 bg-white p-6 shadow-sm">
+              <h3 className="text-xl font-black tracking-[-0.04em]">Checklist tài liệu cần có</h3>
+              <div className="mt-5 space-y-3">
+                {extra.checklist.map((item, index) => (
+                  <div key={item} className="grid grid-cols-[40px_1fr] items-center gap-3 border border-orange-100 bg-orange-50/70 p-3">
+                    <span className="flex h-9 w-9 items-center justify-center bg-orange-600 text-xs font-black text-white">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <p className="text-sm font-black text-slate-850">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-5">
+              <div className="grid gap-3 md:grid-cols-3">
+                {extra.questions.map(([question, answer]) => (
+                  <article key={question} className="border border-orange-200 bg-white p-5">
+                    <h3 className="text-base font-black leading-tight text-slate-950">{question}</h3>
+                    <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{answer}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="border-l-4 border-orange-600 bg-slate-950 p-6 text-white">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-300">Nguyên tắc compliance</p>
+                <p className="mt-3 text-base font-bold leading-8 text-white/82">{extra.compliance}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-950 px-5 py-12 text-white sm:px-8 lg:px-16">
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <h2 className="max-w-3xl text-3xl font-black tracking-[-0.05em]">Muốn kiểm chứng tiếp? Xem sản phẩm hoặc quay lại trang Chất lượng tổng.</h2>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/chat-luong" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-orange-500">
+              Tổng quan chất lượng <ArrowRight size={15} />
+            </Link>
+            <Link href="/san-pham" className="inline-flex items-center gap-2 border border-white/30 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-950">
+              Xem sản phẩm <ArrowRight size={15} />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultInfoPage }) {
   const [page, setPage] = useState<CmsPage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -549,6 +817,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
   if (fallback.routePath === "/gioi-thieu/cau-chuyen-thuong-hieu") {
     return <BrandStoryPosterPage title={title} blocks={blocks} fallbackBlocks={fallback.blocks} products={products} />;
+  }
+
+  if (fallback.routePath.startsWith("/chat-luong/")) {
+    return <QualityDetailPage title={title} routePath={fallback.routePath} blocks={blocks} fallbackBlocks={fallback.blocks} />;
   }
 
   return (

@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import ConfigurableInfoPage from "@/components/pages/ConfigurableInfoPage";
-import { getDefaultInfoPage } from "@/lib/default-info-pages";
 import {
   ArrowRight,
   BadgeCheck,
@@ -19,364 +16,333 @@ import {
   Wheat,
 } from "lucide-react";
 
-const proofBullets = [
-  { icon: Wheat, title: "Nhập khẩu từ Ba Lan, Hungary", note: "[cần bổ sung hồ sơ lô hàng public]" },
-  { icon: FileCheck2, title: "Có C/O và phiếu kiểm dịch", note: "[cần bổ sung ảnh scan]" },
-  { icon: Snowflake, title: "Lưu kho lạnh theo quy chuẩn", note: "[cần bổ sung ảnh kho lạnh]" },
+const orange = "text-orange-600";
+
+const proofPillars = [
+  {
+    no: "01",
+    title: "Nguồn nguyên liệu",
+    desc: "Thông tin xuất xứ, C/O, kiểm dịch và điều kiện lưu kho cần được công khai bằng hồ sơ.",
+    href: "#nguon-nguyen-lieu",
+    icon: Wheat,
+  },
+  {
+    no: "02",
+    title: "Nhà máy & quy trình",
+    desc: "NMV Food, Thái Nguyên. Quy trình 6 bước có kiểm soát, không dùng ngôn ngữ tuyệt đối.",
+    href: "#nha-may",
+    icon: Factory,
+  },
+  {
+    no: "03",
+    title: "Hồ sơ pháp lý",
+    desc: "ISO 22000:2018, HACCP, ATTP, phiếu kiểm nghiệm — mỗi claim cần file xem được.",
+    href: "#ho-so-phap-ly",
+    icon: FileSearch,
+  },
+  {
+    no: "04",
+    title: "Trách nhiệm sản phẩm",
+    desc: "Bảo hiểm trách nhiệm sản phẩm PVI là cam kết trách nhiệm, không phải chứng nhận chất lượng.",
+    href: "#pvi",
+    icon: ShieldCheck,
+  },
+];
+
+const sourceFacts = [
+  { icon: Wheat, title: "Ba Lan, Hungary", desc: "Nguồn nhập khẩu châu Âu. [cần bổ sung hồ sơ lô hàng public]" },
+  { icon: FileCheck2, title: "C/O & kiểm dịch", desc: "Mỗi claim nguồn gốc cần đi kèm C/O, kiểm dịch. [cần bổ sung ảnh scan]" },
+  { icon: Snowflake, title: "Kho lạnh", desc: "Lưu kho lạnh theo quy chuẩn vận hành. [cần bổ sung ảnh/video kho]" },
 ];
 
 const processSteps = [
-  "Nguyên liệu",
-  "Sơ chế",
-  "Chế biến",
-  "QC",
-  "Đóng gói",
-  "Giao hàng",
+  ["01", "Nguyên liệu", "Tiếp nhận nguyên liệu theo hồ sơ lô hàng, điều kiện bảo quản và kiểm tra đầu vào."],
+  ["02", "Sơ chế", "Sơ chế theo khu vực riêng, giảm lẫn chéo và giữ tính ổn định giữa các lô."],
+  ["03", "Chế biến", "Tẩm ướp/chế biến theo công thức và thông số nội bộ được kiểm soát."],
+  ["04", "QC", "Kiểm tra cảm quan, quy cách, bao bì và các điểm kiểm soát chất lượng."],
+  ["05", "Đóng gói", "Đóng gói, tem nhãn, thông tin NSX/HSD và nhận diện sản phẩm."],
+  ["06", "Giao hàng", "Lưu kho, phân phối tới sàn TMĐT/điểm bán/kênh chính thức."],
 ];
 
 const certificates = [
-  {
-    icon: BadgeCheck,
-    title: "ISO 22000:2018",
-    desc: "Cấp cho NMV Food. [cần bổ sung scan chứng nhận]",
-  },
-  {
-    icon: ClipboardCheck,
-    title: "HACCP",
-    desc: "Chương trình đào tạo, NMV Food. [cần bổ sung hồ sơ]",
-  },
-  {
-    icon: FileCheck2,
-    title: "Giấy phép ATTP",
-    desc: "Giấy đủ điều kiện ATTP. [cần bổ sung ảnh/PDF]",
-  },
-  {
-    icon: FileSearch,
-    title: "Phiếu kiểm nghiệm",
-    desc: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]",
-  },
+  { icon: BadgeCheck, title: "ISO 22000:2018", desc: "Ghi rõ: cấp cho NMV Food. [cần bổ sung scan chứng nhận]" },
+  { icon: ClipboardCheck, title: "HACCP", desc: "Chương trình đào tạo, NMV Food. [cần bổ sung hồ sơ]" },
+  { icon: FileCheck2, title: "Giấy phép ATTP", desc: "Giấy đủ điều kiện an toàn thực phẩm. [cần bổ sung ảnh/PDF]" },
+  { icon: FileSearch, title: "Phiếu kiểm nghiệm", desc: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]" },
 ];
 
 const policyItems = [
-  {
-    title: "Quyền được thông tin",
-    desc: "Mọi sản phẩm cần ghi rõ thành phần, NSX, HSD và thông tin nhận diện.",
-  },
-  {
-    title: "Quyền đổi trả",
-    desc: "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH. [cần bổ sung điều kiện chi tiết]",
-  },
-  {
-    title: "Quyền khiếu nại",
-    desc: "Có kênh tiếp nhận và thời gian xử lý phản hồi. [cần bổ sung SLA cụ thể]",
-  },
-  {
-    title: "Bảo hiểm sản phẩm",
-    desc: "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng. [cần xác nhận pháp nhân]",
-  },
-  {
-    title: "Kênh hỗ trợ",
-    desc: "Hotline, email và thời gian làm việc. [cần bổ sung thông tin chính thức]",
-  },
+  ["Quyền được thông tin", "Sản phẩm cần ghi rõ thành phần, NSX, HSD và thông tin nhận diện."],
+  ["Quyền đổi trả", "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH. [cần bổ sung điều kiện]"],
+  ["Quyền khiếu nại", "Có kênh tiếp nhận và thời gian xử lý phản hồi. [cần bổ sung SLA]"],
+  ["Bảo hiểm sản phẩm", "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng."],
+  ["Kênh hỗ trợ", "Hotline, email và thời gian làm việc. [cần bổ sung thông tin chính thức]"],
 ];
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function Eyebrow({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
-    <p className="inline-flex border-l-4 border-orange-500 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
+    <p className={`inline-flex items-center gap-2 border-l-4 border-orange-600 px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] ${dark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"}`}>
       {children}
     </p>
   );
 }
 
-function PlaceholderImage({ label }: { label: string }) {
+function EvidenceFrame({ title, desc, tone = "light" }: { title: string; desc: string; tone?: "light" | "dark" }) {
   return (
-    <div className="flex aspect-[4/3] min-h-[220px] items-center justify-center border border-dashed border-orange-300 bg-[#fff8ed] p-6 text-center">
-      <div>
-        <FileSearch className="mx-auto h-9 w-9 text-orange-500" />
-        <p className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-slate-950">{label}</p>
-        <p className="mt-2 text-xs font-semibold text-slate-500">[cần bổ sung ảnh/hồ sơ public]</p>
-      </div>
+    <div className={`group relative overflow-hidden border p-5 ${tone === "dark" ? "border-white/15 bg-white/8" : "border-orange-200 bg-white"}`}>
+      <div className="absolute right-0 top-0 h-14 w-14 translate-x-7 -translate-y-7 rotate-45 bg-orange-500/20 transition group-hover:bg-orange-500/35" />
+      <FileSearch className={`h-8 w-8 ${tone === "dark" ? "text-orange-300" : orange}`} />
+      <h3 className={`mt-5 text-lg font-black tracking-[-0.04em] ${tone === "dark" ? "text-white" : "text-slate-950"}`}>{title}</h3>
+      <p className={`mt-2 text-sm font-semibold leading-7 ${tone === "dark" ? "text-white/65" : "text-slate-600"}`}>{desc}</p>
     </div>
   );
 }
 
 export default function QualityProofPage() {
-  const [hasCmsPage, setHasCmsPage] = useState(false);
-  const cmsFallback = getDefaultInfoPage("/chat-luong");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch("/api/pages/slug/chat-luong")
-      .then((res) => {
-        if (!cancelled && res.ok) setHasCmsPage(true);
-      })
-      .catch(() => {
-        if (!cancelled) setHasCmsPage(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (hasCmsPage && cmsFallback) {
-    return <ConfigurableInfoPage fallback={cmsFallback} />;
-  }
-
   return (
-    <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
-      <section className="border-b border-orange-100 bg-[#fff3df] px-5 py-16 sm:px-8 lg:px-16">
-        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-end">
+    <main className="min-h-screen bg-[#fff8ed] text-slate-950">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff3df] px-5 py-20 sm:px-8 lg:px-16">
+        <div className="absolute inset-0 bg-[linear-gradient(112deg,#fff3df_0%,#fff3df_50%,#ffffff_50%,#ffffff_100%)]" />
+        <div className="absolute -right-32 top-16 h-[460px] w-[460px] rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="absolute left-0 top-0 h-full w-2 bg-orange-600" />
+
+        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
-            <SectionLabel>Chất lượng</SectionLabel>
-            <h1 className="mt-6 max-w-5xl text-4xl font-black leading-[0.96] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
-              Chất lượng kiểm chứng được
+            <Eyebrow>Chất lượng kiểm chứng</Eyebrow>
+            <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
+              Năng lực sản xuất rõ ràng trước khi nói về bán hàng
             </h1>
-            <p className="mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ đều có hồ sơ.
-              Các thông tin chưa có file công khai sẽ được ghi rõ là [cần bổ sung].
+            <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
+              Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ cần có hồ sơ đi kèm.
+              Chỗ nào chưa có file công khai sẽ ghi rõ <span className="font-black text-orange-700">[cần bổ sung]</span>, không tự tuyên bố thay bằng chứng.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="#ho-so-phap-ly"
-                className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950"
-              >
-                Xem hồ sơ pháp lý
-                <ArrowRight size={15} />
+              <Link href="#ho-so-phap-ly" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
+                Xem hồ sơ pháp lý <ArrowRight size={15} />
               </Link>
-              <Link
-                href="/san-pham"
-                className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white"
-              >
-                Xem sản phẩm
-                <ArrowRight size={15} />
+              <Link href="/san-pham" className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
+                Xem sản phẩm <ArrowRight size={15} />
               </Link>
             </div>
           </div>
 
-          <div className="border border-orange-200 bg-white p-5 shadow-[14px_14px_0_rgba(234,88,12,0.14)]">
-            <div className="grid grid-cols-2 gap-3">
-              <PlaceholderImage label="C/O nhập khẩu" />
-              <PlaceholderImage label="Phiếu kiểm dịch" />
-              <PlaceholderImage label="Nhà máy NMV Food" />
-              <PlaceholderImage label="Phiếu kiểm nghiệm" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 border border-orange-200 bg-white p-4 shadow-[16px_16px_0_rgba(234,88,12,0.12)]">
+              <div className="relative min-h-[300px] overflow-hidden bg-slate-950">
+                <img src="/bento/bento-factory.png" alt="Nhà máy sản xuất" className="absolute inset-0 h-full w-full object-cover opacity-75" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/40 to-orange-500/30" />
+                <div className="absolute bottom-0 left-0 max-w-lg p-7 text-white">
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-200">NMV Food · Thái Nguyên</p>
+                  <h2 className="mt-3 text-3xl font-black tracking-[-0.05em]">Nhà máy, hồ sơ và quy trình phải nhìn thấy được</h2>
+                </div>
+              </div>
             </div>
+            <EvidenceFrame title="C/O nhập khẩu" desc="Ảnh scan hồ sơ nhập khẩu nguyên liệu. [cần bổ sung]" />
+            <EvidenceFrame title="Phiếu kiểm nghiệm" desc="VNTEST định kỳ hàng tháng. [cần bổ sung bản mới nhất]" />
           </div>
         </div>
       </section>
 
-      <section id="nguon-nguyen-lieu" className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
-        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+      <section className="grid border-b border-orange-100 bg-white lg:grid-cols-4">
+        {proofPillars.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.title} href={item.href} className="group border-b border-orange-100 p-7 transition hover:bg-orange-50 lg:border-b-0 lg:border-r">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-orange-600">{item.no}</span>
+                <Icon className="h-6 w-6 text-orange-600 transition group-hover:scale-110" />
+              </div>
+              <h2 className="mt-5 text-xl font-black tracking-[-0.04em]">{item.title}</h2>
+              <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
+            </Link>
+          );
+        })}
+      </section>
+
+      <section id="nguon-nguyen-lieu" className="border-b border-orange-100 bg-[#fffaf3] px-5 py-20 sm:px-8 lg:px-16">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.88fr_1.12fr]">
           <div>
-            <SectionLabel>01 · Nguồn nguyên liệu</SectionLabel>
-            <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
+            <Eyebrow>01 · Minh bạch nguồn nguyên liệu</Eyebrow>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
               Nguyên liệu nhập khẩu từ châu Âu — có truy xuất
             </h2>
-            <p className="mt-5 text-base font-semibold leading-8 text-slate-650">
-              Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan,
-              Hungary và các nước châu Âu khác. Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch
-              và hồ sơ lô hàng tương ứng.
+            <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
+              Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác.
+              Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng.
             </p>
           </div>
 
-          <div className="grid gap-4">
-            <div className="border border-slate-200 bg-[#fff8ed] p-4">
-              <div className="flex aspect-video items-center justify-center border border-dashed border-orange-300 bg-white text-center">
-                <div>
-                  <FileSearch className="mx-auto h-10 w-10 text-orange-500" />
-                  <p className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-slate-950">
-                    Video truy xuất nguồn nguyên liệu từ Ba Lan
-                  </p>
-                  <p className="mt-2 text-xs font-semibold text-slate-500">[cần xác nhận link video để embed]</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-3">
-              {proofBullets.map((item) => {
+          <div className="space-y-5">
+            <div className="grid gap-4 sm:grid-cols-3">
+              {sourceFacts.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className="border border-orange-100 bg-[#fffaf3] p-5">
-                    <Icon className="h-7 w-7 text-orange-600" />
-                    <h3 className="mt-4 text-base font-black tracking-[-0.03em]">{item.title}</h3>
-                    <p className="mt-2 text-xs font-bold leading-6 text-slate-500">{item.note}</p>
+                  <div key={item.title} className="border border-orange-200 bg-white p-5 shadow-sm">
+                    <Icon className="h-8 w-8 text-orange-600" />
+                    <h3 className="mt-5 text-lg font-black tracking-[-0.04em]">{item.title}</h3>
+                    <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
                   </div>
                 );
               })}
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="nha-may" className="border-b border-orange-100 bg-[#fff8ed] px-5 py-16 sm:px-8 lg:px-16">
-        <div className="mb-10 grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-          <div>
-            <SectionLabel>02 · Nhà máy & quy trình</SectionLabel>
-            <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
-              Nhà máy sản xuất NMV Food — Thái Nguyên
-            </h2>
-          </div>
-          <p className="text-base font-semibold leading-8 text-slate-650">
-            Nội dung public nên ưu tiên hình ảnh/video tại NMV Food. NMV Food đạt chứng nhận ISO 22000:2018;
-            không diễn đạt thành chứng nhận cấp cho ACBT nếu hồ sơ không thể hiện như vậy.
-          </p>
-        </div>
-
-        <div className="grid border border-orange-200 bg-white md:grid-cols-3">
-          <div className="border-b border-orange-100 p-6 md:border-b-0 md:border-r">
-            <p className="text-3xl font-black text-orange-600">3.300m²</p>
-            <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">Diện tích nhà máy</p>
-          </div>
-          <div className="border-b border-orange-100 p-6 md:border-b-0 md:border-r">
-            <p className="text-3xl font-black text-orange-600">ISO 22000:2018</p>
-            <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">NMV Food</p>
-          </div>
-          <div className="p-6">
-            <p className="text-3xl font-black text-orange-600">HACCP</p>
-            <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">Chương trình đào tạo</p>
-          </div>
-        </div>
-
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_1.15fr] lg:items-start">
-          <div className="grid grid-cols-2 gap-3">
-            <PlaceholderImage label="Dây chuyền" />
-            <PlaceholderImage label="Kho lạnh" />
-            <PlaceholderImage label="Đóng gói" />
-            <PlaceholderImage label="QC" />
-          </div>
-
-          <div>
-            <h3 className="text-2xl font-black tracking-[-0.04em]">Quy trình 6 bước có kiểm soát</h3>
-            <div className="mt-5 grid gap-0">
-              {processSteps.map((step, index) => (
-                <div key={step} className="grid grid-cols-[56px_1fr] border border-orange-100 bg-white">
-                  <div className="flex items-center justify-center border-r border-orange-100 bg-slate-950 text-xs font-black text-white">
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
-                  <div className="p-4">
-                    <p className="text-lg font-black tracking-[-0.03em]">{step}</p>
-                    <p className="mt-1 text-sm font-semibold leading-6 text-slate-550">
-                      Mô tả bước đang chờ hồ sơ/ảnh/video xác nhận. [cần bổ sung]
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
+              <div className="relative min-h-[260px] overflow-hidden border border-orange-200 bg-white">
+                <img src="/bento/bento-ingredients.png" alt="Nguyên liệu" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
+                <p className="absolute bottom-5 left-5 max-w-sm text-lg font-black text-white">Ảnh container, kho lạnh, C/O nên đặt vào đây khi có file public.</p>
+              </div>
+              <EvidenceFrame title="Video truy xuất" desc="Embed video truy xuất nguồn nguyên liệu từ Ba Lan khi xác nhận link." />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="ho-so-phap-ly" className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
-        <div className="mb-10 max-w-4xl">
-          <SectionLabel>03 · Hồ sơ pháp lý & chứng nhận</SectionLabel>
-          <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
-            Bằng chứng phải mở ra xem được
-          </h2>
-          <p className="mt-5 text-base font-semibold leading-8 text-slate-650">
-            Mỗi chứng nhận nên có ảnh scan hoặc PDF đi kèm. Card nào chưa có file công khai sẽ giữ nhãn [cần bổ sung].
-          </p>
-        </div>
-
-        <div className="grid gap-0 md:grid-cols-2 xl:grid-cols-4">
-          {certificates.map((cert) => {
-            const Icon = cert.icon;
-            return (
-              <article key={cert.title} className="border border-orange-100 bg-[#fffaf3] p-7 transition hover:bg-white">
-                <Icon className="h-9 w-9 text-orange-600" />
-                <h3 className="mt-6 text-xl font-black tracking-[-0.03em]">{cert.title}</h3>
-                <p className="mt-3 min-h-[84px] text-sm font-semibold leading-7 text-slate-600">{cert.desc}</p>
-                <button className="mt-5 inline-flex cursor-not-allowed items-center gap-2 border border-slate-300 px-4 py-3 text-xs font-black uppercase tracking-wider text-slate-500">
-                  Xem chi tiết
-                </button>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section id="pvi" className="border-b border-orange-100 bg-[#fff8ed] px-5 py-16 sm:px-8 lg:px-16">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <SectionLabel>04 · Trách nhiệm sản phẩm</SectionLabel>
-            <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
-              Bảo hiểm trách nhiệm sản phẩm — PVI
-            </h2>
-            <p className="mt-5 text-base font-semibold leading-8 text-slate-650">
-              ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI, nghĩa là nếu sản phẩm gây thiệt hại cho người tiêu dùng
-              theo phạm vi hợp đồng, có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Đây là cam kết trách nhiệm,
-              không phải chứng nhận chất lượng và không được trình bày như PVI xác nhận chất lượng sản phẩm.
-            </p>
-            <p className="mt-4 border-l-4 border-orange-500 bg-white p-4 text-sm font-black leading-7 text-slate-700">
-              [cần xác nhận] Pháp nhân trên hợp đồng PVI là ACBT hay NMV Food, phạm vi bảo hiểm cụ thể và bản scan được phép public.
+      <section id="nha-may" className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+            <div>
+              <Eyebrow>02 · Nhà máy & quy trình</Eyebrow>
+              <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
+                Nhà máy sản xuất NMV Food — Thái Nguyên
+              </h2>
+            </div>
+            <p className="text-base font-semibold leading-8 text-slate-700">
+              Ghi đúng chủ thể: <span className="font-black">NMV Food đạt chứng nhận ISO 22000:2018</span>. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy.
+              Không dùng “an toàn tuyệt đối”, “vô trùng”; dùng “quy trình 6 bước có kiểm soát”.
             </p>
           </div>
-          <div className="border border-orange-200 bg-white p-6 shadow-[12px_12px_0_rgba(234,88,12,0.12)]">
-            <div className="flex aspect-[4/3] items-center justify-center bg-[#fff8ed] text-center">
-              <div>
-                <ShieldCheck className="mx-auto h-14 w-14 text-orange-600" />
-                <p className="mt-5 text-3xl font-black tracking-[-0.05em]">PVI</p>
-                <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Logo + scan hợp đồng nếu được phép public
-                </p>
+
+          <div className="mt-10 grid border border-orange-200 md:grid-cols-3">
+            {[
+              ["3.300m²", "Diện tích nhà máy"],
+              ["ISO 22000:2018", "NMV Food"],
+              ["HACCP", "Chương trình đào tạo"],
+            ].map(([value, label]) => (
+              <div key={label} className="border-b border-orange-100 bg-[#fffaf3] p-7 md:border-b-0 md:border-r">
+                <p className="text-3xl font-black text-orange-600">{value}</p>
+                <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="grid grid-cols-2 gap-3">
+              {["/bento/bento-factory.png", "/bento/bento-tiktok.png", "/hero/chan-ga-plate.png", "/bento/bento-insurance.png"].map((src, idx) => (
+                <div key={src} className="relative min-h-[190px] overflow-hidden border border-orange-200 bg-orange-50">
+                  <img src={src} alt={`Nhà máy ${idx + 1}`} className="absolute inset-0 h-full w-full object-cover transition duration-500 hover:scale-105" />
+                </div>
+              ))}
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-black tracking-[-0.04em]">Quy trình 6 bước có kiểm soát</h3>
+              <div className="mt-6">
+                {processSteps.map(([no, title, desc]) => (
+                  <div key={no} className="grid grid-cols-[70px_1fr] border-x border-t border-orange-200 last:border-b">
+                    <div className="flex items-center justify-center bg-slate-950 text-sm font-black text-white">{no}</div>
+                    <div className="bg-white p-5">
+                      <p className="text-xl font-black tracking-[-0.04em]">{title}</p>
+                      <p className="mt-1 text-sm font-semibold leading-7 text-slate-600">{desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="chinh-sach" className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
-        <div className="mb-10 max-w-4xl">
-          <SectionLabel>05 · Quyền lợi khách hàng</SectionLabel>
-          <h2 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] sm:text-5xl">
-            Chính sách bảo vệ quyền lợi khách hàng
-          </h2>
-          <p className="mt-5 text-base font-semibold leading-8 text-slate-650">
-            Tóm tắt các điểm chính từ chính sách CSKH. Bản đầy đủ nên dẫn sang trang hoặc PDF riêng khi đã chốt nội dung 11 điều.
-          </p>
+      <section id="ho-so-phap-ly" className="border-b border-orange-100 bg-[#fffaf3] px-5 py-20 sm:px-8 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <Eyebrow>03 · Hồ sơ pháp lý & chứng nhận</Eyebrow>
+          <div className="mt-6 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <h2 className="text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
+              Bằng chứng phải mở ra xem được
+            </h2>
+            <p className="text-base font-semibold leading-8 text-slate-700">
+              Mỗi chứng nhận nên có ảnh scan hoặc PDF đi kèm. Card nào chưa có file công khai sẽ giữ nhãn [cần bổ sung], tránh biến hồ sơ thành lời quảng cáo.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-0 md:grid-cols-2 xl:grid-cols-4">
+            {certificates.map((cert) => {
+              const Icon = cert.icon;
+              return (
+                <article key={cert.title} className="group border border-orange-200 bg-white p-7 transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(234,88,12,0.12)]">
+                  <Icon className="h-9 w-9 text-orange-600" />
+                  <h3 className="mt-6 text-xl font-black tracking-[-0.04em]">{cert.title}</h3>
+                  <p className="mt-3 min-h-[110px] text-sm font-semibold leading-7 text-slate-600">{cert.desc}</p>
+                  <button className="mt-5 inline-flex cursor-not-allowed items-center gap-2 border border-orange-200 px-4 py-3 text-xs font-black uppercase tracking-wider text-slate-500">
+                    Xem chi tiết
+                  </button>
+                </article>
+              );
+            })}
+          </div>
         </div>
-
-        <div className="grid gap-3 lg:grid-cols-5">
-          {policyItems.map((item, index) => (
-            <details key={item.title} className="group border border-orange-100 bg-[#fffaf3] p-5 open:bg-white">
-              <summary className="cursor-pointer list-none">
-                <span className="block text-xs font-black text-orange-600">{String(index + 1).padStart(2, "0")}</span>
-                <span className="mt-3 block text-lg font-black tracking-[-0.03em]">{item.title}</span>
-              </summary>
-              <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
-            </details>
-          ))}
-        </div>
-
-        <Link
-          href="/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang"
-          className="mt-8 inline-flex items-center gap-2 border border-slate-950 px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white"
-        >
-          Xem chính sách đầy đủ
-          <ArrowRight size={15} />
-        </Link>
       </section>
 
-      <section className="bg-slate-950 px-5 py-14 text-white sm:px-8 lg:px-16">
-        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+      <section id="pvi" className="grid border-b border-orange-100 bg-slate-950 text-white lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="px-5 py-20 sm:px-8 lg:px-16">
+          <Eyebrow dark>04 · Bảo hiểm trách nhiệm sản phẩm</Eyebrow>
+          <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
+            PVI là cam kết trách nhiệm, không phải “bảo chứng chất lượng”
+          </h2>
+          <p className="mt-6 text-base font-semibold leading-8 text-white/72">
+            ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng,
+            có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm.
+          </p>
+        </div>
+        <div className="border-t border-white/10 p-5 lg:border-l lg:border-t-0 lg:p-10">
+          <div className="grid h-full place-items-center border border-white/15 bg-white/5 p-8">
+            <ShieldCheck className="h-20 w-20 text-orange-400" />
+            <p className="mt-6 text-7xl font-black tracking-[-0.08em]">PVI</p>
+            <p className="mt-4 max-w-md text-center text-sm font-bold leading-7 text-white/60">
+              [cần xác nhận] Pháp nhân trên hợp đồng, phạm vi bảo hiểm và scan hợp đồng được phép public.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="chinh-sach" className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-16">
+        <div className="mx-auto max-w-7xl">
+          <Eyebrow>05 · Quyền lợi khách hàng</Eyebrow>
+          <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
+            Khách hàng cần biết mình được bảo vệ thế nào
+          </h2>
+          <div className="mt-10 grid gap-3 lg:grid-cols-5">
+            {policyItems.map(([title, desc], index) => (
+              <details key={title} className="group border border-orange-200 bg-[#fffaf3] p-5 open:bg-white">
+                <summary className="cursor-pointer list-none">
+                  <span className="block text-xs font-black text-orange-600">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="mt-3 block text-lg font-black tracking-[-0.03em]">{title}</span>
+                </summary>
+                <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{desc}</p>
+              </details>
+            ))}
+          </div>
+          <Link href="/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang" className="mt-8 inline-flex items-center gap-2 border border-slate-950 px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
+            Xem chính sách đầy đủ <ArrowRight size={15} />
+          </Link>
+        </div>
+      </section>
+
+      <section className="bg-orange-600 px-5 py-14 text-white sm:px-8 lg:px-16">
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-400">Bước tiếp theo</p>
-            <h2 className="mt-4 text-3xl font-black tracking-[-0.045em] sm:text-5xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-100">Bước tiếp theo</p>
+            <h2 className="mt-4 max-w-4xl text-3xl font-black tracking-[-0.045em] sm:text-5xl">
               Có hồ sơ rồi, hãy xem sản phẩm và nơi mua chính thức.
             </h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/san-pham" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-orange-500">
-              <PackageCheck size={16} />
-              Xem sản phẩm
+            <Link href="/san-pham" className="inline-flex items-center gap-2 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 hover:bg-slate-950 hover:text-white">
+              <PackageCheck size={16} /> Xem sản phẩm
             </Link>
-            <Link href="/diem-ban" className="inline-flex items-center gap-2 border border-white/30 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-950">
-              <Truck size={16} />
-              Tìm điểm bán gần nhất
+            <Link href="/diem-ban" className="inline-flex items-center gap-2 border border-white/40 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-950">
+              <Truck size={16} /> Tìm điểm bán
             </Link>
-            <Link href="/lien-he" className="inline-flex items-center gap-2 border border-white/30 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-950">
-              <Headphones size={16} />
-              Liên hệ hỗ trợ
+            <Link href="/lien-he" className="inline-flex items-center gap-2 border border-white/40 px-6 py-4 text-xs font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-950">
+              <Headphones size={16} /> Liên hệ hỗ trợ
             </Link>
           </div>
         </div>
