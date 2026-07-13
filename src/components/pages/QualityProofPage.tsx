@@ -18,7 +18,7 @@ import {
   Wheat,
   X,
 } from "lucide-react";
-import type { PageBlock } from "@/lib/pages";
+import type { QualityPageConfig } from "@/lib/quality-config";
 
 type ModalContent = {
   eyebrow?: string;
@@ -75,15 +75,6 @@ const defaultSourceFacts = [
     title: "Kho lạnh",
     desc: "Lưu kho lạnh theo quy chuẩn vận hành. [cần bổ sung ảnh/video kho]",
   },
-];
-
-const processSteps = [
-  ["01", "Nguyên liệu", "Tiếp nhận nguyên liệu theo hồ sơ lô hàng, điều kiện bảo quản và kiểm tra đầu vào."],
-  ["02", "Sơ chế", "Sơ chế theo khu vực riêng, giảm lẫn chéo và giữ tính ổn định giữa các lô."],
-  ["03", "Chế biến", "Tẩm ướp/chế biến theo công thức và thông số nội bộ được kiểm soát."],
-  ["04", "QC", "Kiểm tra cảm quan, quy cách, bao bì và các điểm kiểm soát chất lượng."],
-  ["05", "Đóng gói", "Đóng gói, tem nhãn, thông tin NSX/HSD và nhận diện sản phẩm."],
-  ["06", "Giao hàng", "Lưu kho, phân phối tới sàn TMĐT, điểm bán và kênh chính thức."],
 ];
 
 const defaultCertificates = [
@@ -163,21 +154,6 @@ const evidenceBoard = [
   },
 ];
 
-const policyItems = [
-  ["Quyền được thông tin", "Sản phẩm cần ghi rõ thành phần, NSX, HSD và thông tin nhận diện."],
-  ["Quyền đổi trả", "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH. [cần bổ sung điều kiện]"],
-  ["Quyền khiếu nại", "Có kênh tiếp nhận và thời gian xử lý phản hồi. [cần bổ sung SLA]"],
-  ["Bảo hiểm sản phẩm", "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng."],
-  ["Kênh hỗ trợ", "Hotline, email và thời gian làm việc. [cần bổ sung thông tin chính thức]"],
-];
-
-const faqItems = [
-  ["ACBT có tự tuyên bố chất lượng không?", "Không nên. Trang này ưu tiên để bên thứ ba và hồ sơ nói thay: chứng nhận, kiểm nghiệm, bảo hiểm, giấy tờ nhập khẩu."],
-  ["Nếu chưa có file chứng nhận thì sao?", "Giữ nhãn [cần bổ sung] ngay tại vị trí đó, để đội admin biết cần upload tài liệu thật trước khi truyền thông mạnh."],
-  ["PVI có nghĩa là sản phẩm được chứng nhận chất lượng không?", "Không. PVI là bảo hiểm trách nhiệm sản phẩm, thể hiện trách nhiệm bồi thường theo phạm vi hợp đồng."],
-  ["Trang này có thay /quy-trinh không?", "Có thể dùng như trang chất lượng tổng, còn /quy-trinh chỉ nên là một phần nhỏ trong section nhà máy."],
-];
-
 function Eyebrow({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
     <p className={`inline-flex items-center gap-2 border-l-4 border-orange-600 px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] ${dark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"}`}>
@@ -197,67 +173,31 @@ function EvidenceFrame({ title, desc, tone = "light" }: { title: string; desc: s
   );
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function text(value: unknown, fallback = "") {
-  return typeof value === "string" && value.trim() ? value : fallback;
-}
-
-function blockData(blocks: PageBlock[] | undefined, id: string, fallback: Record<string, unknown> = {}) {
-  const block = blocks?.find((item) => item.id === id);
-  return isRecord(block?.data) ? block.data : fallback;
-}
-
-function featureItems(data: Record<string, unknown>) {
-  if (!Array.isArray(data.items)) return [];
-  return data.items.filter(isRecord).map((item) => ({
-    title: text(item.title),
-    desc: text(item.description),
-  })).filter((item) => item.title || item.desc);
-}
-
-function stripHtml(value: string) {
-  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-}
-
-export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
+export default function QualityProofPage({ config }: { config: QualityPageConfig }) {
   const [modal, setModal] = useState<ModalContent | null>(null);
-  const heroData = blockData(blocks, "chat-luong-hero");
-  const sourceData = blockData(blocks, "chat-luong-nguyen-lieu");
-  const factsData = blockData(blocks, "chat-luong-facts");
-  const factoryData = blockData(blocks, "chat-luong-factory");
-  const docsData = blockData(blocks, "chat-luong-documents");
-  const pviData = blockData(blocks, "chat-luong-pvi");
-  const policyData = blockData(blocks, "chat-luong-policy");
-
-  const sourceFacts = featureItems(factsData).length
-    ? featureItems(factsData).map((item, index) => ({
-        icon: defaultSourceFacts[index]?.icon ?? FileCheck2,
-        title: item.title,
-        desc: item.desc,
-      }))
-    : defaultSourceFacts;
-
-  const certificates = featureItems(docsData).length
-    ? featureItems(docsData).map((item, index) => ({
-        ...(defaultCertificates[index] ?? defaultCertificates[0]),
-        title: item.title,
-        desc: item.desc,
-      }))
-    : defaultCertificates;
-
-  const policyItemsFromCms = featureItems(policyData).map((item) => [item.title, item.desc] as [string, string]);
-  const visiblePolicyItems = policyItemsFromCms.length ? policyItemsFromCms : policyItems;
-  const heroImage = text(heroData.backgroundImage, "/bento/bento-factory.png");
-  const sourceImage = text(sourceData.imageUrl, "/bento/bento-ingredients.png");
-  const factoryImage = text(factoryData.imageUrl, "/bento/bento-factory.png");
-  const pviText = stripHtml(text(pviData.content));
+  const sourceFacts = config.source.facts.map((item, index) => ({
+    icon: defaultSourceFacts[index]?.icon ?? FileCheck2,
+    title: item.title,
+    desc: item.description,
+  }));
+  const certificates = config.documents.items.map((item, index) => ({
+    ...(defaultCertificates[index] ?? defaultCertificates[0]),
+    title: item.title,
+    desc: item.description,
+    image: item.imageUrl || defaultCertificates[index]?.image,
+  }));
+  const visiblePolicyItems = config.policy.items.map((item) => [item.title, item.description] as [string, string]);
+  const heroImage = config.hero.imageUrl;
+  const sourceImage = config.source.imageUrl;
+  const factoryImage = config.factory.imageUrl;
   const gallery = [
     { ...galleryImages[0], src: sourceImage },
     { ...galleryImages[1], src: factoryImage },
-    ...galleryImages.slice(2),
+    ...config.factory.gallery.slice(0, 3).map((item) => ({
+      src: item.imageUrl || "/bento/bento-tiktok.png",
+      label: item.title,
+      desc: item.description,
+    })),
   ];
 
   return (
@@ -269,22 +209,19 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
 
         <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
-            <Eyebrow>{text(heroData.label, "Chất lượng kiểm chứng")}</Eyebrow>
+            <Eyebrow>{config.hero.eyebrow}</Eyebrow>
             <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
-              {text(heroData.title, "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
+              {config.hero.title}
             </h1>
             <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              {text(
-                heroData.subtitle,
-                "Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ cần có hồ sơ đi kèm. Chỗ nào chưa có file công khai sẽ ghi rõ [cần bổ sung], không tự tuyên bố thay bằng chứng."
-              )}
+              {config.hero.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={text(heroData.ctaLink, "#ho-so-phap-ly")} className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
-                {text(heroData.ctaText, "Xem hồ sơ pháp lý")} <ArrowRight size={15} />
+              <Link href={config.hero.ctaLink} className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
+                {config.hero.ctaText} <ArrowRight size={15} />
               </Link>
-              <Link href="/san-pham" className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
-                Xem sản phẩm <ArrowRight size={15} />
+              <Link href={config.hero.secondaryCtaLink} className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
+                {config.hero.secondaryCtaText} <ArrowRight size={15} />
               </Link>
             </div>
           </div>
@@ -425,13 +362,10 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
           <div>
             <Eyebrow>01 · Minh bạch nguồn nguyên liệu</Eyebrow>
             <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-              {text(sourceData.title, "Nguyên liệu nhập khẩu từ châu Âu — có truy xuất")}
+              {config.source.title}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
-              {text(
-                sourceData.description,
-                "Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác. Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng."
-              )}
+              {config.source.description}
             </p>
           </div>
 
@@ -491,14 +425,11 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
             <div>
               <Eyebrow>02 · Nhà máy & quy trình</Eyebrow>
               <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-                {text(factoryData.title, "Nhà máy sản xuất NMV Food — Thái Nguyên")}
+                {config.factory.title}
               </h2>
             </div>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              {text(
-                factoryData.description,
-                "Ghi đúng chủ thể: NMV Food đạt chứng nhận ISO 22000:2018. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Không dùng “an toàn tuyệt đối”, “vô trùng”; dùng “quy trình 6 bước có kiểm soát”."
-              )}
+              {config.factory.description}
             </p>
           </div>
 
@@ -540,12 +471,12 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
             <div>
               <h3 className="text-2xl font-black tracking-[-0.04em]">Quy trình 6 bước có kiểm soát</h3>
               <div className="mt-6">
-                {processSteps.map(([no, title, desc]) => (
-                  <div key={no} className="grid grid-cols-[70px_1fr] border-x border-t border-orange-200 last:border-b">
-                    <div className="flex items-center justify-center bg-slate-950 text-sm font-black text-white">{no}</div>
+                {config.factory.steps.map((step, index) => (
+                  <div key={step.id} className="grid grid-cols-[70px_1fr] border-x border-t border-orange-200 last:border-b">
+                    <div className="flex items-center justify-center bg-slate-950 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</div>
                     <div className="bg-white p-5">
-                      <p className="text-xl font-black tracking-[-0.04em]">{title}</p>
-                      <p className="mt-1 text-sm font-semibold leading-7 text-slate-600">{desc}</p>
+                      <p className="text-xl font-black tracking-[-0.04em]">{step.title}</p>
+                      <p className="mt-1 text-sm font-semibold leading-7 text-slate-600">{step.description}</p>
                     </div>
                   </div>
                 ))}
@@ -560,10 +491,10 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
           <Eyebrow>03 · Hồ sơ pháp lý & chứng nhận</Eyebrow>
           <div className="mt-6 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <h2 className="text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-              Bằng chứng phải mở ra xem được
+              {config.documents.title}
             </h2>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              Mỗi chứng nhận nên có ảnh scan hoặc PDF đi kèm. Card nào chưa có file công khai sẽ giữ nhãn [cần bổ sung], tránh biến hồ sơ thành lời quảng cáo.
+              {config.documents.subtitle}
             </p>
           </div>
           <div className="mt-10 grid gap-0 md:grid-cols-2 xl:grid-cols-4">
@@ -600,10 +531,10 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
         <div className="px-5 py-20 sm:px-8 lg:px-16">
           <Eyebrow dark>04 · Bảo hiểm trách nhiệm sản phẩm</Eyebrow>
           <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-            PVI là cam kết trách nhiệm, không phải “bảo chứng chất lượng”
+            {config.pvi.title}
           </h2>
           <p className="mt-6 text-base font-semibold leading-8 text-white/72">
-            {pviText || "ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm."}
+            {config.pvi.description}
           </p>
           <button
             type="button"
@@ -612,7 +543,7 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
                 eyebrow: "PVI",
                 title: "Bảo hiểm trách nhiệm sản phẩm",
                 desc: "Đây là cam kết trách nhiệm theo phạm vi hợp đồng, không phải chứng nhận chất lượng sản phẩm.",
-                image: "/bento/bento-insurance.png",
+                image: config.pvi.imageUrl,
                 bullets: ["[cần xác nhận] Pháp nhân trên hợp đồng.", "[cần xác nhận] Phạm vi bảo hiểm cụ thể.", "[cần xác nhận] Scan hợp đồng được phép public."],
               })
             }
@@ -636,7 +567,7 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
         <div className="mx-auto max-w-7xl">
           <Eyebrow>05 · Quyền lợi khách hàng</Eyebrow>
           <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-            Khách hàng cần biết mình được bảo vệ thế nào
+            {config.policy.title}
           </h2>
           <div className="mt-10 grid gap-3 lg:grid-cols-5">
             {visiblePolicyItems.map(([title, desc], index) => (
@@ -657,16 +588,16 @@ export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
           <div>
             <Eyebrow>FAQ nhanh</Eyebrow>
             <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              Những câu dễ bị hỏi nhất phải trả lời gọn và chắc.
+              {config.faq.title}
             </h2>
           </div>
           <div className="space-y-3">
-            {faqItems.map(([question, answer]) => (
-              <details key={question} className="group border border-orange-200 bg-white p-6">
+            {config.faq.items.map((item) => (
+              <details key={item.id} className="group border border-orange-200 bg-white p-6">
                 <summary className="cursor-pointer list-none text-xl font-black tracking-[-0.04em] text-slate-950">
-                  {question}
+                  {item.title}
                 </summary>
-                <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{answer}</p>
+                <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{item.description}</p>
               </details>
             ))}
           </div>

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
-import { SystemPagesManager } from "@/components/admin/SystemPagesManager";
 import {
   ArrowRight,
   History,
@@ -56,6 +55,13 @@ const pageGroups = [
       { title: "Báo chí và phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
     ],
   },
+  {
+    title: "Chất lượng & bằng chứng",
+    description: "Cấu hình riêng trang Chất lượng đúng layout đang hiển thị ngoài website.",
+    items: [
+      { title: "Trang Chất lượng", description: "Sửa hero, nguồn nguyên liệu, nhà máy, hồ sơ pháp lý, PVI, chính sách, FAQ và ảnh popup.", href: "/admin/quality", icon: ShieldCheck },
+    ],
+  },
 ];
 
 export default function AdminWebControlPage() {
@@ -72,8 +78,6 @@ export default function AdminWebControlPage() {
             Xem website hiện tại <ArrowRight size={16} />
           </Link>
         </header>
-
-        <SystemPagesManager />
 
         {pageGroups.map((group) => (
           <section key={group.title}>
