@@ -1,4 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import ConfigurableInfoPage from "@/components/pages/ConfigurableInfoPage";
+import { getDefaultInfoPage } from "@/lib/default-info-pages";
 import {
   ArrowRight,
   BadgeCheck,
@@ -96,6 +101,29 @@ function PlaceholderImage({ label }: { label: string }) {
 }
 
 export default function QualityProofPage() {
+  const [hasCmsPage, setHasCmsPage] = useState(false);
+  const cmsFallback = getDefaultInfoPage("/chat-luong");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/pages/slug/chat-luong")
+      .then((res) => {
+        if (!cancelled && res.ok) setHasCmsPage(true);
+      })
+      .catch(() => {
+        if (!cancelled) setHasCmsPage(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (hasCmsPage && cmsFallback) {
+    return <ConfigurableInfoPage fallback={cmsFallback} />;
+  }
+
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
       <section className="border-b border-orange-100 bg-[#fff3df] px-5 py-16 sm:px-8 lg:px-16">

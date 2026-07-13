@@ -9,6 +9,15 @@ import Button from "@/components/ui/Button";
 import { DEFAULT_SITE_CONFIG, REQUIRED_NAV_LINKS, type SiteConfigData } from "@/lib/site-config-defaults";
 
 const DEFAULT_NAV_LINKS = REQUIRED_NAV_LINKS;
+const HEADER_NAV_LINKS = [
+  { href: "/", label: "Trang chủ" },
+  { href: "/gioi-thieu", label: "Giới thiệu" },
+  { href: "/chat-luong", label: "Chất lượng" },
+  { href: "/san-pham", label: "Sản phẩm" },
+  { href: "/diem-ban", label: "Điểm bán" },
+  { href: "/hop-tac", label: "Hợp tác" },
+  { href: "/lien-he", label: "Liên hệ" },
+];
 export const LEGACY_NAV_LINKS = [
   { href: "/", label: "Trang chủ" },
   { href: "/san-pham", label: "Sản phẩm" },
@@ -79,6 +88,86 @@ function getHeaderSubmenu(
 ): HeaderSubmenu | null {
   const identity = menuIdentity(link);
 
+  if (link.href === "/gioi-thieu") {
+    return {
+      eyebrow: "Về thương hiệu",
+      title: "Giới thiệu",
+      description: "Câu chuyện, thông tin doanh nghiệp và hành trình phát triển.",
+      accent: "01",
+      links: [
+        { href: "/gioi-thieu/cau-chuyen-thuong-hieu", label: "Câu chuyện thương hiệu", note: "Tinh thần và định hướng thương hiệu" },
+        { href: "/gioi-thieu/thong-tin-doanh-nghiep", label: "Thông tin doanh nghiệp", note: "Uy tín, chứng nhận và năng lực" },
+        { href: "/gioi-thieu/hanh-trinh-phat-trien", label: "Hành trình phát triển", note: "Các dấu mốc quan trọng" },
+      ],
+    };
+  }
+
+  if (link.href === "/chat-luong") {
+    return {
+      eyebrow: "Chất lượng",
+      title: "Hồ sơ kiểm chứng",
+      description: "Nguyên liệu, nhà máy, hồ sơ pháp lý, bảo hiểm và chính sách khách hàng.",
+      accent: "02",
+      overviewHref: "/chat-luong",
+      links: [
+        { href: "/chat-luong/minh-bach-nguon-nguyen-lieu", label: "Minh bạch nguồn nguyên liệu", note: "Nguồn gốc và hồ sơ truy xuất" },
+        { href: "/chat-luong/nha-may-quy-trinh-san-xuat", label: "Nhà máy & Quy trình sản xuất", note: "Quy trình 6 bước có kiểm soát" },
+        { href: "/chat-luong/ho-so-phap-ly-chung-nhan", label: "Hồ sơ pháp lý & chứng nhận", note: "ISO, HACCP, ATTP, kiểm nghiệm" },
+        { href: "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi", label: "Bảo hiểm trách nhiệm sản phẩm - PVI", note: "Cam kết trách nhiệm, không phải chứng nhận chất lượng" },
+        { href: "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang", label: "Chính sách bảo vệ quyền lợi khách hàng", note: "Khiếu nại, đổi trả và hỗ trợ" },
+      ],
+    };
+  }
+
+  if (link.href === "/diem-ban") {
+    return {
+      eyebrow: "Điểm bán",
+      title: "Kênh phân phối",
+      description: "Nơi mua chính thức và cách nhận diện hàng chính hãng.",
+      accent: "04",
+      overviewHref: "/diem-ban",
+      links: [
+        { href: "/diem-ban/he-thong-diem-ban-offline", label: "Hệ thống điểm bán offline", note: "Cửa hàng, đại lý và khu vực phân phối" },
+        { href: "/diem-ban/kenh-online-chinh-thuc", label: "Kênh online chính thức", note: "Sàn TMĐT và kênh bán công bố" },
+        { href: "/diem-ban/nhan-dien-hang-chinh-hang", label: "Nhận diện hàng chính hãng", note: "Tem nhãn, bao bì và nguồn mua" },
+      ],
+    };
+  }
+
+  if (link.href === "/hop-tac") {
+    return {
+      eyebrow: "Hợp tác",
+      title: "Kết nối đối tác",
+      description: "Thông tin dành cho đại lý, nhà phân phối và đối tác truyền thông.",
+      accent: "05",
+      overviewHref: "/hop-tac",
+      links: [
+        { href: "/hop-tac/dai-ly-nha-phan-phoi", label: "Trở thành Đại lý/Nhà phân phối", note: "Gửi thông tin hợp tác kinh doanh" },
+        { href: "/hop-tac/truyen-thong", label: "Hợp tác truyền thông", note: "PR, báo chí, KOL/KOC và cộng đồng" },
+      ],
+    };
+  }
+
+  if (link.href === "/san-pham") {
+    return {
+      eyebrow: "Sản phẩm",
+      title: "Danh mục sản phẩm",
+      description: "Các dòng sản phẩm chính đang được giới thiệu trên website.",
+      accent: "03",
+      overviewHref: "/san-pham",
+      links: [
+        ...(productMenuLinks.length
+          ? productMenuLinks.map((item) => ({ href: item.href, label: item.label, note: item.note }))
+          : [
+              { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà Bà Tuyết", note: "Dòng sản phẩm chủ lực" },
+              { href: "/san-pham/tam-cay", label: "Tăm cay Bà Tuyết", note: "Dòng snack cay" },
+              { href: "/san-pham/snack-banh-trang", label: "Snack Bánh tráng", note: "Đóng gói tiện lợi" },
+            ]),
+        { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác", note: "Các dòng bổ sung" },
+      ],
+    };
+  }
+
   if (link.href === "/gioi-thieu" || identity.includes("gioi thieu")) {
     return {
       eyebrow: "Về thương hiệu",
@@ -93,7 +182,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/quy-trinh" || identity.includes("chat luong") || identity.includes("quy trinh")) {
+  if (link.href === "/chat-luong" || link.href === "/quy-trinh" || identity.includes("chat luong") || identity.includes("quy trinh")) {
     return {
       eyebrow: "Chất lượng",
       title: "Minh bạch & tiêu chuẩn",
@@ -125,7 +214,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/he-thong-ban" || identity.includes("diem ban") || identity.includes("he thong ban")) {
+  if (link.href === "/diem-ban" || link.href === "/he-thong-ban" || identity.includes("diem ban") || identity.includes("he thong ban")) {
     return {
       eyebrow: "Điểm bán",
       title: "Hệ thống phân phối",
@@ -403,7 +492,7 @@ export default function Navbar({
 
     return () => window.clearTimeout(timer);
   }, []);
-  const navLinks = mergeRequiredNavLinks(initialLinks);
+  const navLinks = HEADER_NAV_LINKS;
   const productMenuLinks = currentProductMenuLinks.length
     ? currentProductMenuLinks
     : productMenuLoaded
@@ -571,28 +660,28 @@ export default function Navbar({
                       <span>{link.label}</span>
                       <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
                     </Link>
-                    <div className="absolute left-1/2 top-full z-50 hidden w-[min(90vw,520px)] -translate-x-1/2 pt-3 group-hover:block">
-                      <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.16)]">
-                        <div className="grid grid-cols-[150px_1fr]">
-                          <div className="relative bg-slate-950 p-5 text-white">
-                            <div className="absolute inset-x-0 top-0 h-1 bg-orange-500" />
-                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-300">
+                    <div className="absolute left-1/2 top-full z-50 hidden w-[min(90vw,430px)] -translate-x-1/2 pt-3 group-hover:block">
+                      <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.14)]">
+                        <div className="grid">
+                          <div className="relative border-b border-orange-100 bg-[#fffaf3] px-5 py-4 text-slate-950">
+                            <div className="absolute inset-x-0 top-0 h-0.5 bg-orange-500" />
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                               {submenu.eyebrow}
                             </p>
-                            <p className="mt-3 text-4xl font-black tracking-[-0.08em] text-white/15">
+                            <p className="absolute right-4 top-4 border border-orange-200 bg-white px-2 py-1 text-[10px] font-black tracking-[-0.02em] text-orange-600">
                               {submenu.accent}
                             </p>
-                            <p className="mt-4 text-sm font-black leading-5">
+                            <p className="mt-2 pr-16 text-base font-black leading-5">
                               {submenu.title}
                             </p>
-                            <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-300">
+                            <p className="mt-1.5 pr-10 text-xs font-semibold leading-5 text-slate-500">
                               {submenu.description}
                             </p>
                           </div>
-                          <div className="grid gap-1 bg-[#fffaf3] p-3">
+                          <div className="grid gap-1 bg-white p-2.5">
                             <Link
                               href={overviewHref}
-                              className="group/item flex items-center justify-between border border-orange-100 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-orange-700 transition hover:border-orange-300 hover:bg-orange-50"
+                              className="group/item flex items-center justify-between border border-orange-100 bg-orange-50 px-4 py-3 text-sm font-black text-orange-700 transition hover:border-orange-300 hover:bg-orange-100"
                             >
                               <span>Xem tổng quan</span>
                               <span className="transition group-hover/item:translate-x-1">→</span>
@@ -601,14 +690,14 @@ export default function Navbar({
                               <Link
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
-                                className="group/item block border border-transparent px-4 py-3 transition hover:border-orange-100 hover:bg-white"
+                                className="group/item block border border-transparent px-4 py-3 transition hover:border-orange-100 hover:bg-[#fffaf3]"
                               >
                                 <span className="flex items-center justify-between gap-4 text-sm font-black text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
                                   <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
                                 </span>
                                 {item.note && (
-                                  <span className="mt-1 block text-[11px] font-semibold leading-5 text-slate-500">
+                                  <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">
                                     {item.note}
                                   </span>
                                 )}

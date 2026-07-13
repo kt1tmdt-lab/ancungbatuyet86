@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { SystemPagesManager } from "@/components/admin/SystemPagesManager";
 import {
   ArrowRight,
   History,
@@ -71,6 +72,8 @@ export default function AdminWebControlPage() {
             Xem website hiện tại <ArrowRight size={16} />
           </Link>
         </header>
+
+        <SystemPagesManager />
 
         {pageGroups.map((group) => (
           <section key={group.title}>
