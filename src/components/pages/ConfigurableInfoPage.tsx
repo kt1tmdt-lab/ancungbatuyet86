@@ -36,6 +36,96 @@ function normalizeText(value: string) {
     .replace(/đ/g, "d");
 }
 
+function BrandStoryPosterPage({ title, blocks }: { title: string; blocks: InfoPageBlock[] }) {
+  const heroData = (blocks.find((block) => block.type === "hero")?.data || {}) as any;
+  const splitData = (blocks.find((block) => block.type === "split")?.data || {}) as any;
+  const featuresData = (blocks.find((block) => block.type === "features")?.data || {}) as any;
+  const textData = (blocks.find((block) => block.type === "text")?.data || {}) as any;
+  const storyImage = splitData.imageUrl || heroData.backgroundImage || "/hero/ba-tuyet-character.png";
+  const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
+  const safeStoryHtml = DOMPurify.sanitize(textData.content || "");
+
+  return (
+    <main className="min-h-screen bg-[#fff4e4] px-4 py-10 text-slate-950 sm:px-6 lg:px-10">
+      <section className="relative mx-auto max-w-6xl overflow-hidden border border-orange-200 bg-[#fffaf0] shadow-[0_34px_120px_rgba(234,88,12,0.16)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_8%,rgba(251,146,60,0.16),transparent_32%),linear-gradient(135deg,#fffaf0_0%,#fff7e9_52%,#fffdf8_100%)]" />
+        <div className="absolute -right-10 -top-8 select-none text-[180px] font-black leading-none text-orange-100/60">BT</div>
+        <div className="absolute bottom-0 left-0 h-1.5 w-full bg-orange-600" />
+
+        <div className="relative grid lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="px-6 py-8 sm:px-10 lg:px-12 lg:py-12">
+            <p className="mb-4 w-fit border-b border-orange-300 pb-2 text-[11px] font-black uppercase tracking-[0.26em] text-orange-600">
+              {heroData.label || "Câu chuyện thương hiệu"}
+            </p>
+            <h1 className="font-serif text-5xl font-black uppercase leading-[0.86] tracking-[-0.06em] text-orange-900 sm:text-6xl lg:text-7xl">
+              Câu chuyện
+              <span className="block">thương hiệu</span>
+            </h1>
+            <div className="mt-5 border-l-4 border-orange-600 pl-4">
+              <p className="text-sm font-black uppercase tracking-[0.22em] text-orange-700">Chân Gà Bà Tuyết</p>
+              <p className="mt-2 max-w-xl text-sm font-semibold leading-7 text-slate-700">
+                {heroData.subtitle || splitData.description || "Ngon phải rõ nguồn gốc, ăn phải thật an tâm."}
+              </p>
+            </div>
+
+            <div className="mt-8 grid gap-7 lg:grid-cols-[1fr_190px] lg:items-start">
+              <div
+                className="max-w-none text-[15px] leading-8 text-slate-800 [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-orange-600 [&_blockquote]:bg-orange-50 [&_blockquote]:p-5 [&_blockquote]:font-serif [&_blockquote]:text-2xl [&_blockquote]:font-black [&_blockquote]:italic [&_blockquote]:leading-tight [&_blockquote]:text-orange-800 [&_h2]:mb-4 [&_h2]:font-serif [&_h2]:text-3xl [&_h2]:font-black [&_h2]:tracking-[-0.04em] [&_h2]:text-orange-900 [&_h3]:mt-8 [&_h3]:border-t [&_h3]:border-orange-200 [&_h3]:pt-5 [&_h3]:font-serif [&_h3]:text-2xl [&_h3]:font-black [&_h3]:leading-tight [&_h3]:text-orange-800 [&_p]:mb-4 [&_p]:text-slate-800 [&_strong]:font-black [&_strong]:text-orange-800"
+                dangerouslySetInnerHTML={{ __html: safeStoryHtml }}
+              />
+
+              <aside className="hidden space-y-3 lg:block">
+                {["“Khủng khiếp.”", "“Làm tốt vẫn có thể bị nói. Làm đúng vẫn có thể bị nghi ngờ.”", "“Nếu ai cũng sợ hãi và bỏ cuộc, vậy ai sẽ là người đứng lên?”"].map((quote, idx) => (
+                  <div key={quote} className={`${idx % 2 ? "rotate-1 bg-[#fff3df]" : "-rotate-2 bg-white/85"} border border-orange-200 p-4 shadow-sm`}>
+                    <p className="font-serif text-lg font-black italic leading-tight text-orange-800">{quote}</p>
+                  </div>
+                ))}
+              </aside>
+            </div>
+          </div>
+
+          <div className="relative border-t border-orange-200 bg-orange-50/70 p-6 lg:border-l lg:border-t-0 lg:p-8">
+            <div className="sticky top-24 space-y-5">
+              <div className="relative overflow-hidden border border-orange-200 bg-white shadow-[0_24px_60px_rgba(234,88,12,0.18)]">
+                <div className="aspect-[4/5] bg-orange-100">
+                  <img src={storyImage} alt={title} className="h-full w-full object-cover object-top" />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-orange-950/75 to-transparent p-5 text-white">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-100">Ăn Cùng Bà Tuyết</p>
+                  <p className="mt-1 font-serif text-2xl font-black leading-tight">Ngon phải rõ nguồn gốc</p>
+                </div>
+              </div>
+
+              <div className="grid gap-3">
+                {(featureItems.length ? featureItems : [
+                  { icon: "Heart", title: "Nỗi sợ rất thật", description: "Sợ chân gà không rõ nguồn gốc." },
+                  { icon: "Factory", title: "Trả lời bằng việc làm", description: "Nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày." },
+                  { icon: "MapPin", title: "Tự hào Thái Nguyên", description: "Một sản phẩm được làm nên từ trách nhiệm." },
+                ]).map((item: any, idx: number) => (
+                  <div key={`${item.title}-${idx}`} className="grid grid-cols-[42px_1fr] gap-3 border border-orange-200 bg-white/90 p-4">
+                    <div className="flex h-10 w-10 items-center justify-center bg-orange-600 text-white">
+                      <DynIcon name={item.icon || "CheckCircle2"} className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-orange-900">{item.title}</h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border border-orange-300 bg-orange-600 p-5 text-white">
+                <p className="font-serif text-3xl font-black uppercase leading-none tracking-[-0.04em]">Chân Gà Bà Tuyết</p>
+                <p className="mt-2 text-sm font-black italic text-orange-50">Ngon phải rõ nguồn gốc – Ăn phải thật an tâm</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultInfoPage }) {
   const [page, setPage] = useState<CmsPage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,6 +261,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         <Loader className="animate-spin text-orange-500" size={34} />
       </div>
     );
+  }
+
+  if (fallback.routePath === "/gioi-thieu/cau-chuyen-thuong-hieu") {
+    return <BrandStoryPosterPage title={title} blocks={blocks} />;
   }
 
   return (
