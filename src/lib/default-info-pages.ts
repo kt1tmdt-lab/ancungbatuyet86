@@ -365,6 +365,195 @@ export const DEFAULT_INFO_PAGES: Record<string, DefaultInfoPage> = {
   ),
 };
 
+DEFAULT_INFO_PAGES["/diem-ban"] = page(
+  "/diem-ban",
+  "Điểm bán",
+  "Phân phối chính thức",
+  "Tìm đúng nơi mua sản phẩm Ăn Cùng Bà Tuyết: điểm bán offline, kênh online chính thức và cách nhận diện hàng chính hãng.",
+  [
+    {
+      id: "sales-overview-split",
+      type: "split",
+      data: {
+        title: "Mua đúng kênh — tránh nhầm hàng giả, hàng trôi nổi",
+        description:
+          "Trang Điểm bán giúp khách hàng biết nên mua sản phẩm ở đâu, kênh nào được thương hiệu công bố và cần kiểm tra gì trước khi đặt hàng. Các kênh chưa được xác nhận chính thức nên được ghi rõ [cần bổ sung] để tránh gây hiểu nhầm.",
+        imageUrl: "/bento/bento-factory.png",
+        imagePosition: "right",
+        ctaText: "Xem kênh online chính thức",
+        ctaLink: "/diem-ban/kenh-online-chinh-thuc",
+      },
+    },
+    {
+      id: "sales-overview-features",
+      type: "features",
+      data: {
+        title: "3 việc khách hàng cần làm trước khi mua",
+        subtitle: "Mục tiêu là mua đúng sản phẩm, đúng nguồn và có kênh hỗ trợ khi cần.",
+        items: [
+          {
+            icon: "Store",
+            title: "Kiểm tra điểm bán",
+            description: "Ưu tiên điểm bán, đại lý hoặc kênh phân phối được thương hiệu công bố.",
+          },
+          {
+            icon: "ShoppingBag",
+            title: "Chọn kênh online chính thức",
+            description: "Mua qua gian hàng/sàn/kênh mạng xã hội đã được xác nhận. [cần bổ sung link chính thức]",
+          },
+          {
+            icon: "PackageCheck",
+            title: "Nhận diện hàng chính hãng",
+            description: "Kiểm tra bao bì, tem nhãn, hạn sử dụng và thông tin nhà sản xuất trước khi dùng.",
+          },
+        ],
+      },
+    },
+    {
+      id: "sales-overview-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Kênh mua hàng cần được công bố rõ</h2><p>Danh sách điểm bán và kênh online nên được cập nhật định kỳ để khách hàng dễ đối chiếu. Nếu một cửa hàng hoặc tài khoản bán hàng chưa có trong danh sách, khách hàng nên liên hệ CSKH để xác minh trước khi mua.</p><ul><li><strong>Offline:</strong> cửa hàng, đại lý, khu vực phân phối.</li><li><strong>Online:</strong> sàn TMĐT, website, fanpage/kênh bán chính thức.</li><li><strong>Hỗ trợ:</strong> tiếp nhận phản ánh khi nghi ngờ hàng giả, hàng nhái hoặc hàng không rõ nguồn.</li></ul>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/diem-ban/he-thong-diem-ban-offline"] = page(
+  "/diem-ban/he-thong-diem-ban-offline",
+  "Hệ thống điểm bán offline",
+  "Điểm bán",
+  "Thông tin về cửa hàng, đại lý và khu vực phân phối offline đang được công bố.",
+  [
+    {
+      id: "offline-store-split",
+      type: "split",
+      data: {
+        title: "Danh sách điểm bán offline cần rõ địa chỉ và khu vực",
+        description:
+          "Mỗi điểm bán nên có tên cửa hàng/đại lý, địa chỉ, khu vực phục vụ, số điện thoại liên hệ và trạng thái xác nhận. Nếu chưa có danh sách chính thức, trang này giữ nội dung hướng dẫn và đánh dấu [cần bổ sung danh sách điểm bán].",
+        imageUrl: "/bento/bento-factory.png",
+        imagePosition: "left",
+        ctaText: "Liên hệ xác minh điểm bán",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "offline-store-features",
+      type: "features",
+      data: {
+        title: "Thông tin nên có cho từng điểm bán",
+        subtitle: "Càng rõ dữ liệu, khách hàng càng dễ mua đúng nơi.",
+        items: [
+          { icon: "MapPin", title: "Địa chỉ cụ thể", description: "Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành." },
+          { icon: "Phone", title: "Liên hệ cửa hàng", description: "Số điện thoại hoặc kênh nhắn tin để kiểm tra hàng trước khi đến." },
+          { icon: "BadgeCheck", title: "Trạng thái xác nhận", description: "Ghi rõ điểm bán đã xác nhận, đang cập nhật hoặc cần bổ sung." },
+        ],
+      },
+    },
+    {
+      id: "offline-store-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>[cần bổ sung] Danh sách điểm bán offline</h2><p>Khi có dữ liệu chính thức, nhập theo nhóm khu vực để khách dễ tra cứu: Hà Nội, miền Bắc, miền Trung, miền Nam hoặc theo tỉnh/thành.</p><p>Nên ưu tiên hiển thị các điểm bán còn hoạt động và có khả năng hỗ trợ đổi trả/kiểm tra thông tin đơn hàng.</p>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/diem-ban/kenh-online-chinh-thuc"] = page(
+  "/diem-ban/kenh-online-chinh-thuc",
+  "Kênh online chính thức",
+  "Điểm bán",
+  "Các kênh online được công bố để khách hàng hạn chế mua nhầm hàng giả, hàng nhái hoặc tài khoản mạo danh.",
+  [
+    {
+      id: "online-channel-split",
+      type: "split",
+      data: {
+        title: "Mua online cần đúng gian hàng/kênh được xác nhận",
+        description:
+          "Khách hàng nên đặt hàng qua các kênh được thương hiệu công bố như sàn TMĐT, website, fanpage hoặc TikTok Shop chính thức. Các link cụ thể cần được admin cập nhật và kiểm tra định kỳ.",
+        imageUrl: "/hero/chan-ga-plate.png",
+        imagePosition: "right",
+        ctaText: "Xem sản phẩm",
+        ctaLink: "/san-pham",
+      },
+    },
+    {
+      id: "online-channel-features",
+      type: "features",
+      data: {
+        title: "Kênh online cần công bố",
+        subtitle: "Mỗi kênh nên có link bấm được và ghi rõ trạng thái chính thức.",
+        items: [
+          { icon: "ShoppingCart", title: "Sàn TMĐT", description: "Shopee/TikTok Shop/Lazada nếu có. [cần bổ sung link chính thức]" },
+          { icon: "Facebook", title: "Fanpage & cộng đồng", description: "Fanpage bán hàng hoặc kênh chăm sóc khách hàng được xác nhận." },
+          { icon: "Globe", title: "Website/landing page", description: "Trang giới thiệu sản phẩm, thông tin mua hàng và liên hệ hỗ trợ." },
+        ],
+      },
+    },
+    {
+      id: "online-channel-text",
+      type: "text",
+      data: {
+        backgroundColor: "white",
+        content:
+          "<h2>Cảnh báo tài khoản mạo danh</h2><p>Không chuyển khoản hoặc đặt hàng qua tài khoản chưa được công bố. Nếu link bán hàng, tên shop hoặc hình ảnh sản phẩm có dấu hiệu bất thường, khách hàng nên chụp màn hình và gửi về kênh hỗ trợ để xác minh.</p><ul><li>Kiểm tra tên shop và đường link.</li><li>Kiểm tra đánh giá, thông tin liên hệ và chính sách đổi trả.</li><li>Không mua nếu giá quá bất thường hoặc thông tin sản phẩm thiếu rõ ràng.</li></ul>",
+      },
+    },
+  ],
+);
+
+DEFAULT_INFO_PAGES["/diem-ban/nhan-dien-hang-chinh-hang"] = page(
+  "/diem-ban/nhan-dien-hang-chinh-hang",
+  "Nhận diện hàng chính hãng",
+  "Điểm bán",
+  "Hướng dẫn khách hàng kiểm tra bao bì, tem nhãn, hạn sử dụng và nguồn mua trước khi lựa chọn.",
+  [
+    {
+      id: "authentic-product-split",
+      type: "split",
+      data: {
+        title: "Đừng chỉ nhìn ảnh sản phẩm — hãy kiểm tra nguồn mua",
+        description:
+          "Sản phẩm chính hãng cần có bao bì rõ ràng, thông tin nhà sản xuất/đơn vị chịu trách nhiệm, ngày sản xuất, hạn sử dụng và kênh bán có thể xác minh. Nếu nghi ngờ hàng giả, khách hàng nên giữ lại bao bì và hóa đơn/chứng từ mua hàng.",
+        imageUrl: "/hero/chan-ga-plate.png",
+        imagePosition: "left",
+        ctaText: "Liên hệ hỗ trợ kiểm tra",
+        ctaLink: "/lien-he",
+      },
+    },
+    {
+      id: "authentic-product-features",
+      type: "features",
+      data: {
+        title: "Checklist nhận diện trước khi mua",
+        subtitle: "Các dấu hiệu cơ bản giúp hạn chế mua nhầm hàng trôi nổi.",
+        items: [
+          { icon: "PackageCheck", title: "Bao bì & thiết kế", description: "Kiểm tra hình ảnh, màu sắc, thông tin sản phẩm và dấu hiệu in ấn bất thường." },
+          { icon: "CalendarCheck", title: "NSX / HSD", description: "Không mua sản phẩm mờ ngày, thiếu hạn sử dụng hoặc có dấu hiệu tẩy xóa." },
+          { icon: "QrCode", title: "Tem nhãn / mã kiểm tra", description: "Nếu có mã hoặc tem, cần đối chiếu đúng hướng dẫn từ thương hiệu. [cần bổ sung hướng dẫn cụ thể]" },
+          { icon: "Store", title: "Nguồn mua", description: "Ưu tiên kênh chính thức, điểm bán được công bố hoặc shop có thể xác minh." },
+        ],
+      },
+    },
+    {
+      id: "authentic-product-text",
+      type: "text",
+      data: {
+        backgroundColor: "cream",
+        content:
+          "<h2>Khi nghi ngờ hàng giả/hàng nhái</h2><p>Khách hàng nên giữ lại sản phẩm, bao bì, hóa đơn hoặc ảnh chụp màn hình đơn hàng. Gửi thông tin về kênh hỗ trợ để được kiểm tra và hướng dẫn bước tiếp theo.</p><p><strong>[cần bổ sung]</strong> Hotline/email CSKH chính thức và quy trình tiếp nhận phản ánh hàng giả.</p>",
+      },
+    },
+  ],
+);
+
 export function getDefaultInfoPage(routePath: string) {
   return DEFAULT_INFO_PAGES[routePath] || null;
 }
