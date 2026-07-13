@@ -37,6 +37,7 @@ import Link from "next/link";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
+import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
 
 // Define block interfaces
 interface Block {
@@ -368,6 +369,32 @@ export function PageForm({ pageId }: { pageId?: string }) {
     setMediaPickerTarget(null);
   };
 
+  const loadDefaultTemplate = () => {
+    const normalizedSlug = normalizePageSlug(slug || title);
+    const template = Object.values(DEFAULT_INFO_PAGES).find(
+      (item) => item.cmsSlug === normalizedSlug || item.routePath.replace(/^\//, "").replace(/\//g, "-") === normalizedSlug,
+    );
+
+    if (!template) {
+      setError("Không tìm thấy mẫu có sẵn cho slug trang này. Kiểm tra lại đường dẫn tĩnh hoặc tạo nội dung thủ công.");
+      setSuccess("");
+      return;
+    }
+
+    const shouldReplace = window.confirm(
+      "Nạp mẫu sẽ thay toàn bộ các khối nội dung hiện tại bằng mẫu mới. Bạn có chắc muốn nạp không?",
+    );
+
+    if (!shouldReplace) return;
+
+    setTitle(template.title);
+    setSlug(template.cmsSlug);
+    setBlocks(JSON.parse(JSON.stringify(template.blocks)) as Block[]);
+    setExpandedBlockId(template.blocks[0]?.id || null);
+    setError("");
+    setSuccess("Đã nạp mẫu vào trình sửa. Bấm Lưu thiết kế để cập nhật lên website.");
+  };
+
   // Submit Page
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -440,6 +467,15 @@ export function PageForm({ pageId }: { pageId?: string }) {
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={loadDefaultTemplate}
+            className="inline-flex items-center gap-2 border border-orange-200 bg-white px-5 py-2.5 text-xs font-bold text-orange-700 transition-all hover:border-orange-500 hover:bg-orange-50 disabled:opacity-50"
+          >
+            <Upload size={14} />
+            <span>Nạp mẫu theo slug</span>
+          </button>
           <button
             type="button"
             disabled={loading}
