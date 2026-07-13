@@ -102,22 +102,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/chat-luong") {
-    return {
-      eyebrow: "Chất lượng",
-      title: "Hồ sơ kiểm chứng",
-      description: "Nguyên liệu, nhà máy, hồ sơ pháp lý, bảo hiểm và chính sách khách hàng.",
-      accent: "02",
-      overviewHref: "/chat-luong",
-      links: [
-        { href: "/chat-luong/minh-bach-nguon-nguyen-lieu", label: "Minh bạch nguồn nguyên liệu", note: "Nguồn gốc và hồ sơ truy xuất" },
-        { href: "/chat-luong/nha-may-quy-trinh-san-xuat", label: "Nhà máy & Quy trình sản xuất", note: "Quy trình 6 bước có kiểm soát" },
-        { href: "/chat-luong/ho-so-phap-ly-chung-nhan", label: "Hồ sơ pháp lý & chứng nhận", note: "ISO, HACCP, ATTP, kiểm nghiệm" },
-        { href: "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi", label: "Bảo hiểm trách nhiệm sản phẩm - PVI", note: "Cam kết trách nhiệm, không phải chứng nhận chất lượng" },
-        { href: "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang", label: "Chính sách bảo vệ quyền lợi khách hàng", note: "Khiếu nại, đổi trả và hỗ trợ" },
-      ],
-    };
-  }
+  if (link.href === "/chat-luong") return null;
 
   if (link.href === "/diem-ban") {
     return {
@@ -182,22 +167,7 @@ function getHeaderSubmenu(
     };
   }
 
-  if (link.href === "/chat-luong" || identity.includes("chat luong")) {
-    return {
-      eyebrow: "Chất lượng",
-      title: "Minh bạch & tiêu chuẩn",
-      description: "Các bằng chứng giúp khách hàng hiểu sản phẩm được làm ra như thế nào.",
-      accent: "02",
-      overviewHref: "/chat-luong",
-      links: [
-        { href: "/chat-luong/minh-bach-nguon-nguyen-lieu", label: "Minh bạch nguồn nguyên liệu", note: "Đầu vào rõ ràng, dễ kiểm chứng" },
-        { href: "/chat-luong/nha-may-quy-trinh-san-xuat", label: "Nhà máy & Quy trình sản xuất", note: "Không gian sản xuất và kiểm soát" },
-        { href: "/chat-luong/ho-so-phap-ly-chung-nhan", label: "Hồ sơ pháp lý & chứng nhận", note: "Chứng từ, kiểm nghiệm, bảo chứng" },
-        { href: "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi", label: "Bảo hiểm trách nhiệm sản phẩm - PVI", note: "Cam kết bảo vệ người tiêu dùng" },
-        { href: "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang", label: "Chính sách bảo vệ quyền lợi khách hàng", note: "Lắng nghe và xử lý phản hồi" },
-      ],
-    };
-  }
+  if (link.href === "/chat-luong" || identity.includes("chat luong")) return null;
 
   if (link.href === "/san-pham" || identity.includes("san pham")) {
     return {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
-import { ArrowRight, HelpCircle, Loader } from "lucide-react";
+import { ArrowRight, FileSearch, HelpCircle, Loader } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import type { DefaultInfoPage, InfoPageBlock } from "@/lib/default-info-pages";
 
@@ -430,9 +430,11 @@ function QualityDetailPage({
   const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
   const imageUrl = splitData.imageUrl || heroData.backgroundImage || "/bento/bento-factory.png";
   const safeTextHtml = DOMPurify.sanitize(textData.content || "");
+  const isSource = routePath.includes("minh-bach");
   const isProcess = routePath.includes("nha-may");
   const isLegal = routePath.includes("ho-so");
   const isPvi = routePath.includes("pvi");
+  const isPolicy = routePath.includes("chinh-sach");
 
   const navItems = [
     ["Tổng quan", "/chat-luong"],
@@ -442,6 +444,51 @@ function QualityDetailPage({
     ["PVI", "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi"],
     ["Chính sách khách hàng", "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang"],
   ];
+
+  const vibe = isSource
+    ? {
+        label: "Trace the origin",
+        quote: "Không chống lại nỗi sợ bằng lời nói. Chống lại bằng dấu vết.",
+        imageA: "/bento/bento-ingredients.png",
+        imageB: "/hero/chan-ga-plate.png",
+        stats: [["EU", "Nguồn nhập khẩu"], ["C/O", "Hồ sơ xuất xứ"], ["Cold", "Chuỗi bảo quản"]],
+        dark: false,
+      }
+    : isProcess
+      ? {
+          label: "Inside the factory",
+          quote: "Một sản phẩm đáng tin phải có nơi sản xuất đáng nhìn.",
+          imageA: "/bento/bento-factory.png",
+          imageB: "/bento/bento-tiktok.png",
+          stats: [["3.300m²", "Không gian"], ["6 bước", "Quy trình"], ["ISO", "NMV Food"]],
+          dark: true,
+        }
+      : isLegal
+        ? {
+            label: "Open the proof",
+            quote: "Giấy tờ không để trang trí. Giấy tờ là thứ khách hàng có quyền xem.",
+            imageA: "/bento/bento-insurance.png",
+            imageB: "/bento/bento-factory.png",
+            stats: [["ISO", "Chứng nhận"], ["ATTP", "Điều kiện"], ["VNTEST", "Kiểm nghiệm"]],
+            dark: false,
+          }
+        : isPvi
+          ? {
+              label: "Responsibility layer",
+              quote: "Bảo hiểm không thay chất lượng. Bảo hiểm cho thấy trách nhiệm sau bán.",
+              imageA: "/bento/bento-insurance.png",
+              imageB: "/hero/ba-tuyet-character.png",
+              stats: [["PVI", "Bảo hiểm"], ["Scope", "Phạm vi"], ["Claim", "Quy trình"]],
+              dark: true,
+            }
+          : {
+              label: "Customer protection",
+              quote: "Niềm tin không kết thúc ở lúc bán hàng. Nó bắt đầu khi khách cần được bảo vệ.",
+              imageA: "/hero/ba-tuyet-character.png",
+              imageB: "/hero/chan-ga-poster.png",
+              stats: [["CSKH", "Tiếp nhận"], ["SLA", "Thời gian"], ["PVI", "Bảo hiểm"]],
+              dark: false,
+            };
 
   const extra = routePath.includes("minh-bach")
     ? {
@@ -552,6 +599,175 @@ function QualityDetailPage({
           ))}
         </div>
       </nav>
+
+      <section className={`${vibe.dark ? "bg-slate-950 text-white" : "bg-white text-slate-950"} border-b border-orange-100 px-5 py-16 sm:px-8 lg:px-16`}>
+        <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="grid gap-6 md:grid-cols-[0.85fr_1.15fr]">
+            <div className="relative min-h-[420px] overflow-hidden border border-orange-200 bg-orange-50">
+              <img src={vibe.imageA} alt={title} className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 p-6 text-white">
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">{vibe.label}</p>
+                <h2 className="mt-3 max-w-sm text-4xl font-black leading-none tracking-[-0.06em]">{title}</h2>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              <div className={`${vibe.dark ? "border-white/15 bg-white/8" : "border-orange-200 bg-[#fff8ed]"} border p-8`}>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-orange-500">Brand proof</p>
+                <blockquote className="mt-5 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                  “{vibe.quote}”
+                </blockquote>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {vibe.stats.map(([value, label]) => (
+                  <div key={value} className={`${vibe.dark ? "border-white/15 bg-white/8" : "border-orange-200 bg-white"} border p-5`}>
+                    <p className="text-2xl font-black tracking-[-0.06em] text-orange-600">{value}</p>
+                    <p className={`${vibe.dark ? "text-white/55" : "text-slate-500"} mt-2 text-[10px] font-black uppercase tracking-[0.18em]`}>{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6">
+            <div className="relative min-h-[260px] overflow-hidden border border-orange-200 bg-orange-50">
+              <img src={vibe.imageB} alt={`${title} minh họa`} className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
+            </div>
+            <div className={`${vibe.dark ? "border-white/15 bg-white/8 text-white/72" : "border-orange-200 bg-white text-slate-650"} border p-6 text-sm font-semibold leading-8`}>
+              <p>
+                Trang này không chỉ để “có thông tin”, mà để người xem cảm thấy mọi thứ đang được đặt lên bàn: nhìn được, kiểm được, hỏi được và bổ sung được khi thiếu hồ sơ.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {isSource && (
+        <section className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Traceability map</p>
+                <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                  Một lô nguyên liệu phải đi qua đủ dấu vết trước khi thành sản phẩm
+                </h2>
+                <p className="mt-5 text-base font-semibold leading-8 text-slate-650">
+                  Trang nguyên liệu nên nhìn như bản đồ truy xuất: xuất xứ, vận chuyển, kiểm dịch, kho lạnh và ngày đưa vào sản xuất.
+                </p>
+              </div>
+              <div className="grid gap-3">
+                {["Nước xuất khẩu", "C/O", "Kiểm dịch", "Kho lạnh", "Mã lô sản xuất"].map((step, index) => (
+                  <div key={step} className="grid grid-cols-[70px_1fr_auto] items-center border border-orange-200 bg-[#fff8ed]">
+                    <div className="flex h-full min-h-[72px] items-center justify-center bg-orange-600 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</div>
+                    <div className="p-4">
+                      <p className="text-lg font-black text-slate-950">{step}</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-600">[cần bổ sung] ảnh/file/hồ sơ đối chiếu cho bước này.</p>
+                    </div>
+                    <ArrowRight className="mr-5 hidden text-orange-500 md:block" size={18} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {isProcess && (
+        <section className="border-b border-orange-100 bg-slate-950 px-5 py-16 text-white sm:px-8 lg:px-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-8 lg:grid-cols-[1fr_1.15fr]">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-300">Factory control board</p>
+                <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                  Trang nhà máy phải giống một bảng điều khiển sản xuất
+                </h2>
+                <p className="mt-5 text-base font-semibold leading-8 text-white/70">
+                  Không kể lể chung chung. Mỗi bước cần có ảnh, khu vực phụ trách, điểm kiểm soát và hồ sơ tương ứng.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                {["Đầu vào", "Sơ chế", "Chế biến", "QC", "Đóng gói", "Lưu kho"].map((cell, index) => (
+                  <div key={cell} className="border border-white/15 bg-white/8 p-5">
+                    <p className="text-xs font-black text-orange-300">STEP {String(index + 1).padStart(2, "0")}</p>
+                    <h3 className="mt-8 text-2xl font-black tracking-[-0.05em]">{cell}</h3>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-white/55">Ảnh thật + tiêu chí kiểm soát</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {isLegal && (
+        <section className="border-b border-orange-100 bg-[#f8fafc] px-5 py-16 sm:px-8 lg:px-16">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Document vault</p>
+                <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">Kho hồ sơ mở ra xem được</h2>
+              </div>
+              <p className="max-w-xl text-sm font-semibold leading-7 text-slate-600">Mỗi giấy tờ nên là một “folder” có chủ thể cấp, ngày cấp, file scan và trạng thái công khai.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {["ISO 22000:2018", "HACCP", "Giấy phép ATTP", "Phiếu kiểm nghiệm"].map((doc) => (
+                <div key={doc} className="relative min-h-[210px] border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="absolute right-4 top-4 h-12 w-16 border border-orange-200 bg-orange-50" />
+                  <FileSearch className="h-8 w-8 text-orange-600" />
+                  <h3 className="mt-10 text-xl font-black tracking-[-0.04em]">{doc}</h3>
+                  <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">Trạng thái: [cần bổ sung file scan/PDF]</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {isPvi && (
+        <section className="border-b border-orange-100 bg-[#1b120c] px-5 py-16 text-white sm:px-8 lg:px-16">
+          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-300">Insurance statement</p>
+              <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                PVI phải được trình bày như hợp đồng trách nhiệm, không phải tem chất lượng
+              </h2>
+            </div>
+            <div className="grid gap-3">
+              {[
+                ["Đúng", "Bảo hiểm trách nhiệm sản phẩm"],
+                ["Sai", "Bảo chứng chất lượng / PVI xác nhận chất lượng"],
+                ["Cần có", "Pháp nhân, phạm vi, thời hạn, scan được phép public"],
+              ].map(([label, desc]) => (
+                <div key={label} className="grid grid-cols-[110px_1fr] border border-white/15 bg-white/8">
+                  <div className="bg-orange-600 p-5 text-sm font-black uppercase">{label}</div>
+                  <div className="p-5 text-base font-bold text-white/82">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {isPolicy && (
+        <section className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
+          <div className="mx-auto max-w-7xl">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Customer care flow</p>
+            <h2 className="mt-4 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+              Chính sách phải là một luồng xử lý, không phải vài dòng cam kết
+            </h2>
+            <div className="mt-10 grid gap-0 lg:grid-cols-5">
+              {["Tiếp nhận", "Xác minh", "Phân loại", "Xử lý", "Phản hồi"].map((step, index) => (
+                <div key={step} className="border border-orange-200 bg-[#fff8ed] p-6">
+                  <p className="text-xs font-black text-orange-600">{String(index + 1).padStart(2, "0")}</p>
+                  <h3 className="mt-8 text-2xl font-black tracking-[-0.05em]">{step}</h3>
+                  <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">[cần bổ sung] người phụ trách, thời gian xử lý, bằng chứng cần khách cung cấp.</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="border-b border-orange-100 bg-white px-5 py-18 sm:px-8 lg:px-16">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr]">
