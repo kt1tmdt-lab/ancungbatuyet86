@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -64,65 +64,65 @@ type IconBlock = {
 
 const heroStats: Array<{ value: string; label: string }> = [
   {
-    value: "228,6 tỷ",
-    label: "doanh thu năm 2025",
+    value: "228,6 tá»·",
+    label: "doanh thu nÄƒm 2025",
   },
   {
     value: "1,9M+",
-    label: "sản phẩm bán ra năm 2025",
+    label: "sáº£n pháº©m bÃ¡n ra nÄƒm 2025",
   },
   {
     value: "97%+",
-    label: "doanh số từ TikTok Shop",
+    label: "doanh sá»‘ tá»« TikTok Shop",
   },
 ];
 
 const values: IconBlock[] = [
   {
     icon: Target,
-    title: "Sứ mệnh",
-    text: "Đưa đồ ăn vặt Việt Nam đến gần hơn với người tiêu dùng bằng sản phẩm rõ nguồn gốc, hương vị gần gũi và cách làm minh bạch.",
+    title: "Sá»© má»‡nh",
+    text: "ÄÆ°a Ä‘á»“ Äƒn váº·t Viá»‡t Nam Ä‘áº¿n gáº§n hÆ¡n vá»›i ngÆ°á»i tiÃªu dÃ¹ng báº±ng sáº£n pháº©m rÃµ nguá»“n gá»‘c, hÆ°Æ¡ng vá»‹ gáº§n gÅ©i vÃ  cÃ¡ch lÃ m minh báº¡ch.",
   },
   {
     icon: Eye,
-    title: "Tầm nhìn",
-    text: "Trở thành thương hiệu ăn vặt Việt được nhận diện bằng chất lượng ổn định, quy trình bài bản và niềm tin của khách hàng.",
+    title: "Táº§m nhÃ¬n",
+    text: "Trá»Ÿ thÃ nh thÆ°Æ¡ng hiá»‡u Äƒn váº·t Viá»‡t Ä‘Æ°á»£c nháº­n diá»‡n báº±ng cháº¥t lÆ°á»£ng á»•n Ä‘á»‹nh, quy trÃ¬nh bÃ i báº£n vÃ  niá»m tin cá»§a khÃ¡ch hÃ ng.",
   },
   {
     icon: Heart,
-    title: "Giá trị cốt lõi",
-    text: "Chân thật trong truyền thông, kỹ trong sản xuất, chỉn chu trong đóng gói và tử tế với từng khách hàng.",
+    title: "GiÃ¡ trá»‹ cá»‘t lÃµi",
+    text: "ChÃ¢n tháº­t trong truyá»n thÃ´ng, ká»¹ trong sáº£n xuáº¥t, chá»‰n chu trong Ä‘Ã³ng gÃ³i vÃ  tá»­ táº¿ vá»›i tá»«ng khÃ¡ch hÃ ng.",
   },
   {
     icon: Users,
-    title: "Con người",
-    text: "Đội ngũ sản xuất, kho vận, livestream và chăm sóc khách hàng cùng vận hành thương hiệu từ những công việc cụ thể mỗi ngày.",
+    title: "Con ngÆ°á»i",
+    text: "Äá»™i ngÅ© sáº£n xuáº¥t, kho váº­n, livestream vÃ  chÄƒm sÃ³c khÃ¡ch hÃ ng cÃ¹ng váº­n hÃ nh thÆ°Æ¡ng hiá»‡u tá»« nhá»¯ng cÃ´ng viá»‡c cá»¥ thá»ƒ má»—i ngÃ y.",
   },
 ];
 
 const processSteps: Array<IconBlock & { image?: string; linkUrl?: string }> = [
   {
     icon: Leaf,
-    title: "Chọn nguyên liệu",
-    text: "Ưu tiên nguồn đầu vào rõ ràng, phù hợp tiêu chuẩn chế biến và kiểm soát chất lượng trước khi đưa vào sản xuất.",
+    title: "Chá»n nguyÃªn liá»‡u",
+    text: "Æ¯u tiÃªn nguá»“n Ä‘áº§u vÃ o rÃµ rÃ ng, phÃ¹ há»£p tiÃªu chuáº©n cháº¿ biáº¿n vÃ  kiá»ƒm soÃ¡t cháº¥t lÆ°á»£ng trÆ°á»›c khi Ä‘Æ°a vÃ o sáº£n xuáº¥t.",
     linkUrl: "/chat-luong",
   },
   {
     icon: Factory,
-    title: "Sản xuất tại xưởng",
-    text: "Quy trình được tổ chức theo từng khu vực để giữ độ ổn định, hạn chế rủi ro và đảm bảo năng suất.",
+    title: "Sáº£n xuáº¥t táº¡i xÆ°á»Ÿng",
+    text: "Quy trÃ¬nh Ä‘Æ°á»£c tá»• chá»©c theo tá»«ng khu vá»±c Ä‘á»ƒ giá»¯ Ä‘á»™ á»•n Ä‘á»‹nh, háº¡n cháº¿ rá»§i ro vÃ  Ä‘áº£m báº£o nÄƒng suáº¥t.",
     linkUrl: "/chat-luong",
   },
   {
     icon: PackageCheck,
-    title: "Đóng gói chỉn chu",
-    text: "Bao bì được chuẩn hóa để sản phẩm dễ vận chuyển, dễ nhận diện và giữ được trải nghiệm tốt khi đến tay khách.",
+    title: "ÄÃ³ng gÃ³i chá»‰n chu",
+    text: "Bao bÃ¬ Ä‘Æ°á»£c chuáº©n hÃ³a Ä‘á»ƒ sáº£n pháº©m dá»… váº­n chuyá»ƒn, dá»… nháº­n diá»‡n vÃ  giá»¯ Ä‘Æ°á»£c tráº£i nghiá»‡m tá»‘t khi Ä‘áº¿n tay khÃ¡ch.",
     linkUrl: "/chat-luong",
   },
   {
     icon: Truck,
-    title: "Phân phối toàn quốc",
-    text: "Kết nối các sàn thương mại điện tử và hệ thống vận chuyển để khách hàng đặt mua thuận tiện hơn.",
+    title: "PhÃ¢n phá»‘i toÃ n quá»‘c",
+    text: "Káº¿t ná»‘i cÃ¡c sÃ n thÆ°Æ¡ng máº¡i Ä‘iá»‡n tá»­ vÃ  há»‡ thá»‘ng váº­n chuyá»ƒn Ä‘á»ƒ khÃ¡ch hÃ ng Ä‘áº·t mua thuáº­n tiá»‡n hÆ¡n.",
     linkUrl: "/diem-ban",
   },
 ];
@@ -186,7 +186,7 @@ function BrandImage({
       <div
         className={`flex items-center justify-center border border-dashed border-orange-200 bg-orange-50 px-6 text-center text-xs font-black uppercase tracking-[0.16em] text-orange-500 ${ratio} ${className}`}
       >
-        Chưa có hình ảnh
+        ChÆ°a cÃ³ hÃ¬nh áº£nh
       </div>
     );
   }
@@ -196,7 +196,7 @@ function BrandImage({
       overlayMode="full"
       overlayContent={
         <span className="flex items-center gap-1">
-          Xem thêm <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+          Xem thÃªm <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
         </span>
       }
       overlayClassName="bg-slate-950/85 backdrop-blur-[2px] text-white font-extrabold"
@@ -250,7 +250,7 @@ function ValueCard({
           overlayMode="partial"
           overlayContent={
             <span className="flex items-center gap-1">
-              Xem chi tiết <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+              Xem chi tiáº¿t <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
             </span>
           }
           className="absolute inset-0 w-full h-full z-0"
@@ -274,7 +274,7 @@ function ValueCard({
             <p className="mt-2 text-xs leading-6 text-slate-900">{item.text}</p>
             {item.linkUrl && (
               <div className="mt-3 flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-orange-700 transition-colors group-hover:text-orange-900 group-hover:underline">
-                Xem quy trình <ArrowRight size={11} className="transition-transform group-hover:translate-x-1" />
+                Xem quy trÃ¬nh <ArrowRight size={11} className="transition-transform group-hover:translate-x-1" />
               </div>
             )}
           </div>
@@ -309,7 +309,7 @@ function ValueCard({
         overlayMode="partial"
         overlayContent={
           <span className="flex items-center gap-1">
-            Xem chi tiết <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+            Xem chi tiáº¿t <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
           </span>
         }
         className="w-full h-full flex flex-col justify-between"
@@ -391,27 +391,27 @@ export default function AboutPage() {
           <div>
             <div className="mb-5 inline-flex w-fit items-center gap-3 border border-orange-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
               <BadgeCheck size={15} />
-              Hồ sơ thương hiệu thực phẩm Việt
+              Há»“ sÆ¡ thÆ°Æ¡ng hiá»‡u thá»±c pháº©m Viá»‡t
             </div>
 
             <h1 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
-              Ăn Cùng Bà Tuyết
-              <span className="block text-orange-600">làm thật, bán thật.</span>
+              Ä‚n CÃ¹ng BÃ  Tuyáº¿t
+              <span className="block text-orange-600">lÃ m tháº­t, bÃ¡n tháº­t.</span>
             </h1>
           </div>
 
           <div>
             <p className="max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">
-              Ăn Cùng Bà Tuyết là thương hiệu đồ ăn vặt Việt Nam phát triển từ
-              nội dung gần gũi, sản phẩm dễ ăn và sức mua thật trên các nền tảng
-              thương mại điện tử.
+              Ä‚n CÃ¹ng BÃ  Tuyáº¿t lÃ  thÆ°Æ¡ng hiá»‡u Ä‘á»“ Äƒn váº·t Viá»‡t Nam phÃ¡t triá»ƒn tá»«
+              ná»™i dung gáº§n gÅ©i, sáº£n pháº©m dá»… Äƒn vÃ  sá»©c mua tháº­t trÃªn cÃ¡c ná»n táº£ng
+              thÆ°Æ¡ng máº¡i Ä‘iá»‡n tá»­.
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               {[
-                "Sản xuất có quy trình",
-                "Đóng gói chỉn chu",
-                "Vận hành rõ ràng",
+                "Sáº£n xuáº¥t cÃ³ quy trÃ¬nh",
+                "ÄÃ³ng gÃ³i chá»‰n chu",
+                "Váº­n hÃ nh rÃµ rÃ ng",
               ].map((item) => (
                 <div
                   key={item}
@@ -428,14 +428,14 @@ export default function AboutPage() {
                 href="/san-pham"
                 className="inline-flex items-center justify-center gap-3 bg-orange-600 px-7 py-4 text-sm font-black text-white transition hover:bg-orange-700"
               >
-                Xem sản phẩm
+                Xem sáº£n pháº©m
                 <ArrowRight size={18} />
               </Link>
               <Link
                 href="/chat-luong"
                 className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-7 py-4 text-sm font-black text-slate-950 transition hover:border-orange-300 hover:text-orange-700"
               >
-                Xem quy trình sản xuất
+                Xem quy trÃ¬nh sáº£n xuáº¥t
               </Link>
             </div>
           </div>
@@ -467,17 +467,17 @@ export default function AboutPage() {
       <section id="about-video" className="scroll-mt-24 grid border-b border-orange-100 bg-[#fffaf2] lg:grid-cols-[0.95fr_1.05fr]">
         <div className="px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
           <SectionIntro
-            label="Câu chuyện thương hiệu"
-            title="Từ căn bếp nhỏ đến thương hiệu hàng triệu khách hàng tin dùng."
-            description="Video giúp bạn nhìn thấy thật sự sản phẩm được làm ra như thế nào, bởi ai và với tinh thần gì."
+            label="CÃ¢u chuyá»‡n thÆ°Æ¡ng hiá»‡u"
+            title="Tá»« cÄƒn báº¿p nhá» Ä‘áº¿n thÆ°Æ¡ng hiá»‡u hÃ ng triá»‡u khÃ¡ch hÃ ng tin dÃ¹ng."
+            description="Video giÃºp báº¡n nhÃ¬n tháº¥y tháº­t sá»± sáº£n pháº©m Ä‘Æ°á»£c lÃ m ra nhÆ° tháº¿ nÃ o, bá»Ÿi ai vÃ  vá»›i tinh tháº§n gÃ¬."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2">
             {[
-              "Sản phẩm sạch, rõ nguồn gốc",
-              "Sản xuất tại xưởng có kiểm soát",
-              "Giao hàng toàn quốc qua sàn TMĐT",
-              "Được bảo hiểm sản phẩm bởi PVI",
+              "Sáº£n pháº©m sáº¡ch, rÃµ nguá»“n gá»‘c",
+              "Sáº£n xuáº¥t táº¡i xÆ°á»Ÿng cÃ³ kiá»ƒm soÃ¡t",
+              "Giao hÃ ng toÃ n quá»‘c qua sÃ n TMÄT",
+              "ÄÆ°á»£c báº£o hiá»ƒm sáº£n pháº©m bá»Ÿi PVI",
             ].map((item) => (
               <div
                 key={item}
@@ -493,7 +493,7 @@ export default function AboutPage() {
         <div className="relative w-full min-h-[350px] sm:min-h-[450px] lg:min-h-[500px] bg-black lg:border-l lg:border-t-0 border-t border-orange-100 overflow-hidden">
           <iframe
             src={aboutVideoUrl}
-            title="Hành trình thương hiệu Ăn Cùng Bà Tuyết"
+            title="HÃ nh trÃ¬nh thÆ°Æ¡ng hiá»‡u Ä‚n CÃ¹ng BÃ  Tuyáº¿t"
             className="w-full h-full border-none absolute inset-0 z-10"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -506,7 +506,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 z-0">
           <img
             src={factoryImage}
-            alt="Quy trình vận hành background"
+            alt="Quy trÃ¬nh váº­n hÃ nh background"
             className="w-full h-full object-cover opacity-25"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#f7efe3]/50 via-white/80 to-white/60" />
@@ -515,9 +515,9 @@ export default function AboutPage() {
         <div className="relative z-10 grid lg:grid-cols-[0.62fr_1.38fr]">
           <div className="border-b border-orange-100 bg-[#f7efe3]/70 backdrop-blur-md px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
-              label="Quy trình vận hành"
-              title="Quy trình sản xuất bài bản & an toàn"
-              description="Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
+              label="Quy trÃ¬nh váº­n hÃ nh"
+              title="Quy trÃ¬nh sáº£n xuáº¥t bÃ i báº£n & an toÃ n"
+              description="Tá»« nguyÃªn liá»‡u, xÆ°á»Ÿng sáº£n xuáº¥t, Ä‘Ã³ng gÃ³i Ä‘áº¿n phÃ¢n phá»‘i, má»i thÃ´ng tin Ä‘á»u hÆ°á»›ng tá»›i sá»± minh báº¡ch vÃ  dá»… kiá»ƒm chá»©ng."
             />
           </div>
 
@@ -544,9 +544,9 @@ export default function AboutPage() {
         <div className="grid lg:grid-cols-[0.62fr_1.38fr]">
           <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
-              label="Định hướng thương hiệu"
-              title="Sứ mệnh, tầm nhìn và giá trị cốt lõi."
-              description="Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
+              label="Äá»‹nh hÆ°á»›ng thÆ°Æ¡ng hiá»‡u"
+              title="Sá»© má»‡nh, táº§m nhÃ¬n vÃ  giÃ¡ trá»‹ cá»‘t lÃµi."
+              description="Ä‚n CÃ¹ng BÃ  Tuyáº¿t Ä‘Æ°á»£c xÃ¢y dá»±ng trÃªn ná»n táº£ng cá»§a sá»± chÃ¢n tháº­t: lÃ m sáº¡ch, bÃ¡n tháº­t, phá»¥c vá»¥ tá»­ táº¿ vÃ  phÃ¡t triá»ƒn bá»n vá»¯ng."
             />
           </div>
 
@@ -567,7 +567,7 @@ export default function AboutPage() {
         <div className="min-h-[280px] border-b border-orange-100 lg:min-h-[360px] lg:border-b-0 lg:border-r">
           <BrandImage
             src={teamImage}
-            label="Đội ngũ Ăn Cùng Bà Tuyết"
+            label="Äá»™i ngÅ© Ä‚n CÃ¹ng BÃ  Tuyáº¿t"
             linkUrl={teamLink}
             ratio="aspect-auto"
             className="h-full"
@@ -587,11 +587,11 @@ export default function AboutPage() {
               <Quote size={30} />
             </div>
             <blockquote className="border-l-4 border-orange-500 pl-6 text-3xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
-              &ldquo;Một thương hiệu muốn đi xa không thể chỉ nói hay. Phải có sản
-              phẩm thật, hình ảnh thật và bằng chứng thật.&rdquo;
+              &ldquo;Má»™t thÆ°Æ¡ng hiá»‡u muá»‘n Ä‘i xa khÃ´ng thá»ƒ chá»‰ nÃ³i hay. Pháº£i cÃ³ sáº£n
+              pháº©m tháº­t, hÃ¬nh áº£nh tháº­t vÃ  báº±ng chá»©ng tháº­t.&rdquo;
             </blockquote>
             <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
-              — Tinh thần Ăn Cùng Bà Tuyết
+              â€” Tinh tháº§n Ä‚n CÃ¹ng BÃ  Tuyáº¿t
             </p>
           </motion.div>
         </div>
@@ -599,9 +599,9 @@ export default function AboutPage() {
 
       <section id="about-trust" className="scroll-mt-24 border-b border-orange-100 bg-[#fffaf2] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <SectionIntro
-          label="Thông tin doanh nghiệp"
-          title="Uy tín, chứng nhận và năng lực được gom ngay trong trang Giới thiệu."
-          description="Các nội dung này lấy từ phần quản trị thương hiệu: chứng nhận, bảo hiểm, năng lực sản xuất và bằng chứng tạo niềm tin."
+          label="ThÃ´ng tin doanh nghiá»‡p"
+          title="Uy tÃ­n, chá»©ng nháº­n vÃ  nÄƒng lá»±c Ä‘Æ°á»£c gom ngay trong trang Giá»›i thiá»‡u."
+          description="CÃ¡c ná»™i dung nÃ y láº¥y tá»« pháº§n quáº£n trá»‹ thÆ°Æ¡ng hiá»‡u: chá»©ng nháº­n, báº£o hiá»ƒm, nÄƒng lá»±c sáº£n xuáº¥t vÃ  báº±ng chá»©ng táº¡o niá»m tin."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visibleTrustSections.map((item, index) => (
@@ -614,15 +614,15 @@ export default function AboutPage() {
               className="group border border-orange-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_70px_rgba(234,88,12,0.10)]"
             >
               {item.imageUrl ? (
-                <div className="mb-5 aspect-[16/10] overflow-hidden bg-orange-50">
-                  <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                <div className="mb-5 flex h-[260px] items-center justify-center overflow-hidden border border-orange-100 bg-[#fff7ea] p-4">
+                  <img src={item.imageUrl} alt={item.title} className="max-h-full max-w-full object-contain transition duration-700 group-hover:scale-[1.03]" />
                 </div>
               ) : (
-                <div className="mb-5 flex aspect-[16/10] items-center justify-center bg-orange-50 text-orange-600">
+                <div className="mb-5 flex h-[260px] items-center justify-center border border-orange-100 bg-orange-50 text-orange-600">
                   <ShieldCheck size={34} />
                 </div>
               )}
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">Hồ sơ thương hiệu</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">Há»“ sÆ¡ thÆ°Æ¡ng hiá»‡u</p>
               <h3 className="mt-3 text-xl font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
               <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
             </motion.article>
@@ -631,41 +631,60 @@ export default function AboutPage() {
       </section>
 
       <section id="about-history" className="scroll-mt-24 border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr]">
+        <div className="mx-auto max-w-7xl">
           <SectionIntro
             label="Hành trình phát triển"
-            title="Các dấu mốc chính nằm chung trong trang Giới thiệu."
-            description="Không cần tách trang lịch sử riêng nữa. Admin sửa từng mốc, năm, ảnh và nội dung tại phần cấu hình Giới thiệu."
+            title="Bản đồ dấu mốc của Ăn Cùng Bà Tuyết."
+            description="Các cột mốc được xếp như một hành trình đi xuống: mỗi điểm là một bước chuyển, một thành tựu hoặc một quyết định quan trọng."
           />
-          <div className="space-y-4">
-            {visibleHistoryMilestones.map((item, index) => (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, x: 24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="grid gap-4 border border-orange-100 bg-[#fffaf2] p-5 sm:grid-cols-[120px_1fr]"
-              >
-                <div>
-                  <p className="text-3xl font-black tracking-[-0.06em] text-orange-600">{item.year || item.title.match(/\b(20\d\d|19\d\d)\b/)?.[0] || String(index + 1).padStart(2, "0")}</p>
-                  <p className="mt-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">{item.type === "achievement" ? "Thành tựu" : "Cột mốc"}</p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-black tracking-[-0.04em] text-slate-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
-                </div>
-              </motion.div>
-            ))}
+
+          <div className="relative mt-14">
+            <div className="absolute left-6 top-0 h-full border-l-2 border-dashed border-orange-300 lg:left-1/2 lg:-translate-x-1/2" />
+
+            <div className="space-y-10">
+              {visibleHistoryMilestones.map((item, index) => {
+                const isRight = index % 2 === 0;
+                const year = item.year || item.title.match(/\b(20\d\d|19\d\d)\b/)?.[0] || String(index + 1).padStart(2, "0");
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 28 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.06 }}
+                    className={`relative grid gap-5 pl-16 lg:grid-cols-2 lg:pl-0 ${isRight ? "" : "lg:[&>*:first-child]:col-start-2"}`}
+                  >
+                    <div className={`relative border border-orange-200 bg-[#fffaf2] p-6 shadow-[14px_14px_0_rgba(234,88,12,0.08)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
+                      <div className="absolute -left-[54px] top-7 z-10 flex h-12 w-12 items-center justify-center border-4 border-white bg-orange-600 text-sm font-black text-white shadow-lg lg:left-auto lg:top-1/2 lg:-translate-y-1/2">
+                        {String(index + 1).padStart(2, "0")}
+                      </div>
+                      <div className={`hidden lg:absolute lg:top-1/2 lg:block lg:h-px lg:w-16 lg:-translate-y-1/2 lg:bg-orange-300 ${isRight ? "lg:-right-16" : "lg:-left-16"}`} />
+                      <p className="text-4xl font-black tracking-[-0.07em] text-orange-600">{year}</p>
+                      <p className="mt-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">
+                        {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
+                      </p>
+                      <h3 className="mt-5 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title}</h3>
+                      <p className="mt-3 text-sm leading-7 text-slate-600">{item.description}</p>
+                    </div>
+
+                    {index < visibleHistoryMilestones.length - 1 ? (
+                      <div className="absolute left-[15px] top-[92px] z-10 flex h-8 w-8 items-center justify-center bg-white text-orange-600 lg:left-1/2 lg:-translate-x-1/2">
+                        <ArrowRight className="rotate-90" size={22} />
+                      </div>
+                    ) : null}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
 
       <section id="about-community" className="scroll-mt-24 border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <SectionIntro
-          label="Cộng đồng"
-          title="Hoạt động cộng đồng và khách hàng cũng nằm trong trang Giới thiệu."
-          description="Các hoạt động này giúp trang giới thiệu không chỉ nói về công ty, mà còn cho thấy thương hiệu đang sống cùng khách hàng thế nào."
+          label="Cá»™ng Ä‘á»“ng"
+          title="Hoáº¡t Ä‘á»™ng cá»™ng Ä‘á»“ng vÃ  khÃ¡ch hÃ ng cÅ©ng náº±m trong trang Giá»›i thiá»‡u."
+          description="CÃ¡c hoáº¡t Ä‘á»™ng nÃ y giÃºp trang giá»›i thiá»‡u khÃ´ng chá»‰ nÃ³i vá» cÃ´ng ty, mÃ  cÃ²n cho tháº¥y thÆ°Æ¡ng hiá»‡u Ä‘ang sá»‘ng cÃ¹ng khÃ¡ch hÃ ng tháº¿ nÃ o."
         />
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {visibleCommunityActivities.map((item, index) => {
@@ -698,14 +717,14 @@ export default function AboutPage() {
         <div className="grid lg:grid-cols-[1.15fr_0.85fr]">
           <div className="px-5 py-16 sm:px-8 lg:px-14 xl:px-20">
             <p className="mb-5 inline-flex border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-200">
-              Tiếp tục khám phá
+              Tiáº¿p tá»¥c khÃ¡m phÃ¡
             </p>
             <h2 className="max-w-5xl text-4xl font-black leading-tight tracking-[-0.05em] sm:text-6xl">
-              Sản phẩm thật, quy trình rõ — mọi thứ đều có thể kiểm chứng.
+              Sáº£n pháº©m tháº­t, quy trÃ¬nh rÃµ â€” má»i thá»© Ä‘á»u cÃ³ thá»ƒ kiá»ƒm chá»©ng.
             </h2>
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/70 sm:text-lg">
-              Khám phá danh sách sản phẩm đang bán chạy và toàn bộ quy trình từ
-              chọn nguyên liệu đến giao hàng tận tay khách hàng.
+              KhÃ¡m phÃ¡ danh sÃ¡ch sáº£n pháº©m Ä‘ang bÃ¡n cháº¡y vÃ  toÃ n bá»™ quy trÃ¬nh tá»«
+              chá»n nguyÃªn liá»‡u Ä‘áº¿n giao hÃ ng táº­n tay khÃ¡ch hÃ ng.
             </p>
           </div>
 
@@ -714,7 +733,7 @@ export default function AboutPage() {
               href="/chat-luong"
               className="group flex items-center justify-between border-b border-white/10 bg-orange-600 p-8 text-lg font-black text-white transition hover:bg-orange-700"
             >
-              Xem quy trình sản xuất
+              Xem quy trÃ¬nh sáº£n xuáº¥t
               <ArrowRight
                 className="transition-transform group-hover:translate-x-1"
                 size={22}
@@ -724,7 +743,7 @@ export default function AboutPage() {
               href="/san-pham"
               className="group flex items-center justify-between bg-white p-8 text-lg font-black text-slate-950 transition hover:bg-orange-50"
             >
-              Xem sản phẩm
+              Xem sáº£n pháº©m
               <ArrowRight
                 className="transition-transform group-hover:translate-x-1"
                 size={22}

@@ -501,7 +501,16 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             {certificates.map((cert) => {
               const Icon = cert.icon;
               return (
-                <article key={cert.title} className="group border border-orange-200 bg-white p-7 transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(234,88,12,0.12)]">
+                <article key={cert.title} className="group relative border border-orange-200 bg-white p-7 transition hover:z-20 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(234,88,12,0.12)]">
+                  {cert.image ? (
+                    <div className="pointer-events-none absolute left-1/2 top-3 z-30 hidden w-80 -translate-x-1/2 -translate-y-full border border-orange-200 bg-white p-3 opacity-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] transition duration-200 group-hover:opacity-100 lg:block">
+                      <div className="aspect-[4/3] overflow-hidden bg-orange-50">
+                        <img src={cert.image} alt={`Ảnh bằng chứng ${cert.title}`} className="h-full w-full object-cover" />
+                      </div>
+                      <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-orange-700">Ảnh bằng chứng</p>
+                      <div className="absolute bottom-[-9px] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-orange-200 bg-white" />
+                    </div>
+                  ) : null}
                   <Icon className="h-9 w-9 text-orange-600" />
                   <h3 className="mt-6 text-xl font-black tracking-[-0.04em]">{cert.title}</h3>
                   <p className="mt-3 min-h-[110px] text-sm font-semibold leading-7 text-slate-600">{cert.desc}</p>
@@ -553,12 +562,18 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
           </button>
         </div>
         <div className="border-t border-white/10 p-5 lg:border-l lg:border-t-0 lg:p-10">
-          <div className="grid h-full place-items-center border border-white/15 bg-white/5 p-8">
-            <ShieldCheck className="h-20 w-20 text-orange-400" />
-            <p className="mt-6 text-7xl font-black tracking-[-0.08em]">PVI</p>
-            <p className="mt-4 max-w-md text-center text-sm font-bold leading-7 text-white/60">
-              [cần xác nhận] Pháp nhân trên hợp đồng, phạm vi bảo hiểm và scan hợp đồng được phép public.
-            </p>
+          <div className="group relative min-h-[360px] overflow-hidden border border-white/15 bg-white/5">
+            {config.pvi.imageUrl ? (
+              <img src={config.pvi.imageUrl} alt="Bảo hiểm trách nhiệm sản phẩm PVI" className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-8">
+              <ShieldCheck className="h-12 w-12 text-orange-400" />
+              <p className="mt-4 text-5xl font-black tracking-[-0.08em] text-white">PVI</p>
+              <p className="mt-3 max-w-md text-sm font-bold leading-7 text-white/70">
+                Ảnh/scan PVI được cấu hình trong admin. Nếu chưa thay, hệ thống dùng ảnh mặc định.
+              </p>
+            </div>
           </div>
         </div>
       </section>
