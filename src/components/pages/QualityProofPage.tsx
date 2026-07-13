@@ -18,6 +18,7 @@ import {
   Wheat,
   X,
 } from "lucide-react";
+import type { PageBlock } from "@/lib/pages";
 
 type ModalContent = {
   eyebrow?: string;
@@ -58,7 +59,7 @@ const proofPillars = [
   },
 ];
 
-const sourceFacts = [
+const defaultSourceFacts = [
   {
     icon: Wheat,
     title: "Ba Lan, Hungary",
@@ -85,7 +86,7 @@ const processSteps = [
   ["06", "Giao hàng", "Lưu kho, phân phối tới sàn TMĐT, điểm bán và kênh chính thức."],
 ];
 
-const certificates = [
+const defaultCertificates = [
   {
     icon: BadgeCheck,
     title: "ISO 22000:2018",
@@ -196,8 +197,68 @@ function EvidenceFrame({ title, desc, tone = "light" }: { title: string; desc: s
   );
 }
 
-export default function QualityProofPage() {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function text(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function blockData(blocks: PageBlock[] | undefined, id: string, fallback: Record<string, unknown> = {}) {
+  const block = blocks?.find((item) => item.id === id);
+  return isRecord(block?.data) ? block.data : fallback;
+}
+
+function featureItems(data: Record<string, unknown>) {
+  if (!Array.isArray(data.items)) return [];
+  return data.items.filter(isRecord).map((item) => ({
+    title: text(item.title),
+    desc: text(item.description),
+  })).filter((item) => item.title || item.desc);
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export default function QualityProofPage({ blocks }: { blocks?: PageBlock[] }) {
   const [modal, setModal] = useState<ModalContent | null>(null);
+  const heroData = blockData(blocks, "chat-luong-hero");
+  const sourceData = blockData(blocks, "chat-luong-nguyen-lieu");
+  const factsData = blockData(blocks, "chat-luong-facts");
+  const factoryData = blockData(blocks, "chat-luong-factory");
+  const docsData = blockData(blocks, "chat-luong-documents");
+  const pviData = blockData(blocks, "chat-luong-pvi");
+  const policyData = blockData(blocks, "chat-luong-policy");
+
+  const sourceFacts = featureItems(factsData).length
+    ? featureItems(factsData).map((item, index) => ({
+        icon: defaultSourceFacts[index]?.icon ?? FileCheck2,
+        title: item.title,
+        desc: item.desc,
+      }))
+    : defaultSourceFacts;
+
+  const certificates = featureItems(docsData).length
+    ? featureItems(docsData).map((item, index) => ({
+        ...(defaultCertificates[index] ?? defaultCertificates[0]),
+        title: item.title,
+        desc: item.desc,
+      }))
+    : defaultCertificates;
+
+  const policyItemsFromCms = featureItems(policyData).map((item) => [item.title, item.desc] as [string, string]);
+  const visiblePolicyItems = policyItemsFromCms.length ? policyItemsFromCms : policyItems;
+  const heroImage = text(heroData.backgroundImage, "/bento/bento-factory.png");
+  const sourceImage = text(sourceData.imageUrl, "/bento/bento-ingredients.png");
+  const factoryImage = text(factoryData.imageUrl, "/bento/bento-factory.png");
+  const pviText = stripHtml(text(pviData.content));
+  const gallery = [
+    { ...galleryImages[0], src: sourceImage },
+    { ...galleryImages[1], src: factoryImage },
+    ...galleryImages.slice(2),
+  ];
 
   return (
     <main className="min-h-screen bg-[#fff8ed] text-slate-950">
@@ -208,17 +269,19 @@ export default function QualityProofPage() {
 
         <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <div>
-            <Eyebrow>Chất lượng kiểm chứng</Eyebrow>
+            <Eyebrow>{text(heroData.label, "Chất lượng kiểm chứng")}</Eyebrow>
             <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
-              Năng lực sản xuất rõ ràng trước khi nói về bán hàng
+              {text(heroData.title, "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
             </h1>
             <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ cần có hồ sơ đi kèm.
-              Chỗ nào chưa có file công khai sẽ ghi rõ <span className="font-black text-orange-700">[cần bổ sung]</span>, không tự tuyên bố thay bằng chứng.
+              {text(
+                heroData.subtitle,
+                "Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ cần có hồ sơ đi kèm. Chỗ nào chưa có file công khai sẽ ghi rõ [cần bổ sung], không tự tuyên bố thay bằng chứng."
+              )}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="#ho-so-phap-ly" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
-                Xem hồ sơ pháp lý <ArrowRight size={15} />
+              <Link href={text(heroData.ctaLink, "#ho-so-phap-ly")} className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
+                {text(heroData.ctaText, "Xem hồ sơ pháp lý")} <ArrowRight size={15} />
               </Link>
               <Link href="/san-pham" className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
                 Xem sản phẩm <ArrowRight size={15} />
@@ -234,14 +297,14 @@ export default function QualityProofPage() {
                   eyebrow: "Ảnh minh họa",
                   title: "Nhà máy, hồ sơ và quy trình phải nhìn thấy được",
                   desc: "Popup này dùng để xem ảnh lớn hoặc thay bằng ảnh nhà máy thật khi admin upload.",
-                  image: "/bento/bento-factory.png",
+                  image: heroImage,
                   bullets: ["Ưu tiên ảnh NMV Food.", "Không dùng ảnh nền tối quá lâu dài.", "Ảnh cần tự co theo khung, không méo."],
                 })
               }
               className="group border border-orange-200 bg-white p-4 text-left shadow-[16px_16px_0_rgba(234,88,12,0.12)] sm:col-span-2"
             >
               <div className="relative min-h-[300px] overflow-hidden bg-slate-950">
-                <img src="/bento/bento-factory.png" alt="Nhà máy sản xuất" className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105" />
+                <img src={heroImage} alt="Nhà máy sản xuất" className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/40 to-orange-500/30" />
                 <div className="absolute bottom-0 left-0 max-w-lg p-7 text-white">
                   <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-200">NMV Food · Thái Nguyên</p>
@@ -304,7 +367,7 @@ export default function QualityProofPage() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-5">
-            {galleryImages.map((item, index) => (
+            {gallery.map((item, index) => (
               <button
                 key={item.label}
                 type="button"
@@ -362,11 +425,13 @@ export default function QualityProofPage() {
           <div>
             <Eyebrow>01 · Minh bạch nguồn nguyên liệu</Eyebrow>
             <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-              Nguyên liệu nhập khẩu từ châu Âu — có truy xuất
+              {text(sourceData.title, "Nguyên liệu nhập khẩu từ châu Âu — có truy xuất")}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
-              Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác.
-              Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng.
+              {text(
+                sourceData.description,
+                "Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác. Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng."
+              )}
             </p>
           </div>
 
@@ -383,7 +448,7 @@ export default function QualityProofPage() {
                         eyebrow: "Nguồn nguyên liệu",
                         title: item.title,
                         desc: item.desc,
-                        image: "/bento/bento-ingredients.png",
+                        image: sourceImage,
                         bullets: ["Admin có thể thay bằng ảnh scan/hồ sơ thật.", "Nội dung này nên đi kèm ngày/lô hàng nếu public.", "Không nói tuyệt đối khi chưa có chứng từ."],
                       })
                     }
@@ -404,13 +469,13 @@ export default function QualityProofPage() {
                     eyebrow: "Ảnh nguồn nguyên liệu",
                     title: "Container, kho lạnh, C/O",
                     desc: "Khu vực này nên thay bằng ảnh thật: container nhập khẩu, giấy C/O, phiếu kiểm dịch hoặc kho lạnh.",
-                    image: "/bento/bento-ingredients.png",
+                    image: sourceImage,
                     bullets: ["Có thể dùng nhiều ảnh qua thư viện admin.", "Nếu giấy tờ nhạy cảm, che thông tin trước khi public.", "Ảnh tự co theo khung để không bị méo."],
                   })
                 }
                 className="relative min-h-[260px] overflow-hidden border border-orange-200 bg-white text-left"
               >
-                <img src="/bento/bento-ingredients.png" alt="Nguyên liệu" className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
+                <img src={sourceImage} alt="Nguyên liệu" className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
                 <p className="absolute bottom-5 left-5 max-w-sm text-lg font-black text-white">Ảnh container, kho lạnh, C/O nên đặt vào đây khi có file public.</p>
               </button>
@@ -426,12 +491,14 @@ export default function QualityProofPage() {
             <div>
               <Eyebrow>02 · Nhà máy & quy trình</Eyebrow>
               <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">
-                Nhà máy sản xuất NMV Food — Thái Nguyên
+                {text(factoryData.title, "Nhà máy sản xuất NMV Food — Thái Nguyên")}
               </h2>
             </div>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              Ghi đúng chủ thể: <span className="font-black">NMV Food đạt chứng nhận ISO 22000:2018</span>. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy.
-              Không dùng “an toàn tuyệt đối”, “vô trùng”; dùng “quy trình 6 bước có kiểm soát”.
+              {text(
+                factoryData.description,
+                "Ghi đúng chủ thể: NMV Food đạt chứng nhận ISO 22000:2018. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Không dùng “an toàn tuyệt đối”, “vô trùng”; dùng “quy trình 6 bước có kiểm soát”."
+              )}
             </p>
           </div>
 
@@ -450,7 +517,7 @@ export default function QualityProofPage() {
 
           <div className="mt-10 grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="grid grid-cols-2 gap-3">
-              {["/bento/bento-factory.png", "/bento/bento-tiktok.png", "/hero/chan-ga-plate.png", "/bento/bento-insurance.png"].map((src, idx) => (
+              {[factoryImage, "/bento/bento-tiktok.png", "/hero/chan-ga-plate.png", "/bento/bento-insurance.png"].map((src, idx) => (
                 <button
                   type="button"
                   key={src}
@@ -536,8 +603,7 @@ export default function QualityProofPage() {
             PVI là cam kết trách nhiệm, không phải “bảo chứng chất lượng”
           </h2>
           <p className="mt-6 text-base font-semibold leading-8 text-white/72">
-            ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng,
-            có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm.
+            {pviText || "ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm."}
           </p>
           <button
             type="button"
@@ -573,7 +639,7 @@ export default function QualityProofPage() {
             Khách hàng cần biết mình được bảo vệ thế nào
           </h2>
           <div className="mt-10 grid gap-3 lg:grid-cols-5">
-            {policyItems.map(([title, desc], index) => (
+            {visiblePolicyItems.map(([title, desc], index) => (
               <details key={title} className="group border border-orange-200 bg-[#fffaf3] p-5 open:bg-white">
                 <summary className="cursor-pointer list-none">
                   <span className="block text-xs font-black text-orange-600">{String(index + 1).padStart(2, "0")}</span>

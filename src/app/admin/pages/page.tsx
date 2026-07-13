@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
+import { getSystemPageSeedContent as getCleanSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
 
 interface PageData {
   id: string;
@@ -180,7 +181,7 @@ export default function AdminPagesList() {
     }
   };
 
-  const systemPages = Object.values(DEFAULT_INFO_PAGES).map((page) => ({
+  const systemPages = Object.values(DEFAULT_INFO_PAGES).filter(isVisibleSystemPage).map((page) => ({
     ...page,
     cmsPage: pages.find((existing) => existing.slug === page.cmsSlug)
   }));
@@ -201,7 +202,7 @@ export default function AdminPagesList() {
           title: fallback.title,
           slug: fallback.cmsSlug,
           status: "PUBLISHED",
-          content: getSystemPageSeedContent(fallback)
+          content: getCleanSystemPageSeedContent(fallback)
         })
       });
 
@@ -223,10 +224,12 @@ export default function AdminPagesList() {
   };
 
   // Filter search
-  const filteredPages = pages.filter((page) =>
-    page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    page.slug.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPages = pages
+    .filter((page) => page.slug === "chat-luong" || !page.slug.startsWith("chat-luong-"))
+    .filter((page) =>
+      page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      page.slug.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>

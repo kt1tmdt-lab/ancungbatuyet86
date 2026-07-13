@@ -38,6 +38,7 @@ import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
+import { getSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
 
 // Define block interfaces
 interface Block {
@@ -371,7 +372,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
   const loadDefaultTemplate = () => {
     const normalizedSlug = normalizePageSlug(slug || title);
-    const template = Object.values(DEFAULT_INFO_PAGES).find(
+    const template = Object.values(DEFAULT_INFO_PAGES).filter(isVisibleSystemPage).find(
       (item) => item.cmsSlug === normalizedSlug || item.routePath.replace(/^\//, "").replace(/\//g, "-") === normalizedSlug,
     );
 
@@ -389,8 +390,9 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
     setTitle(template.title);
     setSlug(template.cmsSlug);
-    setBlocks(JSON.parse(JSON.stringify(template.blocks)) as Block[]);
-    setExpandedBlockId(template.blocks[0]?.id || null);
+    const templateBlocks = getSystemPageSeedContent(template);
+    setBlocks(JSON.parse(JSON.stringify(templateBlocks)) as Block[]);
+    setExpandedBlockId(templateBlocks[0]?.id || null);
     setError("");
     setSuccess("Đã nạp mẫu vào trình sửa. Bấm Lưu thiết kế để cập nhật lên website.");
   };
