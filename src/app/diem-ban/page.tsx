@@ -89,7 +89,7 @@ export default async function SalesPointPage() {
               <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-6xl">Hệ thống điểm bán offline</h2>
             </div>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              Danh sách cửa hàng/đại lý đang được công bố. Admin cập nhật tại phần Quản lý hệ thống bán.
+              Danh sách cửa hàng, đại lý và khu vực phân phối đang được công bố để khách hàng dễ chọn đúng kênh mua.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default async function SalesPointPage() {
                   <div>
                     <MapPin className="mx-auto h-12 w-12 text-orange-600" />
                     <p className="mt-4 text-sm font-black uppercase tracking-[0.16em] text-slate-500">Chưa có tọa độ điểm bán</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Thêm lat/lng trong admin để bản đồ hiển thị ở đây.</p>
+                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Khi có tọa độ điểm bán, bản đồ sẽ hiển thị tại đây.</p>
                   </div>
                 </div>
               )}
@@ -115,9 +115,9 @@ export default async function SalesPointPage() {
 
             <div className="border border-orange-200 bg-white p-6">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Bản đồ</p>
-              <h3 className="mt-3 text-3xl font-black tracking-[-0.05em] text-slate-950">Tọa độ lấy từ admin điểm bán</h3>
+              <h3 className="mt-3 text-3xl font-black tracking-[-0.05em] text-slate-950">Bản đồ điểm bán chính thức</h3>
               <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">
-                Khi admin thêm/sửa điểm bán, chọn tọa độ trên bản đồ trong trang quản lý. Trang ngoài sẽ tự lấy điểm đầu tiên làm tâm bản đồ và hiển thị danh sách bên dưới.
+                Các điểm bán có tọa độ sẽ được hiển thị trên bản đồ để khách hàng dễ tra cứu vị trí, giờ mở cửa và thông tin liên hệ.
               </p>
               {firstLocation ? (
                 <Link
@@ -150,7 +150,7 @@ export default async function SalesPointPage() {
               </article>
             )) : (
               <div className="border border-dashed border-orange-200 bg-white p-8 text-sm font-bold text-slate-500 md:col-span-2 xl:col-span-3">
-                Chưa có điểm bán offline nào. Vào admin để thêm cửa hàng/đại lý.
+                Hiện chưa có điểm bán offline nào được công bố.
               </div>
             )}
           </div>
@@ -172,7 +172,7 @@ export default async function SalesPointPage() {
               </Link>
             )) : (
               <div className="border border-dashed border-orange-200 bg-[#fffaf3] p-8 text-sm font-bold text-slate-500 md:col-span-2 xl:col-span-4">
-                Chưa có kênh online nào. Vào admin để thêm Shopee/TikTok Shop/kênh bán chính thức.
+                Hiện chưa có kênh online chính thức nào được công bố.
               </div>
             )}
           </div>

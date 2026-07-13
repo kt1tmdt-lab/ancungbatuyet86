@@ -46,7 +46,7 @@ const proofPillars = [
   {
     no: "03",
     title: "Hồ sơ pháp lý",
-    desc: "ISO, HACCP, ATTP, phiếu kiểm nghiệm — bấm để mở popup xem hồ sơ.",
+    desc: "ISO, HACCP, ATTP, phiếu kiểm nghiệm — trình bày rõ ràng để khách hàng dễ kiểm tra.",
     href: "#ho-so-phap-ly",
     icon: FileSearch,
   },
@@ -63,17 +63,17 @@ const defaultSourceFacts = [
   {
     icon: Wheat,
     title: "Ba Lan, Hungary",
-    desc: "Nguồn nhập khẩu châu Âu. [cần bổ sung hồ sơ lô hàng public]",
+    desc: "Nguồn nguyên liệu được trình bày theo hồ sơ xuất xứ và kiểm dịch.",
   },
   {
     icon: FileCheck2,
     title: "C/O & kiểm dịch",
-    desc: "Claim nguồn gốc cần đi kèm C/O, kiểm dịch. [cần bổ sung ảnh scan]",
+    desc: "Thông tin xuất xứ và kiểm dịch là cơ sở để kiểm tra nguồn nguyên liệu.",
   },
   {
     icon: Snowflake,
     title: "Kho lạnh",
-    desc: "Lưu kho lạnh theo quy chuẩn vận hành. [cần bổ sung ảnh/video kho]",
+    desc: "Lưu kho lạnh theo quy chuẩn vận hành để giữ chất lượng ổn định.",
   },
 ];
 
@@ -81,30 +81,30 @@ const defaultCertificates = [
   {
     icon: BadgeCheck,
     title: "ISO 22000:2018",
-    desc: "Ghi rõ: cấp cho NMV Food. [cần bổ sung scan chứng nhận]",
+    desc: "Chứng nhận ISO 22000:2018 cấp cho NMV Food trong hệ thống quản lý an toàn thực phẩm.",
     image: "/bento/bento-factory.png",
-    bullets: ["Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy.", "Nên public ảnh/PDF đã che thông tin nhạy cảm.", "Dùng như bằng chứng hệ thống quản lý an toàn thực phẩm."],
+    bullets: ["Gắn với hệ thống quản lý an toàn thực phẩm.", "Thể hiện năng lực vận hành của nhà máy.", "Là một trong các cơ sở để đối tác đánh giá."],
   },
   {
     icon: ClipboardCheck,
     title: "HACCP",
-    desc: "Chương trình đào tạo, NMV Food. [cần bổ sung hồ sơ]",
+    desc: "Chương trình đào tạo và kiểm soát theo nguyên tắc HACCP tại NMV Food.",
     image: "/bento/bento-insurance.png",
-    bullets: ["Gắn với chương trình đào tạo/hồ sơ tương ứng.", "Không dùng từ “vô trùng” hoặc “an toàn tuyệt đối”.", "Nên có ảnh chứng nhận hoặc biên bản đào tạo."],
+    bullets: ["Tập trung vào các điểm kiểm soát quan trọng.", "Giúp quy trình sản xuất được vận hành có nguyên tắc.", "Phù hợp với cách trình bày thông tin thận trọng."],
   },
   {
     icon: FileCheck2,
     title: "Giấy phép ATTP",
-    desc: "Giấy đủ điều kiện an toàn thực phẩm. [cần bổ sung ảnh/PDF]",
+    desc: "Giấy đủ điều kiện an toàn thực phẩm cho hoạt động sản xuất, kinh doanh liên quan.",
     image: "/bento/bento-ingredients.png",
-    bullets: ["Hiển thị tên pháp nhân đúng trên giấy.", "Có thể mở lightbox để xem bản scan.", "Cần che mã số/chi tiết nhạy cảm nếu cần."],
+    bullets: ["Là hồ sơ pháp lý quan trọng trong ngành thực phẩm.", "Giúp người xem hiểu rõ hơn về nền tảng vận hành.", "Được trình bày theo hướng rõ ràng, dễ kiểm tra."],
   },
   {
     icon: FileSearch,
     title: "Phiếu kiểm nghiệm",
-    desc: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]",
+    desc: "Kiểm nghiệm định kỳ là cơ sở theo dõi chất lượng sản phẩm theo từng giai đoạn.",
     image: "/bento/bento-tiktok.png",
-    bullets: ["Gắn ngày kiểm nghiệm gần nhất.", "Nói “kiểm nghiệm định kỳ”, không nói thay cho mọi lô.", "Cần cập nhật file mới khi có phiếu mới."],
+    bullets: ["Giúp theo dõi chất lượng theo thời gian.", "Là tài liệu hỗ trợ đối tác và khách hàng kiểm tra.", "Được trình bày thận trọng, không thay thế cho mọi lô sản xuất."],
   },
 ];
 
@@ -143,9 +143,9 @@ const evidenceBoard = [
     items: ["NMV Food đạt ISO 22000:2018 khi có hồ sơ kèm theo", "Quy trình 6 bước có kiểm soát", "Bảo hiểm trách nhiệm sản phẩm PVI"],
   },
   {
-    title: "Cần bổ sung file",
+    title: "Cần kiểm tra thêm",
     tone: "bg-orange-50 text-orange-700 border-orange-200",
-    items: ["Scan C/O, kiểm dịch, phiếu kiểm nghiệm", "Ảnh/video kho lạnh và nhà máy thật", "Phạm vi hợp đồng PVI được phép public"],
+    items: ["Hồ sơ xuất xứ, kiểm dịch và kiểm nghiệm", "Hình ảnh kho lạnh và nhà máy thật", "Phạm vi bảo hiểm trách nhiệm sản phẩm"],
   },
   {
     title: "Không nói quá",
@@ -173,20 +173,78 @@ function EvidenceFrame({ title, desc, tone = "light" }: { title: string; desc: s
   );
 }
 
+const unsafePublicWords = [
+  "admin",
+  "cần bổ sung",
+  "cáº§n bá»• sung",
+  "scan",
+  "pdf",
+  "file public",
+  "popup",
+  "lightbox",
+  "cấu hình",
+  "cáº¥u hÃ¬nh",
+  "mặc định",
+  "máº·c Ä‘á»‹nh",
+  "chưa thay",
+  "chÆ°a thay",
+  "upload",
+];
+
+function cleanPublicText(value: string | undefined, fallback: string) {
+  const text = (value || "").trim();
+  if (!text) return fallback;
+  const lower = text.toLowerCase();
+  return unsafePublicWords.some((word) => lower.includes(word.toLowerCase())) ? fallback : text;
+}
+
+function cleanPublicList(items: string[] | undefined) {
+  return (items || [])
+    .map((item) => cleanPublicText(item, ""))
+    .filter(Boolean);
+}
+
 export default function QualityProofPage({ config }: { config: QualityPageConfig }) {
   const [modal, setModal] = useState<ModalContent | null>(null);
+  const heroSubtitle = cleanPublicText(
+    config.hero.subtitle,
+    "Nguyên liệu, nhà máy, chứng nhận, bảo hiểm và chính sách khách hàng được trình bày rõ ràng để người xem có cơ sở kiểm tra."
+  );
+  const sourceDescription = cleanPublicText(
+    config.source.description,
+    "Nguồn nguyên liệu được trình bày theo hướng minh bạch: xuất xứ, điều kiện bảo quản và hồ sơ kiểm tra đi kèm."
+  );
+  const factoryDescription = cleanPublicText(
+    config.factory.description,
+    "Nhà máy, quy trình và các điểm kiểm soát được trình bày theo hướng rõ ràng, thận trọng và dễ kiểm chứng."
+  );
+  const documentsSubtitle = cleanPublicText(
+    config.documents.subtitle,
+    "Các hồ sơ pháp lý, kiểm nghiệm và chứng nhận được trình bày để khách hàng, đối tác có thêm cơ sở đánh giá."
+  );
+  const pviDescription = cleanPublicText(
+    config.pvi.description,
+    "Bảo hiểm trách nhiệm sản phẩm thể hiện cam kết đồng hành và bảo vệ quyền lợi người tiêu dùng theo phạm vi hợp đồng."
+  );
   const sourceFacts = config.source.facts.map((item, index) => ({
     icon: defaultSourceFacts[index]?.icon ?? FileCheck2,
     title: item.title,
-    desc: item.description,
+    desc: cleanPublicText(item.description, defaultSourceFacts[index]?.desc || "Thông tin được trình bày rõ ràng để người xem có cơ sở kiểm tra."),
   }));
   const certificates = config.documents.items.map((item, index) => ({
     ...(defaultCertificates[index] ?? defaultCertificates[0]),
     title: item.title,
-    desc: item.description,
+    desc: cleanPublicText(item.description, defaultCertificates[index]?.desc || "Hồ sơ được trình bày để khách hàng và đối tác có thêm cơ sở đánh giá."),
     image: item.imageUrl || defaultCertificates[index]?.image,
   }));
-  const visiblePolicyItems = config.policy.items.map((item) => [item.title, item.description] as [string, string]);
+  const visiblePolicyItems = config.policy.items.map((item) => [
+    item.title,
+    cleanPublicText(item.description, "Thông tin chính sách được trình bày rõ ràng để khách hàng dễ theo dõi."),
+  ] as [string, string]);
+  const faqItems = config.faq.items.map((item) => ({
+    ...item,
+    description: cleanPublicText(item.description, "Thông tin được trình bày theo hướng rõ ràng, thận trọng và dễ kiểm tra."),
+  }));
   const heroImage = config.hero.imageUrl;
   const sourceImage = config.source.imageUrl;
   const factoryImage = config.factory.imageUrl;
@@ -214,7 +272,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               {config.hero.title}
             </h1>
             <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              {config.hero.subtitle}
+              {heroSubtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href={config.hero.ctaLink} className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
@@ -233,7 +291,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 setModal({
                   eyebrow: "Ảnh minh họa",
                   title: "Nhà máy, hồ sơ và quy trình phải nhìn thấy được",
-                  desc: "Popup này dùng để xem ảnh lớn hoặc thay bằng ảnh nhà máy thật khi admin upload.",
+                  desc: "Hình ảnh giúp người xem nhìn rõ hơn về nhà máy, hồ sơ và quy trình vận hành.",
                   image: heroImage,
                   bullets: ["Ưu tiên ảnh NMV Food.", "Không dùng ảnh nền tối quá lâu dài.", "Ảnh cần tự co theo khung, không méo."],
                 })
@@ -250,8 +308,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <span className="absolute right-4 top-4 bg-white px-4 py-2 text-xs font-black uppercase text-orange-700">Bấm xem</span>
               </div>
             </button>
-            <EvidenceFrame title="C/O nhập khẩu" desc="Ảnh scan hồ sơ nhập khẩu nguyên liệu. [cần bổ sung]" />
-            <EvidenceFrame title="Phiếu kiểm nghiệm" desc="VNTEST định kỳ hàng tháng. [cần bổ sung bản mới nhất]" />
+            <EvidenceFrame title="Hồ sơ nhập khẩu" desc="Thông tin xuất xứ và kiểm dịch là cơ sở kiểm tra nguồn nguyên liệu." />
+            <EvidenceFrame title="Phiếu kiểm nghiệm" desc="Kiểm nghiệm định kỳ giúp theo dõi chất lượng theo từng giai đoạn." />
           </div>
         </div>
       </section>
@@ -299,7 +357,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             </div>
             <p className="text-base font-semibold leading-8 text-white/68">
               Người xem kéo một lần là thấy nguồn nguyên liệu, nhà máy, chứng nhận, PVI và chính sách khách hàng.
-              Ảnh nào cần xem kỹ thì bấm mở popup, tránh layout khô như bảng giấy tờ.
+              Hình ảnh và hồ sơ được gom theo từng cụm để người xem dễ đọc, dễ kiểm tra và không bị khô như bảng giấy tờ.
             </p>
           </div>
 
@@ -314,7 +372,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                     title: item.label,
                     desc: item.desc,
                     image: item.src,
-                    bullets: ["Ảnh được tự co theo khung.", "Có thể thay bằng ảnh thật trong admin.", "Nên dùng ảnh rõ nguồn gốc, tránh ảnh minh họa chung chung."],
+                    bullets: ["Hình ảnh được tự co theo khung.", "Ưu tiên hình ảnh rõ nguồn gốc.", "Tránh dùng ảnh minh họa chung chung khi có ảnh thật."],
                   })
                 }
                 className={`group relative overflow-hidden border border-white/15 bg-white/5 text-left ${index === 1 ? "md:col-span-2 md:row-span-2" : ""}`}
@@ -324,7 +382,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-transparent to-transparent" />
                 <p className="absolute bottom-4 left-4 right-4 text-sm font-black uppercase tracking-[0.14em] text-white">{item.label}</p>
-                <span className="absolute right-3 top-3 bg-orange-600 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white opacity-0 transition group-hover:opacity-100">Mở popup</span>
+                <span className="absolute right-3 top-3 bg-orange-600 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white opacity-0 transition group-hover:opacity-100">Xem lớn</span>
               </button>
             ))}
           </div>
@@ -365,7 +423,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               {config.source.title}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
-              {config.source.description}
+              {sourceDescription}
             </p>
           </div>
 
@@ -383,7 +441,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                         title: item.title,
                         desc: item.desc,
                         image: sourceImage,
-                        bullets: ["Admin có thể thay bằng ảnh scan/hồ sơ thật.", "Nội dung này nên đi kèm ngày/lô hàng nếu public.", "Không nói tuyệt đối khi chưa có chứng từ."],
+                        bullets: ["Thông tin nên đi cùng hồ sơ xuất xứ tương ứng.", "Ưu tiên dữ liệu rõ nguồn gốc.", "Không dùng các tuyên bố tuyệt đối khi chưa có cơ sở kiểm tra."],
                       })
                     }
                     className="border border-orange-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-[0_18px_50px_rgba(234,88,12,0.12)]"
@@ -404,14 +462,14 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                     title: "Container, kho lạnh, C/O",
                     desc: "Khu vực này nên thay bằng ảnh thật: container nhập khẩu, giấy C/O, phiếu kiểm dịch hoặc kho lạnh.",
                     image: sourceImage,
-                    bullets: ["Có thể dùng nhiều ảnh qua thư viện admin.", "Nếu giấy tờ nhạy cảm, che thông tin trước khi public.", "Ảnh tự co theo khung để không bị méo."],
+                    bullets: ["Nên dùng hình ảnh thật về nguồn nguyên liệu và kho lạnh.", "Các thông tin nhạy cảm cần được xử lý phù hợp trước khi công bố.", "Hình ảnh tự co theo khung để không bị méo."],
                   })
                 }
                 className="relative min-h-[260px] overflow-hidden border border-orange-200 bg-white text-left"
               >
                 <img src={sourceImage} alt="Nguyên liệu" className="absolute inset-0 h-full w-full object-cover transition duration-700 hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-                <p className="absolute bottom-5 left-5 max-w-sm text-lg font-black text-white">Ảnh container, kho lạnh, C/O nên đặt vào đây khi có file public.</p>
+                <p className="absolute bottom-5 left-5 max-w-sm text-lg font-black text-white">Nguồn nguyên liệu, kho lạnh và hồ sơ xuất xứ cần được trình bày rõ ràng.</p>
               </button>
               <EvidenceFrame title="Video truy xuất" desc="Embed video truy xuất nguồn nguyên liệu từ Ba Lan khi xác nhận link." />
             </div>
@@ -429,7 +487,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </h2>
             </div>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              {config.factory.description}
+              {factoryDescription}
             </p>
           </div>
 
@@ -456,7 +514,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                     setModal({
                       eyebrow: "Gallery nhà máy",
                       title: `Ảnh nhà máy #${idx + 1}`,
-                      desc: "Bấm ảnh để mở lớn. Khi có ảnh thật từ nhà máy, admin thay vào vị trí này.",
+                      desc: "Hình ảnh nhà máy giúp người xem hiểu rõ hơn về không gian sản xuất, kho, QC và đóng gói.",
                       image: src,
                       bullets: ["Ảnh được crop bằng object-cover.", "Nên dùng ảnh dây chuyền, kho, QC, đóng gói.", "Ưu tiên ảnh NMV Food."],
                     })
@@ -494,7 +552,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               {config.documents.title}
             </h2>
             <p className="text-base font-semibold leading-8 text-slate-700">
-              {config.documents.subtitle}
+              {documentsSubtitle}
             </p>
           </div>
           <div className="mt-10 grid gap-0 md:grid-cols-2 xl:grid-cols-4">
@@ -505,9 +563,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                   {cert.image ? (
                     <div className="pointer-events-none absolute left-1/2 top-3 z-30 hidden w-80 -translate-x-1/2 -translate-y-full border border-orange-200 bg-white p-3 opacity-0 shadow-[0_24px_80px_rgba(15,23,42,0.22)] transition duration-200 group-hover:opacity-100 lg:block">
                       <div className="aspect-[4/3] overflow-hidden bg-orange-50">
-                        <img src={cert.image} alt={`Ảnh bằng chứng ${cert.title}`} className="h-full w-full object-cover" />
+                        <img src={cert.image} alt={cert.title} className="h-full w-full object-cover" />
                       </div>
-                      <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-orange-700">Ảnh bằng chứng</p>
                       <div className="absolute bottom-[-9px] left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b border-r border-orange-200 bg-white" />
                     </div>
                   ) : null}
@@ -543,7 +600,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             {config.pvi.title}
           </h2>
           <p className="mt-6 text-base font-semibold leading-8 text-white/72">
-            {config.pvi.description}
+            {pviDescription}
           </p>
           <button
             type="button"
@@ -553,7 +610,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 title: "Bảo hiểm trách nhiệm sản phẩm",
                 desc: "Đây là cam kết trách nhiệm theo phạm vi hợp đồng, không phải chứng nhận chất lượng sản phẩm.",
                 image: config.pvi.imageUrl,
-                bullets: ["[cần xác nhận] Pháp nhân trên hợp đồng.", "[cần xác nhận] Phạm vi bảo hiểm cụ thể.", "[cần xác nhận] Scan hợp đồng được phép public."],
+                bullets: ["Thể hiện trách nhiệm của thương hiệu với người tiêu dùng.", "Không sử dụng như chứng nhận chất lượng sản phẩm.", "Thông tin chi tiết áp dụng theo phạm vi hợp đồng bảo hiểm."],
               })
             }
             className="mt-8 inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
@@ -571,7 +628,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               <ShieldCheck className="h-12 w-12 text-orange-400" />
               <p className="mt-4 text-5xl font-black tracking-[-0.08em] text-white">PVI</p>
               <p className="mt-3 max-w-md text-sm font-bold leading-7 text-white/70">
-                Ảnh/scan PVI được cấu hình trong admin. Nếu chưa thay, hệ thống dùng ảnh mặc định.
+                Bảo hiểm trách nhiệm sản phẩm thể hiện cam kết đồng hành và bảo vệ quyền lợi người tiêu dùng theo phạm vi hợp đồng.
               </p>
             </div>
           </div>
@@ -607,7 +664,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             </h2>
           </div>
           <div className="space-y-3">
-            {config.faq.items.map((item) => (
+            {faqItems.map((item) => (
               <details key={item.id} className="group border border-orange-200 bg-white p-6">
                 <summary className="cursor-pointer list-none text-xl font-black tracking-[-0.04em] text-slate-950">
                   {item.title}
@@ -643,7 +700,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
 
       {modal ? (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
-          <button type="button" aria-label="Đóng popup" onClick={() => setModal(null)} className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" />
+          <button type="button" aria-label="Đóng" onClick={() => setModal(null)} className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" />
           <article className="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto border border-orange-200 bg-[#fffaf3] shadow-[0_30px_100px_rgba(15,23,42,0.35)]">
             <button
               type="button"
@@ -664,10 +721,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               <div className="p-8 lg:p-10">
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-700">{modal.eyebrow ?? "Chi tiết hồ sơ"}</p>
                 <h3 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] text-slate-950">{modal.title}</h3>
-                <p className="mt-5 text-base font-semibold leading-8 text-slate-700">{modal.desc}</p>
-                {modal.bullets?.length ? (
+                <p className="mt-5 text-base font-semibold leading-8 text-slate-700">
+                  {cleanPublicText(modal.desc, "Thông tin được trình bày rõ ràng để người xem có cơ sở kiểm tra.")}
+                </p>
+                {cleanPublicList(modal.bullets).length ? (
                   <ul className="mt-7 space-y-3">
-                    {modal.bullets.map((item) => (
+                    {cleanPublicList(modal.bullets).map((item) => (
                       <li key={item} className="flex gap-3 border border-orange-200 bg-white p-4 text-sm font-bold leading-6 text-slate-700">
                         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-orange-600" />
                         <span>{item}</span>

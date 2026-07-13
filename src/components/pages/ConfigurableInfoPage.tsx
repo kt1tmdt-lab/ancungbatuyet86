@@ -497,7 +497,7 @@ function QualityDetailPage({
         questions: [
           ["Có phải chân gà Trung Quốc không?", "Trang này cần trả lời bằng hồ sơ xuất xứ, không trả lời bằng lời khẳng định chung chung."],
           ["Nguồn Ba Lan/Hungary chứng minh bằng gì?", "Bằng C/O, phiếu kiểm dịch và hồ sơ lô hàng có thể đối chiếu."],
-          ["Có cần công khai hết giấy tờ không?", "Nên công khai phần được phép public, che thông tin nhạy cảm nếu cần."],
+          ["Có cần công khai hết giấy tờ không?", "Nên công bố phần phù hợp, đồng thời bảo vệ các thông tin nhạy cảm."],
         ],
         compliance: "Chỉ ghi nguồn nhập khẩu khi có hồ sơ đi kèm. Không dùng cụm “100% châu Âu” nếu chưa có đủ hồ sơ cho mọi lô hàng.",
       }
@@ -506,7 +506,7 @@ function QualityDetailPage({
           label: "Bộ hồ sơ nhà máy",
           checklist: ["Ảnh dây chuyền thật", "Ảnh khu sơ chế", "Ảnh khu đóng gói", "Sơ đồ quy trình 6 bước", "Chứng nhận ISO 22000:2018 cấp cho NMV Food"],
           questions: [
-            ["ACBT hay NMV Food được cấp ISO?", "Copy public phải ghi đúng: NMV Food đạt chứng nhận ISO 22000:2018."],
+            ["ACBT hay NMV Food được cấp ISO?", "Thông tin cần ghi đúng: NMV Food đạt chứng nhận ISO 22000:2018."],
             ["Quy trình có an toàn tuyệt đối không?", "Không dùng “an toàn tuyệt đối”. Dùng “quy trình 6 bước có kiểm soát”."],
             ["Ảnh nhà máy nên dùng ảnh nào?", "Ưu tiên ảnh/video quay tại NMV Food và có thể xác minh."],
           ],
@@ -517,7 +517,7 @@ function QualityDetailPage({
             label: "Bộ hồ sơ pháp lý",
             checklist: ["ISO 22000:2018", "HACCP", "Giấy đủ điều kiện ATTP", "Phiếu kiểm nghiệm VNTEST", "Ngày cấp và đơn vị cấp"],
             questions: [
-              ["Khách xem giấy tờ ở đâu?", "Mỗi card nên mở lightbox ảnh scan hoặc PDF."],
+              ["Khách xem giấy tờ ở đâu?", "Mỗi hồ sơ nên có phần xem chi tiết rõ ràng, dễ đối chiếu."],
               ["Có được ghi ACBT đạt ISO không?", "Chỉ ghi như vậy nếu giấy chứng nhận cấp cho đúng pháp nhân ACBT."],
               ["Phiếu kiểm nghiệm cần mới không?", "Nên dùng phiếu mới nhất và ghi rõ ngày kiểm nghiệm."],
             ],
@@ -526,7 +526,7 @@ function QualityDetailPage({
         : routePath.includes("pvi")
           ? {
               label: "Bộ hồ sơ PVI",
-              checklist: ["Logo PVI được phép dùng", "Scan hợp đồng đã che thông tin nhạy cảm", "Pháp nhân đứng tên hợp đồng", "Phạm vi bảo hiểm", "Thời hạn hiệu lực"],
+              checklist: ["Logo PVI", "Thông tin hợp đồng phù hợp để công bố", "Pháp nhân đứng tên hợp đồng", "Phạm vi bảo hiểm", "Thời hạn hiệu lực"],
               questions: [
                 ["PVI có chứng nhận chất lượng sản phẩm không?", "Không. PVI là bảo hiểm trách nhiệm sản phẩm, không phải chứng nhận chất lượng."],
                 ["Có được gọi là bảo chứng không?", "Không nên. Dùng “bảo hiểm trách nhiệm sản phẩm”."],
@@ -662,7 +662,7 @@ function QualityDetailPage({
                     <div className="flex h-full min-h-[72px] items-center justify-center bg-orange-600 text-sm font-black text-white">{String(index + 1).padStart(2, "0")}</div>
                     <div className="p-4">
                       <p className="text-lg font-black text-slate-950">{step}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-600">[cần bổ sung] ảnh/file/hồ sơ đối chiếu cho bước này.</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-600">Hồ sơ đối chiếu giúp người xem kiểm tra rõ từng bước.</p>
                     </div>
                     <ArrowRight className="mr-5 hidden text-orange-500 md:block" size={18} />
                   </div>
@@ -708,7 +708,7 @@ function QualityDetailPage({
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">Document vault</p>
                 <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">Kho hồ sơ mở ra xem được</h2>
               </div>
-              <p className="max-w-xl text-sm font-semibold leading-7 text-slate-600">Mỗi giấy tờ nên là một “folder” có chủ thể cấp, ngày cấp, file scan và trạng thái công khai.</p>
+              <p className="max-w-xl text-sm font-semibold leading-7 text-slate-600">Mỗi giấy tờ nên có chủ thể cấp, ngày cấp, phạm vi áp dụng và phần xem chi tiết rõ ràng.</p>
             </div>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {["ISO 22000:2018", "HACCP", "Giấy phép ATTP", "Phiếu kiểm nghiệm"].map((doc) => (
@@ -716,7 +716,7 @@ function QualityDetailPage({
                   <div className="absolute right-4 top-4 h-12 w-16 border border-orange-200 bg-orange-50" />
                   <FileSearch className="h-8 w-8 text-orange-600" />
                   <h3 className="mt-10 text-xl font-black tracking-[-0.04em]">{doc}</h3>
-                  <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">Trạng thái: [cần bổ sung file scan/PDF]</p>
+                  <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">Thông tin hồ sơ cần rõ chủ thể cấp, ngày cấp và phạm vi áp dụng.</p>
                 </div>
               ))}
             </div>
@@ -737,7 +737,7 @@ function QualityDetailPage({
               {[
                 ["Đúng", "Bảo hiểm trách nhiệm sản phẩm"],
                 ["Sai", "Bảo chứng chất lượng / PVI xác nhận chất lượng"],
-                ["Cần có", "Pháp nhân, phạm vi, thời hạn, scan được phép public"],
+                ["Cần có", "Pháp nhân, phạm vi, thời hạn và thông tin được phép công bố"],
               ].map(([label, desc]) => (
                 <div key={label} className="grid grid-cols-[110px_1fr] border border-white/15 bg-white/8">
                   <div className="bg-orange-600 p-5 text-sm font-black uppercase">{label}</div>
@@ -761,7 +761,7 @@ function QualityDetailPage({
                 <div key={step} className="border border-orange-200 bg-[#fff8ed] p-6">
                   <p className="text-xs font-black text-orange-600">{String(index + 1).padStart(2, "0")}</p>
                   <h3 className="mt-8 text-2xl font-black tracking-[-0.05em]">{step}</h3>
-                  <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">[cần bổ sung] người phụ trách, thời gian xử lý, bằng chứng cần khách cung cấp.</p>
+                  <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">Nêu rõ người phụ trách, thời gian xử lý và thông tin khách cần cung cấp.</p>
                 </div>
               ))}
             </div>
@@ -1081,7 +1081,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                     </div>
                     <div className="absolute bottom-6 left-6 z-10 max-w-xs bg-white/90 p-5 backdrop-blur">
                       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
-                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">Nội dung có thể chỉnh trong admin</p>
+                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">Nội dung được cập nhật theo từng giai đoạn</p>
                     </div>
                     <img
                       src={data.backgroundImage}

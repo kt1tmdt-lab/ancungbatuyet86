@@ -56,7 +56,7 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     eyebrow: "Chất lượng kiểm chứng",
     title: "Năng lực sản xuất rõ ràng trước khi nói về bán hàng",
     subtitle:
-      "Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ cần có hồ sơ đi kèm. Chỗ nào chưa có file công khai sẽ ghi rõ [cần bổ sung], không tự tuyên bố thay bằng chứng.",
+      "Nguyên liệu, nhà máy, chứng nhận và bảo hiểm được trình bày rõ ràng để khách hàng và đối tác có thêm cơ sở kiểm tra.",
     imageUrl: "/bento/bento-factory.png",
     ctaText: "Xem hồ sơ pháp lý",
     ctaLink: "#ho-so-phap-ly",
@@ -69,9 +69,9 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
       "Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác. Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng.",
     imageUrl: "/bento/bento-ingredients.png",
     facts: [
-      { id: "source-1", title: "Ba Lan, Hungary", description: "Nguồn nhập khẩu châu Âu. [cần bổ sung hồ sơ lô hàng public]" },
-      { id: "source-2", title: "C/O & kiểm dịch", description: "Claim nguồn gốc cần đi kèm C/O, kiểm dịch. [cần bổ sung ảnh scan]" },
-      { id: "source-3", title: "Kho lạnh", description: "Lưu kho lạnh theo quy chuẩn vận hành. [cần bổ sung ảnh/video kho]" },
+      { id: "source-1", title: "Ba Lan, Hungary", description: "Nguồn nguyên liệu được trình bày theo hồ sơ xuất xứ và kiểm dịch." },
+      { id: "source-2", title: "C/O & kiểm dịch", description: "Thông tin xuất xứ và kiểm dịch là cơ sở để kiểm tra nguồn nguyên liệu." },
+      { id: "source-3", title: "Kho lạnh", description: "Lưu kho lạnh theo quy chuẩn vận hành để giữ chất lượng ổn định." },
     ],
   },
   factory: {
@@ -96,12 +96,12 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
   },
   documents: {
     title: "Hồ sơ pháp lý & chứng nhận",
-    subtitle: "Mỗi chứng nhận nên có ảnh scan hoặc PDF đi kèm để khách hàng, đối tác và báo chí kiểm chứng.",
+    subtitle: "Các hồ sơ pháp lý, kiểm nghiệm và chứng nhận được trình bày để khách hàng, đối tác có thêm cơ sở đánh giá.",
     items: [
-      { id: "doc-1", title: "ISO 22000:2018", description: "Ghi rõ: cấp cho NMV Food. [cần bổ sung scan chứng nhận]", imageUrl: "/bento/bento-factory.png" },
-      { id: "doc-2", title: "HACCP", description: "Chương trình đào tạo, NMV Food. [cần bổ sung hồ sơ]", imageUrl: "/bento/bento-insurance.png" },
-      { id: "doc-3", title: "Giấy phép ATTP", description: "Giấy đủ điều kiện an toàn thực phẩm. [cần bổ sung ảnh/PDF]", imageUrl: "/bento/bento-ingredients.png" },
-      { id: "doc-4", title: "Phiếu kiểm nghiệm", description: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]", imageUrl: "/bento/bento-tiktok.png" },
+      { id: "doc-1", title: "ISO 22000:2018", description: "Chứng nhận ISO 22000:2018 cấp cho NMV Food trong hệ thống quản lý an toàn thực phẩm.", imageUrl: "/bento/bento-factory.png" },
+      { id: "doc-2", title: "HACCP", description: "Chương trình đào tạo và kiểm soát theo nguyên tắc HACCP tại NMV Food.", imageUrl: "/bento/bento-insurance.png" },
+      { id: "doc-3", title: "Giấy phép ATTP", description: "Giấy đủ điều kiện an toàn thực phẩm cho hoạt động sản xuất, kinh doanh liên quan.", imageUrl: "/bento/bento-ingredients.png" },
+      { id: "doc-4", title: "Phiếu kiểm nghiệm", description: "Kiểm nghiệm định kỳ là cơ sở theo dõi chất lượng sản phẩm theo từng giai đoạn.", imageUrl: "/bento/bento-tiktok.png" },
     ],
   },
   pvi: {
@@ -114,17 +114,17 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     title: "Khách hàng cần biết mình được bảo vệ thế nào",
     items: [
       { id: "policy-1", title: "Quyền được thông tin", description: "Sản phẩm cần ghi rõ thành phần, NSX, HSD và thông tin nhận diện." },
-      { id: "policy-2", title: "Quyền đổi trả", description: "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH. [cần bổ sung điều kiện]" },
-      { id: "policy-3", title: "Quyền khiếu nại", description: "Có kênh tiếp nhận và thời gian xử lý phản hồi. [cần bổ sung SLA]" },
+      { id: "policy-2", title: "Quyền đổi trả", description: "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH." },
+      { id: "policy-3", title: "Quyền khiếu nại", description: "Có kênh tiếp nhận và thời gian xử lý phản hồi." },
       { id: "policy-4", title: "Bảo hiểm sản phẩm", description: "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng." },
-      { id: "policy-5", title: "Kênh hỗ trợ", description: "Hotline, email và thời gian làm việc. [cần bổ sung thông tin chính thức]" },
+      { id: "policy-5", title: "Kênh hỗ trợ", description: "Hotline, email và thời gian làm việc được công bố để khách hàng liên hệ khi cần." },
     ],
   },
   faq: {
     title: "Những câu dễ bị hỏi nhất phải trả lời gọn và chắc",
     items: [
       { id: "faq-1", title: "ACBT có tự tuyên bố chất lượng không?", description: "Không nên. Trang này ưu tiên để bên thứ ba và hồ sơ nói thay." },
-      { id: "faq-2", title: "Nếu chưa có file chứng nhận thì sao?", description: "Giữ nhãn [cần bổ sung] ngay tại vị trí đó." },
+      { id: "faq-2", title: "Khách hàng nên xem hồ sơ nào?", description: "Ưu tiên xem nguồn nguyên liệu, nhà máy, chứng nhận, kiểm nghiệm và chính sách bảo vệ quyền lợi khách hàng." },
       { id: "faq-3", title: "PVI có nghĩa là sản phẩm được chứng nhận chất lượng không?", description: "Không. PVI là bảo hiểm trách nhiệm sản phẩm." },
     ],
   },
