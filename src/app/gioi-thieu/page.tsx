@@ -376,12 +376,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-24">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-20">
         <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 bg-orange-100 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-[38%] bg-[#fff4e2]" />
-        <div className="relative mx-auto grid max-w-[1560px] gap-10 px-5 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-14 xl:px-20">
-          <div className="grid gap-5 lg:sticky lg:top-24 lg:self-start">
-            <div className="relative min-h-[620px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[24px_24px_0_rgba(234,88,12,0.10)]">
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[#fff4e2]" />
+        <div className="relative grid w-full gap-8 px-5 sm:px-8 lg:grid-cols-[minmax(470px,0.86fr)_minmax(760px,1.14fr)] lg:px-8 xl:px-10 2xl:px-14">
+          <div className="grid gap-5 lg:self-start">
+            <div className="relative min-h-[640px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[18px_18px_0_rgba(234,88,12,0.10)]">
               {storyVideoUrl ? (
                 <iframe
                   src={storyVideoUrl}
@@ -423,16 +423,21 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div>
-            <SectionLabel>{storyEyebrow}</SectionLabel>
-            <div className="mt-7 grid gap-8 xl:grid-cols-[0.95fr_0.65fr] xl:items-start">
-              <article className="relative border border-orange-100 bg-[#fffaf2] p-7 shadow-[18px_18px_0_rgba(15,23,42,0.05)] sm:p-10">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <SectionLabel>{storyEyebrow}</SectionLabel>
+              <p className="max-w-xl text-right text-sm font-bold leading-6 text-slate-500">
+                Một hành trình được kể bằng nỗi sợ thật, quyết định thật và những việc đang làm mỗi ngày.
+              </p>
+            </div>
+            <div className="mt-7 grid gap-6 2xl:grid-cols-[minmax(520px,1fr)_minmax(340px,0.52fr)] 2xl:items-start">
+              <article className="relative border border-orange-100 bg-[#fffaf2] p-7 shadow-[14px_14px_0_rgba(15,23,42,0.05)] sm:p-10">
                 <Quote className="absolute right-7 top-7 h-12 w-12 text-orange-200" />
                 <p className="max-w-2xl text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl">
                   {storySubtitle}
                 </p>
 
-                <div className="mt-10 space-y-5 text-base font-semibold leading-8 text-slate-700">
+                <div className="mt-10 columns-1 gap-10 space-y-5 text-base font-semibold leading-8 text-slate-700 xl:columns-2 2xl:columns-1">
                   {storyPreview.map((paragraph, index) => (
                     <p
                       key={index}
@@ -450,7 +455,7 @@ export default function AboutPage() {
                 </div>
               </article>
 
-              <div className="grid gap-4">
+              <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-1">
                 <div className="border border-orange-100 bg-slate-950 p-6 text-white">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">Cấu trúc câu chuyện</p>
                   <div className="mt-6 space-y-4">
@@ -469,7 +474,7 @@ export default function AboutPage() {
                 <button
                   type="button"
                   onClick={() => setIsStoryOpen(true)}
-                  className="group border border-orange-200 bg-white p-6 text-left transition hover:-translate-y-1 hover:border-orange-500 hover:shadow-[0_24px_70px_rgba(234,88,12,0.16)]"
+                  className="group border border-orange-200 bg-white p-6 text-left transition hover:-translate-y-1 hover:border-orange-500 hover:shadow-[0_24px_70px_rgba(234,88,12,0.16)] xl:min-h-full"
                 >
                   <div className="flex items-center justify-between gap-5">
                     <div>
@@ -628,55 +633,134 @@ export default function AboutPage() {
       </section>
 
       {isStoryOpen ? (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5">
+          <style>{`
+            @keyframes storyFade { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes storyPop { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            @keyframes storyGlow { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: .9; transform: scale(1.08); } }
+          `}</style>
           <button
             type="button"
             aria-label="Đóng câu chuyện thương hiệu"
             onClick={() => setIsStoryOpen(false)}
-            className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+            className="absolute inset-0 animate-[storyFade_.18s_ease-out] bg-slate-950/82 backdrop-blur-md"
           />
-          <article className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden border border-orange-200 bg-[#fff8ed] shadow-[0_30px_100px_rgba(15,23,42,0.35)]">
+          <div className="pointer-events-none absolute -left-24 top-1/4 h-80 w-80 animate-[storyGlow_4s_ease-in-out_infinite] bg-orange-600/35 blur-3xl" />
+          <div className="pointer-events-none absolute -right-20 bottom-10 h-96 w-96 animate-[storyGlow_5s_ease-in-out_infinite] bg-orange-300/25 blur-3xl" />
+          <article className="relative max-h-[94vh] w-full max-w-[1380px] animate-[storyPop_.24s_ease-out] overflow-hidden border border-orange-300 bg-[#fff8ed] shadow-[0_36px_120px_rgba(0,0,0,0.55)]">
             <button
               type="button"
               onClick={() => setIsStoryOpen(false)}
-              className="absolute right-4 top-4 z-20 grid h-11 w-11 place-items-center bg-slate-950 text-white transition hover:bg-orange-600"
+              className="absolute right-4 top-4 z-30 grid h-12 w-12 place-items-center bg-slate-950 text-white shadow-xl transition hover:rotate-90 hover:bg-orange-600"
               aria-label="Đóng"
             >
               <X size={20} />
             </button>
-            <div className="grid max-h-[92vh] overflow-y-auto lg:grid-cols-[0.42fr_0.58fr]">
-              <aside className="bg-slate-950 p-8 text-white lg:sticky lg:top-0 lg:min-h-[92vh]">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-300">Câu chuyện thương hiệu</p>
-                <h3 className="mt-5 text-4xl font-black leading-tight tracking-[-0.06em]">
-                  Chân Gà Bà Tuyết
-                </h3>
-                <div className="mt-8 border-l-4 border-orange-500 pl-5">
-                  <p className="text-2xl font-black leading-tight">
-                    “Ngon phải rõ nguồn gốc – Ăn phải thật an tâm.”
+
+            <div className="grid max-h-[94vh] overflow-y-auto lg:grid-cols-[0.36fr_0.64fr]">
+              <aside className="relative overflow-hidden bg-slate-950 p-7 text-white lg:sticky lg:top-0 lg:min-h-[94vh] lg:p-9">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(234,88,12,.35),transparent_32%),radial-gradient(circle_at_90%_80%,rgba(251,146,60,.22),transparent_30%)]" />
+                <div className="absolute -right-24 top-24 h-64 w-64 rounded-full border border-orange-400/30" />
+                <div className="absolute -right-12 top-36 h-36 w-36 rounded-full bg-orange-600/25 blur-2xl" />
+
+                <div className="relative">
+                  <p className="inline-flex border border-orange-400/40 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">
+                    Hồ sơ cảm xúc
+                  </p>
+                  <h3 className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl">
+                    Câu chuyện của Bà Tuyết
+                  </h3>
+                  <p className="mt-5 max-w-md text-sm font-semibold leading-7 text-white/65">
+                    Từ một nỗi sợ rất đời thường đến quyết định trả lời thị trường bằng minh bạch, nhà máy, nguyên liệu và từng sản phẩm thật.
                   </p>
                 </div>
-                <p className="mt-8 text-sm font-semibold leading-7 text-white/65">
-                  Bản đầy đủ để khách hàng, đối tác và báo chí hiểu câu chuyện phía sau thương hiệu — không chỉ bằng lời nói, mà bằng nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày.
-                </p>
+
+                <div className="relative mt-8 overflow-hidden border border-white/10 bg-white/5">
+                  <div className="relative h-64">
+                    <AssetImage src={teamImage} alt="Bà Tuyết trong câu chuyện thương hiệu" className="opacity-85" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/15 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Brand story</p>
+                      <p className="mt-2 text-2xl font-black leading-tight">Không chỉ kể. Phải cho người ta nhìn thấy.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative mt-7 space-y-3">
+                  {storyChapters.map((item) => (
+                    <div key={item.number} className="group grid grid-cols-[42px_1fr] gap-4 border border-white/10 bg-white/[0.04] p-3 transition hover:-translate-x-1 hover:border-orange-400/70 hover:bg-orange-600/15">
+                      <div className="grid h-10 w-10 place-items-center bg-orange-600 text-xs font-black shadow-[0_0_28px_rgba(234,88,12,.45)]">
+                        {item.number}
+                      </div>
+                      <div>
+                        <p className="text-sm font-black">{item.title}</p>
+                        <p className="mt-1 text-[11px] font-semibold leading-5 text-white/55 group-hover:text-white/80">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </aside>
 
-              <div className="p-7 sm:p-10">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-700">Bản đầy đủ</p>
-                <h4 className="mt-4 text-3xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-4xl">
-                  {storyTitle}
-                </h4>
-                <div className="mt-8 space-y-5 text-base font-semibold leading-8 text-slate-700">
+              <div className="relative bg-[#fff8ed] p-6 sm:p-10 lg:p-12">
+                <div className="pointer-events-none absolute right-10 top-8 text-[120px] font-black leading-none tracking-[-0.08em] text-orange-100/80 sm:text-[170px]">
+                  “
+                </div>
+                <div className="relative">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="border-l-4 border-orange-600 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
+                      Bản đầy đủ
+                    </p>
+                    {storyProofs.map((item) => (
+                      <span key={item.label} className="border border-orange-100 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
+                        {item.label}: <span className="text-orange-700">{item.value}</span>
+                      </span>
+                    ))}
+                  </div>
+
+                  <h4 className="mt-6 max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.075em] text-slate-950 sm:text-6xl">
+                    {storyTitle}
+                  </h4>
+
+                  <div className="mt-8 grid gap-4 border-y border-orange-100 py-5 md:grid-cols-3">
+                    {["Nỗi sợ không rõ nguồn gốc", "Sức ép từ dư luận", "Trả lời bằng việc làm thật"].map((item, index) => (
+                      <div key={item} className="flex items-center gap-3">
+                        <span className="grid h-9 w-9 shrink-0 place-items-center bg-orange-600 text-xs font-black text-white">0{index + 1}</span>
+                        <p className="text-sm font-black leading-5 text-slate-900">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="relative mt-9 space-y-5 text-base font-semibold leading-8 text-slate-700">
                   {storyParagraphs.map((paragraph, index) => {
                     const isEmphasis = paragraph.length < 90 || paragraph === paragraph.toUpperCase();
+                    const isFinal = index >= storyParagraphs.length - 2;
                     return (
-                      <p
-                        key={index}
-                        className={isEmphasis ? "border-l-4 border-orange-500 bg-white px-5 py-4 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950" : ""}
-                      >
-                        {paragraph}
-                      </p>
+                      <div key={index} className="grid gap-4 md:grid-cols-[54px_1fr]">
+                        <span className="hidden h-10 w-10 place-items-center border border-orange-200 bg-white text-[11px] font-black text-orange-700 md:grid">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <p
+                          className={
+                            isFinal
+                              ? "bg-slate-950 px-6 py-5 text-xl font-black leading-tight tracking-[-0.03em] text-white shadow-[12px_12px_0_rgba(234,88,12,0.20)]"
+                              : isEmphasis
+                                ? "border-l-4 border-orange-500 bg-white px-5 py-4 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 shadow-sm"
+                                : "bg-white/60 px-5 py-4"
+                          }
+                        >
+                          {paragraph}
+                        </p>
+                      </div>
                     );
                   })}
+                </div>
+
+                <div className="relative mt-10 border border-orange-200 bg-orange-600 p-6 text-white shadow-[16px_16px_0_rgba(15,23,42,0.10)]">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-100">Thông điệp chốt</p>
+                  <p className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em]">
+                    Chân Gà Bà Tuyết — ngon phải rõ nguồn gốc, ăn phải thật an tâm.
+                  </p>
                 </div>
               </div>
             </div>
