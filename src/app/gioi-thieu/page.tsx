@@ -256,6 +256,11 @@ const missionCards = [
     title: "Giá trị cốt lõi",
     desc: "Chân thành trong giao tiếp. Trách nhiệm với sản phẩm. Minh bạch về nguồn gốc và quy trình. Luôn lắng nghe phản hồi của khách hàng. Không ngừng cải tiến sản phẩm và hoạt động sản xuất.",
   },
+  {
+    icon: Users,
+    title: "Con người",
+    desc: "Đội ngũ sản xuất, kho vận, livestream và chăm sóc khách hàng cùng vận hành thương hiệu từ những công việc cụ thể mỗi ngày.",
+  },
 ];
 
 export default function AboutPage() {
