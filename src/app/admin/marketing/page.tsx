@@ -573,6 +573,17 @@ function MarketingPageContent() {
       return;
     }
 
+    if (mediaPickerAssetId.startsWith("history:")) {
+      const itemId = mediaPickerAssetId.replace("history:", "");
+      const nextHistoryList = historyList.map((item) =>
+        item.id === itemId ? { ...item, imageUrl: url } : item,
+      );
+      setHistoryList(nextHistoryList);
+      setMediaPickerAssetId(null);
+      await saveMarketingConfig({ historyMilestones: nextHistoryList });
+      return;
+    }
+
     if (activeTab === "trust") {
       const nextTrustList = trustList.map((item) =>
         item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
@@ -1271,7 +1282,7 @@ function MarketingPageContent() {
                   <div>
                     <h2 className="text-base font-black text-slate-900 uppercase">Cột mốc lịch sử phát triển</h2>
                     <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
-                      Mỗi dòng là một cột mốc đang hiển thị ở trang Lịch sử phát triển. Admin có thể sửa từng chữ, từng ảnh, link và thứ tự.
+                      Mỗi dòng là một cột mốc hiển thị trong section Hành trình phát triển của trang /gioi-thieu. Admin sửa ở đây thì ngoài trang Giới thiệu đổi theo.
                     </p>
                   </div>
                   <button
@@ -1286,7 +1297,7 @@ function MarketingPageContent() {
                 <div className="border border-orange-100 bg-orange-50 p-4 text-xs leading-5 text-slate-700">
                   <p className="font-bold text-slate-900">Cách dùng:</p>
                   <p className="mt-1">
-                    Nhập năm, tiêu đề, mô tả ngắn, nội dung chi tiết và ảnh. Bật/tắt để ẩn hiện ngoài website. Ô thứ tự càng nhỏ sẽ hiển thị càng trước.
+                    Nhập năm, tiêu đề, mô tả ngắn, nội dung chi tiết và ảnh. Ngoài /gioi-thieu sẽ hiện cả mô tả ngắn và nội dung chi tiết. Bật/tắt để ẩn hiện, ô thứ tự càng nhỏ sẽ hiển thị càng trước.
                   </p>
                 </div>
 
@@ -1412,7 +1423,7 @@ function MarketingPageContent() {
                                   />
                                   <button
                                     type="button"
-                                    onClick={() => setMediaPickerAssetId(item.id)}
+                                    onClick={() => setMediaPickerAssetId(`history:${item.id}`)}
                                     className="inline-flex shrink-0 items-center gap-1.5 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                                   >
                                     <ImagePlus size={14} />

@@ -326,6 +326,38 @@ export default function AboutPage() {
   const visibleMilestones = historyMilestones
     .filter((item) => item.enabled !== false)
     .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
+  const businessSectionLabel = marketingTextValue(homeTexts, "about_business_label", "Thông tin doanh nghiệp");
+  const businessSectionTitle = marketingTextValue(homeTexts, "about_business_title", "Thông tin thương hiệu và đơn vị sản xuất");
+  const businessSectionDescription = marketingTextValue(
+    homeTexts,
+    "about_business_description",
+    "Những thông tin cơ bản giúp khách hàng, đối tác và các đơn vị truyền thông có thể kiểm chứng rõ hơn về thương hiệu Ăn Cùng Bà Tuyết."
+  );
+  const businessInfoItems = Array.from({ length: 12 }, (_, index) => {
+    const position = index + 1;
+    const [fallbackLabel, fallbackValue] = businessInfo[index] || [`Dòng ${position}`, ""];
+    return [
+      marketingTextValue(homeTexts, `about_business_${position}_label`, fallbackLabel),
+      marketingTextValue(homeTexts, `about_business_${position}_value`, fallbackValue),
+    ] as const;
+  }).filter(([label, value]) => label || value);
+  const valuesSectionLabel = marketingTextValue(homeTexts, "about_values_label", "Định hướng thương hiệu");
+  const valuesSectionTitle = marketingTextValue(homeTexts, "about_values_title", "Sứ mệnh, tầm nhìn và giá trị cốt lõi.");
+  const valuesSectionDescription = marketingTextValue(
+    homeTexts,
+    "about_values_description",
+    "Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
+  );
+  const valueIcons = [Target, BadgeCheck, Heart, Users];
+  const valueCards = valueIcons.map((icon, index) => {
+    const fallback = missionCards[index];
+    const position = index + 1;
+    return {
+      icon,
+      title: marketingTextValue(homeTexts, `about_value_${position}_title`, fallback.title),
+      desc: marketingTextValue(homeTexts, `about_value_${position}_description`, fallback.desc),
+    };
+  });
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
@@ -493,17 +525,17 @@ export default function AboutPage() {
       <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.75fr_1.25fr]">
           <div>
-            <SectionLabel>Thông tin doanh nghiệp</SectionLabel>
+            <SectionLabel>{businessSectionLabel}</SectionLabel>
             <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              Thông tin thương hiệu và đơn vị sản xuất
+              {businessSectionTitle}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
-              Những thông tin cơ bản giúp khách hàng, đối tác và các đơn vị truyền thông có thể kiểm chứng rõ hơn về thương hiệu Ăn Cùng Bà Tuyết.
+              {businessSectionDescription}
             </p>
           </div>
 
           <div className="border border-orange-100 bg-white">
-            {businessInfo.map(([label, value]) => {
+            {businessInfoItems.map(([label, value]) => {
               const isPending = value.toLowerCase().includes("cần xác nhận");
               return (
                 <div key={label} className="grid border-b border-orange-100 last:border-b-0 md:grid-cols-[0.42fr_0.58fr]">
@@ -542,7 +574,7 @@ export default function AboutPage() {
               ) : null}
               {visibleMilestones.map((item, index) => {
                 const isRight = index % 2 === 0;
-                const description = item.description || item.detailContent;
+                const hasMilestoneContent = Boolean(item.description || item.detailContent);
                 const content = (
                   <div className={`overflow-hidden border border-orange-100 bg-[#fbf7ef] shadow-[12px_12px_0_rgba(234,88,12,0.08)] transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[18px_18px_0_rgba(234,88,12,0.12)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
                     {item.imageUrl ? (
@@ -558,11 +590,14 @@ export default function AboutPage() {
                             {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                           </p>
                         </div>
-                        {!description ? <PlaceholderValue>Cần bổ sung</PlaceholderValue> : null}
+                        {!hasMilestoneContent ? <PlaceholderValue>Cần bổ sung</PlaceholderValue> : null}
                       </div>
                       <h3 className="mt-6 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title || "Cột mốc mới"}</h3>
-                      {description ? (
-                        <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{description}</p>
+                      {item.description ? (
+                        <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.description}</p>
+                      ) : null}
+                      {item.detailContent ? (
+                        <p className="mt-4 border-l-4 border-orange-300 bg-white/70 px-4 py-3 text-sm font-semibold leading-7 text-slate-700">{item.detailContent}</p>
                       ) : null}
                       {item.linkUrl ? (
                         <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-orange-700">
@@ -589,13 +624,16 @@ export default function AboutPage() {
 
       <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mx-auto max-w-7xl">
-          <SectionLabel>Sứ mệnh & giá trị</SectionLabel>
+          <SectionLabel>{valuesSectionLabel}</SectionLabel>
           <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-            Sứ mệnh, tầm nhìn và giá trị cốt lõi
+            {valuesSectionTitle}
           </h2>
+          <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700">
+            {valuesSectionDescription}
+          </p>
 
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {missionCards.map((item) => {
+            {valueCards.slice(0, 3).map((item) => {
               const Icon = item.icon;
               return (
                 <article key={item.title} className="border border-orange-100 bg-white p-7">
@@ -617,9 +655,9 @@ export default function AboutPage() {
               <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600">
                 <Users size={24} />
               </div>
-              <h3 className="mt-7 text-3xl font-black tracking-[-0.05em]">Con người</h3>
+              <h3 className="mt-7 text-3xl font-black tracking-[-0.05em]">{valueCards[3].title}</h3>
               <p className="mt-5 text-base font-semibold leading-8 text-slate-700">
-                Đằng sau mỗi sản phẩm là đội ngũ cùng làm việc từ khâu nghiên cứu, sản xuất, kiểm soát, đóng gói đến phân phối. Ăn Cùng Bà Tuyết coi con người là nền tảng để thương hiệu có thể phát triển ổn định và lâu dài.
+                {valueCards[3].desc}
               </p>
             </div>
           </div>

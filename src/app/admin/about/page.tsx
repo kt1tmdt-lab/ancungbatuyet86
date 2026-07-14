@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Eye, Film, ImageIcon, Route, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, Building2, Eye, Film, ImageIcon, Route, ShieldCheck, Target, Users } from "lucide-react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 
 const aboutSections = [
@@ -16,6 +16,18 @@ const aboutSections = [
     description: "Sửa các card uy tín, chứng nhận, bảo hiểm và năng lực đang gộp vào section Thông tin doanh nghiệp.",
     href: "/admin/site-content?tab=trust",
     icon: ShieldCheck,
+  },
+  {
+    title: "Bảng thông tin doanh nghiệp",
+    description: "Sửa tiêu đề, mô tả và từng dòng trong bảng thông tin thương hiệu, pháp nhân, nhà máy, kênh phân phối.",
+    href: "/admin/site-content?tab=homeTexts",
+    icon: Building2,
+  },
+  {
+    title: "Sứ mệnh, tầm nhìn và giá trị",
+    description: "Sửa nhãn, tiêu đề, mô tả và 4 thẻ Sứ mệnh / Tầm nhìn / Giá trị cốt lõi / Con người.",
+    href: "/admin/site-content?tab=homeTexts",
+    icon: Target,
   },
   {
     title: "Hành trình phát triển",
