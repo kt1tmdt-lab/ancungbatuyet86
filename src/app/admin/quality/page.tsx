@@ -21,7 +21,7 @@ const tabs: Array<{ key: SectionKey; label: string; note: string }> = [
   { key: "factory", label: "Nhà máy & quy trình", note: "Gallery + 6 bước" },
   { key: "documents", label: "Hồ sơ pháp lý", note: "Card mở popup ngoài web" },
   { key: "pvi", label: "PVI", note: "Nội dung bảo hiểm" },
-  { key: "policy", label: "Chính sách & FAQ", note: "Accordion cuối trang" },
+  { key: "policy", label: "Chính sách khách hàng", note: "Các card quyền lợi cuối trang" },
 ];
 
 function cloneDefault() {
@@ -227,7 +227,7 @@ export default function AdminQualityPage() {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Cấu hình website</p>
             <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Trang Chất lượng</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Màn này sửa đúng layout ngoài trang /chat-luong: chữ, ảnh, card, popup, quy trình, chính sách và FAQ.
+              Màn này sửa đúng layout ngoài trang /chat-luong: chữ, ảnh, card hồ sơ mở popup, quy trình, PVI và chính sách khách hàng.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -318,9 +318,6 @@ export default function AdminQualityPage() {
                 <Field label="Tiêu đề chính sách"><TextArea value={config.policy.title} onChange={(e) => patch({ policy: { ...config.policy, title: e.target.value } })} /></Field>
                 <h2 className="text-lg font-black text-slate-950">Chính sách khách hàng</h2>
                 {renderList(config.policy.items, (items) => patch({ policy: { ...config.policy, items } }), "policy")}
-                <Field label="Tiêu đề FAQ"><TextArea value={config.faq.title} onChange={(e) => patch({ faq: { ...config.faq, title: e.target.value } })} /></Field>
-                <h2 className="text-lg font-black text-slate-950">FAQ</h2>
-                {renderList(config.faq.items, (items) => patch({ faq: { ...config.faq, items } }), "faq")}
               </div>
             ) : null}
           </main>

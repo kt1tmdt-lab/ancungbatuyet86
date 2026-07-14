@@ -77,7 +77,7 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
   factory: {
     title: "Nhà máy sản xuất NMV Food — Thái Nguyên",
     description:
-      "Ghi đúng chủ thể: NMV Food đạt chứng nhận ISO 22000:2018. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Không dùng “an toàn tuyệt đối”, “vô trùng”; dùng “quy trình 6 bước có kiểm soát”.",
+      "Ghi đúng chủ thể: NMV Food đạt chứng nhận ISO 22000:2018. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Sử dụng cách diễn đạt trung tính như “quy trình 6 bước có kiểm soát”.",
     imageUrl: "/bento/bento-factory.png",
     gallery: [
       { id: "factory-gallery-1", title: "Không gian nhà máy", description: "Ảnh dây chuyền/khu sản xuất.", imageUrl: "/bento/bento-factory.png" },
@@ -105,9 +105,9 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     ],
   },
   pvi: {
-    title: "PVI là cam kết trách nhiệm, không phải “bảo chứng chất lượng”",
+    title: "Bảo hiểm trách nhiệm sản phẩm — PVI",
     description:
-      "ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, có đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm.",
+      "Bảo hiểm trách nhiệm sản phẩm do PVI cung cấp được trình bày theo phạm vi hợp đồng. Không trình bày như PVI trực tiếp kiểm nghiệm hoặc xác nhận chất lượng sản phẩm.",
     imageUrl: "/bento/bento-insurance.png",
   },
   policy: {
@@ -116,7 +116,7 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
       { id: "policy-1", title: "Quyền được thông tin", description: "Sản phẩm cần ghi rõ thành phần, NSX, HSD và thông tin nhận diện." },
       { id: "policy-2", title: "Quyền đổi trả", description: "Có quy trình đổi trả khi sản phẩm lỗi theo chính sách CSKH." },
       { id: "policy-3", title: "Quyền khiếu nại", description: "Có kênh tiếp nhận và thời gian xử lý phản hồi." },
-      { id: "policy-4", title: "Bảo hiểm sản phẩm", description: "Sản phẩm được bảo hiểm trách nhiệm sản phẩm bởi PVI theo phạm vi hợp đồng." },
+      { id: "policy-4", title: "Bảo hiểm trách nhiệm sản phẩm", description: "Quyền lợi bảo hiểm được xem xét theo pháp nhân, sản phẩm, thời hạn và điều kiện cụ thể của hợp đồng." },
       { id: "policy-5", title: "Kênh hỗ trợ", description: "Hotline, email và thời gian làm việc được công bố để khách hàng liên hệ khi cần." },
     ],
   },
