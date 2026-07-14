@@ -773,7 +773,7 @@ function MarketingPageContent() {
             rel="noreferrer"
             className="mt-3 inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-orange-700 hover:text-orange-900"
           >
-            Xem ngo?i web <ExternalLink size={13} />
+            Xem ngoài web <ExternalLink size={13} />
           </a>
         </div>
       </div>
