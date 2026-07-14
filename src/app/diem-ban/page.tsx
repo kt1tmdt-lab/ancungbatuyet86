@@ -22,7 +22,7 @@ export default async function SalesPointPage() {
   ]);
   const firstLocation = locations[0];
   const mapSrc = firstLocation
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${firstLocation.lng - 0.08}%2C${firstLocation.lat - 0.05}%2C${firstLocation.lng + 0.08}%2C${firstLocation.lat + 0.05}&layer=mapnik&marker=${firstLocation.lat}%2C${firstLocation.lng}`
+    ? `https://www.google.com/maps?q=${firstLocation.lat},${firstLocation.lng}&z=13&hl=vi&output=embed`
     : "";
 
   return (

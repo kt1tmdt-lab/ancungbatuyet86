@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Building2, Eye, Film, ImageIcon, Route, ShieldCheck, Target, Users } from "lucide-react";
+import { ArrowRight, Building2, Eye, Film, FileText, ImageIcon, Route, ShieldCheck, Target, Users } from "lucide-react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 
 const aboutSections = [
+  {
+    title: "Hero hồ sơ thương hiệu",
+    description: "Sửa nhãn, tiêu đề, mô tả, 2 nút CTA và 3 ô số liệu đầu trang Giới thiệu.",
+    href: "/admin/site-content?tab=homeTexts",
+    icon: FileText,
+  },
   {
     title: "Video, gallery và ảnh trang Giới thiệu",
     description: "Sửa video giới thiệu, ảnh quy trình, gallery và ảnh quote đang dùng trên /gioi-thieu.",

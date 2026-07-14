@@ -146,7 +146,7 @@ function marketingTextValue(items: HomeTextItem[], key: string, fallback: string
   return repairMojibakeText(value && value.trim() ? value : fallback);
 }
 
-const brandStats = [
+const fallbackBrandStats = [
   {
     value: "Cần cập nhật",
     label: "Doanh thu thương mại điện tử năm 2025.",
@@ -363,25 +363,43 @@ export default function AboutPage() {
       desc: marketingTextValue(homeTexts, `about_value_${position}_description`, fallback.desc),
     };
   });
+  const aboutHeroLabel = marketingTextValue(homeTexts, "about_hero_label", "Hồ sơ thương hiệu");
+  const aboutHeroTitle = marketingTextValue(homeTexts, "about_hero_title", "Hồ sơ thương hiệu Ăn Cùng Bà Tuyết");
+  const aboutHeroDescription = marketingTextValue(
+    homeTexts,
+    "about_hero_description",
+    "Ăn Cùng Bà Tuyết là thương hiệu đồ ăn vặt Việt Nam được xây dựng từ những nội dung ẩm thực gần gũi, hướng đến các sản phẩm có nguồn gốc rõ ràng, được sản xuất theo quy trình và phân phối rộng rãi trên toàn quốc."
+  );
+  const aboutHeroPrimaryText = marketingTextValue(homeTexts, "about_hero_primary_text", "Xem sản phẩm");
+  const aboutHeroPrimaryLink = marketingTextValue(homeTexts, "about_hero_primary_link", "/san-pham");
+  const aboutHeroSecondaryText = marketingTextValue(homeTexts, "about_hero_secondary_text", "Xem chất lượng & quy trình");
+  const aboutHeroSecondaryLink = marketingTextValue(homeTexts, "about_hero_secondary_link", "/chat-luong");
+  const brandStats = fallbackBrandStats.map((fallback, index) => {
+    const position = index + 1;
+    return {
+      value: marketingTextValue(homeTexts, `about_hero_stat_${position}_value`, fallback.value),
+      label: marketingTextValue(homeTexts, `about_hero_stat_${position}_label`, fallback.label),
+    };
+  });
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
       <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
-            <SectionLabel>Hồ sơ thương hiệu</SectionLabel>
+            <SectionLabel>{aboutHeroLabel}</SectionLabel>
             <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.07em] text-slate-950 sm:text-6xl lg:text-7xl">
-              Hồ sơ thương hiệu Ăn Cùng Bà Tuyết
+              {aboutHeroTitle}
             </h1>
           </div>
 
           <div>
             <p className="max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              Ăn Cùng Bà Tuyết là thương hiệu đồ ăn vặt Việt Nam được xây dựng từ những nội dung ẩm thực gần gũi, hướng đến các sản phẩm có nguồn gốc rõ ràng, được sản xuất theo quy trình và phân phối rộng rãi trên toàn quốc.
+              {aboutHeroDescription}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/san-pham">Xem sản phẩm</ButtonLink>
-              <ButtonLink href="/chat-luong" variant="secondary">Xem chất lượng & quy trình</ButtonLink>
+              <ButtonLink href={aboutHeroPrimaryLink}>{aboutHeroPrimaryText}</ButtonLink>
+              <ButtonLink href={aboutHeroSecondaryLink} variant="secondary">{aboutHeroSecondaryText}</ButtonLink>
             </div>
           </div>
         </div>
