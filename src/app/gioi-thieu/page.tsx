@@ -8,6 +8,7 @@ import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
   type PageAssetItem,
+  type HomeTextItem,
   type TrustSectionItem,
   type HistoryMilestoneItem,
   type CommunityActivityItem,
@@ -110,6 +111,11 @@ function repairMarketingItem<T extends Record<string, unknown>>(item: T): T {
   return Object.fromEntries(
     Object.entries(item).map(([key, value]) => [key, typeof value === "string" ? repairMojibakeText(value) : value])
   ) as T;
+}
+
+function marketingTextValue(items: HomeTextItem[], key: string, fallback: string) {
+  const value = items.find((item) => item.key === key)?.value;
+  return repairMojibakeText(value && value.trim() ? value : fallback);
 }
 
 
@@ -390,6 +396,7 @@ function ValueCard({
 
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>([]);
+  const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(DEFAULT_MARKETING_CONFIG.homeTexts);
   const [trustSections, setTrustSections] = useState<TrustSectionItem[]>(DEFAULT_MARKETING_CONFIG.trustSections);
   const [historyMilestones, setHistoryMilestones] = useState<HistoryMilestoneItem[]>(DEFAULT_MARKETING_CONFIG.historyMilestones);
   const [communityActivities, setCommunityActivities] = useState<CommunityActivityItem[]>(DEFAULT_MARKETING_CONFIG.communityActivities);
@@ -402,6 +409,7 @@ export default function AboutPage() {
         const data = await res.json();
         const marketingConfig = normalizeMarketingConfig(data?.data);
         setPageAssets(marketingConfig.pageAssets);
+        setHomeTexts(marketingConfig.homeTexts.map(repairMarketingItem));
         setTrustSections(marketingConfig.trustSections.map(repairMarketingItem));
         setHistoryMilestones(marketingConfig.historyMilestones.map(repairMarketingItem));
         setCommunityActivities(marketingConfig.communityActivities.map(repairMarketingItem));
@@ -419,9 +427,30 @@ export default function AboutPage() {
   }, {});
   const processDisplaySteps = processSteps.map((item, index) => ({
     ...item,
+    title: marketingTextValue(homeTexts, `about_process_step_${index + 1}_title`, item.title),
+    text: marketingTextValue(homeTexts, `about_process_step_${index + 1}_description`, item.text),
     image: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.imageUrl || item.image,
     linkUrl: assetByKey[ABOUT_PROCESS_ASSET_KEYS[index]]?.linkUrl || item.linkUrl,
   }));
+  const aboutValueItems = values.map((item, index) => ({
+    ...item,
+    title: marketingTextValue(homeTexts, `about_value_${index + 1}_title`, item.title),
+    text: marketingTextValue(homeTexts, `about_value_${index + 1}_description`, item.text),
+  }));
+  const aboutProcessLabel = marketingTextValue(homeTexts, "about_process_label", "Quy trình vận hành");
+  const aboutProcessTitle = marketingTextValue(homeTexts, "about_process_title", "Quy trình sản xuất bài bản & an toàn");
+  const aboutProcessDescription = marketingTextValue(
+    homeTexts,
+    "about_process_description",
+    "Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
+  );
+  const aboutValuesLabel = marketingTextValue(homeTexts, "about_values_label", "Định hướng thương hiệu");
+  const aboutValuesTitle = marketingTextValue(homeTexts, "about_values_title", "Sứ mệnh, tầm nhìn và giá trị cốt lõi.");
+  const aboutValuesDescription = marketingTextValue(
+    homeTexts,
+    "about_values_description",
+    "Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
+  );
   const factoryImage = assetByKey.about_process_background?.imageUrl || "/bento/bento-factory.png";
   const teamImage = assetByKey.about_team_quote?.imageUrl || "/bento/bento-factory.png";
   const teamLink = assetByKey.about_team_quote?.linkUrl;
@@ -572,9 +601,9 @@ export default function AboutPage() {
         <div className="relative z-10 grid lg:grid-cols-[0.62fr_1.38fr]">
           <div className="border-b border-orange-100 bg-[#f7efe3]/70 backdrop-blur-md px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
-              label="Quy trình vận hành"
-              title="Quy trình sản xuất bài bản & an toàn"
-              description="Từ nguyên liệu, xưởng sản xuất, đóng gói đến phân phối, mọi thông tin đều hướng tới sự minh bạch và dễ kiểm chứng."
+              label={aboutProcessLabel}
+              title={aboutProcessTitle}
+              description={aboutProcessDescription}
             />
           </div>
 
@@ -601,14 +630,14 @@ export default function AboutPage() {
         <div className="grid lg:grid-cols-[0.62fr_1.38fr]">
           <div className="border-b border-orange-100 px-5 py-16 sm:px-8 lg:border-b-0 lg:border-r lg:px-14 xl:px-20">
             <SectionIntro
-              label="Định hướng thương hiệu"
-              title="Sứ mệnh, tầm nhìn và giá trị cốt lõi."
-              description="Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
+              label={aboutValuesLabel}
+              title={aboutValuesTitle}
+              description={aboutValuesDescription}
             />
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((item, index) => (
+            {aboutValueItems.map((item, index) => (
               <div
                 key={item.title}
                 className="border-b border-orange-100 sm:border-r lg:border-b-0"
