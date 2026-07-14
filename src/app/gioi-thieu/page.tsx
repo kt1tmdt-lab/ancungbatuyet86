@@ -25,6 +25,7 @@ import {
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
+  type HistoryMilestoneItem,
   type HomeTextItem,
   type PageAssetItem,
 } from "@/lib/marketing-config";
@@ -239,35 +240,6 @@ const businessInfo = [
   ["Bảo hiểm sản phẩm", "Bảo hiểm trách nhiệm sản phẩm PVI"],
 ];
 
-const timeline = [
-  {
-    year: "2022",
-    title: "Những nội dung đầu tiên",
-    desc: "Hành trình bắt đầu từ niềm yêu thích ẩm thực và những nội dung đời thường được bà Tuyết chia sẻ trên mạng xã hội. Sự gần gũi và chân thành giúp hình ảnh “Bà Tuyết” từng bước nhận được sự quan tâm của cộng đồng.",
-  },
-  {
-    year: "2023",
-    title: "Hình thành thương hiệu ACBT",
-    desc: "Ăn Cùng Bà Tuyết bắt đầu được phát triển theo định hướng một thương hiệu đồ ăn vặt riêng biệt. Từ việc sáng tạo nội dung, đội ngũ từng bước nghiên cứu sản phẩm, bao bì và phương thức đưa sản phẩm đến người tiêu dùng.",
-  },
-  {
-    year: "2024",
-    title: "Mở rộng trên thương mại điện tử",
-    desc: "Thương hiệu đẩy mạnh hoạt động trên TikTok Shop, Shopee và các nền tảng mạng xã hội. Cộng đồng khách hàng tiếp tục được mở rộng, tạo nền tảng cho việc phát triển thêm sản phẩm và kênh phân phối.",
-  },
-  {
-    year: "2025",
-    title: "Chuẩn hóa hoạt động sản xuất",
-    desc: "Nhà máy sản xuất quy mô 3.300 m² tại Thái Nguyên được đưa vào hoạt động cùng NMV Food. Đây là bước tiến quan trọng trong quá trình nâng cao năng lực sản xuất, quản lý quy trình và mở rộng khả năng cung ứng sản phẩm.",
-  },
-  {
-    year: "2026",
-    title: "Tiếp tục mở rộng",
-    desc: "Cần xác nhận mốc phát triển và định hướng năm 2026.",
-    pending: true,
-  },
-];
-
 const missionCards = [
   {
     icon: Target,
@@ -289,6 +261,7 @@ const missionCards = [
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(DEFAULT_MARKETING_CONFIG.pageAssets);
   const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(DEFAULT_MARKETING_CONFIG.homeTexts);
+  const [historyMilestones, setHistoryMilestones] = useState<HistoryMilestoneItem[]>(DEFAULT_MARKETING_CONFIG.historyMilestones);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
 
   useEffect(() => {
@@ -305,6 +278,13 @@ export default function AboutPage() {
         setPageAssets(config.pageAssets.map((item) => ({
           ...item,
           label: repairMojibakeText(item.label),
+        })));
+        setHistoryMilestones(config.historyMilestones.map((item) => ({
+          ...item,
+          year: repairMojibakeText(item.year),
+          title: repairMojibakeText(item.title),
+          description: repairMojibakeText(item.description),
+          detailContent: repairMojibakeText(item.detailContent),
         })));
       } catch (error) {
         console.error("Failed to fetch about page assets:", error);
@@ -343,6 +323,9 @@ export default function AboutPage() {
     { label: "Nguyên liệu", value: "Truy xuất được" },
     { label: "Quy trình", value: "Kiểm soát được" },
   ];
+  const visibleMilestones = historyMilestones
+    .filter((item) => item.enabled !== false)
+    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
@@ -395,7 +378,7 @@ export default function AboutPage() {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
               <div className="absolute left-6 top-6 border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
-                Brand film
+                Câu chuyện thật
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-9">
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-200">Chân Gà Bà Tuyết</p>
@@ -408,7 +391,7 @@ export default function AboutPage() {
                   className="mt-7 inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
                 >
                   <BookOpen size={16} />
-                  Đọc như một bài phóng sự
+                  Đọc câu chuyện đầy đủ
                 </button>
               </div>
             </div>
@@ -478,7 +461,7 @@ export default function AboutPage() {
                 >
                   <div className="flex items-center justify-between gap-5">
                     <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Popup đọc sâu</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Câu chuyện đầy đủ</p>
                       <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-slate-950">Mở toàn bộ câu chuyện</p>
                     </div>
                     <span className="grid h-12 w-12 place-items-center bg-orange-600 text-white transition group-hover:bg-slate-950">
@@ -552,21 +535,50 @@ export default function AboutPage() {
           <div className="relative mt-14">
             <div className="absolute left-4 top-0 h-full border-l-2 border-dashed border-orange-300 lg:left-1/2 lg:-translate-x-1/2" />
             <div className="space-y-8">
-              {timeline.map((item, index) => {
+              {visibleMilestones.length === 0 ? (
+                <div className="border border-orange-100 bg-[#fbf7ef] p-8 text-sm font-bold text-slate-500">
+                  Chưa có cột mốc nào đang hiển thị. Admin có thể thêm và bật hiển thị trong phần Lịch sử phát triển.
+                </div>
+              ) : null}
+              {visibleMilestones.map((item, index) => {
                 const isRight = index % 2 === 0;
-                return (
-                  <article key={item.year} className={`relative grid gap-5 pl-12 lg:grid-cols-2 lg:pl-0 ${isRight ? "" : "lg:[&>*:first-child]:col-start-2"}`}>
-                    <div className={`border border-orange-100 bg-[#fbf7ef] p-6 shadow-[12px_12px_0_rgba(234,88,12,0.08)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
+                const description = item.description || item.detailContent;
+                const content = (
+                  <div className={`overflow-hidden border border-orange-100 bg-[#fbf7ef] shadow-[12px_12px_0_rgba(234,88,12,0.08)] transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[18px_18px_0_rgba(234,88,12,0.12)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
+                    {item.imageUrl ? (
+                      <div className="h-56 border-b border-orange-100 bg-orange-50">
+                        <AssetImage src={item.imageUrl} alt={item.title || item.year || "Cột mốc phát triển"} />
+                      </div>
+                    ) : null}
+                    <div className="p-6">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <p className={`text-4xl font-black tracking-[-0.07em] ${BRAND_ORANGE}`}>{item.year}</p>
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.16em] text-slate-400">Cột mốc</p>
+                          <p className={`text-4xl font-black tracking-[-0.07em] ${BRAND_ORANGE}`}>{item.year || String(index + 1).padStart(2, "0")}</p>
+                          <p className="mt-2 text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+                            {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
+                          </p>
                         </div>
-                        {item.pending ? <PlaceholderValue>Cần xác nhận</PlaceholderValue> : null}
+                        {!description ? <PlaceholderValue>Cần bổ sung</PlaceholderValue> : null}
                       </div>
-                      <h3 className="mt-6 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title}</h3>
-                      <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
+                      <h3 className="mt-6 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title || "Cột mốc mới"}</h3>
+                      {description ? (
+                        <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{description}</p>
+                      ) : null}
+                      {item.linkUrl ? (
+                        <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-orange-700">
+                          Xem thêm <ArrowRight size={14} />
+                        </span>
+                      ) : null}
                     </div>
+                  </div>
+                );
+                return (
+                  <article key={item.id} className={`relative grid gap-5 pl-12 lg:grid-cols-2 lg:pl-0 ${isRight ? "" : "lg:[&>*:first-child]:col-start-2"}`}>
+                    {item.linkUrl ? (
+                      <Link href={item.linkUrl} className="block">
+                        {content}
+                      </Link>
+                    ) : content}
                   </article>
                 );
               })}
@@ -665,7 +677,7 @@ export default function AboutPage() {
 
                 <div className="relative">
                   <p className="inline-flex border border-orange-400/40 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">
-                    Hồ sơ cảm xúc
+                    Câu chuyện thương hiệu
                   </p>
                   <h3 className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl">
                     Câu chuyện của Bà Tuyết
@@ -680,8 +692,8 @@ export default function AboutPage() {
                     <AssetImage src={teamImage} alt="Bà Tuyết trong câu chuyện thương hiệu" className="opacity-85" />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/15 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Brand story</p>
-                      <p className="mt-2 text-2xl font-black leading-tight">Không chỉ kể. Phải cho người ta nhìn thấy.</p>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Chân Gà Bà Tuyết</p>
+                      <p className="mt-2 text-2xl font-black leading-tight">Không chỉ nói hay. Phải làm thật.</p>
                     </div>
                   </div>
                 </div>
@@ -708,7 +720,7 @@ export default function AboutPage() {
                 <div className="relative">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="border-l-4 border-orange-600 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
-                      Bản đầy đủ
+                      Toàn bộ câu chuyện
                     </p>
                     {storyProofs.map((item) => (
                       <span key={item.label} className="border border-orange-100 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
