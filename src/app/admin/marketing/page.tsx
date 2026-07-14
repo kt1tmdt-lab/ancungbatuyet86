@@ -159,6 +159,19 @@ function getPageAssetScope(item: PageAssetItem) {
 
 type HomeTextScope = "all" | "home" | "about" | "quality";
 
+function normalizeAdminSearch(value: unknown) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
+function isFactoryProofText(item: HomeTextItem) {
+  return item.key.startsWith("factory_proof");
+}
+
 function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; note: string; previewPath: string; scope: HomeTextScope } {
   const key = item.key || "";
   const group = item.group || "";
@@ -680,7 +693,7 @@ function MarketingPageContent() {
   const factoryProofAssets = Array.from(FACTORY_PROOF_ASSET_KEYS)
     .map((key) => homeAssetList.find((item) => item.key === key))
     .filter((item): item is PageAssetItem => Boolean(item));
-  const normalizedHomeTextSearch = homeTextSearch.trim().toLowerCase();
+  const normalizedHomeTextSearch = normalizeAdminSearch(homeTextSearch.trim());
   const visibleHomeTextList = useMemo(() => homeTextList.filter((item) => {
     const meta = getHomeTextMeta(item);
     const scopeMatches = homeTextScope === "all" || meta.scope === homeTextScope;
@@ -695,23 +708,26 @@ function MarketingPageContent() {
       meta.page,
       meta.section,
       meta.note,
-    ].some((value) => String(value || "").toLowerCase().includes(normalizedHomeTextSearch));
+    ].some((value) => normalizeAdminSearch(value).includes(normalizedHomeTextSearch));
   }), [homeTextList, homeTextScope, normalizedHomeTextSearch]);
   const factoryHomeTextItems = visibleHomeTextList
-    .filter((item) => (item.group || "").includes("B?ng ch?ng"))
+    .filter(isFactoryProofText)
     .filter((item) => !/^factory_proof_\d_title$/.test(item.key))
     .sort((a, b) => a.sortOrder - b.sortOrder);
-  const groupedHomeTextItems = Array.from(new Set(visibleHomeTextList.map((item) => item.group || "Kh?c")))
-    .filter((group) => !group.includes("B?ng ch?ng"))
+  const groupedTextSource = visibleHomeTextList.filter((item) => !isFactoryProofText(item));
+  const groupedHomeTextItems = Array.from(new Set(groupedTextSource.map((item) => item.group || "Khác")))
     .map((group) => ({
       group,
-      items: visibleHomeTextList
-        .filter((item) => (item.group || "Kh?c") === group)
+      items: groupedTextSource
+        .filter((item) => (item.group || "Khác") === group)
         .sort((a, b) => a.sortOrder - b.sortOrder),
-    }));
+    }))
+    .filter(({ items }) => items.length > 0);
   const looseHomeAssets = homeAssetList.filter((item) => (
     item.key !== "home_factory_proof_image" && !FACTORY_PROOF_ASSET_KEYS.has(item.key)
   ));
+  const showFactoryProofSection = (homeTextScope === "all" || homeTextScope === "home")
+    && (!normalizedHomeTextSearch || factoryHomeTextItems.length > 0);
 
   const renderHomeTextField = (item: HomeTextItem) => {
     const meta = getHomeTextMeta(item);
@@ -747,9 +763,9 @@ function MarketingPageContent() {
         </div>
 
         <div className="border border-orange-100 bg-orange-50 p-3">
-          <p className="text-[10px] font-black uppercase tracking-wider text-orange-700">Preview ch? ?ang nh?p</p>
+          <p className="text-[10px] font-black uppercase tracking-wider text-orange-700">Preview chữ đang nhập</p>
           <div className="mt-2 max-h-28 overflow-y-auto whitespace-pre-wrap break-words bg-white p-3 text-xs font-semibold leading-5 text-slate-700">
-            {item.value || <span className="text-slate-400">?ang tr?ng</span>}
+            {item.value || <span className="text-slate-400">Đang trống</span>}
           </div>
           <a
             href={meta.previewPath}
@@ -1767,17 +1783,17 @@ function MarketingPageContent() {
                 <section className="border border-orange-200 bg-orange-50 p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
-                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">T?m nhanh ch? c?n s?a</h3>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">Tìm nhanh chữ cần sửa</h3>
                       <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                        G? t?n khu v?c, n?i dung, key ho?c ch?n trang ?? l?c. M?i d?ng b?n d??i ??u c? preview v? n?t m? ??ng v? tr? ngo?i web.
+                        Gõ tên khu vực, nội dung, key hoặc chọn trang để lọc. Mỗi dòng bên dưới đều có preview và nút mở đúng vị trí ngoài web.
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        ["all", "T?t c?"],
-                        ["home", "Trang ch?"],
-                        ["about", "Gi?i thi?u"],
-                        ["quality", "Ch?t l??ng"],
+                        ["all", "Tất cả"],
+                        ["home", "Trang chủ"],
+                        ["about", "Giới thiệu"],
+                        ["quality", "Chất lượng"],
                       ].map(([value, label]) => (
                         <button
                           key={value}
@@ -1800,38 +1816,40 @@ function MarketingPageContent() {
                       type="search"
                       value={homeTextSearch}
                       onChange={(event) => setHomeTextSearch(event.target.value)}
-                      placeholder="T?m: hero, s? li?u, gi?i thi?u, n?t, s?n ph?m, nh? m?y..."
+                      placeholder="Tìm: hero, số liệu, giới thiệu, nút, sản phẩm, nhà máy..."
                       className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
                     />
                     <span className="text-xs font-black text-slate-400">{visibleHomeTextList.length}/{homeTextList.length}</span>
                   </div>
                 </section>
 
-                <section className="border border-slate-200 bg-slate-50">
-                  <div className="border-b border-slate-200 bg-white px-4 py-3">
-                    <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Năng lực sản xuất / bằng chứng thương hiệu</h3>
-                    <p className="mt-1 text-[11px] font-semibold text-slate-500">Chữ, ảnh lớn, ảnh từng mục và link đều nằm chung trong cụm này.</p>
-                  </div>
-                  <div className="grid gap-5 p-4">
-                    <div className="grid gap-4">
-                      {factoryHomeTextItems.map(renderHomeTextField)}
+                {showFactoryProofSection && (
+                  <section className="border border-slate-200 bg-slate-50">
+                    <div className="border-b border-slate-200 bg-white px-4 py-3">
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Năng lực sản xuất / bằng chứng thương hiệu</h3>
+                      <p className="mt-1 text-[11px] font-semibold text-slate-500">Chữ, ảnh lớn, ảnh từng mục và link đều nằm chung trong cụm này.</p>
                     </div>
-                    {factoryMainAsset && (
-                      <div>
-                        <p className="mb-2 text-xs font-black uppercase text-slate-500">Ảnh lớn của cụm</p>
-                        {renderAssetEditor(factoryMainAsset)}
+                    <div className="grid gap-5 p-4">
+                      <div className="grid gap-4">
+                        {factoryHomeTextItems.map(renderHomeTextField)}
                       </div>
-                    )}
-                    {factoryProofAssets.length > 0 && (
-                      <div>
-                        <p className="mb-2 text-xs font-black uppercase text-slate-500">Các mục nhỏ trong cụm</p>
-                        <div className="grid gap-4 xl:grid-cols-2">
-                          {factoryProofAssets.map((item) => renderAssetEditor(item, true))}
+                      {factoryMainAsset && (
+                        <div>
+                          <p className="mb-2 text-xs font-black uppercase text-slate-500">Ảnh lớn của cụm</p>
+                          {renderAssetEditor(factoryMainAsset)}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </section>
+                      )}
+                      {factoryProofAssets.length > 0 && (
+                        <div>
+                          <p className="mb-2 text-xs font-black uppercase text-slate-500">Các mục nhỏ trong cụm</p>
+                          <div className="grid gap-4 xl:grid-cols-2">
+                            {factoryProofAssets.map((item) => renderAssetEditor(item, true))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
 
                 {groupedHomeTextItems.map(({ group, items }) => (
                   <section key={group} className="border border-slate-200 bg-slate-50">
