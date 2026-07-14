@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useMemo, useState, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
@@ -26,7 +26,8 @@ import {
   Eye,
   ExternalLink,
   X,
-  Heart
+  Heart,
+  Search
 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -156,6 +157,52 @@ function getPageAssetScope(item: PageAssetItem) {
   return "other";
 }
 
+type HomeTextScope = "all" | "home" | "about" | "quality";
+
+function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; note: string; previewPath: string; scope: HomeTextScope } {
+  const key = item.key || "";
+  const group = item.group || "";
+
+  if (key.startsWith("about_hero")) {
+    return { page: "Giới thiệu", section: "Hero hồ sơ thương hiệu", note: "Đoạn đầu trang Giới thiệu: tiêu đề, mô tả, nút và 3 ô số liệu.", previewPath: "/gioi-thieu", scope: "about" };
+  }
+  if (key.startsWith("about_story")) {
+    return { page: "Giới thiệu", section: "Câu chuyện thương hiệu", note: "Video/câu chuyện và popup đọc toàn bộ câu chuyện.", previewPath: "/gioi-thieu#about-story", scope: "about" };
+  }
+  if (key.startsWith("about_process")) {
+    return { page: "Giới thiệu", section: "Quy trình vận hành", note: "Cụm quy trình/nhà máy trên trang Giới thiệu.", previewPath: "/gioi-thieu#about-process", scope: "about" };
+  }
+  if (key.startsWith("about_business")) {
+    return { page: "Giới thiệu", section: "Thông tin doanh nghiệp", note: "Bảng thông tin thương hiệu, pháp nhân, nhà máy và kênh phân phối.", previewPath: "/gioi-thieu#about-business", scope: "about" };
+  }
+  if (key.startsWith("about_values") || key.startsWith("about_value_")) {
+    return { page: "Giới thiệu", section: "Sứ mệnh & giá trị", note: "Các thẻ Sứ mệnh, Tầm nhìn, Giá trị cốt lõi và Con người.", previewPath: "/gioi-thieu#about-values", scope: "about" };
+  }
+  if (key.startsWith("factory_proof")) {
+    return { page: "Trang chủ", section: "Năng lực sản xuất / bằng chứng thương hiệu", note: "Cụm nhà máy và các mục bằng chứng trên trang chủ.", previewPath: "/#factory-proof", scope: "home" };
+  }
+  if (key.startsWith("products_")) {
+    return { page: "Trang chủ", section: "Sản phẩm nổi bật", note: "Tiêu đề và mô tả cụm sản phẩm nổi bật.", previewPath: "/#products", scope: "home" };
+  }
+  if (key.startsWith("process_")) {
+    return { page: "Trang chủ", section: "Quy trình sản xuất", note: "Cụm quy trình trên trang chủ.", previewPath: "/#process", scope: "home" };
+  }
+  if (key.startsWith("brand_story")) {
+    return { page: "Trang chủ", section: "Câu chuyện thương hiệu", note: "Cụm câu chuyện thương hiệu trên trang chủ.", previewPath: "/#brand-story", scope: "home" };
+  }
+  if (key.startsWith("trust_")) {
+    return { page: "Trang chủ", section: "Sứ mệnh", note: "Cụm sứ mệnh/niềm tin trên trang chủ.", previewPath: "/#mission", scope: "home" };
+  }
+  if (group.includes("Chất lượng")) {
+    return { page: "Chất lượng", section: group, note: "Nội dung liên quan trang Chất lượng.", previewPath: "/chat-luong", scope: "quality" };
+  }
+  if (group.includes("Giới thiệu")) {
+    return { page: "Giới thiệu", section: group.replace("Giới thiệu - ", ""), note: "Nội dung trang Giới thiệu.", previewPath: "/gioi-thieu", scope: "about" };
+  }
+
+  return { page: "Trang chủ", section: group || "Khác", note: "Nội dung chữ hiển thị trên website.", previewPath: "/", scope: "home" };
+}
+
 type ContentTab = "press" | "feedback" | "videos" | "home" | "trust" | "history" | "community";
 
 function MarketingPageContent() {
@@ -184,6 +231,8 @@ function MarketingPageContent() {
   );
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
+  const [homeTextSearch, setHomeTextSearch] = useState("");
+  const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>("all");
 
   // State for assets lists
   const [pressList, setPressList] = useState<PressItem[]>([]);
@@ -631,44 +680,89 @@ function MarketingPageContent() {
   const factoryProofAssets = Array.from(FACTORY_PROOF_ASSET_KEYS)
     .map((key) => homeAssetList.find((item) => item.key === key))
     .filter((item): item is PageAssetItem => Boolean(item));
-  const factoryHomeTextItems = homeTextList
-    .filter((item) => (item.group || "").includes("Bằng chứng"))
+  const normalizedHomeTextSearch = homeTextSearch.trim().toLowerCase();
+  const visibleHomeTextList = useMemo(() => homeTextList.filter((item) => {
+    const meta = getHomeTextMeta(item);
+    const scopeMatches = homeTextScope === "all" || meta.scope === homeTextScope;
+    if (!scopeMatches) return false;
+    if (!normalizedHomeTextSearch) return true;
+
+    return [
+      item.label,
+      item.value,
+      item.key,
+      item.group,
+      meta.page,
+      meta.section,
+      meta.note,
+    ].some((value) => String(value || "").toLowerCase().includes(normalizedHomeTextSearch));
+  }), [homeTextList, homeTextScope, normalizedHomeTextSearch]);
+  const factoryHomeTextItems = visibleHomeTextList
+    .filter((item) => (item.group || "").includes("B?ng ch?ng"))
     .filter((item) => !/^factory_proof_\d_title$/.test(item.key))
     .sort((a, b) => a.sortOrder - b.sortOrder);
-  const groupedHomeTextItems = Array.from(new Set(homeTextList.map((item) => item.group || "Khác")))
-    .filter((group) => !group.includes("Bằng chứng"))
+  const groupedHomeTextItems = Array.from(new Set(visibleHomeTextList.map((item) => item.group || "Kh?c")))
+    .filter((group) => !group.includes("B?ng ch?ng"))
     .map((group) => ({
       group,
-      items: homeTextList
-        .filter((item) => (item.group || "Khác") === group)
+      items: visibleHomeTextList
+        .filter((item) => (item.group || "Kh?c") === group)
         .sort((a, b) => a.sortOrder - b.sortOrder),
     }));
   const looseHomeAssets = homeAssetList.filter((item) => (
     item.key !== "home_factory_proof_image" && !FACTORY_PROOF_ASSET_KEYS.has(item.key)
   ));
 
-  const renderHomeTextField = (item: HomeTextItem) => (
-    <div key={item.id} className="grid gap-2 lg:grid-cols-[220px_1fr] lg:items-start">
-      <div>
-        <label className="block text-xs font-black text-slate-800">{item.label}</label>
+  const renderHomeTextField = (item: HomeTextItem) => {
+    const meta = getHomeTextMeta(item);
+
+    return (
+      <div key={item.id} className="grid gap-3 border border-slate-200 bg-white p-4 lg:grid-cols-[240px_1fr_230px] lg:items-start">
+        <div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="bg-orange-50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-orange-700">{meta.page}</span>
+            <span className="bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-600">{meta.section}</span>
+          </div>
+          <label className="mt-3 block text-sm font-black text-slate-900">{item.label}</label>
+          <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">{meta.note}</p>
+          <p className="mt-2 break-all font-mono text-[10px] font-bold text-slate-400">{item.key}</p>
+        </div>
+
+        <div>
+          {item.multiline ? (
+            <textarea
+              value={item.value}
+              onChange={(e) => updateHomeText(item.id, e.target.value)}
+              rows={4}
+              className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition focus:border-orange-500"
+            />
+          ) : (
+            <input
+              type="text"
+              value={item.value}
+              onChange={(e) => updateHomeText(item.id, e.target.value)}
+              className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-orange-500"
+            />
+          )}
+        </div>
+
+        <div className="border border-orange-100 bg-orange-50 p-3">
+          <p className="text-[10px] font-black uppercase tracking-wider text-orange-700">Preview ch? ?ang nh?p</p>
+          <div className="mt-2 max-h-28 overflow-y-auto whitespace-pre-wrap break-words bg-white p-3 text-xs font-semibold leading-5 text-slate-700">
+            {item.value || <span className="text-slate-400">?ang tr?ng</span>}
+          </div>
+          <a
+            href={meta.previewPath}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wide text-orange-700 hover:text-orange-900"
+          >
+            Xem ngo?i web <ExternalLink size={13} />
+          </a>
+        </div>
       </div>
-      {item.multiline ? (
-        <textarea
-          value={item.value}
-          onChange={(e) => updateHomeText(item.id, e.target.value)}
-          rows={3}
-          className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold leading-6 text-slate-800 outline-none transition focus:border-orange-500"
-        />
-      ) : (
-        <input
-          type="text"
-          value={item.value}
-          onChange={(e) => updateHomeText(item.id, e.target.value)}
-          className="w-full border border-slate-300 bg-white p-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-orange-500"
-        />
-      )}
-    </div>
-  );
+    );
+  };
 
   const renderAssetEditor = (item: PageAssetItem, compact = false) => {
     const meta = getPageAssetMeta(item);
@@ -782,7 +876,7 @@ function MarketingPageContent() {
 
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MARKETING", "EDITOR"]}>
-      <div className="max-w-5xl mx-auto space-y-6 pb-20">
+      <div className="mx-auto max-w-7xl space-y-6 pb-20">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
@@ -1667,6 +1761,49 @@ function MarketingPageContent() {
                           </span>
                         </label>
                       ))}
+                  </div>
+                </section>
+
+                <section className="border border-orange-200 bg-orange-50 p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">T?m nhanh ch? c?n s?a</h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                        G? t?n khu v?c, n?i dung, key ho?c ch?n trang ?? l?c. M?i d?ng b?n d??i ??u c? preview v? n?t m? ??ng v? tr? ngo?i web.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        ["all", "T?t c?"],
+                        ["home", "Trang ch?"],
+                        ["about", "Gi?i thi?u"],
+                        ["quality", "Ch?t l??ng"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setHomeTextScope(value as HomeTextScope)}
+                          className={`border px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
+                            homeTextScope === value
+                              ? "border-orange-600 bg-orange-600 text-white"
+                              : "border-orange-200 bg-white text-slate-700 hover:border-orange-500 hover:text-orange-700"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2 border border-orange-200 bg-white px-3 py-2">
+                    <Search size={16} className="text-orange-600" />
+                    <input
+                      type="search"
+                      value={homeTextSearch}
+                      onChange={(event) => setHomeTextSearch(event.target.value)}
+                      placeholder="T?m: hero, s? li?u, gi?i thi?u, n?t, s?n ph?m, nh? m?y..."
+                      className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+                    />
+                    <span className="text-xs font-black text-slate-400">{visibleHomeTextList.length}/{homeTextList.length}</span>
                   </div>
                 </section>
 
