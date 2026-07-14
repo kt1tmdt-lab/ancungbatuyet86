@@ -712,9 +712,6 @@ export default function AboutPage() {
                     className={`relative grid gap-5 pl-16 lg:grid-cols-2 lg:pl-0 ${isRight ? "" : "lg:[&>*:first-child]:col-start-2"}`}
                   >
                     <div className={`relative border border-orange-200 bg-[#fffaf2] p-6 shadow-[14px_14px_0_rgba(234,88,12,0.08)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
-                      <div className="absolute -left-[54px] top-7 z-10 flex h-12 w-12 items-center justify-center border-4 border-white bg-orange-600 text-sm font-black text-white shadow-lg lg:left-auto lg:top-1/2 lg:-translate-y-1/2">
-                        {String(index + 1).padStart(2, "0")}
-                      </div>
                       <div className={`hidden lg:absolute lg:top-1/2 lg:block lg:h-px lg:w-16 lg:-translate-y-1/2 lg:bg-orange-300 ${isRight ? "lg:-right-16" : "lg:-left-16"}`} />
                       <p className="text-4xl font-black tracking-[-0.07em] text-orange-600">{year}</p>
                       <p className="mt-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-400">

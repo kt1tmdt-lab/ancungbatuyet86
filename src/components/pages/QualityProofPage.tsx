@@ -136,24 +136,6 @@ const galleryImages = [
   },
 ];
 
-const evidenceBoard = [
-  {
-    title: "Được nói",
-    tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    items: ["NMV Food đạt ISO 22000:2018 khi có hồ sơ kèm theo", "Quy trình 6 bước có kiểm soát", "Bảo hiểm trách nhiệm sản phẩm PVI"],
-  },
-  {
-    title: "Cần kiểm tra thêm",
-    tone: "bg-orange-50 text-orange-700 border-orange-200",
-    items: ["Hồ sơ xuất xứ, kiểm dịch và kiểm nghiệm", "Hình ảnh kho lạnh và nhà máy thật", "Phạm vi bảo hiểm trách nhiệm sản phẩm"],
-  },
-  {
-    title: "Không nói quá",
-    tone: "bg-rose-50 text-rose-700 border-rose-200",
-    items: ["Không ghi “an toàn tuyệt đối”", "Không ghi “PVI bảo chứng chất lượng”", "Không tự nhận chứng nhận nếu giấy cấp cho pháp nhân khác"],
-  },
-];
-
 function Eyebrow({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
     <p className={`inline-flex items-center gap-2 border-l-4 border-orange-600 px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] ${dark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"}`}>
@@ -385,32 +367,6 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <span className="absolute right-3 top-3 bg-orange-600 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white opacity-0 transition group-hover:opacity-100">Xem lớn</span>
               </button>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-orange-100 bg-white px-5 py-16 sm:px-8 lg:px-16">
-        <div className="mx-auto max-w-7xl">
-          <Eyebrow>Bảng kiểm truyền thông</Eyebrow>
-          <div className="mt-6 grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
-            <h2 className="text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              Trang này không chỉ đẹp — nó còn khóa cách nói cho đúng.
-            </h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              {evidenceBoard.map((board) => (
-                <article key={board.title} className={`border p-5 ${board.tone}`}>
-                  <h3 className="text-xl font-black tracking-[-0.04em]">{board.title}</h3>
-                  <ul className="mt-5 space-y-3 text-sm font-bold leading-6">
-                    {board.items.map((item) => (
-                      <li key={item} className="flex gap-2">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              ))}
-            </div>
           </div>
         </div>
       </section>
