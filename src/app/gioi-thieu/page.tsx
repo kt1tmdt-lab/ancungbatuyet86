@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
+  BookOpen,
   Building2,
   CheckCircle2,
   Factory,
@@ -13,15 +14,18 @@ import {
   Heart,
   MapPin,
   PackageCheck,
+  Quote,
   ShieldCheck,
   Sparkles,
   Target,
   Truck,
   Users,
+  X,
 } from "lucide-react";
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
+  type HomeTextItem,
   type PageAssetItem,
 } from "@/lib/marketing-config";
 
@@ -136,6 +140,11 @@ function AssetImage({
   return <img src={src} alt={alt} className={`h-full w-full object-cover ${className}`} />;
 }
 
+function marketingTextValue(items: HomeTextItem[], key: string, fallback: string) {
+  const value = items.find((item) => item.key === key)?.value;
+  return repairMojibakeText(value && value.trim() ? value : fallback);
+}
+
 const brandStats = [
   {
     value: "Cần cập nhật",
@@ -173,6 +182,47 @@ const storyHighlights = [
     desc: "Thể hiện trách nhiệm của doanh nghiệp đối với sản phẩm đưa ra thị trường.",
   },
 ];
+
+const DEFAULT_FULL_BRAND_STORY = `Tôi cũng có một nỗi sợ.
+
+Một nỗi sợ giống như rất nhiều người tiêu dùng khác: sợ chân gà không rõ nguồn gốc. Sợ những sản phẩm bị gắn với cái tên “chân gà Trung Quốc”.
+
+Tôi là một người mẹ, cũng là một người bà. Làm sao tôi có thể để con cháu mình ăn những sản phẩm mà không biết chúng đến từ đâu, được sản xuất như thế nào và có thực sự bảo đảm an toàn hay không?
+
+Bởi sức khỏe của các con, các cháu hôm nay cũng chính là tương lai của chúng sau này.
+
+Nhưng nỗi ám ảnh mang tên “chân gà Trung Quốc” đã ăn sâu vào suy nghĩ của nhiều người. Đến mức dù tôi có làm thật, nói thật và công khai mọi thứ, vẫn có người không tin.
+
+Người ta nghi ngờ. Người ta chỉ trích. Người ta để lại những bình luận cay nghiệt và lan truyền những tin đồn không có căn cứ về Chân Gà Bà Tuyết.
+
+Sức ép từ dư luận, chỉ có thể diễn tả bằng hai chữ: Khủng khiếp.
+
+Có những ngày tôi ngồi đọc từng bình luận ác ý, từng lời phủ nhận mọi công sức mà mình đã bỏ ra. Tôi thấy mệt mỏi. Tôi thấy tủi thân. Và dường như tôi già đi sau mỗi đêm mất ngủ.
+
+Tôi biết con đường mình lựa chọn chưa bao giờ là dễ dàng. Làm tốt vẫn có thể bị nói. Làm đúng vẫn có thể bị nghi ngờ.
+
+Có những lúc tôi không thể chịu đựng thêm được nữa. Tôi đã từng muốn nói: “Hay là mình dừng lại thôi.”
+
+Nhưng rồi tôi lại tự hỏi: Nếu ai cũng sợ hãi và bỏ cuộc, vậy ai sẽ là người đứng lên để xóa bỏ nỗi sợ ấy?
+
+Chính vì vậy, tôi quyết định tiếp tục.
+
+Tôi tin rằng nơi này sẽ tạo ra những sản phẩm có nguồn gốc rõ ràng, quy trình sản xuất minh bạch và chất lượng được kiểm soát nghiêm túc.
+
+Tôi tin rằng nơi này không chỉ tạo ra những gói chân gà ngon, mà còn tạo thêm công ăn việc làm ổn định cho bà con tại Thái Nguyên.
+
+Tôi tin rằng nơi này sẽ đóng góp một phần nhỏ bé vào hành trình xây dựng và phát triển quê hương. Và tôi tin rằng nơi này sẽ từng bước đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam.
+
+Tôi không mong mọi người tin tôi chỉ bằng những lời tôi nói.
+
+Tôi mong mọi người hãy nhìn vào những gì chúng tôi đang làm. Hãy nhìn vào nhà máy. Hãy nhìn vào nguyên liệu. Hãy nhìn vào quy trình sản xuất. Và hãy nhìn vào từng sản phẩm được làm ra mỗi ngày.
+
+Hãy để tôi và những con người tại đây từng bước xóa đi nỗi sợ mang tên: “Chân gà Trung Quốc.”
+
+Để khi cầm trên tay một gói Chân Gà Bà Tuyết, mọi người không chỉ cảm nhận được vị ngon, mà còn cảm nhận được sự minh bạch, trách nhiệm và niềm tự hào của một sản phẩm được làm nên tại Thái Nguyên.
+
+CHÂN GÀ BÀ TUYẾT
+Ngon phải rõ nguồn gốc – Ăn phải thật an tâm.`;
 
 const businessInfo = [
   ["Tên thương hiệu", "Ăn Cùng Bà Tuyết"],
@@ -238,6 +288,8 @@ const missionCards = [
 
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(DEFAULT_MARKETING_CONFIG.pageAssets);
+  const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(DEFAULT_MARKETING_CONFIG.homeTexts);
+  const [isStoryOpen, setIsStoryOpen] = useState(false);
 
   useEffect(() => {
     async function fetchMarketingConfig() {
@@ -246,6 +298,10 @@ export default function AboutPage() {
         if (!res.ok) return;
         const data = await res.json();
         const config = normalizeMarketingConfig(data?.data);
+        setHomeTexts(config.homeTexts.map((item) => ({
+          ...item,
+          value: repairMojibakeText(item.value),
+        })));
         setPageAssets(config.pageAssets.map((item) => ({
           ...item,
           label: repairMojibakeText(item.label),
@@ -266,6 +322,27 @@ export default function AboutPage() {
   const heroImage = assetByKey.about_process_background?.imageUrl || "/bento/bento-factory.png";
   const teamImage = assetByKey.about_team_quote?.imageUrl || "/hero/ba-tuyet-character.png";
   const storyVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "");
+  const storyEyebrow = marketingTextValue(homeTexts, "about_story_label", "Câu chuyện thương hiệu");
+  const storyTitle = marketingTextValue(homeTexts, "about_story_title", "Tôi cũng có một nỗi sợ.");
+  const storySubtitle = marketingTextValue(
+    homeTexts,
+    "about_story_subtitle",
+    "Hành trình của Chân Gà Bà Tuyết bắt đầu từ nỗi sợ rất thật của một người mẹ, một người bà: sợ những sản phẩm không rõ nguồn gốc, và mong muốn làm ra thứ gì đó minh bạch hơn."
+  );
+  const storyFullText = marketingTextValue(homeTexts, "about_story_full", DEFAULT_FULL_BRAND_STORY);
+  const storyParagraphs = storyFullText.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+  const storyPreview = storyParagraphs.slice(0, 6);
+  const storyChapters = [
+    { number: "01", title: "Nỗi sợ", desc: "Sợ chân gà không rõ nguồn gốc, sợ cái tên “chân gà Trung Quốc” bám vào suy nghĩ người tiêu dùng." },
+    { number: "02", title: "Áp lực", desc: "Làm thật, nói thật, công khai mọi thứ nhưng vẫn có nghi ngờ, chỉ trích và tin đồn." },
+    { number: "03", title: "Quyết định", desc: "Không dừng lại. Trả lời bằng nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày." },
+    { number: "04", title: "Niềm tin", desc: "Đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam bằng sự minh bạch và trách nhiệm." },
+  ];
+  const storyProofs = [
+    { label: "Nhà máy", value: "Nhìn được" },
+    { label: "Nguyên liệu", value: "Truy xuất được" },
+    { label: "Quy trình", value: "Kiểm soát được" },
+  ];
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
@@ -299,28 +376,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr_0.86fr]">
-          <div>
-            <SectionLabel>Câu chuyện thương hiệu</SectionLabel>
-            <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              Từ căn bếp nhỏ đến một thương hiệu được nhiều người biết đến
-            </h2>
-            <div className="mt-8 space-y-5 text-base font-semibold leading-8 text-slate-700">
-              <p>
-                Ăn Cùng Bà Tuyết bắt đầu từ niềm yêu thích ẩm thực và mong muốn chia sẻ những món ăn gần gũi đến với mọi người của bà Đỗ Thị Tuyết. Từ những video đời thường trên mạng xã hội, hình ảnh “Bà Tuyết” dần nhận được sự yêu mến nhờ cách nói chuyện chân thành, mộc mạc và gần gũi.
-              </p>
-              <p>
-                Khi cộng đồng ngày càng lớn, Ăn Cùng Bà Tuyết không chỉ dừng lại ở việc chia sẻ nội dung mà từng bước phát triển thành một thương hiệu đồ ăn vặt có định hướng rõ ràng. Các sản phẩm được nghiên cứu để vừa giữ được hương vị hấp dẫn, vừa đáp ứng yêu cầu về nguồn nguyên liệu, quy trình sản xuất và khả năng phân phối trên quy mô lớn.
-              </p>
-              <p>
-                Hành trình đó tiếp tục được phát triển thông qua sự hợp tác với NMV Food, đơn vị trực tiếp tổ chức sản xuất tại nhà máy ở Thái Nguyên.
-              </p>
-            </div>
-          </div>
-
-          <div className="border border-orange-100 bg-[#fbf7ef] p-4">
-            <div className="relative min-h-[340px] overflow-hidden bg-slate-950">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-24">
+        <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 bg-orange-100 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-[38%] bg-[#fff4e2]" />
+        <div className="relative mx-auto grid max-w-[1560px] gap-10 px-5 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:px-14 xl:px-20">
+          <div className="grid gap-5 lg:sticky lg:top-24 lg:self-start">
+            <div className="relative min-h-[620px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[24px_24px_0_rgba(234,88,12,0.10)]">
               {storyVideoUrl ? (
                 <iframe
                   src={storyVideoUrl}
@@ -330,35 +391,114 @@ export default function AboutPage() {
                   allowFullScreen
                 />
               ) : (
-                <div className="grid h-full min-h-[340px] place-items-center p-8 text-center">
-                  <div>
-                    <FileText className="mx-auto h-12 w-12 text-orange-300" />
-                    <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-orange-200">
-                      Video brand story
-                    </p>
-                    <p className="mt-3 text-2xl font-black leading-tight text-white">
-                      Cần cập nhật link embed
-                    </p>
-                  </div>
-                </div>
+                <AssetImage src={teamImage} alt="Câu chuyện thương hiệu Chân Gà Bà Tuyết" className="scale-105 opacity-90" />
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+              <div className="absolute left-6 top-6 border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
+                Brand film
+              </div>
+              <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-9">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-200">Chân Gà Bà Tuyết</p>
+                <h2 className="mt-4 max-w-xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl">
+                  {storyTitle}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setIsStoryOpen(true)}
+                  className="mt-7 inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
+                >
+                  <BookOpen size={16} />
+                  Đọc như một bài phóng sự
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 border border-orange-100 bg-white">
+              {storyProofs.map((item) => (
+                <div key={item.label} className="border-r border-orange-100 p-4 last:border-r-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                  <p className="mt-2 text-sm font-black text-slate-950">{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
 
-        <div className="mx-auto mt-10 grid max-w-7xl gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {storyHighlights.map((item) => {
-            const Icon = item.icon;
-            return (
-              <article key={item.title} className="border border-orange-100 bg-[#fbf7ef] p-6 transition hover:-translate-y-1 hover:border-orange-300 hover:bg-white hover:shadow-[0_20px_60px_rgba(234,88,12,0.10)]">
-                <div className="flex h-12 w-12 items-center justify-center border border-orange-100 bg-white text-orange-600">
-                  <Icon size={22} />
+          <div>
+            <SectionLabel>{storyEyebrow}</SectionLabel>
+            <div className="mt-7 grid gap-8 xl:grid-cols-[0.95fr_0.65fr] xl:items-start">
+              <article className="relative border border-orange-100 bg-[#fffaf2] p-7 shadow-[18px_18px_0_rgba(15,23,42,0.05)] sm:p-10">
+                <Quote className="absolute right-7 top-7 h-12 w-12 text-orange-200" />
+                <p className="max-w-2xl text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl">
+                  {storySubtitle}
+                </p>
+
+                <div className="mt-10 space-y-5 text-base font-semibold leading-8 text-slate-700">
+                  {storyPreview.map((paragraph, index) => (
+                    <p
+                      key={index}
+                      className={
+                        index === 0
+                          ? "border-l-4 border-orange-600 bg-white px-5 py-4 text-3xl font-black leading-tight tracking-[-0.05em] text-slate-950"
+                          : index === 3
+                            ? "bg-orange-600 px-5 py-4 text-2xl font-black leading-tight tracking-[-0.04em] text-white"
+                            : ""
+                      }
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
-                <h3 className="mt-6 text-lg font-black tracking-[-0.03em]">{item.title}</h3>
-                <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
               </article>
-            );
-          })}
+
+              <div className="grid gap-4">
+                <div className="border border-orange-100 bg-slate-950 p-6 text-white">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">Cấu trúc câu chuyện</p>
+                  <div className="mt-6 space-y-4">
+                    {storyChapters.map((item) => (
+                      <div key={item.number} className="grid grid-cols-[52px_1fr] gap-4 border-b border-white/10 pb-4 last:border-b-0 last:pb-0">
+                        <div className="grid h-12 w-12 place-items-center bg-orange-600 text-sm font-black">{item.number}</div>
+                        <div>
+                          <h3 className="text-lg font-black tracking-[-0.03em]">{item.title}</h3>
+                          <p className="mt-1 text-xs font-semibold leading-5 text-white/65">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsStoryOpen(true)}
+                  className="group border border-orange-200 bg-white p-6 text-left transition hover:-translate-y-1 hover:border-orange-500 hover:shadow-[0_24px_70px_rgba(234,88,12,0.16)]"
+                >
+                  <div className="flex items-center justify-between gap-5">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Popup đọc sâu</p>
+                      <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-slate-950">Mở toàn bộ câu chuyện</p>
+                    </div>
+                    <span className="grid h-12 w-12 place-items-center bg-orange-600 text-white transition group-hover:bg-slate-950">
+                      <ArrowRight size={18} />
+                    </span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {storyHighlights.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <article key={item.title} className="group border border-orange-100 bg-white p-6 transition hover:-translate-y-1 hover:border-orange-400 hover:bg-orange-600 hover:text-white hover:shadow-[0_20px_60px_rgba(234,88,12,0.16)]">
+                    <div className="flex h-12 w-12 items-center justify-center border border-orange-100 bg-orange-50 text-orange-600 transition group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-white">
+                      <Icon size={22} />
+                    </div>
+                    <h3 className="mt-6 text-lg font-black tracking-[-0.03em]">{item.title}</h3>
+                    <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 transition group-hover:text-white/78">{item.desc}</p>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -486,6 +626,63 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {isStoryOpen ? (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Đóng câu chuyện thương hiệu"
+            onClick={() => setIsStoryOpen(false)}
+            className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm"
+          />
+          <article className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden border border-orange-200 bg-[#fff8ed] shadow-[0_30px_100px_rgba(15,23,42,0.35)]">
+            <button
+              type="button"
+              onClick={() => setIsStoryOpen(false)}
+              className="absolute right-4 top-4 z-20 grid h-11 w-11 place-items-center bg-slate-950 text-white transition hover:bg-orange-600"
+              aria-label="Đóng"
+            >
+              <X size={20} />
+            </button>
+            <div className="grid max-h-[92vh] overflow-y-auto lg:grid-cols-[0.42fr_0.58fr]">
+              <aside className="bg-slate-950 p-8 text-white lg:sticky lg:top-0 lg:min-h-[92vh]">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-300">Câu chuyện thương hiệu</p>
+                <h3 className="mt-5 text-4xl font-black leading-tight tracking-[-0.06em]">
+                  Chân Gà Bà Tuyết
+                </h3>
+                <div className="mt-8 border-l-4 border-orange-500 pl-5">
+                  <p className="text-2xl font-black leading-tight">
+                    “Ngon phải rõ nguồn gốc – Ăn phải thật an tâm.”
+                  </p>
+                </div>
+                <p className="mt-8 text-sm font-semibold leading-7 text-white/65">
+                  Bản đầy đủ để khách hàng, đối tác và báo chí hiểu câu chuyện phía sau thương hiệu — không chỉ bằng lời nói, mà bằng nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày.
+                </p>
+              </aside>
+
+              <div className="p-7 sm:p-10">
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-700">Bản đầy đủ</p>
+                <h4 className="mt-4 text-3xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                  {storyTitle}
+                </h4>
+                <div className="mt-8 space-y-5 text-base font-semibold leading-8 text-slate-700">
+                  {storyParagraphs.map((paragraph, index) => {
+                    const isEmphasis = paragraph.length < 90 || paragraph === paragraph.toUpperCase();
+                    return (
+                      <p
+                        key={index}
+                        className={isEmphasis ? "border-l-4 border-orange-500 bg-white px-5 py-4 text-xl font-black leading-tight tracking-[-0.03em] text-slate-950" : ""}
+                      >
+                        {paragraph}
+                      </p>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      ) : null}
     </main>
   );
 }
