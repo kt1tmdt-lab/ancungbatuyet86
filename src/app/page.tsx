@@ -20,7 +20,6 @@ import {
   PackageCheck,
   ClipboardCheck,
   Store,
-  HeartHandshake,
   Wheat,
   Award,
   type LucideIcon,
@@ -80,6 +79,7 @@ type NewsEvidenceItem = {
   title: string;
   desc: string;
   image?: string;
+  logo?: string;
   href: string;
   label?: string;
 };
@@ -434,6 +434,7 @@ function buildConfiguredNewsEvidenceItems(items: HomeNewsItem[]) {
         title: item.title || "Bài viết nổi bật",
         desc: item.description || "Thông tin nổi bật được cấu hình trong CMS.",
         image: item.imageUrl || undefined,
+        logo: item.logoUrl || undefined,
         href: item.linkUrl || "/tin-tuc",
         label: item.label || "Tin tức",
       }),
@@ -494,6 +495,9 @@ function HeroSection() {
     activeProduct?.orbitImage || getProductImage(activeProduct);
   const brandName = "Ăn Cùng Bà Tuyết";
   const heroTitle = heroBanner.title || DEFAULT_SITE_CONFIG.heroBanner.title;
+  const heroTitlePrefix = heroTitle.includes(brandName)
+    ? heroTitle.replace(brandName, "").trim()
+    : "Ăn vặt thì phải";
   const showHeroProducts = homeSectionEnabled(homeSections, "hero_products");
 
   return (
@@ -521,16 +525,12 @@ function HeroSection() {
 
           <motion.h1
             variants={fadeUp}
-            className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-[4.2rem] xl:text-[5.25rem]"
+            className="max-w-4xl text-[clamp(3.05rem,7vw,5.25rem)] font-black leading-[0.98] tracking-[-0.06em] text-slate-950"
           >
-            {heroTitle.includes(brandName) ? (
-              <>
-                {heroTitle.replace(brandName, "").trim()}{" "}
-                <span className="font-black text-primary">{brandName}</span>
-              </>
-            ) : (
-              heroTitle
-            )}
+            <span className="block whitespace-nowrap">{heroTitlePrefix}</span>
+            <span className="block whitespace-nowrap font-black text-primary">
+              {brandName}
+            </span>
           </motion.h1>
 
           <motion.p
@@ -545,21 +545,20 @@ function HeroSection() {
             className="mt-10 flex flex-col gap-4 sm:flex-row"
           >
             <CurtainAction
-              href={heroBanner.ctaLink}
-              icon={<ArrowRight size={18} />}
-              variant="orange"
-              className="shadow-[0_20px_45px_rgba(234,88,12,0.25)]"
+              href={heroBanner.secondaryCtaLink}
+              variant="white"
+              className="h-14 w-full shadow-[0_14px_36px_rgba(15,23,42,0.08)] sm:w-56"
             >
-              {heroBanner.ctaText}
+              {heroBanner.secondaryCtaText}
             </CurtainAction>
 
             <CurtainAction
-              href={heroBanner.secondaryCtaLink}
-              icon={<ShoppingBag size={17} />}
-              variant="white"
-              className="shadow-[0_14px_36px_rgba(15,23,42,0.08)]"
+              href={heroBanner.ctaLink}
+              icon={<ArrowRight size={18} />}
+              variant="orange"
+              className="h-14 w-full shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:w-56"
             >
-              {heroBanner.secondaryCtaText}
+              Sản phẩm
             </CurtainAction>
           </motion.div>
 
@@ -1056,8 +1055,8 @@ function WhyChooseUsFromDb() {
     <section className="bg-white py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
-          label={homeTextValue(homeTexts, "news_section_label", "Tin tức & bằng chứng")}
-          title={homeTextValue(homeTexts, "news_section_title", "Từ sản phẩm thật đến hệ thống phân phối thật")}
+          label={homeTextValue(homeTexts, "news_section_label", "Tin tức")}
+          title={homeTextValue(homeTexts, "news_section_title", "Họ nói gì về chúng tôi")}
         />
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1120,11 +1119,21 @@ function WhyChooseUsFromDb() {
                     )}
                   </div>
                   <div className="relative z-10 flex flex-1 flex-col justify-between p-6">
-                    <Icon
-                      size={34}
-                      className="text-orange-600 transition-colors duration-300 group-hover/news:text-orange-700"
-                      strokeWidth={1.8}
-                    />
+                    {item.logo ? (
+                      <div className="flex h-12 w-32 items-center justify-start">
+                        <img
+                          src={item.logo}
+                          alt={item.label || "Logo báo chí"}
+                          className="max-h-10 max-w-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <Icon
+                        size={34}
+                        className="text-orange-600 transition-colors duration-300 group-hover/news:text-orange-700"
+                        strokeWidth={1.8}
+                      />
+                    )}
                     <div className="mt-8">
                       {item.label && (
                         <p className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
@@ -1148,10 +1157,20 @@ function WhyChooseUsFromDb() {
                   </div>
 
                   <div className="pointer-events-none absolute inset-0 z-30 flex translate-y-full items-end bg-orange-600/96 p-7 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/news:translate-y-0 group-focus-visible/news:translate-y-0">
-                    <div className="translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-100">
-                        {item.label || "Tin tức"}
-                      </p>
+                    <div className="w-full translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
+                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center bg-white px-5 py-3 shadow-[8px_8px_0_rgba(15,23,42,0.12)]">
+                        {item.logo ? (
+                          <img
+                            src={item.logo}
+                            alt={item.label || "Logo báo chí"}
+                            className="max-h-10 max-w-[170px] object-contain"
+                          />
+                        ) : (
+                          <span className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+                            {item.label || "Tin tức"}
+                          </span>
+                        )}
+                      </div>
                       <h3 className="mt-3 max-w-xl text-2xl font-black tracking-[-0.04em] text-white">
                         {item.title}
                       </h3>
@@ -1711,65 +1730,6 @@ function BrandStory() {
 }
 
 // ==========================================
-// 9. CTA SECTION
-// ==========================================
-function CTASection() {
-  const { pageAssets } = useHomeMarketingConfig();
-  const ctaImage =
-    pageAssets.find((item) => item.key === "home_cta_image")?.imageUrl ||
-    "/hero/chan-ga-plate.png";
-
-  return (
-    <section id="home-cta" className="bg-[#fff8ed] px-0 py-0">
-      <div className="grid w-full overflow-hidden border-y border-orange-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.08)] lg:grid-cols-[1fr_0.9fr]">
-        <div className="p-5 sm:p-8 lg:p-16">
-          <p className="mb-5 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-            <HeartHandshake size={14} />
-            Tìm hiểu sản phẩm chính hãng
-          </p>
-
-          <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">
-            Khám phá sản phẩm trước khi lựa chọn
-          </h2>
-
-          <p className="mt-6 max-w-xl text-base font-medium leading-8 text-slate-600 sm:text-lg">
-            Xem câu chuyện sản phẩm, thành phần, quy trình và kênh phân phối chính thức của Ăn Cùng Bà Tuyết.
-          </p>
-
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <CurtainAction
-              href="https://tiktok.com/@batuyethanhvi"
-              icon={<Play size={15} className="fill-white" />}
-              variant="dark"
-              className="rounded-none px-8 py-5"
-            >
-              Xem kênh TikTok
-            </CurtainAction>
-
-            <CurtainAction
-              href="https://shopee.vn/an-vat-ba-tuyet-tam-cay"
-              icon={<ArrowRight size={18} />}
-              variant="orange"
-              className="rounded-none px-8 py-5"
-            >
-              Xem sản phẩm Shopee
-            </CurtainAction>
-          </div>
-        </div>
-
-        <div className="relative min-h-[420px] overflow-hidden border-l border-orange-200 bg-[#f7ead8] lg:min-h-[520px]">
-          <img
-            src={ctaImage}
-            alt="Sản phẩm Bà Tuyết"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ==========================================
 // MAIN EXPORT
 // ==========================================
 export default function HomePage() {
@@ -1785,7 +1745,6 @@ export default function HomePage() {
       <WhyChooseUsFromDb />
       <TrustEvidenceSections />
       <MarketingAssetsSection />
-      <CTASection />
     </main>
   );
 }

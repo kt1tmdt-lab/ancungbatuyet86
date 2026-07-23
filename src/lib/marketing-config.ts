@@ -57,6 +57,7 @@ export type HomeNewsItem = {
   description: string;
   label: string;
   imageUrl: string;
+  logoUrl: string;
   linkUrl: string;
   enabled: boolean;
   sortOrder: number;
@@ -468,6 +469,7 @@ export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
     description: "Thông tin nổi bật về thương hiệu, sản phẩm và hoạt động bán hàng.",
     label: "Báo chí",
     imageUrl: "/hero/tam-cay-pack.png",
+    logoUrl: "",
     linkUrl: "/tin-tuc",
     enabled: true,
     sortOrder: 10,
@@ -478,6 +480,7 @@ export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
     description: "Bài viết giới thiệu cách dùng sản phẩm trong các món ăn vặt quen thuộc.",
     label: "Công thức",
     imageUrl: "/hero/banh-trang-rong-bien.png",
+    logoUrl: "",
     linkUrl: "/tin-tuc",
     enabled: true,
     sortOrder: 20,
@@ -488,6 +491,7 @@ export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
     description: "Nội dung giúp khách hàng hiểu rõ hơn về quy trình sản xuất.",
     label: "Hậu trường",
     imageUrl: "/hero/chan-ga-poster.png",
+    logoUrl: "",
     linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
     enabled: true,
     sortOrder: 30,
@@ -498,6 +502,7 @@ export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
     description: "Thông tin tạo niềm tin về bảo hiểm trách nhiệm sản phẩm cho khách hàng.",
     label: "Thông báo",
     imageUrl: "/bento/bento-insurance.png",
+    logoUrl: "",
     linkUrl: "/gioi-thieu/thanh-tuu",
     enabled: true,
     sortOrder: 40,
@@ -889,12 +894,13 @@ function normalizeHomeNewsItems(input: unknown): HomeNewsItem[] {
       const description = stringValue(item.description);
       const label = stringValue(item.label);
       const imageUrl = normalizeUploadPublicUrl(stringValue(item.imageUrl));
+      const logoUrl = normalizeUploadPublicUrl(stringValue(item.logoUrl));
       const linkUrl = stringValue(item.linkUrl);
       const sortOrder = Number.isFinite(Number(item.sortOrder))
         ? Number(item.sortOrder)
         : index * 10;
 
-      if (!title && !description && !label && !imageUrl && !linkUrl) return null;
+      if (!title && !description && !label && !imageUrl && !logoUrl && !linkUrl) return null;
 
       return {
         id: itemId(item.id),
@@ -902,6 +908,7 @@ function normalizeHomeNewsItems(input: unknown): HomeNewsItem[] {
         description,
         label,
         imageUrl,
+        logoUrl,
         linkUrl,
         enabled: item.enabled !== false,
         sortOrder,
