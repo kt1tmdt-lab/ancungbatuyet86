@@ -6,14 +6,8 @@ import {
   ArrowRight,
   BadgeCheck,
   BookOpen,
-  Building2,
-  CheckCircle2,
   Factory,
-  FileText,
-  Handshake,
   Heart,
-  MapPin,
-  PackageCheck,
   Quote,
   ShieldCheck,
   Sparkles,
@@ -121,14 +115,6 @@ function ButtonLink({
   );
 }
 
-function PlaceholderValue({ children = "Cần cập nhật" }: { children?: ReactNode }) {
-  return (
-    <span className="inline-flex w-fit border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-orange-700">
-      {children}
-    </span>
-  );
-}
-
 function AssetImage({
   src,
   alt,
@@ -144,6 +130,16 @@ function AssetImage({
 function marketingTextValue(items: HomeTextItem[], key: string, fallback: string) {
   const value = items.find((item) => item.key === key)?.value;
   return repairMojibakeText(value && value.trim() ? value : fallback);
+}
+
+function isPlaceholderText(value?: string) {
+  const normalized = repairMojibakeText(value || "").trim().toLowerCase();
+  return !normalized ||
+    normalized.includes("cần cập nhật") ||
+    normalized.includes("cần xác nhận") ||
+    normalized.includes("cần bổ sung") ||
+    normalized.includes("[cần") ||
+    normalized.includes("chưa có");
 }
 
 const fallbackBrandStats = [
@@ -270,6 +266,20 @@ export default function AboutPage() {
   const [isStoryOpen, setIsStoryOpen] = useState(false);
 
   useEffect(() => {
+    if (!isStoryOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsStoryOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isStoryOpen]);
+
+  useEffect(() => {
     async function fetchMarketingConfig() {
       try {
         const res = await fetch("/api/settings/marketing", { cache: "no-store" });
@@ -316,7 +326,7 @@ export default function AboutPage() {
   );
   const storyFullText = marketingTextValue(homeTexts, "about_story_full", DEFAULT_FULL_BRAND_STORY);
   const storyParagraphs = storyFullText.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
-  const storyPreview = storyParagraphs.slice(0, 6);
+  const storyPreview = storyParagraphs.slice(0, 4);
   const storyChapters = [
     { number: "01", title: "Nỗi sợ", desc: "Sợ chân gà không rõ nguồn gốc, sợ cái tên “chân gà Trung Quốc” bám vào suy nghĩ người tiêu dùng." },
     { number: "02", title: "Áp lực", desc: "Làm thật, nói thật, công khai mọi thứ nhưng vẫn có nghi ngờ, chỉ trích và tin đồn." },
@@ -330,6 +340,7 @@ export default function AboutPage() {
   ];
   const visibleMilestones = historyMilestones
     .filter((item) => item.enabled !== false)
+    .filter((item) => !isPlaceholderText(item.title) || !isPlaceholderText(item.description) || item.imageUrl)
     .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
   const businessSectionLabel = marketingTextValue(homeTexts, "about_business_label", "Thông tin doanh nghiệp");
   const businessSectionTitle = marketingTextValue(homeTexts, "about_business_title", "Thông tin thương hiệu và đơn vị sản xuất");
@@ -345,7 +356,7 @@ export default function AboutPage() {
       marketingTextValue(homeTexts, `about_business_${position}_label`, fallbackLabel),
       marketingTextValue(homeTexts, `about_business_${position}_value`, fallbackValue),
     ] as const;
-  }).filter(([label, value]) => label || value);
+  }).filter(([label, value]) => label && !isPlaceholderText(value));
   const valuesSectionLabel = marketingTextValue(homeTexts, "about_values_label", "Định hướng thương hiệu");
   const valuesSectionTitle = marketingTextValue(homeTexts, "about_values_title", "Sứ mệnh, tầm nhìn và giá trị cốt lõi.");
   const valuesSectionDescription = marketingTextValue(
@@ -380,20 +391,19 @@ export default function AboutPage() {
       value: marketingTextValue(homeTexts, `about_hero_stat_${position}_value`, fallback.value),
       label: marketingTextValue(homeTexts, `about_hero_stat_${position}_label`, fallback.label),
     };
-  });
+  }).filter((stat) => !isPlaceholderText(stat.value) && !isPlaceholderText(stat.label));
 
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
-          <div>
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#f7efe3] px-5 py-16 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
+        <div className="pointer-events-none absolute -left-24 top-10 h-80 w-80 bg-orange-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-[36%] bg-orange-100/55" />
+        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,0.9fr)] lg:items-center">
+          <div className="min-w-0">
             <SectionLabel>{aboutHeroLabel}</SectionLabel>
-            <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.07em] text-slate-950 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.07em] text-slate-950 sm:text-6xl lg:text-7xl xl:text-8xl">
               {aboutHeroTitle}
             </h1>
-          </div>
-
-          <div>
             <p className="max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
               {aboutHeroDescription}
             </p>
@@ -402,22 +412,35 @@ export default function AboutPage() {
               <ButtonLink href={aboutHeroSecondaryLink} variant="secondary">{aboutHeroSecondaryText}</ButtonLink>
             </div>
           </div>
+
+          <div className="relative min-h-[420px] overflow-hidden border border-orange-200 bg-white shadow-[18px_18px_0_rgba(234,88,12,0.13)] sm:min-h-[520px]">
+            <AssetImage src={heroImage} alt="Hồ sơ thương hiệu Ăn Cùng Bà Tuyết" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-950/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Minh bạch bằng việc làm</p>
+              <p className="mt-3 max-w-md text-3xl font-black leading-tight tracking-[-0.05em]">
+                Ngon phải rõ nguồn gốc — ăn phải thật an tâm.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-7xl border border-orange-100 bg-white shadow-sm lg:grid-cols-3">
-          {brandStats.map((stat) => (
-            <div key={stat.label} className="border-b border-orange-100 p-7 lg:border-b-0 lg:border-r last:lg:border-r-0">
-              <PlaceholderValue>{stat.value}</PlaceholderValue>
-              <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        {brandStats.length > 0 ? (
+          <div className="relative mx-auto mt-12 grid max-w-7xl border border-orange-100 bg-white shadow-sm lg:grid-cols-3">
+            {brandStats.map((stat) => (
+              <div key={stat.label} className="border-b border-orange-100 p-7 lg:border-b-0 lg:border-r last:lg:border-r-0">
+                <p className="text-4xl font-black tracking-[-0.07em] text-orange-600">{stat.value}</p>
+                <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="relative overflow-hidden border-b border-orange-100 bg-white py-20">
         <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 bg-orange-100 blur-3xl" />
         <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[#fff4e2]" />
-        <div className="relative grid w-full gap-8 px-5 sm:px-8 lg:grid-cols-[minmax(470px,0.86fr)_minmax(760px,1.14fr)] lg:px-8 xl:px-10 2xl:px-14">
+        <div className="relative grid w-full max-w-[1600px] gap-8 px-5 sm:px-8 lg:mx-auto lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-8 xl:px-10 2xl:px-14">
           <div className="grid gap-5 lg:self-start">
             <div className="relative min-h-[640px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[18px_18px_0_rgba(234,88,12,0.10)]">
               {storyVideoUrl ? (
@@ -431,11 +454,11 @@ export default function AboutPage() {
               ) : (
                 <AssetImage src={teamImage} alt="Câu chuyện thương hiệu Chân Gà Bà Tuyết" className="scale-105 opacity-90" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
-              <div className="absolute left-6 top-6 border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+              <div className="pointer-events-none absolute left-6 top-6 border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
                 Câu chuyện thật
               </div>
-              <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-9">
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-7 text-white sm:p-9">
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-200">Chân Gà Bà Tuyết</p>
                 <h2 className="mt-4 max-w-xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl">
                   {storyTitle}
@@ -443,7 +466,7 @@ export default function AboutPage() {
                 <button
                   type="button"
                   onClick={() => setIsStoryOpen(true)}
-                  className="mt-7 inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
+                  className="pointer-events-auto mt-7 inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
                 >
                   <BookOpen size={16} />
                   Đọc câu chuyện đầy đủ
@@ -558,21 +581,19 @@ export default function AboutPage() {
           </div>
 
           <div className="border border-orange-100 bg-white">
-            {businessInfoItems.map(([label, value]) => {
-              const isPending = value.toLowerCase().includes("cần xác nhận");
-              return (
-                <div key={label} className="grid border-b border-orange-100 last:border-b-0 md:grid-cols-[0.42fr_0.58fr]">
-                  <div className="bg-orange-50/70 p-4 text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</div>
-                  <div className="p-4 text-sm font-bold leading-7 text-slate-800">
-                    {isPending ? <PlaceholderValue>Cần xác nhận</PlaceholderValue> : value}
-                  </div>
+            {businessInfoItems.map(([label, value]) => (
+              <div key={label} className="grid border-b border-orange-100 last:border-b-0 md:grid-cols-[0.42fr_0.58fr]">
+                <div className="bg-orange-50/70 p-4 text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</div>
+                <div className="p-4 text-sm font-bold leading-7 text-slate-800">
+                  {value}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
+      {visibleMilestones.length > 0 ? (
       <section className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
@@ -590,14 +611,8 @@ export default function AboutPage() {
           <div className="relative mt-14">
             <div className="absolute left-4 top-0 h-full border-l-2 border-dashed border-orange-300 lg:left-1/2 lg:-translate-x-1/2" />
             <div className="space-y-8">
-              {visibleMilestones.length === 0 ? (
-                <div className="border border-orange-100 bg-[#fbf7ef] p-8 text-sm font-bold text-slate-500">
-                  Chưa có cột mốc nào đang hiển thị. Admin có thể thêm và bật hiển thị trong phần Lịch sử phát triển.
-                </div>
-              ) : null}
               {visibleMilestones.map((item, index) => {
                 const isRight = index % 2 === 0;
-                const hasMilestoneContent = Boolean(item.description || item.detailContent);
                 const content = (
                   <div className={`overflow-hidden border border-orange-100 bg-[#fbf7ef] shadow-[12px_12px_0_rgba(234,88,12,0.08)] transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[18px_18px_0_rgba(234,88,12,0.12)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
                     {item.imageUrl ? (
@@ -613,7 +628,6 @@ export default function AboutPage() {
                             {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
                           </p>
                         </div>
-                        {!hasMilestoneContent ? <PlaceholderValue>Cần bổ sung</PlaceholderValue> : null}
                       </div>
                       <h3 className="mt-6 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title || "Cột mốc mới"}</h3>
                       {item.description ? (
@@ -644,6 +658,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      ) : null}
 
       <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
         <div className="mx-auto max-w-7xl">
@@ -720,7 +735,12 @@ export default function AboutPage() {
           />
           <div className="pointer-events-none absolute -left-24 top-1/4 h-80 w-80 animate-[storyGlow_4s_ease-in-out_infinite] bg-orange-600/35 blur-3xl" />
           <div className="pointer-events-none absolute -right-20 bottom-10 h-96 w-96 animate-[storyGlow_5s_ease-in-out_infinite] bg-orange-300/25 blur-3xl" />
-          <article className="relative max-h-[94vh] w-full max-w-[1380px] animate-[storyPop_.24s_ease-out] overflow-hidden border border-orange-300 bg-[#fff8ed] shadow-[0_36px_120px_rgba(0,0,0,0.55)]">
+          <article
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="brand-story-dialog-title"
+            className="relative max-h-[94vh] w-full max-w-[1380px] animate-[storyPop_.24s_ease-out] overflow-hidden border border-orange-300 bg-[#fff8ed] shadow-[0_36px_120px_rgba(0,0,0,0.55)]"
+          >
             <button
               type="button"
               onClick={() => setIsStoryOpen(false)}
@@ -740,7 +760,7 @@ export default function AboutPage() {
                   <p className="inline-flex border border-orange-400/40 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">
                     Câu chuyện thương hiệu
                   </p>
-                  <h3 className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl">
+                  <h3 id="brand-story-dialog-title" className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl">
                     Câu chuyện của Bà Tuyết
                   </h3>
                   <p className="mt-5 max-w-md text-sm font-semibold leading-7 text-white/65">
