@@ -57,7 +57,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error("Login failed");
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      if (res.status === 429) {
+        const retryAfter = Number(data?.retryAfter);
+        const waitMessage = Number.isFinite(retryAfter)
+          ? ` Vui lòng thử lại sau ${Math.ceil(retryAfter / 60)} phút.`
+          : " Vui lòng thử lại sau.";
+        throw new Error(`Bạn đã đăng nhập quá nhiều lần.${waitMessage}`);
+      }
+      if (res.status === 401) {
+        throw new Error("Email hoặc mật khẩu không đúng.");
+      }
+      throw new Error(data?.error || "Đăng nhập thất bại.");
+    }
     const data = await res.json();
     setUser(data.user);
     setToken(data.token ?? null);

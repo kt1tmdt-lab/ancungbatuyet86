@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { getClientIp, rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendTelegramNotification } from "@/lib/telegram";
 
 function cleanString(value: unknown) {
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    const ip = getClientIp(req);
     const { success } = await rateLimit(`contact_${ip}`, 5, 60 * 10);
     if (!success) return rateLimitResponse();
 

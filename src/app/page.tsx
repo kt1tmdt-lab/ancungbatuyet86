@@ -15,12 +15,10 @@ import {
   Newspaper,
   Leaf,
   Truck,
-  Clock3,
   BadgeCheck,
   PackageCheck,
   ClipboardCheck,
   Store,
-  HeartHandshake,
   Wheat,
   Award,
   type LucideIcon,
@@ -171,7 +169,7 @@ const showcaseHeroProductsFallback: HeroProduct[] = [
 ];
 
 function SectionTitle({
-  label,
+  label: _label,
   title,
   description,
   align = "left",
@@ -187,9 +185,6 @@ function SectionTitle({
         align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl"
       }
     >
-      <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-        {label}
-      </p>
       <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
         {title}
       </h2>
@@ -566,30 +561,6 @@ function HeroSection() {
             </CurtainAction>
           </motion.div>
 
-          <motion.div
-            variants={fadeUp}
-            className="mt-14 grid max-w-xl overflow-hidden rounded-[1.5rem] border border-orange-100 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:grid-cols-3 xl:max-w-2xl"
-          >
-            {heroBanner.highlights.map((item, index) => {
-              const Icon = [Factory, ShieldCheck, Truck][index] || Factory;
-              return (
-                <div
-                  key={item.label}
-                  className="border-b border-orange-100 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
-                >
-                  <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-full bg-orange-600 text-yellow-300">
-                    <Icon size={20} strokeWidth={1.8} />
-                  </div>
-                  <p className="text-2xl font-black tracking-[-0.04em] text-slate-950">
-                    {item.value}
-                  </p>
-                  <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                    {item.label}
-                  </p>
-                </div>
-              );
-            })}
-          </motion.div>
         </motion.div>
 
         <motion.div
@@ -608,22 +579,6 @@ function HeroSection() {
             <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
           </div>
           <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-orange-300/60 bg-orange-100/30 xl:block" />
-
-          <div className="absolute left-0 top-[27%] z-30 hidden w-fit min-w-0 max-w-[min(20rem,42vw)] -rotate-2 border border-orange-100 bg-white/88 px-5 py-4 shadow-[10px_12px_0_rgba(234,88,12,0.16),0_26px_70px_rgba(15,23,42,0.12)] backdrop-blur xl:block">
-            <div className="mb-2 h-1 w-12 bg-orange-500" />
-            <p className="font-[var(--font-script)] text-[clamp(1.25rem,1.45vw,1.75rem)] font-bold italic leading-tight tracking-[-0.03em] text-orange-700">
-              {heroBanner.quote}
-            </p>
-          </div>
-
-          <div className="absolute right-0 top-[14%] z-30 rounded-[1.35rem] border border-green-200 bg-green-50 px-5 py-4 text-center shadow-[0_24px_60px_rgba(22,101,52,0.12)] sm:right-4 xl:right-2 xl:px-6 xl:py-5">
-            <p className="text-2xl font-black tracking-[-0.05em] text-green-700 xl:text-3xl">
-              {heroBanner.statValue}
-            </p>
-            <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-green-700">
-              {heroBanner.statLabel}
-            </p>
-          </div>
 
           <img
             src={heroBanner.characterImage}
@@ -841,7 +796,6 @@ function TrustSection() {
       icon: Award,
     },
   ];
-  const sectionLabel = homeTextValue(homeTexts, "trust_section_label", "Sứ mệnh");
   const sectionTitle = homeTextValue(homeTexts, "trust_section_title", "Thay đổi định kiến về ăn vặt");
   const sectionDescription = homeTextValue(
     homeTexts,
@@ -853,9 +807,6 @@ function TrustSection() {
     <section className="bg-[#fff8ed] py-0">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="mb-4 inline-flex border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-            {sectionLabel}
-          </p>
           <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
             {sectionTitle}
           </h2>
@@ -1388,11 +1339,7 @@ function TrustEvidenceSections() {
       <div className="px-5 py-12 sm:px-8 lg:px-16">
         <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              <ShieldCheck size={14} />
-              Bằng chứng thương hiệu
-            </p>
-            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950">
               Vì sao chúng ta nên chọn Ăn Cùng Bà Tuyết?
             </h2>
           </div>
@@ -1541,9 +1488,6 @@ function FactoryProofSection() {
               imageNode
             )}
             <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-                {activeProof.title}
-              </p>
               <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
                 {activeProof.title}
               </h3>
@@ -1633,11 +1577,6 @@ function ProcessSection() {
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="grid gap-0 lg:grid-cols-[0.82fr_1.18fr] lg:items-stretch">
           <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:min-h-[520px] lg:p-16">
-            <p className="mb-4 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              <Clock3 size={14} />
-              {homeTextValue(homeTexts, "process_label", "Quy trình sản xuất")}
-            </p>
-
             <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl">
               {homeTextValue(homeTexts, "process_title", "Từ nguyên liệu đến sản phẩm đóng gói")}
             </h2>
@@ -1712,11 +1651,6 @@ function BrandStory() {
     <section id="brand-story" className="bg-white py-0">
       <div className="grid w-full gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
         <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:h-fit lg:min-h-[520px] lg:p-16">
-          <span className="mb-5 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-            <BadgeCheck size={14} />
-            {homeTextValue(homeTexts, "brand_story_label", "Câu chuyện thương hiệu")}
-          </span>
-
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
             {homeTextValue(homeTexts, "brand_story_title", "Từ món ăn quen thuộc đến thương hiệu có quy trình")}
           </h2>
@@ -1774,11 +1708,6 @@ function CTASection() {
     <section id="home-cta" className="bg-[#fff8ed] px-0 py-0">
       <div className="grid w-full overflow-hidden border-y border-orange-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.08)] lg:grid-cols-[1fr_0.9fr]">
         <div className="p-5 sm:p-8 lg:p-16">
-          <p className="mb-5 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-            <HeartHandshake size={14} />
-            Tìm hiểu sản phẩm chính hãng
-          </p>
-
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">
             Khám phá sản phẩm trước khi lựa chọn
           </h2>

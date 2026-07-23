@@ -3,7 +3,7 @@ import { fileTypeFromBuffer } from "file-type";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { sanitizeFileBaseName, saveLocalUpload } from "@/lib/local-storage";
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { getClientIp, rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const allowedRoles = new Set(["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]);
 const uploadMaxMb = Number(process.env.UPLOAD_MAX_MB || 50);
@@ -11,7 +11,7 @@ const uploadMaxBytes = uploadMaxMb * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   try {
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const ip = getClientIp(req);
     const { success } = await rateLimit(`upload_${ip}`, 30, 60);
     if (!success) return rateLimitResponse();
 

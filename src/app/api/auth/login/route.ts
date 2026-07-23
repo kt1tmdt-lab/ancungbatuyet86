@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { verifyPassword, signToken } from "@/lib/auth";
-import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+  resetRateLimit,
+} from "@/lib/rate-limit";
 import { logAudit } from "@/lib/audit";
 
 function shouldUseSecureCookie() {
@@ -17,9 +22,9 @@ export async function POST(req: Request) {
   const { email, password } = body;
   if (!email || !password) return NextResponse.json({ error: "Missing" }, { status: 400 });
 
-  const ip = req.headers.get("x-forwarded-for") || "unknown";
-  const { success } = await rateLimit(`login_${ip}`, 5, 60 * 5); // 5 attempts per 5 mins
-  if (!success) return rateLimitResponse();
+  const rateLimitKey = `login_${getClientIp(req)}`;
+  const { success, retryAfter } = await rateLimit(rateLimitKey, 5, 60 * 5); // 5 attempts per 5 mins
+  if (!success) return rateLimitResponse(retryAfter);
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -32,6 +37,9 @@ export async function POST(req: Request) {
     console.log(`[Auth Login] Failed: Password mismatch for email: ${email}`);
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
+
+  // Successful logins must not accumulate and lock an administrator out.
+  resetRateLimit(rateLimitKey);
 
   const token = signToken({ id: user.id, email: user.email, role: user.role });
   
