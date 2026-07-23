@@ -15,10 +15,12 @@ import {
   Newspaper,
   Leaf,
   Truck,
+  Clock3,
   BadgeCheck,
   PackageCheck,
   ClipboardCheck,
   Store,
+  HeartHandshake,
   Wheat,
   Award,
   type LucideIcon,
@@ -796,6 +798,7 @@ function TrustSection() {
       icon: Award,
     },
   ];
+  const sectionLabel = homeTextValue(homeTexts, "trust_section_label", "Sứ mệnh");
   const sectionTitle = homeTextValue(homeTexts, "trust_section_title", "Thay đổi định kiến về ăn vặt");
   const sectionDescription = homeTextValue(
     homeTexts,
@@ -974,7 +977,6 @@ function FeaturedProducts() {
           <SectionTitle
             label={homeTextValue(homeTexts, "products_section_label", "Sản phẩm chủ lực")}
             title={homeTextValue(homeTexts, "products_section_title", "Sản phẩm nổi bật")}
-            description={homeTextValue(homeTexts, "products_section_description", "Giới thiệu nhanh các dòng sản phẩm chính để khách hàng bấm xem chi tiết ở từng trang riêng.")}
           />
 
           <CurtainAction
@@ -1056,7 +1058,6 @@ function WhyChooseUsFromDb() {
         <SectionTitle
           label={homeTextValue(homeTexts, "news_section_label", "Tin tức & bằng chứng")}
           title={homeTextValue(homeTexts, "news_section_title", "Từ sản phẩm thật đến hệ thống phân phối thật")}
-          description={homeTextValue(homeTexts, "news_section_description", "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.")}
         />
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1339,7 +1340,11 @@ function TrustEvidenceSections() {
       <div className="px-5 py-12 sm:px-8 lg:px-16">
         <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950">
+            <p className="inline-flex items-center gap-2 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+              <ShieldCheck size={14} />
+              Bằng chứng thương hiệu
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
               Vì sao chúng ta nên chọn Ăn Cùng Bà Tuyết?
             </h2>
           </div>
@@ -1577,6 +1582,11 @@ function ProcessSection() {
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="grid gap-0 lg:grid-cols-[0.82fr_1.18fr] lg:items-stretch">
           <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:min-h-[520px] lg:p-16">
+            <p className="mb-4 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+              <Clock3 size={14} />
+              {homeTextValue(homeTexts, "process_label", "Quy trình sản xuất")}
+            </p>
+
             <h2 className="text-4xl font-black tracking-[-0.05em] text-slate-950 sm:text-5xl">
               {homeTextValue(homeTexts, "process_title", "Từ nguyên liệu đến sản phẩm đóng gói")}
             </h2>
@@ -1651,6 +1661,11 @@ function BrandStory() {
     <section id="brand-story" className="bg-white py-0">
       <div className="grid w-full gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
         <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:h-fit lg:min-h-[520px] lg:p-16">
+          <span className="mb-5 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+            <BadgeCheck size={14} />
+            {homeTextValue(homeTexts, "brand_story_label", "Câu chuyện thương hiệu")}
+          </span>
+
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-5xl">
             {homeTextValue(homeTexts, "brand_story_title", "Từ món ăn quen thuộc đến thương hiệu có quy trình")}
           </h2>
@@ -1708,6 +1723,11 @@ function CTASection() {
     <section id="home-cta" className="bg-[#fff8ed] px-0 py-0">
       <div className="grid w-full overflow-hidden border-y border-orange-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.08)] lg:grid-cols-[1fr_0.9fr]">
         <div className="p-5 sm:p-8 lg:p-16">
+          <p className="mb-5 inline-flex items-center gap-2 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
+            <HeartHandshake size={14} />
+            Tìm hiểu sản phẩm chính hãng
+          </p>
+
           <h2 className="text-4xl font-black leading-tight tracking-[-0.05em] text-slate-950 sm:text-6xl">
             Khám phá sản phẩm trước khi lựa chọn
           </h2>
