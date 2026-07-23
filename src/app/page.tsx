@@ -1124,7 +1124,7 @@ function WhyChooseUsFromDb() {
                   </div>
                   <div className="relative z-10 flex flex-1 flex-col justify-between p-6">
                     {item.logo ? (
-                      <div className="flex h-14 w-36 items-center justify-center border border-slate-800 bg-slate-950 px-4 py-2 shadow-[6px_6px_0_rgba(234,88,12,0.10)]">
+                      <div className="flex h-14 w-36 items-center justify-center border border-orange-700 bg-orange-600 px-4 py-2 shadow-[6px_6px_0_rgba(15,23,42,0.10)]">
                         <img
                           src={item.logo}
                           alt={item.label || "Logo báo chí"}
@@ -1162,7 +1162,7 @@ function WhyChooseUsFromDb() {
 
                   <div className="pointer-events-none absolute inset-0 z-30 flex translate-y-full items-end bg-orange-600/96 p-7 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/news:translate-y-0 group-focus-visible/news:translate-y-0">
                     <div className="w-full translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
-                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border border-white/15 bg-slate-950 px-5 py-3 shadow-[8px_8px_0_rgba(15,23,42,0.20)]">
+                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border border-orange-200/40 bg-orange-700 px-5 py-3 shadow-[8px_8px_0_rgba(15,23,42,0.20)]">
                         {item.logo ? (
                           <img
                             src={item.logo}
