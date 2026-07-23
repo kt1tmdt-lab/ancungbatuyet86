@@ -968,7 +968,13 @@ function FeaturedProducts() {
     return fromDb.length > 0 ? fromDb : showcaseHeroProductsFallback;
   }, [featuredProducts]);
 
-  const showcaseProducts = useMemo(() => displayProducts.slice(0, 4), [displayProducts]);
+  const showcaseProducts = useMemo(() => {
+    const items = displayProducts.slice(0, 4);
+    if (items.length >= 4) {
+      [items[1], items[3]] = [items[3], items[1]];
+    }
+    return items;
+  }, [displayProducts]);
 
   return (
     <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fff7ed_52%,#ffffff_100%)] py-16">
@@ -1015,10 +1021,7 @@ function FeaturedProducts() {
                 className="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
               >
                 {showcaseProducts.map((product, i) => (
-                  <div
-                    key={`${product.id || product.slug || product.name || ""}-${i}`}
-                    className={i % 2 === 1 ? "xl:mt-10" : ""}
-                  >
+                  <div key={`${product.id || product.slug || product.name || ""}-${i}`}>
                     <ProductCard product={product} index={i} />
                   </div>
                 ))}
@@ -1355,21 +1358,25 @@ function TrustEvidenceSections() {
     .slice(0, 4);
   if (items.length === 0) return null;
 
+  const getTrustEvidenceHref = (item: (typeof items)[number]) => {
+    if (item.key === "food_safety_certificate") return "/chat-luong#ho-so-phap-ly";
+    if (item.key === "pvi_insurance") return "/chat-luong#bao-hiem-san-pham";
+    if (item.key === "production_process") return "/chat-luong#nha-may-quy-trinh";
+    if (item.key === "brand_story") return "/gioi-thieu";
+    return item.linkUrl || "/chat-luong";
+  };
+
   return (
     <section id="uy-tin" className="scroll-mt-24 border-y border-orange-100 bg-[#fffaf3]">
       <div className="px-5 py-12 sm:px-8 lg:px-16">
         <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="inline-flex items-center gap-2 bg-white px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
-              <ShieldCheck size={14} />
-              Bằng chứng thương hiệu
-            </p>
-            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-950">
+            <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950">
               Vì sao chúng ta nên chọn Ăn Cùng Bà Tuyết?
             </h2>
           </div>
           <Link
-            href="/gioi-thieu#ho-so-uy-tin"
+            href="/chat-luong"
             className="inline-flex w-fit items-center gap-2 border border-orange-200 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
           >
             Xem hồ sơ đầy đủ
@@ -1379,10 +1386,12 @@ function TrustEvidenceSections() {
 
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {items.map((item) => {
+            const href = getTrustEvidenceHref(item);
             return (
-              <article
+              <Link
                 key={item.id}
-                className="group grid h-full grid-cols-[92px_1fr] overflow-hidden border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg"
+                href={href}
+                className="group grid h-full grid-cols-[92px_1fr] overflow-hidden border border-orange-100 bg-white shadow-sm outline-none transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg focus-visible:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-200"
               >
                 <div className="relative h-full min-h-[132px] overflow-hidden bg-slate-100">
                   {item.imageUrl ? (
@@ -1404,17 +1413,12 @@ function TrustEvidenceSections() {
                   <p className="mt-2 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">
                     {item.description}
                   </p>
-                  {item.linkUrl && (
-                    <Link
-                      href={item.linkUrl}
-                      className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700 transition hover:text-orange-900 hover:underline"
-                    >
-                      Chi tiết
-                      <ArrowRight size={14} />
-                    </Link>
-                  )}
+                  <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-orange-700 transition group-hover:translate-x-1 group-focus-visible:translate-x-1">
+                    Chi tiết
+                    <ArrowRight size={14} />
+                  </span>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>
@@ -1532,7 +1536,6 @@ function FactoryProofSection() {
           <SectionTitle
             label={homeTextValue(homeTexts, "factory_section_label", "Bằng chứng thương hiệu")}
             title={homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
-            description={homeTextValue(homeTexts, "factory_section_description", "Những bằng chứng giúp khách hàng yên tâm lựa chọn Ăn Cùng Bà Tuyết.")}
           />
 
           <div className="mt-8 grid gap-3">
