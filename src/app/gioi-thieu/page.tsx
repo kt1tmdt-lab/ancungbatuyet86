@@ -142,21 +142,6 @@ function isPlaceholderText(value?: string) {
     normalized.includes("chưa có");
 }
 
-const fallbackBrandStats = [
-  {
-    value: "Cần cập nhật",
-    label: "Doanh thu thương mại điện tử năm 2025.",
-  },
-  {
-    value: "Cần cập nhật",
-    label: "Sản phẩm đã bán ra trên các kênh phân phối.",
-  },
-  {
-    value: "Cần cập nhật",
-    label: "Người theo dõi trên các nền tảng mạng xã hội.",
-  },
-];
-
 const storyHighlights = [
   {
     icon: Sparkles,
@@ -314,7 +299,6 @@ export default function AboutPage() {
     return acc;
   }, {}), [pageAssets]);
 
-  const heroImage = assetByKey.about_process_background?.imageUrl || "/bento/bento-factory.png";
   const teamImage = assetByKey.about_team_quote?.imageUrl || "/hero/ba-tuyet-character.png";
   const storyVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "");
   const storyEyebrow = marketingTextValue(homeTexts, "about_story_label", "Câu chuyện thương hiệu");
@@ -374,73 +358,13 @@ export default function AboutPage() {
       desc: marketingTextValue(homeTexts, `about_value_${position}_description`, fallback.desc),
     };
   });
-  const aboutHeroLabel = marketingTextValue(homeTexts, "about_hero_label", "Hồ sơ thương hiệu");
-  const aboutHeroTitle = marketingTextValue(homeTexts, "about_hero_title", "Hồ sơ thương hiệu Ăn Cùng Bà Tuyết");
-  const aboutHeroDescription = marketingTextValue(
-    homeTexts,
-    "about_hero_description",
-    "Ăn Cùng Bà Tuyết là thương hiệu đồ ăn vặt Việt Nam được xây dựng từ những nội dung ẩm thực gần gũi, hướng đến các sản phẩm có nguồn gốc rõ ràng, được sản xuất theo quy trình và phân phối rộng rãi trên toàn quốc."
-  );
-  const aboutHeroPrimaryText = marketingTextValue(homeTexts, "about_hero_primary_text", "Xem sản phẩm");
-  const aboutHeroPrimaryLink = marketingTextValue(homeTexts, "about_hero_primary_link", "/san-pham");
-  const aboutHeroSecondaryText = marketingTextValue(homeTexts, "about_hero_secondary_text", "Xem chất lượng & quy trình");
-  const aboutHeroSecondaryLink = marketingTextValue(homeTexts, "about_hero_secondary_link", "/chat-luong");
-  const brandStats = fallbackBrandStats.map((fallback, index) => {
-    const position = index + 1;
-    return {
-      value: marketingTextValue(homeTexts, `about_hero_stat_${position}_value`, fallback.value),
-      label: marketingTextValue(homeTexts, `about_hero_stat_${position}_label`, fallback.label),
-    };
-  }).filter((stat) => !isPlaceholderText(stat.value) && !isPlaceholderText(stat.label));
-
   return (
     <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-[#f7efe3] px-5 py-16 sm:px-8 lg:px-14 lg:py-20 xl:px-20">
-        <div className="pointer-events-none absolute -left-24 top-10 h-80 w-80 bg-orange-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-[36%] bg-orange-100/55" />
-        <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,0.9fr)] lg:items-center">
-          <div className="min-w-0">
-            <SectionLabel>{aboutHeroLabel}</SectionLabel>
-            <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.92] tracking-[-0.07em] text-slate-950 sm:text-6xl lg:text-7xl xl:text-8xl">
-              {aboutHeroTitle}
-            </h1>
-            <p className="max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              {aboutHeroDescription}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href={aboutHeroPrimaryLink}>{aboutHeroPrimaryText}</ButtonLink>
-              <ButtonLink href={aboutHeroSecondaryLink} variant="secondary">{aboutHeroSecondaryText}</ButtonLink>
-            </div>
-          </div>
-
-          <div className="relative min-h-[420px] overflow-hidden border border-orange-200 bg-white shadow-[18px_18px_0_rgba(234,88,12,0.13)] sm:min-h-[520px]">
-            <AssetImage src={heroImage} alt="Hồ sơ thương hiệu Ăn Cùng Bà Tuyết" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-950/10 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-200">Minh bạch bằng việc làm</p>
-              <p className="mt-3 max-w-md text-3xl font-black leading-tight tracking-[-0.05em]">
-                Ngon phải rõ nguồn gốc — ăn phải thật an tâm.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {brandStats.length > 0 ? (
-          <div className="relative mx-auto mt-12 grid max-w-7xl border border-orange-100 bg-white shadow-sm lg:grid-cols-3">
-            {brandStats.map((stat) => (
-              <div key={stat.label} className="border-b border-orange-100 p-7 lg:border-b-0 lg:border-r last:lg:border-r-0">
-                <p className="text-4xl font-black tracking-[-0.07em] text-orange-600">{stat.value}</p>
-                <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-slate-500">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-20">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-14 sm:py-16 lg:min-h-[calc(100vh-78px)] lg:py-20">
         <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 bg-orange-100 blur-3xl" />
         <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[#fff4e2]" />
-        <div className="relative grid w-full max-w-[1600px] gap-8 px-5 sm:px-8 lg:mx-auto lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:px-8 xl:px-10 2xl:px-14">
+        <div className="pointer-events-none absolute bottom-0 left-0 h-28 w-full bg-gradient-to-t from-[#fbf7ef] to-transparent" />
+        <div className="relative grid w-full max-w-[1600px] gap-8 px-5 sm:px-8 lg:mx-auto lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-8 xl:px-10 2xl:px-14">
           <div className="grid gap-5 lg:self-start">
             <div className="relative min-h-[640px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[18px_18px_0_rgba(234,88,12,0.10)]">
               {storyVideoUrl ? (
