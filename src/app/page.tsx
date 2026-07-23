@@ -734,7 +734,8 @@ function StatsSection() {
             </h2>
             </div>
             <p className="max-w-2xl justify-self-start border-l-4 border-orange-500 pl-6 text-2xl font-black italic leading-[1.35] tracking-[-0.04em] text-slate-800 lg:justify-self-end lg:text-right xl:text-3xl">
-              Đừng tin những gì chúng tôi nói, hãy nhìn những gì chúng tôi làm.
+              <span className="block">Đừng tin những gì chúng tôi nói,</span>
+              <span className="block">hãy nhìn những gì chúng tôi làm.</span>
             </p>
           </div>
         </div>
@@ -915,7 +916,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           </p>
 
           <h3 className="line-clamp-1 text-xl font-black tracking-[-0.03em] text-slate-950 transition-colors group-hover:text-orange-600">
-            {product.name || "Sản phẩm nổi bật"}
+            {product.name || "Sản phẩm"}
           </h3>
 
           <p className="mt-2 line-clamp-2 min-h-[48px] text-sm leading-6 text-slate-600">
