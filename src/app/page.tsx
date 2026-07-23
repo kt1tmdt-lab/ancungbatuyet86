@@ -1060,7 +1060,7 @@ function WhyChooseUsFromDb() {
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
           label={homeTextValue(homeTexts, "news_section_label", "Tin tức")}
-          title={homeTextValue(homeTexts, "news_section_title", "Họ nói gì về chúng tôi")}
+          title={homeTextValue(homeTexts, "news_section_title", "Họ nói gì về chúng tôi?")}
         />
 
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">

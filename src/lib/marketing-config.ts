@@ -431,7 +431,7 @@ export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
   { id: "home-text-products-section-title", key: "products_section_title", group: "Trang chủ - Sản phẩm", label: "Tiêu đề sản phẩm", value: "Sản phẩm nổi bật", multiline: false, sortOrder: 710 },
   { id: "home-text-products-section-description", key: "products_section_description", group: "Trang chủ - Sản phẩm", label: "Mô tả sản phẩm", value: "Giới thiệu nhanh các dòng sản phẩm chính để khách hàng bấm xem chi tiết ở từng trang riêng.", multiline: true, sortOrder: 720 },
   { id: "home-text-news-section-label", key: "news_section_label", group: "Trang chủ - Tin tức & bằng chứng", label: "Nhãn tin tức", value: "Tin tức & bằng chứng", multiline: false, sortOrder: 800 },
-  { id: "home-text-news-section-title", key: "news_section_title", group: "Trang chủ - Tin tức & bằng chứng", label: "Tiêu đề tin tức", value: "Từ sản phẩm thật đến hệ thống phân phối thật", multiline: true, sortOrder: 810 },
+  { id: "home-text-news-section-title", key: "news_section_title", group: "Trang chủ - Tin tức & bằng chứng", label: "Tiêu đề tin tức", value: "Họ nói gì về chúng tôi?", multiline: true, sortOrder: 810 },
   { id: "home-text-news-section-description", key: "news_section_description", group: "Trang chủ - Tin tức & bằng chứng", label: "Mô tả tin tức", value: "Không phải hiệu ứng nào cũng tạo ra giá trị. Khách hàng cần thấy những thứ thật, có bằng chứng, có câu chuyện cụ thể.", multiline: true, sortOrder: 820 },
 ];
 
