@@ -14,8 +14,18 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/999",
+        source: "/daiviet",
         destination: "https://cd85mgkd-5173.jpe1.devtunnels.ms/",
+        permanent: false,
+      },
+      {
+        source: "/dv",
+        destination: "https://cd85mgkd-5173.jpe1.devtunnels.ms/",
+        permanent: false,
+      },
+      {
+        source: "/tmdt",
+        destination: "https://cd85mgkd-5174.jpe1.devtunnels.ms/",
         permanent: false,
       },
     ];
