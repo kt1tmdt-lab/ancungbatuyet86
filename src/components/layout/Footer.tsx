@@ -119,7 +119,7 @@ export default function Footer({
               </div>
               <div>
                 <p className="text-base font-bold leading-tight text-white">Ăn Cùng Bà Tuyết</p>
-                <p className="text-[11px] text-slate-400 mt-0.5 font-medium italic">Ăn vặt thì phải Ăn Cùng Bà Tuyết</p>
+                <p className="text-xs text-slate-400 mt-1">Ăn vặt thì phải Ăn Cùng Bà Tuyết</p>
               </div>
             </div>
             
@@ -137,7 +137,7 @@ export default function Footer({
           </div>
 
           {/* CỘT 2 — HỖ TRỢ KHÁCH HÀNG */}
-          <div className="lg:col-span-2.5 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
+          <div className="lg:col-span-3 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
             <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-200 mb-4">
               Hỗ trợ khách hàng
             </h3>
@@ -163,7 +163,7 @@ export default function Footer({
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1 flex items-center min-h-[44px] md:min-h-0"
+                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
                     >
                       {link.label}
                     </Link>
@@ -174,7 +174,7 @@ export default function Footer({
           </div>
 
           {/* CỘT 3 — CHÍNH SÁCH */}
-          <div className="lg:col-span-2.5 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
+          <div className="lg:col-span-2 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
             <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-200 mb-4">
               Chính sách
             </h3>
@@ -200,7 +200,7 @@ export default function Footer({
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1 flex items-center min-h-[44px] md:min-h-0"
+                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
                     >
                       {link.label}
                     </Link>
@@ -217,40 +217,32 @@ export default function Footer({
             </h3>
             <address className="not-italic">
               <ul className="space-y-3 text-sm text-slate-300">
-                <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-[#FF7A1A]">
-                    <Phone size={16} aria-hidden="true" />
-                  </div>
+                <li className="flex items-start gap-2.5">
+                  <Phone size={16} className="text-[#FF7A1A] mt-0.5 shrink-0" aria-hidden="true" />
                   <a
                     href={`tel:${contact.phone.replace(/\s+/g, "")}`}
-                    className="hover:text-[#FF7A1A] transition-colors duration-200 py-2 md:py-0 flex items-center min-h-[44px] md:min-h-0"
+                    className="hover:text-[#FF7A1A] transition-colors duration-200 py-1 flex items-center min-h-[44px] md:min-h-0"
                     aria-label={`Hotline: ${contact.phone}`}
                   >
                     {contact.phone}
                   </a>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-[#FF7A1A]">
-                    <Mail size={16} aria-hidden="true" />
-                  </div>
+                <li className="flex items-start gap-2.5">
+                  <Mail size={16} className="text-[#FF7A1A] mt-0.5 shrink-0" aria-hidden="true" />
                   <a
                     href={`mailto:${contact.email}`}
-                    className="hover:text-[#FF7A1A] transition-colors duration-200 py-2 md:py-0 flex items-center min-h-[44px] md:min-h-0"
+                    className="hover:text-[#FF7A1A] transition-colors duration-200 py-1 flex items-center min-h-[44px] md:min-h-0"
                     aria-label={`Email: ${contact.email}`}
                   >
                     {contact.email}
                   </a>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-[#FF7A1A]">
-                    <MapPin size={16} aria-hidden="true" />
-                  </div>
+                <li className="flex items-start gap-2.5">
+                  <MapPin size={16} className="text-[#FF7A1A] mt-0.5 shrink-0" aria-hidden="true" />
                   <span className="leading-tight">{contact.address}</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-8 h-8 shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-[#FF7A1A]">
-                    <Clock size={16} aria-hidden="true" />
-                  </div>
+                <li className="flex items-start gap-2.5">
+                  <Clock size={16} className="text-[#FF7A1A] mt-0.5 shrink-0" aria-hidden="true" />
                   <span className="leading-tight">{contact.workingHours}</span>
                 </li>
               </ul>
@@ -280,24 +272,17 @@ export default function Footer({
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 md:w-10 md:h-10 rounded border border-transparent bg-slate-800 text-slate-300 flex items-center justify-center transition-all duration-200 hover:bg-[#FFF3E8] hover:text-[#EA580C] hover:border-[#FF7A1A]"
+                  className="w-11 h-11 md:w-10 md:h-10 rounded bg-white/10 text-white flex items-center justify-center transition-all duration-200 hover:bg-[#FF7A1A]"
                   aria-label={s.label}
                   title={s.label}
                 >
-                  <s.icon size={20} />
+                  <s.icon size={18} />
                 </a>
               ))}
             </div>
 
             {/* BỘ CÔNG THƯƠNG LOGO PLACEHOLDER */}
-            {/* 
-              BỘ CÔNG THƯƠNG LOGO CONFIGURATION GUIDE:
-              - Chỉ dùng ảnh logo thật khi dự án đã có ảnh và đường dẫn xác nhận chính thức.
-              - Khi đã được duyệt, cấu hình URL tại trang quản trị (initialContact.boCongThuongUrl)
-                hoặc điền trực tiếp vào thuộc tính boCongThuongUrl bên dưới.
-              - Đảm bảo logo dẫn tới trang xác nhận chính thức.
-            */}
-            <div className="pt-2">
+            <div className="pt-1">
               {contact.boCongThuongUrl ? (
                 <a
                   href={contact.boCongThuongUrl}
@@ -313,7 +298,7 @@ export default function Footer({
                   />
                 </a>
               ) : (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-slate-900/40 border border-dashed border-slate-700 text-slate-500 max-w-[200px]">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 border border-dashed border-white/10 text-slate-400 max-w-[200px]">
                   <svg className="w-4 h-4 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
