@@ -107,43 +107,43 @@ export default function Footer({
   };
 
   return (
-    <footer className="bg-neutral text-white border-t border-white/5 font-sans">
+    <footer className="bg-[#fbfaf7] text-slate-900 border-t border-orange-100 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
           
           {/* CỘT 1 — THƯƠNG HIỆU */}
           <div className="lg:col-span-4 md:col-span-1 col-span-12 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-white p-1 rounded">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-white p-1 rounded border border-orange-100 shadow-sm">
                 <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
               </div>
               <div>
-                <p className="text-base font-bold leading-tight text-white">Ăn Cùng Bà Tuyết</p>
-                <p className="text-xs text-slate-400 mt-1">Ăn vặt thì phải Ăn Cùng Bà Tuyết</p>
+                <p className="text-base font-bold leading-tight text-slate-950">Ăn Cùng Bà Tuyết</p>
+                <p className="text-xs text-slate-500 mt-1">Ăn vặt thì phải Ăn Cùng Bà Tuyết</p>
               </div>
             </div>
             
-            <div className="space-y-2 text-xs leading-relaxed text-slate-400">
+            <div className="space-y-2 text-xs leading-relaxed text-slate-600">
               <p>
-                <span className="font-semibold text-slate-300">Đơn vị chủ quản:</span> [TÊN PHÁP LÝ DOANH NGHIỆP]
+                <span className="font-semibold text-slate-800">Đơn vị chủ quản:</span> [TÊN PHÁP LÝ DOANH NGHIỆP]
               </p>
               <p>
-                <span className="font-semibold text-slate-300">Mã số thuế:</span> [MÃ SỐ THUẾ]
+                <span className="font-semibold text-slate-800">Mã số thuế:</span> [MÃ SỐ THUẾ]
               </p>
               <p>
-                <span className="font-semibold text-slate-300">Địa chỉ đăng ký:</span> [ĐỊA CHỈ DOANH NGHIỆP]
+                <span className="font-semibold text-slate-800">Địa chỉ đăng ký:</span> [ĐỊA CHỈ DOANH NGHIỆP]
               </p>
             </div>
           </div>
 
           {/* CỘT 2 — HỖ TRỢ KHÁCH HÀNG */}
-          <div className="lg:col-span-3 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
-            <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-200 mb-4">
+          <div className="lg:col-span-3 md:col-span-1 col-span-12 border-b border-orange-100 md:border-b-0 pb-4 md:pb-0">
+            <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-800 mb-4">
               Hỗ trợ khách hàng
             </h3>
             <button
               onClick={() => toggleSection("support")}
-              className="md:hidden flex items-center justify-between w-full text-left font-bold text-xs uppercase tracking-wider text-slate-200 py-3 focus:outline-none"
+              className="md:hidden flex items-center justify-between w-full text-left font-bold text-xs uppercase tracking-wider text-slate-800 py-3 focus:outline-none"
               aria-expanded={openSection === "support"}
               aria-controls="footer-support-nav"
               style={{ minHeight: "44px" }}
@@ -151,7 +151,7 @@ export default function Footer({
               <span>Hỗ trợ khách hàng</span>
               <ChevronDown
                 size={16}
-                className={`text-slate-400 transition-transform duration-200 ${
+                className={`text-slate-500 transition-transform duration-200 ${
                   openSection === "support" ? "rotate-180" : ""
                 }`}
               />
@@ -163,7 +163,7 @@ export default function Footer({
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
+                      className="text-sm text-slate-600 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
                     >
                       {link.label}
                     </Link>
@@ -174,13 +174,13 @@ export default function Footer({
           </div>
 
           {/* CỘT 3 — CHÍNH SÁCH */}
-          <div className="lg:col-span-2 md:col-span-1 col-span-12 border-b border-white/5 md:border-b-0 pb-4 md:pb-0">
-            <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-200 mb-4">
+          <div className="lg:col-span-2 md:col-span-1 col-span-12 border-b border-orange-100 md:border-b-0 pb-4 md:pb-0">
+            <h3 className="hidden md:block font-bold text-xs uppercase tracking-wider text-slate-800 mb-4">
               Chính sách
             </h3>
             <button
               onClick={() => toggleSection("policy")}
-              className="md:hidden flex items-center justify-between w-full text-left font-bold text-xs uppercase tracking-wider text-slate-200 py-3 focus:outline-none"
+              className="md:hidden flex items-center justify-between w-full text-left font-bold text-xs uppercase tracking-wider text-slate-800 py-3 focus:outline-none"
               aria-expanded={openSection === "policy"}
               aria-controls="footer-policy-nav"
               style={{ minHeight: "44px" }}
@@ -188,7 +188,7 @@ export default function Footer({
               <span>Chính sách</span>
               <ChevronDown
                 size={16}
-                className={`text-slate-400 transition-transform duration-200 ${
+                className={`text-slate-500 transition-transform duration-200 ${
                   openSection === "policy" ? "rotate-180" : ""
                 }`}
               />
@@ -200,7 +200,7 @@ export default function Footer({
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-slate-300 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
+                      className="text-sm text-slate-600 hover:text-[#FF7A1A] hover:translate-x-1 transition-all duration-200 py-2 md:py-1.5 flex items-center min-h-[44px] md:min-h-0"
                     >
                       {link.label}
                     </Link>
@@ -212,11 +212,11 @@ export default function Footer({
 
           {/* CỘT 4 — LIÊN HỆ */}
           <div className="lg:col-span-3 md:col-span-1 col-span-12 space-y-4">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-200">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">
               Liên hệ
             </h3>
             <address className="not-italic">
-              <ul className="space-y-3 text-sm text-slate-300">
+              <ul className="space-y-3 text-sm text-slate-600">
                 <li className="flex items-start gap-2.5">
                   <Phone size={16} className="text-[#FF7A1A] mt-0.5 shrink-0" aria-hidden="true" />
                   <a
@@ -272,7 +272,7 @@ export default function Footer({
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-11 h-11 md:w-10 md:h-10 rounded bg-white/10 text-white flex items-center justify-center transition-all duration-200 hover:bg-[#FF7A1A]"
+                  className="w-11 h-11 md:w-10 md:h-10 rounded border border-orange-100 bg-[#fffaf3] text-slate-700 flex items-center justify-center transition-all duration-200 hover:bg-[#FF7A1A] hover:text-white hover:border-transparent shadow-sm"
                   aria-label={s.label}
                   title={s.label}
                 >
@@ -298,13 +298,13 @@ export default function Footer({
                   />
                 </a>
               ) : (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 border border-dashed border-white/10 text-slate-400 max-w-[200px]">
-                  <svg className="w-4 h-4 shrink-0 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-[#fffaf3] border border-dashed border-orange-200 text-slate-500 max-w-[200px] shadow-sm">
+                  <svg className="w-4 h-4 shrink-0 opacity-60 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                   <div className="text-left leading-tight">
-                    <span className="text-[8px] block uppercase font-bold text-slate-500">[Chờ xác thực]</span>
-                    <span className="text-[9px] block font-black uppercase text-slate-400">Bộ Công Thương</span>
+                    <span className="text-[8px] block uppercase font-bold text-slate-400">[Chờ xác thực]</span>
+                    <span className="text-[9px] block font-black uppercase text-slate-500">Bộ Công Thương</span>
                   </div>
                 </div>
               )}
@@ -315,8 +315,8 @@ export default function Footer({
         </div>
 
         {/* THANH CUỐI FOOTER */}
-        <div className="border-t border-white/10 mt-10 pt-6 text-center">
-          <p className="text-slate-400 text-xs font-medium">
+        <div className="border-t border-orange-100 mt-10 pt-6 text-center">
+          <p className="text-slate-500 text-xs font-medium">
             © 2026 Ăn Cùng Bà Tuyết. Bảo lưu mọi quyền.
           </p>
         </div>
