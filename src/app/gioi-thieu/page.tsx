@@ -507,55 +507,100 @@ export default function AboutPage() {
             <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-sm" />
           </motion.div>
 
-          {/* Pillars: Mission, Vision, Business Philosophy - Clean 3-Column Text Layout */}
-          <motion.div 
-            className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-24"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={staggerContainer}
-          >
+          {/* Pillars: Mission, Vision, Business Philosophy - Illustrated alternating rows */}
+          <div className="space-y-24 mb-28">
             
             {/* Sứ mệnh */}
-            <motion.div className="space-y-4" variants={fapUp}>
-              <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                / Sứ mệnh
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
-                "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
-              </h3>
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
-                Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
-              </p>
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fapUp}
+            >
+              <div className="lg:col-span-7 space-y-4">
+                <span className="text-xs font-black uppercase tracking-wider text-orange-600">
+                  Sứ mệnh
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
+                  "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
+                </h3>
+                <p className="text-base text-slate-700 leading-relaxed font-semibold">
+                  Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
+                </p>
+              </div>
+              <div className="lg:col-span-5">
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
+                  <img
+                    src="/bento/bento-ingredients.png"
+                    alt="Nguyên liệu sạch Ăn Cùng Bà Tuyết"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+              </div>
             </motion.div>
 
             {/* Tầm nhìn */}
-            <motion.div className="space-y-4" variants={fapUp}>
-              <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                / Tầm nhìn
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
-                Vươn tầm quốc tế & khẳng định chất lượng Việt
-              </h3>
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
-                Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
-              </p>
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fapUp}
+            >
+              <div className="lg:col-span-5 order-last lg:order-first">
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
+                  <img
+                    src="/bento/bento-insurance.png"
+                    alt="Chất lượng và bảo hiểm sản phẩm Ăn Cùng Bà Tuyết"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+              <div className="lg:col-span-7 space-y-4">
+                <span className="text-xs font-black uppercase tracking-wider text-orange-600">
+                  Tầm nhìn
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
+                  Vươn tầm quốc tế & khẳng định chất lượng Việt
+                </h3>
+                <p className="text-base text-slate-700 leading-relaxed font-semibold">
+                  Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
+                </p>
+              </div>
             </motion.div>
 
             {/* Triết lý kinh doanh */}
-            <motion.div className="space-y-4" variants={fapUp}>
-              <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                / Triết lý kinh doanh
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
-                "Làm thật và làm khác biệt"
-              </h3>
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
-                Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
-              </p>
+            <motion.div 
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={fapUp}
+            >
+              <div className="lg:col-span-7 space-y-4">
+                <span className="text-xs font-black uppercase tracking-wider text-orange-600">
+                  Triết lý kinh doanh
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
+                  "Làm thật và làm khác biệt"
+                </h3>
+                <p className="text-base text-slate-700 leading-relaxed font-semibold">
+                  Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
+                </p>
+              </div>
+              <div className="lg:col-span-5">
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
+                  <img
+                    src="/bento/bento-factory.png"
+                    alt="Nhà máy hiện đại Ăn Cùng Bà Tuyết"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </div>
+              </div>
             </motion.div>
 
-          </motion.div>
+          </div>
 
           {/* Value cards - 5 columns layout */}
           <div className="mb-24">
