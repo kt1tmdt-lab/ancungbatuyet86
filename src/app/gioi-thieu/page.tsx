@@ -319,27 +319,27 @@ export default function AboutPage() {
 
   const coreValues = [
     {
-      icon: <ShieldCheck className="text-orange-600 h-7 w-7" />,
+      icon: <ShieldCheck className="h-6 w-6 stroke-[1.8]" />,
       title: "An toàn",
       desc: "Sản phẩm phải đạt chuẩn từ nguyên liệu đến thành phẩm, không thỏa hiệp để đổi lấy giá rẻ, sức khoẻ khách hàng là quan trọng nhất và không có ngoại lệ.",
     },
     {
-      icon: <Eye className="text-orange-600 h-7 w-7" />,
+      icon: <Eye className="h-6 w-6 stroke-[1.8]" />,
       title: "Minh bạch",
       desc: "Nguồn gốc nguyên liệu, quy trình sản xuất, chứng nhận chất lượng, tất cả phải được công khai để khách hàng có thể tự kiểm chứng.",
     },
     {
-      icon: <Award className="text-orange-600 h-7 w-7" />,
+      icon: <Award className="h-6 w-6 stroke-[1.8]" />,
       title: "Trách nhiệm",
       desc: "Khi có vấn đề, Ăn Cùng Bà Tuyết luôn sẵn sàng nhận trách nhiệm và không né tránh. Sản phẩm được bảo hiểm trách nhiệm PVI là 1 phần trong những nỗ lực này.",
     },
     {
-      icon: <Zap className="text-orange-600 h-7 w-7" />,
+      icon: <Zap className="h-6 w-6 stroke-[1.8]" />,
       title: "Quyết liệt",
       desc: "Để có thể phát triển và mang lại nhiều giá trị hơn cho khách hàng, chúng tôi luôn quyết liệt làm tốt hơn mỗi ngày để phục vụ được khách hàng tốt và tốt hơn nữa.",
     },
     {
-      icon: <Heart className="text-orange-600 h-7 w-7" />,
+      icon: <Heart className="h-6 w-6 stroke-[1.8]" />,
       title: "Người Việt làm chủ",
       desc: "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới.",
     },
@@ -638,16 +638,25 @@ export default function AboutPage() {
               {coreValues.map((val, idx) => (
                 <motion.div
                   key={idx}
-                  className="flex flex-col gap-4 p-5 bg-white border border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20"
+                  className="relative flex flex-col gap-4 p-5 pt-8 bg-white border border-slate-200/60 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.01)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_12px_30px_rgba(255,122,26,0.04)] hover:border-orange-500/30 group"
                   variants={fapUp}
                 >
-                  <div className="mb-2 self-start">{val.icon}</div>
-                  <h4 className="text-lg font-black tracking-tight text-slate-950">
-                    {val.title}
-                  </h4>
-                  <p className="text-xs text-slate-600 font-semibold leading-relaxed">
-                    {val.desc}
-                  </p>
+                  {/* Subtle top accent bar */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-orange-600/10 group-hover:bg-orange-600 transition-colors duration-300 rounded-t-md" />
+
+                  {/* Icon Container with hover color transition */}
+                  <div className="w-12 h-12 flex items-center justify-center rounded-md bg-orange-50/50 border border-orange-100/50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 self-start">
+                    {val.icon}
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-lg font-black tracking-tight text-slate-950 group-hover:text-orange-600 transition-colors duration-300">
+                      {val.title}
+                    </h4>
+                    <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                      {val.desc}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </motion.div>
