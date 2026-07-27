@@ -115,6 +115,116 @@ const staggerContainer = {
   },
 };
 
+function useCountUp(targetValueString: string, durationMs = 2000) {
+  const [displayValue, setDisplayValue] = useState("0");
+
+  useEffect(() => {
+    if (!targetValueString) {
+      setDisplayValue("0");
+      return;
+    }
+
+    const match = targetValueString.match(/([0-9.,]+)/);
+    if (!match) {
+      setDisplayValue(targetValueString);
+      return;
+    }
+
+    const numberPartString = match[1];
+    const prefix = targetValueString.substring(0, match.index);
+    const suffix = targetValueString.substring((match.index ?? 0) + numberPartString.length);
+
+    let cleanNumberString = numberPartString;
+    const hasComma = numberPartString.includes(",");
+    const hasDot = numberPartString.includes(".");
+
+    let isDecimalDot = false;
+    let isDecimalComma = false;
+    let decimalPlaces = 0;
+
+    if (hasComma && hasDot) {
+      if (numberPartString.indexOf(",") < numberPartString.indexOf(".")) {
+        cleanNumberString = numberPartString.replace(/,/g, "");
+        const decSplit = cleanNumberString.split(".");
+        decimalPlaces = decSplit[1] ? decSplit[1].length : 0;
+        isDecimalDot = true;
+      } else {
+        cleanNumberString = numberPartString.replace(/\./g, "").replace(",", ".");
+        const decSplit = cleanNumberString.split(".");
+        decimalPlaces = decSplit[1] ? decSplit[1].length : 0;
+        isDecimalComma = true;
+      }
+    } else if (hasDot) {
+      const parts = numberPartString.split(".");
+      if (parts.length > 2 || parts[1].length === 3) {
+        cleanNumberString = numberPartString.replace(/\./g, "");
+      } else {
+        cleanNumberString = numberPartString;
+        decimalPlaces = parts[1] ? parts[1].length : 0;
+        isDecimalDot = true;
+      }
+    } else if (hasComma) {
+      const parts = numberPartString.split(",");
+      if (parts.length > 2 || parts[1].length === 3) {
+        cleanNumberString = numberPartString.replace(/,/g, "");
+      } else {
+        cleanNumberString = numberPartString.replace(",", ".");
+        decimalPlaces = parts[1] ? parts[1].length : 0;
+        isDecimalComma = true;
+      }
+    }
+
+    const targetNumber = parseFloat(cleanNumberString);
+    if (isNaN(targetNumber)) {
+      setDisplayValue(targetValueString);
+      return;
+    }
+
+    let startTimestamp: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / durationMs, 1);
+      const easedProgress = progress * (2 - progress); // easeOutQuad
+      const currentNumber = easedProgress * targetNumber;
+
+      let formattedNumber = "";
+      if (hasDot && !isDecimalDot) {
+        formattedNumber = Math.floor(currentNumber)
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      } else if (hasComma && !isDecimalComma) {
+        formattedNumber = Math.floor(currentNumber)
+          .toString()
+          .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      } else if (isDecimalDot) {
+        formattedNumber = currentNumber.toFixed(decimalPlaces);
+      } else if (isDecimalComma) {
+        formattedNumber = currentNumber.toFixed(decimalPlaces).replace(".", ",");
+      } else {
+        formattedNumber = Math.floor(currentNumber).toString();
+      }
+
+      setDisplayValue(`${prefix}${formattedNumber}${suffix}`);
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(step);
+      }
+    };
+
+    animationFrameId = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [targetValueString, durationMs]);
+
+  return displayValue;
+}
+
+function Counter({ value, duration = 2000 }: { value: string; duration?: number }) {
+  const animatedValue = useCountUp(value, duration);
+  return <span>{animatedValue}</span>;
+}
+
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(
     DEFAULT_MARKETING_CONFIG.pageAssets
@@ -165,17 +275,7 @@ export default function AboutPage() {
     "about_hero_label",
     "Hồ sơ thương hiệu"
   );
-  const heroTitle = marketingTextValue(
-    homeTexts,
-    "about_hero_title",
-    "Ăn Cùng Bà Tuyết: Thương hiệu Việt, vì người Việt"
-  );
-  const heroDesc = marketingTextValue(
-    homeTexts,
-    "about_hero_description",
-    "Thương hiệu đồ ăn vặt Việt Nam sản xuất tại nhà máy đạt tiêu chuẩn An toàn Vệ sinh thực phẩm & ISO 22000:2018, phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử."
-  );
-
+  
   const stat1Value = marketingTextValue(homeTexts, "about_hero_stat_1_value", "15+ triệu");
   const stat1Label = marketingTextValue(homeTexts, "about_hero_stat_1_label", "đơn hàng");
   const stat2Value = marketingTextValue(homeTexts, "about_hero_stat_2_value", "50.000+");
@@ -244,92 +344,21 @@ export default function AboutPage() {
 
   return (
     <main className="bg-[#FAF7F2] text-slate-900 overflow-hidden font-sans">
-      {/* SECTION 0: HERO */}
-      <section className="relative py-16 lg:py-24 border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-center">
-            
-            {/* Left Content Area */}
-            <motion.div 
-              className="lg:col-span-7 space-y-6 text-left"
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-            >
-              <motion.div 
-                className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-sm"
-                variants={fapUp}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>{heroTagline}</span>
-              </motion.div>
-              
-              <motion.h1 
-                className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1]"
-                variants={fapUp}
-              >
-                {heroTitle}
-              </motion.h1>
-              
-              <motion.p 
-                className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-semibold"
-                variants={fapUp}
-              >
-                {heroDesc}
-              </motion.p>
-              
-              <motion.div className="pt-4 flex flex-wrap gap-4" variants={fapUp}>
-                <Link
-                  href="/san-pham"
-                  className="acbt-btn acbt-btn--primary acbt-btn--lg rounded-md"
-                >
-                  <span>Xem sản phẩm</span>
-                  <ArrowRight size={16} />
-                </Link>
-                <Link
-                  href="/chat-luong"
-                  className="acbt-btn acbt-btn--secondary acbt-btn--lg rounded-md"
-                >
-                  <span>Xem chất lượng & quy trình</span>
-                </Link>
-              </motion.div>
-            </motion.div>
-
-            {/* Right Stats Area */}
-            <motion.div 
-              className="lg:col-span-5 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1"
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-            >
-              {[
-                { val: stat1Value, label: stat1Label },
-                { val: stat2Value, label: stat2Label },
-                { val: stat3Value, label: stat3Label },
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  className="p-6 bg-white border-l-4 border-orange-600 border-y border-r border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-orange-500/20"
-                  variants={fapUp}
-                >
-                  <span className="text-3xl lg:text-4xl font-black text-[#0F172A] tracking-tight">
-                    {item.val}
-                  </span>
-                  <span className="mt-1 text-xs font-black uppercase tracking-wider text-slate-500 text-center lg:text-left">
-                    {item.label}
-                  </span>
-                </motion.div>
-              ))}
-            </motion.div>
-
-          </div>
-        </div>
-      </section>
-
       {/* SECTION 1: CÂU CHUYỆN THƯƠNG HIỆU */}
-      <section id="about-history" className="py-16 lg:py-24 bg-[#FAF7F2] border-b border-slate-200">
+      <section id="about-history" className="py-16 lg:py-24 bg-white border-b border-slate-200">
         <div id="about-community" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
+          {/* Eyebrow Label Tagline */}
+          <motion.div 
+            className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-sm mb-6"
+            initial="hidden"
+            animate="visible"
+            variants={fapUp}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>{heroTagline}</span>
+          </motion.div>
+
           {/* Section Header */}
           <motion.div 
             className="max-w-3xl mb-12 lg:mb-16"
@@ -338,15 +367,15 @@ export default function AboutPage() {
             viewport={{ once: true, margin: "-100px" }}
             variants={fapUp}
           >
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight leading-snug">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-snug">
               Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
-            </h2>
+            </h1>
             <div className="h-1.5 w-20 bg-orange-600 mt-4 rounded-sm" />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start mb-16">
             
-            {/* Story Paragraphs & Bullets */}
+            {/* Story Paragraphs */}
             <div className="lg:col-span-7 space-y-8">
               <motion.div 
                 className="space-y-6 text-slate-800 text-base leading-relaxed font-semibold"
@@ -360,7 +389,7 @@ export default function AboutPage() {
                     key={index}
                     className={
                       index === 0
-                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-2.5 bg-white p-4 border border-slate-200/80 rounded-r-md shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
+                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-2.5 bg-[#FAF7F2] p-4 border border-slate-200/80 rounded-r-md shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
                         : ""
                     }
                     variants={fapUp}
@@ -369,65 +398,94 @@ export default function AboutPage() {
                   </motion.p>
                 ))}
               </motion.div>
-
-              {/* Bullet list below paragraph */}
-              <motion.div 
-                className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-80px" }}
-                variants={staggerContainer}
-              >
-                {storyBullets.map((bullet, idx) => (
-                  <motion.div
-                    key={idx}
-                    className="flex gap-4 p-4 bg-white border border-slate-200/80 rounded-md shadow-[0_2px_8px_rgba(0,0,0,0.01)] items-start transition duration-300 hover:border-orange-500/20"
-                    variants={fapUp}
-                  >
-                    <div className="p-2 bg-orange-50 shrink-0 border border-orange-100 rounded-sm">
-                      {bullet.icon}
-                    </div>
-                    <p className="text-sm font-bold text-slate-800 leading-snug">
-                      {bullet.text}
-                    </p>
-                  </motion.div>
-                ))}
-              </motion.div>
             </div>
 
-            {/* Sticky Video/Embed Area */}
+            {/* Right Stats Area (From old Hero) */}
             <motion.div 
-              className="lg:col-span-5 lg:sticky lg:top-24"
+              className="lg:col-span-5 grid grid-cols-1 gap-4"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              variants={fapUp}
+              variants={staggerContainer}
             >
-              <div className="relative overflow-hidden bg-slate-950 border-4 border-[#0F172A] aspect-video w-full group rounded-md shadow-md">
-                {storyVideoUrl ? (
-                  <iframe
-                    src={storyVideoUrl}
-                    title="Video câu chuyện thương hiệu Ăn Cùng Bà Tuyết"
-                    className="absolute inset-0 h-full w-full border-0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6">
-                    <Video className="h-16 w-16 text-orange-500 mb-4" />
-                    <span className="text-sm font-black uppercase tracking-wider text-slate-300">
-                      Chưa có video được tải lên
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="mt-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500">
-                <span>Xem quy trình nhà máy thực tế</span>
-                <ExternalLink size={12} />
-              </div>
+              {[
+                { val: stat1Value, label: stat1Label },
+                { val: stat2Value, label: stat2Label },
+                { val: stat3Value, label: stat3Label },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  className="p-6 bg-[#FAF7F2] border-l-4 border-orange-600 border-y border-r border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-orange-500/20"
+                  variants={fapUp}
+                >
+                  <span className="text-3xl lg:text-4xl font-black text-[#0F172A] tracking-tight">
+                    <Counter value={item.val} />
+                  </span>
+                  <span className="mt-1 text-xs font-black uppercase tracking-wider text-slate-500 text-center lg:text-left">
+                    {item.label}
+                  </span>
+                </motion.div>
+              ))}
             </motion.div>
 
           </div>
+
+          {/* Bullet cards - Full Width Grid */}
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+          >
+            {storyBullets.map((bullet, idx) => (
+              <motion.div
+                key={idx}
+                className="flex flex-col gap-4 p-5 bg-white border border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20"
+                variants={fapUp}
+              >
+                <div className="p-2 bg-orange-50 border border-orange-100 rounded-sm self-start">
+                  {bullet.icon}
+                </div>
+                <p className="text-sm font-bold text-slate-800 leading-snug">
+                  {bullet.text}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Centered Wide Video/Embed Area */}
+          <motion.div 
+            className="max-w-5xl mx-auto"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fapUp}
+          >
+            <div className="relative overflow-hidden bg-slate-950 border-4 border-[#0F172A] aspect-video w-full rounded-md shadow-md">
+              {storyVideoUrl ? (
+                <iframe
+                  src={storyVideoUrl}
+                  title="Video câu chuyện thương hiệu Ăn Cùng Bà Tuyết"
+                  className="absolute inset-0 h-full w-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6">
+                  <Video className="h-16 w-16 text-orange-500 mb-4" />
+                  <span className="text-sm font-black uppercase tracking-wider text-slate-300">
+                    Chưa có video được tải lên
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500">
+              <span>Xem quy trình nhà máy thực tế</span>
+              <ExternalLink size={12} />
+            </div>
+          </motion.div>
+
         </div>
       </section>
 
