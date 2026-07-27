@@ -1,31 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
-  BookOpen,
+  Globe,
   Factory,
-  Heart,
-  Quote,
   ShieldCheck,
+  Store,
+  Eye,
+  Heart,
+  Zap,
   Sparkles,
-  Target,
-  Truck,
-  Users,
-  X,
+  Award,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
-  type HistoryMilestoneItem,
   type HomeTextItem,
   type PageAssetItem,
 } from "@/lib/marketing-config";
 
-const BRAND_ORANGE = "text-orange-600";
-
+// Repair CP1252 to UTF-8 mojibake function if needed
 const CP1252_REVERSE: Record<number, number> = {
   0x20ac: 0x80,
   0x201a: 0x82,
@@ -59,14 +57,17 @@ const CP1252_REVERSE: Record<number, number> = {
 const MOJIBAKE_MARKERS = ["Ã", "Â", "Ä", "Æ", "áº", "á»", "â€", "Å"];
 
 function repairMojibakeText(value: string) {
+  if (!value) return "";
   if (!MOJIBAKE_MARKERS.some((marker) => value.includes(marker))) return value;
 
   try {
-    const bytes = new Uint8Array([...value].map((char) => {
-      const code = char.charCodeAt(0);
-      if (code <= 0xff) return code;
-      return CP1252_REVERSE[code] ?? code;
-    }));
+    const bytes = new Uint8Array(
+      [...value].map((char) => {
+        const code = char.charCodeAt(0);
+        if (code <= 0xff) return code;
+        return CP1252_REVERSE[code] ?? code;
+      })
+    );
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
     return value;
@@ -77,54 +78,12 @@ function toYouTubeEmbedUrl(url: string) {
   if (!url) return "";
   if (url.includes("/embed/")) return url;
 
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|watch\?.+&v=|shorts\/))([^#&?]+)/);
-  return match?.[1] ? `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0` : url;
-}
-
-function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
-  return (
-    <p className={`inline-flex border-l-4 border-orange-600 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] ${dark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"}`}>
-      {children}
-    </p>
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|watch\?.+&v=|shorts\/))([^#&?]+)/
   );
-}
-
-function ButtonLink({
-  href,
-  children,
-  variant = "primary",
-}: {
-  href: string;
-  children: ReactNode;
-  variant?: "primary" | "secondary" | "dark";
-}) {
-  const classes = {
-    primary: "bg-orange-600 text-white hover:bg-slate-950 focus-visible:outline-orange-700",
-    secondary: "border border-slate-200 bg-white text-slate-950 hover:border-orange-400 hover:text-orange-700 focus-visible:outline-orange-700",
-    dark: "bg-slate-950 text-white hover:bg-orange-600 focus-visible:outline-white",
-  }[variant];
-
-  return (
-    <Link
-      href={href}
-      className={`inline-flex items-center justify-center gap-3 px-6 py-4 text-xs font-black uppercase tracking-wider transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${classes}`}
-    >
-      {children}
-      <ArrowRight size={16} />
-    </Link>
-  );
-}
-
-function AssetImage({
-  src,
-  alt,
-  className = "",
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-}) {
-  return <img src={src} alt={alt} className={`h-full w-full object-cover ${className}`} />;
+  return match?.[1]
+    ? `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0`
+    : url;
 }
 
 function marketingTextValue(items: HomeTextItem[], key: string, fallback: string) {
@@ -132,137 +91,13 @@ function marketingTextValue(items: HomeTextItem[], key: string, fallback: string
   return repairMojibakeText(value && value.trim() ? value : fallback);
 }
 
-function isPlaceholderText(value?: string) {
-  const normalized = repairMojibakeText(value || "").trim().toLowerCase();
-  return !normalized ||
-    normalized.includes("cần cập nhật") ||
-    normalized.includes("cần xác nhận") ||
-    normalized.includes("cần bổ sung") ||
-    normalized.includes("[cần") ||
-    normalized.includes("chưa có");
-}
-
-const storyHighlights = [
-  {
-    icon: Sparkles,
-    title: "Nguồn nguyên liệu được lựa chọn",
-    desc: "Một số nguyên liệu chính được nhập khẩu từ châu Âu theo tiêu chuẩn của doanh nghiệp.",
-  },
-  {
-    icon: Factory,
-    title: "Sản xuất theo quy trình",
-    desc: "Sản phẩm được tổ chức sản xuất tại nhà máy của NMV Food.",
-  },
-  {
-    icon: Truck,
-    title: "Phân phối trên toàn quốc",
-    desc: "Có mặt trên các nền tảng thương mại điện tử và hệ thống điểm bán.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Bảo hiểm trách nhiệm sản phẩm PVI",
-    desc: "Thể hiện trách nhiệm của doanh nghiệp đối với sản phẩm đưa ra thị trường.",
-  },
-];
-
-const DEFAULT_FULL_BRAND_STORY = `Tôi cũng có một nỗi sợ.
-
-Một nỗi sợ giống như rất nhiều người tiêu dùng khác: sợ chân gà không rõ nguồn gốc. Sợ những sản phẩm bị gắn với cái tên “chân gà Trung Quốc”.
-
-Tôi là một người mẹ, cũng là một người bà. Làm sao tôi có thể để con cháu mình ăn những sản phẩm mà không biết chúng đến từ đâu, được sản xuất như thế nào và có thực sự bảo đảm an toàn hay không?
-
-Bởi sức khỏe của các con, các cháu hôm nay cũng chính là tương lai của chúng sau này.
-
-Nhưng nỗi ám ảnh mang tên “chân gà Trung Quốc” đã ăn sâu vào suy nghĩ của nhiều người. Đến mức dù tôi có làm thật, nói thật và công khai mọi thứ, vẫn có người không tin.
-
-Người ta nghi ngờ. Người ta chỉ trích. Người ta để lại những bình luận cay nghiệt và lan truyền những tin đồn không có căn cứ về Chân Gà Bà Tuyết.
-
-Sức ép từ dư luận, chỉ có thể diễn tả bằng hai chữ: Khủng khiếp.
-
-Có những ngày tôi ngồi đọc từng bình luận ác ý, từng lời phủ nhận mọi công sức mà mình đã bỏ ra. Tôi thấy mệt mỏi. Tôi thấy tủi thân. Và dường như tôi già đi sau mỗi đêm mất ngủ.
-
-Tôi biết con đường mình lựa chọn chưa bao giờ là dễ dàng. Làm tốt vẫn có thể bị nói. Làm đúng vẫn có thể bị nghi ngờ.
-
-Có những lúc tôi không thể chịu đựng thêm được nữa. Tôi đã từng muốn nói: “Hay là mình dừng lại thôi.”
-
-Nhưng rồi tôi lại tự hỏi: Nếu ai cũng sợ hãi và bỏ cuộc, vậy ai sẽ là người đứng lên để xóa bỏ nỗi sợ ấy?
-
-Chính vì vậy, tôi quyết định tiếp tục.
-
-Tôi tin rằng nơi này sẽ tạo ra những sản phẩm có nguồn gốc rõ ràng, quy trình sản xuất minh bạch và chất lượng được kiểm soát nghiêm túc.
-
-Tôi tin rằng nơi này không chỉ tạo ra những gói chân gà ngon, mà còn tạo thêm công ăn việc làm ổn định cho bà con tại Thái Nguyên.
-
-Tôi tin rằng nơi này sẽ đóng góp một phần nhỏ bé vào hành trình xây dựng và phát triển quê hương. Và tôi tin rằng nơi này sẽ từng bước đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam.
-
-Tôi không mong mọi người tin tôi chỉ bằng những lời tôi nói.
-
-Tôi mong mọi người hãy nhìn vào những gì chúng tôi đang làm. Hãy nhìn vào nhà máy. Hãy nhìn vào nguyên liệu. Hãy nhìn vào quy trình sản xuất. Và hãy nhìn vào từng sản phẩm được làm ra mỗi ngày.
-
-Hãy để tôi và những con người tại đây từng bước xóa đi nỗi sợ mang tên: “Chân gà Trung Quốc.”
-
-Để khi cầm trên tay một gói Chân Gà Bà Tuyết, mọi người không chỉ cảm nhận được vị ngon, mà còn cảm nhận được sự minh bạch, trách nhiệm và niềm tự hào của một sản phẩm được làm nên tại Thái Nguyên.
-
-CHÂN GÀ BÀ TUYẾT
-Ngon phải rõ nguồn gốc – Ăn phải thật an tâm.`;
-
-const businessInfo = [
-  ["Tên thương hiệu", "Ăn Cùng Bà Tuyết"],
-  ["Tên viết tắt", "ACBT"],
-  ["Pháp nhân sản xuất", "NMV Food"],
-  ["Người sáng lập", "Đỗ Thị Tuyết"],
-  ["Năm hình thành thương hiệu", "Cần xác nhận"],
-  ["Trụ sở/Văn phòng", "Xuân Phương, Hà Nội"],
-  ["Nhà máy sản xuất", "Nhà máy NMV Food tại Thái Nguyên"],
-  ["Địa chỉ chi tiết nhà máy", "Cần xác nhận"],
-  ["Quy mô nhà máy", "3.300 m²"],
-  ["Ngành hàng", "Đồ ăn vặt chế biến"],
-  ["Kênh phân phối", "Hệ thống tạp hóa toàn quốc, TikTok Shop và Shopee"],
-  ["Bảo hiểm sản phẩm", "Bảo hiểm trách nhiệm sản phẩm PVI"],
-];
-
-const missionCards = [
-  {
-    icon: Target,
-    title: "Sứ mệnh",
-    desc: "Mang đến những sản phẩm đồ ăn vặt có hương vị hấp dẫn, nguồn gốc rõ ràng và được tổ chức sản xuất theo quy trình, để người tiêu dùng có thêm những lựa chọn phù hợp cho các khoảnh khắc ăn uống thường ngày.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Tầm nhìn",
-    desc: "Trở thành một thương hiệu đồ ăn vặt Việt Nam được người tiêu dùng nhớ đến bởi sự gần gũi, chất lượng ổn định và khả năng phân phối rộng khắp.",
-  },
-  {
-    icon: Heart,
-    title: "Giá trị cốt lõi",
-    desc: "Chân thành trong giao tiếp. Trách nhiệm với sản phẩm. Minh bạch về nguồn gốc và quy trình. Luôn lắng nghe phản hồi của khách hàng. Không ngừng cải tiến sản phẩm và hoạt động sản xuất.",
-  },
-  {
-    icon: Users,
-    title: "Con người",
-    desc: "Đội ngũ sản xuất, kho vận, livestream và chăm sóc khách hàng cùng vận hành thương hiệu từ những công việc cụ thể mỗi ngày.",
-  },
-];
-
 export default function AboutPage() {
-  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(DEFAULT_MARKETING_CONFIG.pageAssets);
-  const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(DEFAULT_MARKETING_CONFIG.homeTexts);
-  const [historyMilestones, setHistoryMilestones] = useState<HistoryMilestoneItem[]>(DEFAULT_MARKETING_CONFIG.historyMilestones);
-  const [isStoryOpen, setIsStoryOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isStoryOpen) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setIsStoryOpen(false);
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [isStoryOpen]);
+  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(
+    DEFAULT_MARKETING_CONFIG.pageAssets
+  );
+  const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(
+    DEFAULT_MARKETING_CONFIG.homeTexts
+  );
 
   useEffect(() => {
     async function fetchMarketingConfig() {
@@ -271,519 +106,395 @@ export default function AboutPage() {
         if (!res.ok) return;
         const data = await res.json();
         const config = normalizeMarketingConfig(data?.data);
-        setHomeTexts(config.homeTexts.map((item) => ({
-          ...item,
-          value: repairMojibakeText(item.value),
-        })));
-        setPageAssets(config.pageAssets.map((item) => ({
-          ...item,
-          label: repairMojibakeText(item.label),
-        })));
-        setHistoryMilestones(config.historyMilestones.map((item) => ({
-          ...item,
-          year: repairMojibakeText(item.year),
-          title: repairMojibakeText(item.title),
-          description: repairMojibakeText(item.description),
-          detailContent: repairMojibakeText(item.detailContent),
-        })));
+        setHomeTexts(
+          config.homeTexts.map((item) => ({
+            ...item,
+            value: repairMojibakeText(item.value),
+          }))
+        );
+        setPageAssets(
+          config.pageAssets.map((item) => ({
+            ...item,
+            label: repairMojibakeText(item.label),
+          }))
+        );
       } catch (error) {
-        console.error("Failed to fetch about page assets:", error);
+        console.error("Failed to fetch about page marketing settings:", error);
       }
     }
 
     fetchMarketingConfig();
   }, []);
 
-  const assetByKey = useMemo(() => pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
-    if (item.key) acc[item.key] = item;
-    return acc;
-  }, {}), [pageAssets]);
+  const assetByKey = useMemo(
+    () =>
+      pageAssets.reduce<Record<string, PageAssetItem>>((acc, item) => {
+        if (item.key) acc[item.key] = item;
+        return acc;
+      }, {}),
+    [pageAssets]
+  );
 
-  const teamImage = assetByKey.about_team_quote?.imageUrl || "/hero/ba-tuyet-character.png";
-  const storyVideoUrl = toYouTubeEmbedUrl(assetByKey.about_video?.linkUrl || "");
-  const storyEyebrow = marketingTextValue(homeTexts, "about_story_label", "Câu chuyện thương hiệu");
-  const storyTitle = marketingTextValue(homeTexts, "about_story_title", "Tôi cũng có một nỗi sợ.");
-  const storySubtitle = marketingTextValue(
+  // Dynamic config resolution with fallbacks matching User Request exactly
+  const heroTagline = marketingTextValue(
     homeTexts,
-    "about_story_subtitle",
-    "Hành trình của Chân Gà Bà Tuyết bắt đầu từ nỗi sợ rất thật của một người mẹ, một người bà: sợ những sản phẩm không rõ nguồn gốc, và mong muốn làm ra thứ gì đó minh bạch hơn."
+    "about_hero_label",
+    "Hồ sơ thương hiệu"
   );
-  const storyFullText = marketingTextValue(homeTexts, "about_story_full", DEFAULT_FULL_BRAND_STORY);
-  const storyParagraphs = storyFullText.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
-  const storyPreview = storyParagraphs.slice(0, 4);
-  const storyChapters = [
-    { number: "01", title: "Nỗi sợ", desc: "Sợ chân gà không rõ nguồn gốc, sợ cái tên “chân gà Trung Quốc” bám vào suy nghĩ người tiêu dùng." },
-    { number: "02", title: "Áp lực", desc: "Làm thật, nói thật, công khai mọi thứ nhưng vẫn có nghi ngờ, chỉ trích và tin đồn." },
-    { number: "03", title: "Quyết định", desc: "Không dừng lại. Trả lời bằng nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày." },
-    { number: "04", title: "Niềm tin", desc: "Đưa Thái Nguyên lên bản đồ ăn vặt Việt Nam bằng sự minh bạch và trách nhiệm." },
+  const heroTitle = marketingTextValue(
+    homeTexts,
+    "about_hero_title",
+    "Ăn Cùng Bà Tuyết: Thương hiệu Việt, vì người Việt"
+  );
+  const heroDesc = marketingTextValue(
+    homeTexts,
+    "about_hero_description",
+    "Thương hiệu đồ ăn vặt Việt Nam sản xuất tại nhà máy đạt tiêu chuẩn An toàn Vệ sinh thực phẩm & ISO 22000:2018, phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử."
+  );
+
+  const stat1Value = marketingTextValue(homeTexts, "about_hero_stat_1_value", "15+ triệu");
+  const stat1Label = marketingTextValue(homeTexts, "about_hero_stat_1_label", "đơn hàng");
+  const stat2Value = marketingTextValue(homeTexts, "about_hero_stat_2_value", "50.000+");
+  const stat2Label = marketingTextValue(homeTexts, "about_hero_stat_2_label", "điểm bán toàn quốc");
+  const stat3Value = marketingTextValue(homeTexts, "about_hero_stat_3_value", "10 triệu+");
+  const stat3Label = marketingTextValue(homeTexts, "about_hero_stat_3_label", "người theo dõi");
+
+  const storyVideoUrl = toYouTubeEmbedUrl(
+    assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0"
+  );
+
+  // Brand Story content constant
+  const BRAND_STORY_PARAGRAPHS = [
+    "Bà Tuyết Diamond - Đỗ Thị Tuyết - xuất phát điểm là một nông dân ở Thái Nguyên. Công việc hằng ngày của bà là làm ruộng và trồng chè. Gia đình từng gánh khoản nợ hàng trăm triệu đồng từ việc sửa nhà, chữa bệnh và chăn nuôi thất bại. Năm 2014, một tai nạn gãy chân khiến bà phải ở nhà suốt hai năm, mất đi cơ hội làm việc ổn định.",
+    "Cuối năm 2020, con trai bà - Nguyễn Minh Trường - bắt đầu rủ mẹ cùng tham gia quay video đời thường. Bằng chiếc điện thoại cũ, những thước phim về cuộc sống gia đình mộc mạc, không tô vẽ, không dàn dựng đã chạm đến hàng triệu người xem. Năm 2022, khi TikTok bắt đầu phát triển mạnh tại Việt Nam, bà Tuyết cùng gia đình bắt đầu chia sẻ nội dung về đồ ăn vặt. Cộng đồng yêu mến không chỉ xem mà còn đặt hàng - và Ăn Cùng Bà Tuyết ra đời từ chính nhu cầu và sự ủng hộ đó.",
+    "Trong quá trình phục vụ khách hàng, đội ngũ Ăn Cùng Bà Tuyết nhận ra một thực tế: người Việt Nam vẫn còn nhiều định kiến với đồ ăn vặt nội địa: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu Việt thật sự đứng sau sản phẩm. Từ nhận thức đó, Ăn Cùng Bà Tuyết xác định sứ mệnh của mình: để người Việt Nam tự hào về đồ ăn vặt của chính mình, với sản phẩm do người Việt làm chủ, nguyên liệu rõ ràng, quy trình kiểm soát được.",
+    "Đến nay, Ăn Cùng Bà Tuyết đã xây dựng những nhà máy sản xuất thực phẩm tại Hà Nội và Thái Nguyên, sử dụng những nguồn nguyên liệu chất lượng cao nhập khẩu từ châu Âu, sản phẩm được bảo hiểm trách nhiệm bởi PVI, và phân phối tại hàng nghìn điểm bán trên toàn quốc, từ tạp hóa gần trường học đến các sàn thương mại điện tử."
   ];
-  const storyProofs = [
-    { label: "Nhà máy", value: "Nhìn được" },
-    { label: "Nguyên liệu", value: "Truy xuất được" },
-    { label: "Quy trình", value: "Kiểm soát được" },
+
+  const storyBullets = [
+    {
+      icon: <Globe className="text-orange-600 h-6 w-6" />,
+      text: "Nguyên liệu chân gà chất lượng cao nhập khẩu từ Châu Âu",
+    },
+    {
+      icon: <Factory className="text-orange-600 h-6 w-6" />,
+      text: "Hai nhà máy sản xuất phục vụ hàng triệu khách hàng",
+    },
+    {
+      icon: <ShieldCheck className="text-orange-600 h-6 w-6" />,
+      text: "Bảo hiểm trách nhiệm sản phẩm khẳng định đồng hành bảo vệ quyền lợi khách hàng",
+    },
+    {
+      icon: <Store className="text-orange-600 h-6 w-6" />,
+      text: "Phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử",
+    },
   ];
-  const visibleMilestones = historyMilestones
-    .filter((item) => item.enabled !== false)
-    .filter((item) => !isPlaceholderText(item.title) || !isPlaceholderText(item.description) || item.imageUrl)
-    .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0));
-  const businessSectionLabel = marketingTextValue(homeTexts, "about_business_label", "Thông tin doanh nghiệp");
-  const businessSectionTitle = marketingTextValue(homeTexts, "about_business_title", "Thông tin thương hiệu và đơn vị sản xuất");
-  const businessSectionDescription = marketingTextValue(
-    homeTexts,
-    "about_business_description",
-    "Những thông tin cơ bản giúp khách hàng, đối tác và các đơn vị truyền thông có thể kiểm chứng rõ hơn về thương hiệu Ăn Cùng Bà Tuyết."
-  );
-  const businessInfoItems = Array.from({ length: 12 }, (_, index) => {
-    const position = index + 1;
-    const [fallbackLabel, fallbackValue] = businessInfo[index] || [`Dòng ${position}`, ""];
-    return [
-      marketingTextValue(homeTexts, `about_business_${position}_label`, fallbackLabel),
-      marketingTextValue(homeTexts, `about_business_${position}_value`, fallbackValue),
-    ] as const;
-  }).filter(([label, value]) => label && !isPlaceholderText(value));
-  const valuesSectionLabel = marketingTextValue(homeTexts, "about_values_label", "Định hướng thương hiệu");
-  const valuesSectionTitle = marketingTextValue(homeTexts, "about_values_title", "Sứ mệnh, tầm nhìn và giá trị cốt lõi.");
-  const valuesSectionDescription = marketingTextValue(
-    homeTexts,
-    "about_values_description",
-    "Ăn Cùng Bà Tuyết được xây dựng trên nền tảng của sự chân thật: làm sạch, bán thật, phục vụ tử tế và phát triển bền vững."
-  );
-  const valueIcons = [Target, BadgeCheck, Heart, Users];
-  const valueCards = valueIcons.map((icon, index) => {
-    const fallback = missionCards[index];
-    const position = index + 1;
-    return {
-      icon,
-      title: marketingTextValue(homeTexts, `about_value_${position}_title`, fallback.title),
-      desc: marketingTextValue(homeTexts, `about_value_${position}_description`, fallback.desc),
-    };
-  });
+
+  const coreValues = [
+    {
+      icon: <ShieldCheck className="text-emerald-500 h-8 w-8" />,
+      title: "An toàn",
+      desc: "Sản phẩm phải đạt chuẩn từ nguyên liệu đến thành phẩm, không thỏa hiệp để đổi lấy giá rẻ, sức khoẻ khách hàng là quan trọng nhất và không có ngoại lệ.",
+    },
+    {
+      icon: <Eye className="text-blue-500 h-8 w-8" />,
+      title: "Minh bạch",
+      desc: "Nguồn gốc nguyên liệu, quy trình sản xuất, chứng nhận chất lượng, tất cả phải được công khai để khách hàng có thể tự kiểm chứng.",
+    },
+    {
+      icon: <Award className="text-orange-500 h-8 w-8" />,
+      title: "Trách nhiệm",
+      desc: "Khi có vấn đề, Ăn Cùng Bà Tuyết luôn sẵn sàng nhận trách nhiệm và không né tránh. Sản phẩm được bảo hiểm trách nhiệm PVI là 1 phần trong những nỗ lực này.",
+    },
+    {
+      icon: <Zap className="text-amber-500 h-8 w-8" />,
+      title: "Quyết liệt",
+      desc: "Để có thể phát triển và mang lại nhiều giá trị hơn cho khách hàng, chúng tôi luôn quyết liệt làm tốt hơn mỗi ngày để phục vụ được khách hàng tốt và tốt hơn nữa.",
+    },
+    {
+      icon: <Heart className="text-rose-500 h-8 w-8" />,
+      title: "Người Việt làm chủ",
+      desc: "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới.",
+    },
+  ];
+
   return (
-    <main className="bg-[#fbf7ef] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-white py-14 sm:py-16 lg:min-h-[calc(100vh-78px)] lg:py-20">
-        <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 bg-orange-100 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[#fff4e2]" />
-        <div className="pointer-events-none absolute bottom-0 left-0 h-28 w-full bg-gradient-to-t from-[#fbf7ef] to-transparent" />
-        <div className="relative grid w-full max-w-[1600px] gap-8 px-5 sm:px-8 lg:mx-auto lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-8 xl:px-10 2xl:px-14">
-          <div className="grid gap-5 lg:self-start">
-            <div className="relative min-h-[640px] overflow-hidden border border-orange-100 bg-slate-950 shadow-[18px_18px_0_rgba(234,88,12,0.10)]">
-              {storyVideoUrl ? (
-                <iframe
-                  src={storyVideoUrl}
-                  title="Video câu chuyện thương hiệu Ăn Cùng Bà Tuyết"
-                  className="absolute inset-0 h-full w-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <AssetImage src={teamImage} alt="Câu chuyện thương hiệu Chân Gà Bà Tuyết" className="scale-105 opacity-90" />
-              )}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
-              <div className="pointer-events-none absolute left-6 top-6 border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white backdrop-blur">
-                Câu chuyện thật
+    <main className="bg-[#FAF7F2] text-slate-900 overflow-hidden font-sans">
+      {/* SECTION 0: HERO */}
+      <section className="relative py-16 lg:py-24 border-b border-orange-100/50 bg-white">
+        <div className="absolute inset-0 bg-radial-gradient from-orange-50/40 via-transparent to-transparent pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-center">
+            
+            {/* Left Content Area */}
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200/60 shadow-sm">
+                <Sparkles className="h-4 w-4 text-orange-600 animate-pulse" />
+                <span className="text-xs font-black uppercase tracking-widest text-orange-700">
+                  {heroTagline}
+                </span>
               </div>
-              <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-7 text-white sm:p-9">
-                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-200">Chân Gà Bà Tuyết</p>
-                <h2 className="mt-4 max-w-xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl">
-                  {storyTitle}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setIsStoryOpen(true)}
-                  className="pointer-events-auto mt-7 inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950"
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1]">
+                {heroTitle}
+              </h1>
+              
+              <p className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-medium">
+                {heroDesc}
+              </p>
+              
+              <div className="pt-4 flex flex-wrap gap-4">
+                <Link
+                  href="/san-pham"
+                  className="acbt-btn acbt-btn--primary acbt-btn--lg shadow-lg"
                 >
-                  <BookOpen size={16} />
-                  Đọc câu chuyện đầy đủ
-                </button>
+                  <span>Xem sản phẩm</span>
+                  <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href="/chat-luong"
+                  className="acbt-btn acbt-btn--secondary acbt-btn--lg"
+                >
+                  <span>Xem chất lượng & quy trình</span>
+                </Link>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 border border-orange-100 bg-white">
-              {storyProofs.map((item) => (
-                <div key={item.label} className="border-r border-orange-100 p-4 last:border-r-0">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
-                  <p className="mt-2 text-sm font-black text-slate-950">{item.value}</p>
+            {/* Right Stats Area */}
+            <div className="lg:col-span-5 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              {[
+                { val: stat1Value, label: stat1Label, color: "from-orange-50 to-orange-100/30" },
+                { val: stat2Value, label: stat2Label, color: "from-amber-50 to-amber-100/30" },
+                { val: stat3Value, label: stat3Label, color: "from-orange-50 to-amber-50" },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`p-6 rounded-2xl bg-gradient-to-br ${item.color} border border-orange-200/50 shadow-sm flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-1 hover:shadow-md`}
+                >
+                  <span className="text-3xl lg:text-4xl font-black text-orange-600 tracking-tight">
+                    {item.val}
+                  </span>
+                  <span className="mt-1 text-xs font-black uppercase tracking-wider text-slate-500 text-center lg:text-left">
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 1: CÂU CHUYỆN THƯƠNG HIỆU */}
+      <section id="about-history" className="py-16 lg:py-24 bg-[#FAF7F2]">
+        <div id="about-community" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="max-w-3xl mb-12 lg:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight leading-snug">
+              Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
+            </h2>
+            <div className="h-1 w-20 bg-orange-600 mt-4 rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start">
+            
+            {/* Story Paragraphs & Bullets */}
+            <div className="lg:col-span-7 space-y-8">
+              <div className="space-y-6 text-slate-800 text-base leading-relaxed font-semibold">
+                {BRAND_STORY_PARAGRAPHS.map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className={
+                      index === 0
+                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-1 bg-white p-3 rounded-r-lg shadow-sm"
+                        : ""
+                    }
+                  >
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+
+              {/* Bullet list below paragraph */}
+              <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {storyBullets.map((bullet, idx) => (
+                  <div
+                    key={idx}
+                    className="flex gap-4 p-4 rounded-xl bg-white border border-orange-100 shadow-sm items-start"
+                  >
+                    <div className="p-2 rounded-lg bg-orange-50 shrink-0">
+                      {bullet.icon}
+                    </div>
+                    <p className="text-sm font-bold text-slate-800 leading-snug">
+                      {bullet.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Sticky Video/Embed Area */}
+            <div className="lg:col-span-5 lg:sticky lg:top-24">
+              <div className="relative rounded-3xl overflow-hidden bg-slate-950 border-8 border-white shadow-xl aspect-video w-full group">
+                {storyVideoUrl ? (
+                  <iframe
+                    src={storyVideoUrl}
+                    title="Video câu chuyện thương hiệu Ăn Cùng Bà Tuyết"
+                    className="absolute inset-0 h-full w-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6">
+                    <Video className="h-16 w-16 text-orange-500 mb-4 animate-bounce" />
+                    <span className="text-sm font-black uppercase tracking-wider text-slate-300">
+                      Chưa có video được tải lên
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500">
+                <span>Xem quy trình nhà máy thực tế</span>
+                <ExternalLink size={12} />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <section id="about-trust" className="py-16 lg:py-24 bg-slate-950 text-white relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute right-0 top-0 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute left-0 bottom-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div id="about-values" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          
+          {/* Title */}
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-xs font-black uppercase tracking-widest text-orange-400">
+              Định hướng & Triết lý
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mt-3 tracking-tight">
+              Chúng tôi tin vào điều gì
+            </h2>
+            <div className="h-1 w-20 bg-orange-500 mx-auto mt-4 rounded-full" />
+          </div>
+
+          {/* Pillars: Mission, Vision, Business Philosophy */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+            
+            {/* Sứ mệnh */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/30 transition duration-300 backdrop-blur-sm">
+              <span className="inline-block px-3 py-1 rounded bg-orange-500/20 text-orange-400 text-xs font-black uppercase tracking-widest mb-6">
+                Sứ mệnh
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
+                "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
+              </h3>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
+                Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
+              </p>
+            </div>
+
+            {/* Tầm nhìn */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/30 transition duration-300 backdrop-blur-sm">
+              <span className="inline-block px-3 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-black uppercase tracking-widest mb-6">
+                Tầm nhìn
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
+                Vươn tầm quốc tế & khẳng định chất lượng Việt
+              </h3>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
+                Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
+              </p>
+            </div>
+
+            {/* Triết lý kinh doanh */}
+            <div className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-orange-500/30 transition duration-300 backdrop-blur-sm">
+              <span className="inline-block px-3 py-1 rounded bg-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-widest mb-6">
+                Triết lý kinh doanh
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
+                "Làm thật và làm khác biệt"
+              </h3>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
+                Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
+              </p>
+            </div>
+
+          </div>
+
+          {/* Value cards - 5 cards horizontal layout on large screens */}
+          <div className="mb-20">
+            <h3 className="text-2xl font-black tracking-tight text-center mb-10">
+              Giá trị cốt lõi
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              {coreValues.map((val, idx) => (
+                <div
+                  key={idx}
+                  className="p-6 rounded-2xl bg-white/5 border border-white/5 flex flex-col items-center text-center hover:bg-white/10 hover:border-orange-500/20 transition duration-300"
+                >
+                  <div className="mb-4">{val.icon}</div>
+                  <h4 className="text-lg font-black tracking-tight mb-2 text-white">
+                    {val.title}
+                  </h4>
+                  <p className="text-xs text-slate-300 font-semibold leading-relaxed">
+                    {val.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <SectionLabel>{storyEyebrow}</SectionLabel>
-              <p className="max-w-xl text-right text-sm font-bold leading-6 text-slate-500">
-                Một hành trình được kể bằng nỗi sợ thật, quyết định thật và những việc đang làm mỗi ngày.
-              </p>
-            </div>
-            <div className="mt-7 grid gap-6 2xl:grid-cols-[minmax(520px,1fr)_minmax(340px,0.52fr)] 2xl:items-start">
-              <article className="relative border border-orange-100 bg-[#fffaf2] p-7 shadow-[14px_14px_0_rgba(15,23,42,0.05)] sm:p-10">
-                <Quote className="absolute right-7 top-7 h-12 w-12 text-orange-200" />
-                <p className="max-w-2xl text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl">
-                  {storySubtitle}
-                </p>
-
-                <div className="mt-10 columns-1 gap-10 space-y-5 text-base font-semibold leading-8 text-slate-700 xl:columns-2 2xl:columns-1">
-                  {storyPreview.map((paragraph, index) => (
-                    <p
-                      key={index}
-                      className={
-                        index === 0
-                          ? "border-l-4 border-orange-600 bg-white px-5 py-4 text-3xl font-black leading-tight tracking-[-0.05em] text-slate-950"
-                          : index === 3
-                            ? "bg-orange-600 px-5 py-4 text-2xl font-black leading-tight tracking-[-0.04em] text-white"
-                            : ""
-                      }
-                    >
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </article>
-
-              <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-1">
-                <div className="border border-orange-100 bg-slate-950 p-6 text-white">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-300">Cấu trúc câu chuyện</p>
-                  <div className="mt-6 space-y-4">
-                    {storyChapters.map((item) => (
-                      <div key={item.number} className="grid grid-cols-[52px_1fr] gap-4 border-b border-white/10 pb-4 last:border-b-0 last:pb-0">
-                        <div className="grid h-12 w-12 place-items-center bg-orange-600 text-sm font-black">{item.number}</div>
-                        <div>
-                          <h3 className="text-lg font-black tracking-[-0.03em]">{item.title}</h3>
-                          <p className="mt-1 text-xs font-semibold leading-5 text-white/65">{item.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsStoryOpen(true)}
-                  className="group border border-orange-200 bg-white p-6 text-left transition hover:-translate-y-1 hover:border-orange-500 hover:shadow-[0_24px_70px_rgba(234,88,12,0.16)] xl:min-h-full"
-                >
-                  <div className="flex items-center justify-between gap-5">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Câu chuyện đầy đủ</p>
-                      <p className="mt-2 text-2xl font-black tracking-[-0.045em] text-slate-950">Mở toàn bộ câu chuyện</p>
-                    </div>
-                    <span className="grid h-12 w-12 place-items-center bg-orange-600 text-white transition group-hover:bg-slate-950">
-                      <ArrowRight size={18} />
-                    </span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {storyHighlights.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <article key={item.title} className="group border border-orange-100 bg-white p-6 transition hover:-translate-y-1 hover:border-orange-400 hover:bg-orange-600 hover:text-white hover:shadow-[0_20px_60px_rgba(234,88,12,0.16)]">
-                    <div className="flex h-12 w-12 items-center justify-center border border-orange-100 bg-orange-50 text-orange-600 transition group-hover:border-white/20 group-hover:bg-white/10 group-hover:text-white">
-                      <Icon size={22} />
-                    </div>
-                    <h3 className="mt-6 text-lg font-black tracking-[-0.03em]">{item.title}</h3>
-                    <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 transition group-hover:text-white/78">{item.desc}</p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.75fr_1.25fr]">
-          <div>
-            <SectionLabel>{businessSectionLabel}</SectionLabel>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              {businessSectionTitle}
-            </h2>
-            <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
-              {businessSectionDescription}
+          {/* Slogan - large typography */}
+          <div className="border-t border-white/10 pt-16 text-center">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-400 mb-2">
+              Slogan
             </p>
+            <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent italic select-none">
+              "Ăn vặt thì phải ăn cùng Bà Tuyết"
+            </h3>
           </div>
 
-          <div className="border border-orange-100 bg-white">
-            {businessInfoItems.map(([label, value]) => (
-              <div key={label} className="grid border-b border-orange-100 last:border-b-0 md:grid-cols-[0.42fr_0.58fr]">
-                <div className="bg-orange-50/70 p-4 text-xs font-black uppercase tracking-[0.12em] text-slate-500">{label}</div>
-                <div className="p-4 text-sm font-bold leading-7 text-slate-800">
-                  {value}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {visibleMilestones.length > 0 ? (
-      <section className="border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
-            <div>
-              <SectionLabel>Hành trình phát triển</SectionLabel>
-              <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-                Hành trình phát triển của Ăn Cùng Bà Tuyết
-              </h2>
-            </div>
-            <p className="text-base font-semibold leading-8 text-slate-700">
-              Từ những nội dung ẩm thực gần gũi trên mạng xã hội, Ăn Cùng Bà Tuyết từng bước xây dựng cộng đồng, phát triển sản phẩm và chuẩn hóa hoạt động sản xuất.
-            </p>
-          </div>
-
-          <div className="relative mt-14">
-            <div className="absolute left-4 top-0 h-full border-l-2 border-dashed border-orange-300 lg:left-1/2 lg:-translate-x-1/2" />
-            <div className="space-y-8">
-              {visibleMilestones.map((item, index) => {
-                const isRight = index % 2 === 0;
-                const content = (
-                  <div className={`overflow-hidden border border-orange-100 bg-[#fbf7ef] shadow-[12px_12px_0_rgba(234,88,12,0.08)] transition hover:-translate-y-1 hover:border-orange-300 hover:shadow-[18px_18px_0_rgba(234,88,12,0.12)] ${isRight ? "lg:mr-16" : "lg:ml-16"}`}>
-                    {item.imageUrl ? (
-                      <div className="h-56 border-b border-orange-100 bg-orange-50">
-                        <AssetImage src={item.imageUrl} alt={item.title || item.year || "Cột mốc phát triển"} />
-                      </div>
-                    ) : null}
-                    <div className="p-6">
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div>
-                          <p className={`text-4xl font-black tracking-[-0.07em] ${BRAND_ORANGE}`}>{item.year || String(index + 1).padStart(2, "0")}</p>
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.16em] text-slate-400">
-                            {item.type === "achievement" ? "Thành tựu" : "Cột mốc"}
-                          </p>
-                        </div>
-                      </div>
-                      <h3 className="mt-6 text-2xl font-black tracking-[-0.045em] text-slate-950">{item.title || "Cột mốc mới"}</h3>
-                      {item.description ? (
-                        <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{item.description}</p>
-                      ) : null}
-                      {item.detailContent ? (
-                        <p className="mt-4 border-l-4 border-orange-300 bg-white/70 px-4 py-3 text-sm font-semibold leading-7 text-slate-700">{item.detailContent}</p>
-                      ) : null}
-                      {item.linkUrl ? (
-                        <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-orange-700">
-                          Xem thêm <ArrowRight size={14} />
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-                return (
-                  <article key={item.id} className={`relative grid gap-5 pl-12 lg:grid-cols-2 lg:pl-0 ${isRight ? "" : "lg:[&>*:first-child]:col-start-2"}`}>
-                    {item.linkUrl ? (
-                      <Link href={item.linkUrl} className="block">
-                        {content}
-                      </Link>
-                    ) : content}
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-      ) : null}
-
-      <section className="border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto max-w-7xl">
-          <SectionLabel>{valuesSectionLabel}</SectionLabel>
-          <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-            {valuesSectionTitle}
+      {/* SECTION 4: CTA CUỐI TRANG */}
+      <section className="py-16 lg:py-20 border-t border-orange-100 bg-[#FFFBF5]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-snug">
+            Tìm hiểu thêm về chất lượng và quy trình sản xuất hoặc liên hệ với chúng tôi
           </h2>
-          <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700">
-            {valuesSectionDescription}
-          </p>
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {valueCards.slice(0, 3).map((item) => {
-              const Icon = item.icon;
-              return (
-                <article key={item.title} className="border border-orange-100 bg-white p-7">
-                  <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600">
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="mt-7 text-2xl font-black tracking-[-0.045em]">{item.title}</h3>
-                  <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 grid gap-4 border border-orange-100 bg-white lg:grid-cols-[0.85fr_1.15fr]">
-            <div className="min-h-[280px] bg-orange-50">
-              <AssetImage src={teamImage} alt="Đội ngũ hoặc hoạt động thực tế của Ăn Cùng Bà Tuyết" />
-            </div>
-            <div className="p-7 lg:p-10">
-              <div className="flex h-12 w-12 items-center justify-center bg-orange-50 text-orange-600">
-                <Users size={24} />
-              </div>
-              <h3 className="mt-7 text-3xl font-black tracking-[-0.05em]">{valueCards[3].title}</h3>
-              <p className="mt-5 text-base font-semibold leading-8 text-slate-700">
-                {valueCards[3].desc}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-950 px-5 py-16 text-white sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-          <div>
-            <SectionLabel dark>Tiếp tục khám phá</SectionLabel>
-            <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-              Tiếp tục khám phá cách sản phẩm được tạo ra
-            </h2>
-            <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-white/70">
-              Tìm hiểu thêm về nguồn nguyên liệu, môi trường sản xuất và các bước kiểm soát được áp dụng trong quá trình tạo ra sản phẩm của Ăn Cùng Bà Tuyết.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/chat-luong" variant="primary">Xem chất lượng & quy trình</ButtonLink>
-            <ButtonLink href="/san-pham" variant="secondary">Xem sản phẩm</ButtonLink>
-          </div>
-        </div>
-      </section>
-
-      {isStoryOpen ? (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5">
-          <style>{`
-            @keyframes storyFade { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes storyPop { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-            @keyframes storyGlow { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: .9; transform: scale(1.08); } }
-          `}</style>
-          <button
-            type="button"
-            aria-label="Đóng câu chuyện thương hiệu"
-            onClick={() => setIsStoryOpen(false)}
-            className="absolute inset-0 animate-[storyFade_.18s_ease-out] bg-slate-950/82 backdrop-blur-md"
-          />
-          <div className="pointer-events-none absolute -left-24 top-1/4 h-80 w-80 animate-[storyGlow_4s_ease-in-out_infinite] bg-orange-600/35 blur-3xl" />
-          <div className="pointer-events-none absolute -right-20 bottom-10 h-96 w-96 animate-[storyGlow_5s_ease-in-out_infinite] bg-orange-300/25 blur-3xl" />
-          <article
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="brand-story-dialog-title"
-            className="relative max-h-[94vh] w-full max-w-[1380px] animate-[storyPop_.24s_ease-out] overflow-hidden border border-orange-300 bg-[#fff8ed] shadow-[0_36px_120px_rgba(0,0,0,0.55)]"
-          >
-            <button
-              type="button"
-              onClick={() => setIsStoryOpen(false)}
-              className="absolute right-4 top-4 z-30 grid h-12 w-12 place-items-center bg-slate-950 text-white shadow-xl transition hover:rotate-90 hover:bg-orange-600"
-              aria-label="Đóng"
+          
+          <div className="flex flex-wrap gap-4 justify-center items-center">
+            <Link
+              href="/chat-luong"
+              className="acbt-btn acbt-btn--primary acbt-btn--xl shadow-md min-w-[200px]"
             >
-              <X size={20} />
-            </button>
+              <span>Xem trang Chất lượng</span>
+              <ArrowRight size={18} />
+            </Link>
+            <Link
+              href="/san-pham"
+              className="acbt-btn acbt-btn--secondary acbt-btn--xl min-w-[200px]"
+            >
+              <span>Xem sản phẩm</span>
+            </Link>
+            <Link
+              href="/lien-he"
+              className="acbt-btn acbt-btn--outline acbt-btn--xl min-w-[200px]"
+            >
+              <span>Liên hệ với chúng tôi</span>
+            </Link>
+          </div>
 
-            <div className="grid max-h-[94vh] overflow-y-auto lg:grid-cols-[0.36fr_0.64fr]">
-              <aside className="relative overflow-hidden bg-slate-950 p-7 text-white lg:sticky lg:top-0 lg:min-h-[94vh] lg:p-9">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(234,88,12,.35),transparent_32%),radial-gradient(circle_at_90%_80%,rgba(251,146,60,.22),transparent_30%)]" />
-                <div className="absolute -right-24 top-24 h-64 w-64 rounded-full border border-orange-400/30" />
-                <div className="absolute -right-12 top-36 h-36 w-36 rounded-full bg-orange-600/25 blur-2xl" />
-
-                <div className="relative">
-                  <p className="inline-flex border border-orange-400/40 bg-orange-500/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-orange-200">
-                    Câu chuyện thương hiệu
-                  </p>
-                  <h3 id="brand-story-dialog-title" className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl">
-                    Câu chuyện của Bà Tuyết
-                  </h3>
-                  <p className="mt-5 max-w-md text-sm font-semibold leading-7 text-white/65">
-                    Từ một nỗi sợ rất đời thường đến quyết định trả lời thị trường bằng minh bạch, nhà máy, nguyên liệu và từng sản phẩm thật.
-                  </p>
-                </div>
-
-                <div className="relative mt-8 overflow-hidden border border-white/10 bg-white/5">
-                  <div className="relative h-64">
-                    <AssetImage src={teamImage} alt="Bà Tuyết trong câu chuyện thương hiệu" className="opacity-85" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/15 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Chân Gà Bà Tuyết</p>
-                      <p className="mt-2 text-2xl font-black leading-tight">Không chỉ nói hay. Phải làm thật.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative mt-7 space-y-3">
-                  {storyChapters.map((item) => (
-                    <div key={item.number} className="group grid grid-cols-[42px_1fr] gap-4 border border-white/10 bg-white/[0.04] p-3 transition hover:-translate-x-1 hover:border-orange-400/70 hover:bg-orange-600/15">
-                      <div className="grid h-10 w-10 place-items-center bg-orange-600 text-xs font-black shadow-[0_0_28px_rgba(234,88,12,.45)]">
-                        {item.number}
-                      </div>
-                      <div>
-                        <p className="text-sm font-black">{item.title}</p>
-                        <p className="mt-1 text-[11px] font-semibold leading-5 text-white/55 group-hover:text-white/80">{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </aside>
-
-              <div className="relative bg-[#fff8ed] p-6 sm:p-10 lg:p-12">
-                <div className="pointer-events-none absolute right-10 top-8 text-[120px] font-black leading-none tracking-[-0.08em] text-orange-100/80 sm:text-[170px]">
-                  “
-                </div>
-                <div className="relative">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <p className="border-l-4 border-orange-600 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-sm">
-                      Toàn bộ câu chuyện
-                    </p>
-                    {storyProofs.map((item) => (
-                      <span key={item.label} className="border border-orange-100 bg-white px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">
-                        {item.label}: <span className="text-orange-700">{item.value}</span>
-                      </span>
-                    ))}
-                  </div>
-
-                  <h4 className="mt-6 max-w-4xl text-5xl font-black leading-[0.92] tracking-[-0.075em] text-slate-950 sm:text-6xl">
-                    {storyTitle}
-                  </h4>
-
-                  <div className="mt-8 grid gap-4 border-y border-orange-100 py-5 md:grid-cols-3">
-                    {["Nỗi sợ không rõ nguồn gốc", "Sức ép từ dư luận", "Trả lời bằng việc làm thật"].map((item, index) => (
-                      <div key={item} className="flex items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center bg-orange-600 text-xs font-black text-white">0{index + 1}</span>
-                        <p className="text-sm font-black leading-5 text-slate-900">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="relative mt-9 space-y-5 text-base font-semibold leading-8 text-slate-700">
-                  {storyParagraphs.map((paragraph, index) => {
-                    const isEmphasis = paragraph.length < 90 || paragraph === paragraph.toUpperCase();
-                    const isFinal = index >= storyParagraphs.length - 2;
-                    return (
-                      <div key={index} className="grid gap-4 md:grid-cols-[54px_1fr]">
-                        <span className="hidden h-10 w-10 place-items-center border border-orange-200 bg-white text-[11px] font-black text-orange-700 md:grid">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <p
-                          className={
-                            isFinal
-                              ? "bg-slate-950 px-6 py-5 text-xl font-black leading-tight tracking-[-0.03em] text-white shadow-[12px_12px_0_rgba(234,88,12,0.20)]"
-                              : isEmphasis
-                                ? "border-l-4 border-orange-500 bg-white px-5 py-4 text-2xl font-black leading-tight tracking-[-0.04em] text-slate-950 shadow-sm"
-                                : "bg-white/60 px-5 py-4"
-                          }
-                        >
-                          {paragraph}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="relative mt-10 border border-orange-200 bg-orange-600 p-6 text-white shadow-[16px_16px_0_rgba(15,23,42,0.10)]">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-orange-100">Thông điệp chốt</p>
-                  <p className="mt-3 text-3xl font-black leading-tight tracking-[-0.05em]">
-                    Chân Gà Bà Tuyết — ngon phải rõ nguồn gốc, ăn phải thật an tâm.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </article>
         </div>
-      ) : null}
+      </section>
     </main>
   );
 }
