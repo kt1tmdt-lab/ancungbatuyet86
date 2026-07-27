@@ -490,7 +490,7 @@ export default function AboutPage() {
       </section>
 
       {/* SECTION 2: SỨ MỆNH - TẦM NHÌN - GIÁ TRỊ CỐT LÕI */}
-      <section id="about-trust" className="py-16 lg:py-24 bg-[#0F172A] text-white relative overflow-hidden border-b border-slate-950">
+      <section id="about-trust" className="py-16 lg:py-24 bg-[#F6EFE5] text-slate-900 relative overflow-hidden border-b border-orange-200/50">
         <div id="about-values" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           
           {/* Title */}
@@ -501,15 +501,15 @@ export default function AboutPage() {
             viewport={{ once: true }}
             variants={fapUp}
           >
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-950">
               Chúng tôi tin vào điều gì
             </h2>
-            <div className="h-1.5 w-20 bg-orange-500 mx-auto mt-4 rounded-sm" />
+            <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-sm" />
           </motion.div>
 
           {/* Pillars: Mission, Vision, Business Philosophy */}
           <motion.div 
-            className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20"
+            className="space-y-12 max-w-4xl mx-auto mb-24"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
@@ -517,50 +517,62 @@ export default function AboutPage() {
           >
             
             {/* Sứ mệnh */}
-            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
-              <span className="inline-block px-3 py-1 bg-orange-600/20 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
-                Sứ mệnh
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
-                "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
-              </h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
-                Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
-              </p>
+            <motion.div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-10 border-t border-orange-200/60" variants={fapUp}>
+              <div className="md:col-span-3">
+                <span className="inline-block px-3 py-1 bg-orange-600/10 border border-orange-500/20 text-orange-700 text-xs font-black uppercase tracking-widest rounded-sm">
+                  Sứ mệnh
+                </span>
+              </div>
+              <div className="md:col-span-9 space-y-3">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
+                  "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
+                </h3>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
+                  Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
+                </p>
+              </div>
             </motion.div>
 
             {/* Tầm nhìn */}
-            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
-              <span className="inline-block px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
-                Tầm nhìn
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
-                Vươn tầm quốc tế & khẳng định chất lượng Việt
-              </h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
-                Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
-              </p>
+            <motion.div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-10 border-t border-orange-200/60" variants={fapUp}>
+              <div className="md:col-span-3">
+                <span className="inline-block px-3 py-1 bg-blue-600/10 border border-blue-500/20 text-blue-700 text-xs font-black uppercase tracking-widest rounded-sm">
+                  Tầm nhìn
+                </span>
+              </div>
+              <div className="md:col-span-9 space-y-3">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
+                  Vươn tầm quốc tế & khẳng định chất lượng Việt
+                </h3>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
+                  Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
+                </p>
+              </div>
             </motion.div>
 
             {/* Triết lý kinh doanh */}
-            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
-              <span className="inline-block px-3 py-1 bg-amber-600/20 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
-                Triết lý kinh doanh
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
-                "Làm thật và làm khác biệt"
-              </h3>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
-                Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
-              </p>
+            <motion.div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-10 border-t border-orange-200/60" variants={fapUp}>
+              <div className="md:col-span-3">
+                <span className="inline-block px-3 py-1 bg-amber-600/10 border border-amber-500/20 text-amber-700 text-xs font-black uppercase tracking-widest rounded-sm">
+                  Triết lý kinh doanh
+                </span>
+              </div>
+              <div className="md:col-span-9 space-y-3">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 leading-tight">
+                  "Làm thật và làm khác biệt"
+                </h3>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed font-semibold">
+                  Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
+                </p>
+              </div>
             </motion.div>
 
           </motion.div>
 
           {/* Value cards - 5 cards horizontal layout on large screens */}
-          <div className="mb-20">
+          <div className="mb-24">
             <motion.h3 
-              className="text-2xl font-black tracking-tight text-white text-center mb-10"
+              className="text-2xl font-black tracking-tight text-slate-950 text-center mb-12"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -570,7 +582,7 @@ export default function AboutPage() {
             </motion.h3>
             
             <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl mx-auto"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
@@ -579,14 +591,14 @@ export default function AboutPage() {
               {coreValues.map((val, idx) => (
                 <motion.div
                   key={idx}
-                  className="p-6 bg-[#1E293B]/60 border border-white/10 rounded-md flex flex-col items-center text-center hover:border-orange-500/30 transition duration-300"
+                  className="flex flex-col gap-4 p-5 bg-white border border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20"
                   variants={fapUp}
                 >
-                  <div className="mb-4">{val.icon}</div>
-                  <h4 className="text-lg font-black tracking-tight mb-2 text-white">
+                  <div className="mb-2 self-start">{val.icon}</div>
+                  <h4 className="text-lg font-black tracking-tight text-slate-950">
                     {val.title}
                   </h4>
-                  <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+                  <p className="text-xs text-slate-600 font-semibold leading-relaxed">
                     {val.desc}
                   </p>
                 </motion.div>
@@ -596,13 +608,13 @@ export default function AboutPage() {
 
           {/* Slogan - large typography */}
           <motion.div 
-            className="border-t border-white/10 pt-16 text-center"
+            className="border-t border-orange-200/60 pt-16 text-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fapUp}
           >
-            <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-orange-500 uppercase italic select-none">
+            <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-orange-600 uppercase italic select-none">
               "Ăn vặt thì phải ăn cùng Bà Tuyết"
             </h3>
           </motion.div>
