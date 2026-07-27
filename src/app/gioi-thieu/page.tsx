@@ -510,9 +510,7 @@ export default function AboutPage() {
             <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-sm" />
           </motion.div>
 
-          {/* Pillars: Mission, Vision, Business Philosophy - Illustrated alternating rows */}
           <div className="space-y-24 mb-28">
-            
             {/* Sứ mệnh */}
             <motion.div 
               className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center"
@@ -521,7 +519,7 @@ export default function AboutPage() {
               viewport={{ once: true, margin: "-100px" }}
               variants={fapUp}
             >
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-8 space-y-4">
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Sứ mệnh
                 </span>
@@ -532,23 +530,19 @@ export default function AboutPage() {
                   Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
                 </p>
               </div>
-              <div className="lg:col-span-5">
-                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
-                  {/* Abstract Grid Lines */}
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
-                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -top-12 -left-12 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 bottom-8 left-16 group-hover:scale-105 transition-transform duration-500" />
-                  
-                  {/* Big Background Number */}
-                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
-                    01
-                  </div>
-
-                  {/* Centered Creative Icon Container */}
-                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
-                    <Target size={48} className="stroke-[1.5]" />
-                  </div>
-                </div>
+              <div className="lg:col-span-4 flex justify-center items-center">
+                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="100" cy="100" r="80" strokeDasharray="4 4" className="text-orange-300" />
+                  <circle cx="100" cy="100" r="50" className="text-orange-400" />
+                  <circle cx="100" cy="100" r="20" className="text-orange-500/20" fill="currentColor" />
+                  <line x1="100" y1="10" x2="100" y2="190" className="text-orange-300/50" />
+                  <line x1="10" y1="100" x2="190" y2="100" className="text-orange-300/50" />
+                  <circle cx="100" cy="50" r="4" fill="#ff7a1a" />
+                  <circle cx="150" cy="100" r="4" fill="#ff7a1a" />
+                  <circle cx="100" cy="150" r="4" fill="#ff7a1a" />
+                  <circle cx="50" cy="100" r="4" fill="#ff7a1a" />
+                  <circle cx="100" cy="100" r="6" fill="#ff7a1a" />
+                </svg>
               </div>
             </motion.div>
 
@@ -560,25 +554,19 @@ export default function AboutPage() {
               viewport={{ once: true, margin: "-100px" }}
               variants={fapUp}
             >
-              <div className="lg:col-span-5 order-last lg:order-first">
-                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
-                  {/* Abstract Grid Lines */}
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
-                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -bottom-12 -left-12 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 top-8 right-16 group-hover:scale-105 transition-transform duration-500" />
-                  
-                  {/* Big Background Number */}
-                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
-                    02
-                  </div>
-
-                  {/* Centered Creative Icon Container */}
-                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
-                    <Compass size={48} className="stroke-[1.5]" />
-                  </div>
-                </div>
+              <div className="lg:col-span-4 flex justify-center items-center order-last lg:order-first">
+                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="100" cy="100" r="70" className="text-orange-400" />
+                  <ellipse cx="100" cy="100" rx="40" ry="70" className="text-orange-300" />
+                  <ellipse cx="100" cy="100" rx="15" ry="70" className="text-orange-200" />
+                  <line x1="30" y1="100" x2="170" y2="100" className="text-orange-300" />
+                  <line x1="40" y1="60" x2="160" y2="60" className="text-orange-200/60" strokeDasharray="3 3" />
+                  <line x1="40" y1="140" x2="160" y2="140" className="text-orange-200/60" strokeDasharray="3 3" />
+                  <path d="M140,50 L165,42 L157,67 Z" fill="#ff7a1a" />
+                  <path d="M100,100 Q135,90 157,56" className="text-orange-500" strokeDasharray="4 4" />
+                </svg>
               </div>
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-8 space-y-4">
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Tầm nhìn
                 </span>
@@ -599,7 +587,7 @@ export default function AboutPage() {
               viewport={{ once: true, margin: "-100px" }}
               variants={fapUp}
             >
-              <div className="lg:col-span-7 space-y-4">
+              <div className="lg:col-span-8 space-y-4">
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Triết lý kinh doanh
                 </span>
@@ -610,23 +598,19 @@ export default function AboutPage() {
                   Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
                 </p>
               </div>
-              <div className="lg:col-span-5">
-                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
-                  {/* Abstract Grid Lines */}
-                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
-                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -top-12 -right-12 group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 bottom-8 left-16 group-hover:scale-105 transition-transform duration-500" />
-                  
-                  {/* Big Background Number */}
-                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
-                    03
-                  </div>
-
-                  {/* Centered Creative Icon Container */}
-                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
-                    <Lightbulb size={48} className="stroke-[1.5]" />
-                  </div>
-                </div>
+              <div className="lg:col-span-4 flex justify-center items-center">
+                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M100,35 C70,35 55,55 55,85 C55,110 75,125 75,140 L75,155 L125,155 L125,140 C125,130 145,110 145,85 C145,55 130,35 100,35 Z" className="text-orange-500" />
+                  <circle cx="100" cy="85" r="18" className="text-orange-400" strokeDasharray="4 2" />
+                  <circle cx="100" cy="85" r="6" className="text-orange-600" fill="#ff7a1a" />
+                  <line x1="80" y1="162" x2="120" y2="162" className="text-orange-400" strokeWidth="3" />
+                  <line x1="85" y1="169" x2="115" y2="169" className="text-orange-500" strokeWidth="3" />
+                  <line x1="100" y1="10" x2="100" y2="20" className="text-orange-600" />
+                  <line x1="45" y1="40" x2="55" y2="50" className="text-orange-300" />
+                  <line x1="155" y1="40" x2="145" y2="50" className="text-orange-300" />
+                  <line x1="30" y1="85" x2="42" y2="85" className="text-orange-600" />
+                  <line x1="170" y1="85" x2="158" y2="85" className="text-orange-600" />
+                </svg>
               </div>
             </motion.div>
 
