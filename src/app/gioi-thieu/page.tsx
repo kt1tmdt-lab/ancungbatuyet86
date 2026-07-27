@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   Globe,
@@ -90,6 +91,29 @@ function marketingTextValue(items: HomeTextItem[], key: string, fallback: string
   const value = items.find((item) => item.key === key)?.value;
   return repairMojibakeText(value && value.trim() ? value : fallback);
 }
+
+// Animation variants for minimal corporate transitions
+const fapUp = {
+  hidden: { opacity: 0, y: 15 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+    },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
 
 export default function AboutPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(
@@ -192,27 +216,27 @@ export default function AboutPage() {
 
   const coreValues = [
     {
-      icon: <ShieldCheck className="text-emerald-500 h-8 w-8" />,
+      icon: <ShieldCheck className="text-emerald-500 h-7 w-7" />,
       title: "An toàn",
       desc: "Sản phẩm phải đạt chuẩn từ nguyên liệu đến thành phẩm, không thỏa hiệp để đổi lấy giá rẻ, sức khoẻ khách hàng là quan trọng nhất và không có ngoại lệ.",
     },
     {
-      icon: <Eye className="text-blue-500 h-8 w-8" />,
+      icon: <Eye className="text-blue-500 h-7 w-7" />,
       title: "Minh bạch",
       desc: "Nguồn gốc nguyên liệu, quy trình sản xuất, chứng nhận chất lượng, tất cả phải được công khai để khách hàng có thể tự kiểm chứng.",
     },
     {
-      icon: <Award className="text-orange-500 h-8 w-8" />,
+      icon: <Award className="text-orange-500 h-7 w-7" />,
       title: "Trách nhiệm",
       desc: "Khi có vấn đề, Ăn Cùng Bà Tuyết luôn sẵn sàng nhận trách nhiệm và không né tránh. Sản phẩm được bảo hiểm trách nhiệm PVI là 1 phần trong những nỗ lực này.",
     },
     {
-      icon: <Zap className="text-amber-500 h-8 w-8" />,
+      icon: <Zap className="text-amber-500 h-7 w-7" />,
       title: "Quyết liệt",
       desc: "Để có thể phát triển và mang lại nhiều giá trị hơn cho khách hàng, chúng tôi luôn quyết liệt làm tốt hơn mỗi ngày để phục vụ được khách hàng tốt và tốt hơn nữa.",
     },
     {
-      icon: <Heart className="text-rose-500 h-8 w-8" />,
+      icon: <Heart className="text-rose-500 h-7 w-7" />,
       title: "Người Việt làm chủ",
       desc: "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới.",
     },
@@ -226,47 +250,67 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-center">
             
             {/* Left Content Area */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider">
+            <motion.div 
+              className="lg:col-span-7 space-y-6 text-left"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
+              <motion.div 
+                className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-sm"
+                variants={fapUp}
+              >
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>{heroTagline}</span>
-              </div>
+              </motion.div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1]">
+              <motion.h1 
+                className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-[1.1]"
+                variants={fapUp}
+              >
                 {heroTitle}
-              </h1>
+              </motion.h1>
               
-              <p className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-semibold">
+              <motion.p 
+                className="text-base sm:text-lg text-slate-700 leading-relaxed max-w-2xl font-semibold"
+                variants={fapUp}
+              >
                 {heroDesc}
-              </p>
+              </motion.p>
               
-              <div className="pt-4 flex flex-wrap gap-4">
+              <motion.div className="pt-4 flex flex-wrap gap-4" variants={fapUp}>
                 <Link
                   href="/san-pham"
-                  className="acbt-btn acbt-btn--primary acbt-btn--lg"
+                  className="acbt-btn acbt-btn--primary acbt-btn--lg rounded-md"
                 >
                   <span>Xem sản phẩm</span>
                   <ArrowRight size={16} />
                 </Link>
                 <Link
                   href="/chat-luong"
-                  className="acbt-btn acbt-btn--secondary acbt-btn--lg"
+                  className="acbt-btn acbt-btn--secondary acbt-btn--lg rounded-md"
                 >
                   <span>Xem chất lượng & quy trình</span>
                 </Link>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Right Stats Area */}
-            <div className="lg:col-span-5 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            <motion.div 
+              className="lg:col-span-5 grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-1"
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+            >
               {[
                 { val: stat1Value, label: stat1Label },
                 { val: stat2Value, label: stat2Label },
                 { val: stat3Value, label: stat3Label },
               ].map((item, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  className="p-6 bg-white border-l-4 border-orange-600 border-y border-r border-slate-200 flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-1"
+                  className="p-6 bg-white border-l-4 border-orange-600 border-y border-r border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-orange-500/20"
+                  variants={fapUp}
                 >
                   <span className="text-3xl lg:text-4xl font-black text-[#0F172A] tracking-tight">
                     {item.val}
@@ -274,9 +318,9 @@ export default function AboutPage() {
                   <span className="mt-1 text-xs font-black uppercase tracking-wider text-slate-500 text-center lg:text-left">
                     {item.label}
                   </span>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
           </div>
         </div>
@@ -287,53 +331,79 @@ export default function AboutPage() {
         <div id="about-community" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Section Header */}
-          <div className="max-w-3xl mb-12 lg:mb-16">
+          <motion.div 
+            className="max-w-3xl mb-12 lg:mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fapUp}
+          >
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight leading-snug">
               Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
             </h2>
-            <div className="h-1.5 w-20 bg-orange-600 mt-4" />
-          </div>
+            <div className="h-1.5 w-20 bg-orange-600 mt-4 rounded-sm" />
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start">
             
             {/* Story Paragraphs & Bullets */}
             <div className="lg:col-span-7 space-y-8">
-              <div className="space-y-6 text-slate-800 text-base leading-relaxed font-semibold">
+              <motion.div 
+                className="space-y-6 text-slate-800 text-base leading-relaxed font-semibold"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={staggerContainer}
+              >
                 {BRAND_STORY_PARAGRAPHS.map((paragraph, index) => (
-                  <p
+                  <motion.p
                     key={index}
                     className={
                       index === 0
-                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-2.5 bg-white p-4 border border-slate-200"
+                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-2.5 bg-white p-4 border border-slate-200/80 rounded-r-md shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
                         : ""
                     }
+                    variants={fapUp}
                   >
                     {paragraph}
-                  </p>
+                  </motion.p>
                 ))}
-              </div>
+              </motion.div>
 
               {/* Bullet list below paragraph */}
-              <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <motion.div 
+                className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={staggerContainer}
+              >
                 {storyBullets.map((bullet, idx) => (
-                  <div
+                  <motion.div
                     key={idx}
-                    className="flex gap-4 p-4 bg-white border border-slate-200 items-start"
+                    className="flex gap-4 p-4 bg-white border border-slate-200/80 rounded-md shadow-[0_2px_8px_rgba(0,0,0,0.01)] items-start transition duration-300 hover:border-orange-500/20"
+                    variants={fapUp}
                   >
-                    <div className="p-2 bg-orange-50 shrink-0 border border-orange-100">
+                    <div className="p-2 bg-orange-50 shrink-0 border border-orange-100 rounded-sm">
                       {bullet.icon}
                     </div>
                     <p className="text-sm font-bold text-slate-800 leading-snug">
                       {bullet.text}
                     </p>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
 
             {/* Sticky Video/Embed Area */}
-            <div className="lg:col-span-5 lg:sticky lg:top-24">
-              <div className="relative overflow-hidden bg-slate-950 border-4 border-[#0F172A] aspect-video w-full group">
+            <motion.div 
+              className="lg:col-span-5 lg:sticky lg:top-24"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fapUp}
+            >
+              <div className="relative overflow-hidden bg-slate-950 border-4 border-[#0F172A] aspect-video w-full group rounded-md shadow-md">
                 {storyVideoUrl ? (
                   <iframe
                     src={storyVideoUrl}
@@ -355,7 +425,7 @@ export default function AboutPage() {
                 <span>Xem quy trình nhà máy thực tế</span>
                 <ExternalLink size={12} />
               </div>
-            </div>
+            </motion.div>
 
           </div>
         </div>
@@ -366,19 +436,31 @@ export default function AboutPage() {
         <div id="about-values" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           
           {/* Title */}
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white animate-fade-in-up">
+          <motion.div 
+            className="text-center max-w-2xl mx-auto mb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fapUp}
+          >
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
               Chúng tôi tin vào điều gì
             </h2>
-            <div className="h-1.5 w-20 bg-orange-500 mx-auto mt-4" />
-          </div>
+            <div className="h-1.5 w-20 bg-orange-500 mx-auto mt-4 rounded-sm" />
+          </motion.div>
 
           {/* Pillars: Mission, Vision, Business Philosophy */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+          <motion.div 
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+          >
             
             {/* Sứ mệnh */}
-            <div className="p-8 bg-[#1E293B] border border-white/10 hover:border-orange-500/30 transition duration-300">
-              <span className="inline-block px-3 py-1 bg-orange-600/20 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-widest mb-6">
+            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
+              <span className="inline-block px-3 py-1 bg-orange-600/20 border border-orange-500/30 text-orange-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
                 Sứ mệnh
               </span>
               <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
@@ -387,11 +469,11 @@ export default function AboutPage() {
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
                 Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
               </p>
-            </div>
+            </motion.div>
 
             {/* Tầm nhìn */}
-            <div className="p-8 bg-[#1E293B] border border-white/10 hover:border-orange-500/30 transition duration-300">
-              <span className="inline-block px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-widest mb-6">
+            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
+              <span className="inline-block px-3 py-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
                 Tầm nhìn
               </span>
               <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
@@ -400,11 +482,11 @@ export default function AboutPage() {
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
                 Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
               </p>
-            </div>
+            </motion.div>
 
             {/* Triết lý kinh doanh */}
-            <div className="p-8 bg-[#1E293B] border border-white/10 hover:border-orange-500/30 transition duration-300">
-              <span className="inline-block px-3 py-1 bg-amber-600/20 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-widest mb-6">
+            <motion.div className="p-8 bg-[#1E293B] border border-white/10 rounded-md hover:border-orange-500/30 transition duration-300" variants={fapUp}>
+              <span className="inline-block px-3 py-1 bg-amber-600/20 border border-amber-500/30 text-amber-400 text-xs font-black uppercase tracking-widest mb-6 rounded-sm">
                 Triết lý kinh doanh
               </span>
               <h3 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-white leading-tight">
@@ -413,21 +495,34 @@ export default function AboutPage() {
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-semibold">
                 Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
               </p>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
           {/* Value cards - 5 cards horizontal layout on large screens */}
           <div className="mb-20">
-            <h3 className="text-2xl font-black tracking-tight text-white text-center mb-10">
+            <motion.h3 
+              className="text-2xl font-black tracking-tight text-white text-center mb-10"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fapUp}
+            >
               Giá trị cốt lõi
-            </h3>
+            </motion.h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              variants={staggerContainer}
+            >
               {coreValues.map((val, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  className="p-6 bg-[#1E293B]/60 border border-white/10 flex flex-col items-center text-center hover:border-orange-500/30 transition duration-300"
+                  className="p-6 bg-[#1E293B]/60 border border-white/10 rounded-md flex flex-col items-center text-center hover:border-orange-500/30 transition duration-300"
+                  variants={fapUp}
                 >
                   <div className="mb-4">{val.icon}</div>
                   <h4 className="text-lg font-black tracking-tight mb-2 text-white">
@@ -436,17 +531,23 @@ export default function AboutPage() {
                   <p className="text-xs text-slate-400 font-semibold leading-relaxed">
                     {val.desc}
                   </p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           {/* Slogan - large typography */}
-          <div className="border-t border-white/10 pt-16 text-center">
+          <motion.div 
+            className="border-t border-white/10 pt-16 text-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fapUp}
+          >
             <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-orange-500 uppercase italic select-none">
               "Ăn vặt thì phải ăn cùng Bà Tuyết"
             </h3>
-          </div>
+          </motion.div>
 
         </div>
       </section>
@@ -455,31 +556,43 @@ export default function AboutPage() {
       <section className="py-16 lg:py-20 bg-[#FAF7F2]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
           
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-snug">
+          <motion.h2 
+            className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-snug"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fapUp}
+          >
             Tìm hiểu thêm về chất lượng và quy trình sản xuất hoặc liên hệ với chúng tôi
-          </h2>
+          </motion.h2>
           
-          <div className="flex flex-wrap gap-4 justify-center items-center">
+          <motion.div 
+            className="flex flex-wrap gap-4 justify-center items-center"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fapUp}
+          >
             <Link
               href="/chat-luong"
-              className="acbt-btn acbt-btn--primary acbt-btn--xl min-w-[200px]"
+              className="acbt-btn acbt-btn--primary acbt-btn--xl min-w-[200px] rounded-md"
             >
               <span>Xem trang Chất lượng</span>
               <ArrowRight size={18} />
             </Link>
             <Link
               href="/san-pham"
-              className="acbt-btn acbt-btn--secondary acbt-btn--xl min-w-[200px]"
+              className="acbt-btn acbt-btn--secondary acbt-btn--xl min-w-[200px] rounded-md"
             >
               <span>Xem sản phẩm</span>
             </Link>
             <Link
               href="/lien-he"
-              className="acbt-btn acbt-btn--outline acbt-btn--xl min-w-[200px]"
+              className="acbt-btn acbt-btn--outline acbt-btn--xl min-w-[200px] rounded-md"
             >
               <span>Liên hệ với chúng tôi</span>
             </Link>
-          </div>
+          </motion.div>
 
         </div>
       </section>
