@@ -16,6 +16,9 @@ import {
   Award,
   Video,
   ExternalLink,
+  Target,
+  Compass,
+  Lightbulb,
 } from "lucide-react";
 import {
   DEFAULT_MARKETING_CONFIG,
@@ -530,12 +533,21 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="lg:col-span-5">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
-                  <img
-                    src="/bento/bento-ingredients.png"
-                    alt="Nguyên liệu sạch Ăn Cùng Bà Tuyết"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
+                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
+                  {/* Abstract Grid Lines */}
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
+                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -top-12 -left-12 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 bottom-8 left-16 group-hover:scale-105 transition-transform duration-500" />
+                  
+                  {/* Big Background Number */}
+                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
+                    01
+                  </div>
+
+                  {/* Centered Creative Icon Container */}
+                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
+                    <Target size={48} className="stroke-[1.5]" />
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -549,12 +561,21 @@ export default function AboutPage() {
               variants={fapUp}
             >
               <div className="lg:col-span-5 order-last lg:order-first">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
-                  <img
-                    src="/bento/bento-insurance.png"
-                    alt="Chất lượng và bảo hiểm sản phẩm Ăn Cùng Bà Tuyết"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
+                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
+                  {/* Abstract Grid Lines */}
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
+                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -bottom-12 -left-12 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 top-8 right-16 group-hover:scale-105 transition-transform duration-500" />
+                  
+                  {/* Big Background Number */}
+                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
+                    02
+                  </div>
+
+                  {/* Centered Creative Icon Container */}
+                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
+                    <Compass size={48} className="stroke-[1.5]" />
+                  </div>
                 </div>
               </div>
               <div className="lg:col-span-7 space-y-4">
@@ -590,12 +611,21 @@ export default function AboutPage() {
                 </p>
               </div>
               <div className="lg:col-span-5">
-                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border-2 border-orange-200 shadow-[0_4px_20px_rgba(0,0,0,0.04)] bg-white">
-                  <img
-                    src="/bento/bento-factory.png"
-                    alt="Nhà máy hiện đại Ăn Cùng Bà Tuyết"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
+                <div className="relative aspect-[4/3] w-full flex items-center justify-center overflow-hidden rounded-md border border-orange-200/60 bg-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.01)] group hover:border-orange-500/30 transition duration-500">
+                  {/* Abstract Grid Lines */}
+                  <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ff7a1a_1px,transparent_1px)] [background-size:16px_16px]" />
+                  <div className="absolute h-48 w-48 rounded-full border border-orange-200/30 -top-12 -right-12 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute h-36 w-36 rounded-full border border-orange-200/20 bottom-8 left-16 group-hover:scale-105 transition-transform duration-500" />
+                  
+                  {/* Big Background Number */}
+                  <div className="absolute -bottom-8 -right-4 text-orange-600/[0.07] font-black text-[11rem] tracking-tighter leading-none select-none group-hover:scale-105 transition-transform duration-500 font-sans">
+                    03
+                  </div>
+
+                  {/* Centered Creative Icon Container */}
+                  <div className="relative p-6 bg-white border border-orange-100 rounded-full shadow-[0_8px_30px_rgba(255,122,26,0.05)] text-orange-600 group-hover:scale-110 transition-transform duration-500">
+                    <Lightbulb size={48} className="stroke-[1.5]" />
+                  </div>
                 </div>
               </div>
             </motion.div>
