@@ -324,8 +324,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
 
       <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -28, scale: 0.99 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.65 }}
           className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10"
@@ -381,7 +381,13 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
       </section>
 
       <section id="nha-may-quy-trinh" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, x: 28, scale: 0.99 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-7xl"
+        >
           <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
             <div className="order-2 lg:order-1">
               <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
@@ -446,11 +452,17 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </article>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <section id="ho-so-phap-ly" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, x: -28, scale: 0.99 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-7xl"
+        >
           <div>
             <div>
               <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
@@ -487,11 +499,17 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </motion.button>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <section id="bao-hiem-san-pham" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-12 text-slate-950 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+        <motion.div
+          initial={{ opacity: 0, x: 28, scale: 0.99 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
+        >
           <div className="order-2 lg:order-1">
             <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               {pviTitle}
@@ -518,11 +536,17 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               <Placeholder>Scan hợp đồng/giấy chứng nhận: [CẦN BỔ SUNG]</Placeholder>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <section id="bao-ve-khach-hang" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <div className="mx-auto max-w-7xl">
+        <motion.div
+          initial={{ opacity: 0, x: -28, scale: 0.99 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-7xl"
+        >
           <div>
             <div>
               <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
@@ -563,7 +587,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               Xem chính sách đầy đủ <ArrowRight size={14} />
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <section className="bg-[#FAF7F2] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
