@@ -1671,28 +1671,26 @@ function FactoryProofSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative grid min-w-0 lg:grid-cols-12 lg:items-center"
+                className={`group relative flex min-w-0 flex-col lg:min-h-[520px] lg:items-center ${
+                  imageOnRight ? "lg:flex-row-reverse" : "lg:flex-row"
+                }`}
               >
                 <div
-                  className={`relative order-1 aspect-[4/3] min-w-0 overflow-hidden border border-white/80 bg-slate-100 shadow-[0_28px_80px_rgba(72,38,12,0.14)] sm:aspect-[16/9] lg:row-start-1 lg:aspect-auto lg:min-h-[520px] ${
-                    imageOnRight
-                      ? "lg:col-start-5 lg:col-span-8"
-                      : "lg:col-start-1 lg:col-span-8"
-                  }`}
+                  className="relative order-1 aspect-[4/3] w-full min-w-0 overflow-hidden border border-white/80 bg-[#ece6dd] shadow-[0_28px_80px_rgba(72,38,12,0.14)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] sm:aspect-[16/9] lg:aspect-auto lg:min-h-[520px] lg:w-[68%] lg:shrink-0 lg:group-hover:w-1/2"
                 >
                   <img
                     src={proof.imageUrl}
                     alt={proof.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035]"
+                    className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.015] lg:group-hover:object-contain"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
                 </div>
 
                 <div
-                  className={`relative z-10 order-2 -mt-5 min-w-0 border border-orange-100 bg-white p-5 shadow-[0_24px_65px_rgba(60,31,9,0.13)] sm:-mt-10 sm:p-8 lg:row-start-1 lg:mt-0 lg:p-10 xl:p-12 ${
+                  className={`relative z-10 order-2 -mt-5 w-full min-w-0 border border-orange-100 bg-white p-5 shadow-[0_24px_65px_rgba(60,31,9,0.13)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] sm:-mt-10 sm:p-8 lg:mt-0 lg:flex lg:min-h-[440px] lg:w-[44%] lg:shrink-0 lg:flex-col lg:justify-center lg:p-10 lg:group-hover:min-h-[520px] lg:group-hover:w-1/2 xl:p-12 ${
                     imageOnRight
-                      ? "lg:col-start-1 lg:col-span-5 lg:mr-[-72px]"
-                      : "lg:col-start-8 lg:col-span-5 lg:ml-[-72px]"
+                      ? "lg:-mr-[12%] lg:group-hover:mr-0"
+                      : "lg:-ml-[12%] lg:group-hover:ml-0"
                   }`}
                 >
                   <span
