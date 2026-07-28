@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader, MapPin, Search, Store } from "lucide-react";
 
 type DistributionPoint = [latitude: number, longitude: number, name: string, typeIndex: number];
@@ -10,17 +10,11 @@ type DistributionData = {
   skipped: number;
   types: Array<{ name: string; count: number }>;
   points: DistributionPoint[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 };
-
-const PAGE_SIZE = 12;
-
-function normalizeSearch(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("vi-VN").format(value);
@@ -29,51 +23,53 @@ function formatNumber(value: number) {
 export default function DistributionPointExplorer() {
   const [data, setData] = useState<DistributionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const deferredQuery = useDeferredValue(query);
   const [activeType, setActiveType] = useState("all");
   const [page, setPage] = useState(1);
   const [selectedPoint, setSelectedPoint] = useState<DistributionPoint | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-
-    fetch("/data/distribution-points.json", { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error("Không thể tải dữ liệu điểm phân phối");
-        return response.json() as Promise<DistributionData>;
-      })
-      .then((payload) => {
-        setData(payload);
-        setSelectedPoint(payload.points[0] || null);
-      })
-      .catch((loadError) => {
-        if (loadError instanceof Error && loadError.name === "AbortError") return;
-        setError("Chưa thể tải danh sách điểm phân phối. Vui lòng thử lại sau.");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams({
+        page: String(page),
+        type: activeType,
       });
+      if (query.trim()) params.set("q", query.trim());
 
-    return () => controller.abort();
-  }, []);
+      fetch(`/api/distribution-points?${params.toString()}`, { signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error("Không thể tải dữ liệu điểm phân phối");
+          return response.json() as Promise<DistributionData>;
+        })
+        .then((payload) => {
+          setData(payload);
+          setSelectedPoint(payload.points[0] || null);
+          setError("");
+        })
+        .catch((loadError) => {
+          if (loadError instanceof Error && loadError.name === "AbortError") return;
+          setError("Chưa thể tải danh sách điểm phân phối. Vui lòng thử lại sau.");
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setLoading(false);
+            setFetching(false);
+          }
+        });
+    }, query.trim() ? 250 : 0);
 
-  const filteredPoints = useMemo(() => {
-    if (!data) return [];
-    const normalizedQuery = normalizeSearch(deferredQuery);
-    const activeTypeIndex = activeType === "all" ? -1 : Number(activeType);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [activeType, page, query]);
 
-    return data.points.filter((point) => {
-      if (activeTypeIndex >= 0 && point[3] !== activeTypeIndex) return false;
-      if (normalizedQuery && !normalizeSearch(point[2]).includes(normalizedQuery)) return false;
-      return true;
-    });
-  }, [activeType, data, deferredQuery]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredPoints.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const visiblePoints = filteredPoints.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const totalPages = data?.totalPages || 1;
+  const safePage = data?.page || page;
+  const visiblePoints = data?.points || [];
   const selectedType = selectedPoint && data ? data.types[selectedPoint[3]]?.name || "Điểm phân phối" : "";
   const mapSrc = selectedPoint
     ? `https://www.google.com/maps?q=${selectedPoint[0]},${selectedPoint[1]}&z=16&hl=vi&output=embed`
@@ -110,6 +106,7 @@ export default function DistributionPointExplorer() {
             onChange={(event) => {
               setQuery(event.target.value);
               setPage(1);
+              setFetching(true);
             }}
             placeholder="Tìm theo tên điểm phân phối..."
             className="h-13 w-full border border-slate-200 bg-[#fffaf3] pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-orange-500"
@@ -121,6 +118,7 @@ export default function DistributionPointExplorer() {
           onChange={(event) => {
             setActiveType(event.target.value);
             setPage(1);
+            setFetching(true);
           }}
           className="h-13 w-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 outline-none focus:border-orange-500"
           aria-label="Lọc theo loại khách hàng"
@@ -191,9 +189,12 @@ export default function DistributionPointExplorer() {
 
       <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">Danh sách phân phối</p>
+          <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-orange-600">
+            Danh sách phân phối
+            {fetching ? <Loader className="h-4 w-4 animate-spin" /> : null}
+          </p>
           <h3 className="mt-2 text-2xl font-black tracking-[-0.045em] sm:text-3xl">
-            {formatNumber(filteredPoints.length)} điểm phù hợp
+            {formatNumber(data.total)} điểm phù hợp
           </h3>
         </div>
         <p className="text-xs font-bold text-slate-500">
@@ -243,7 +244,10 @@ export default function DistributionPointExplorer() {
           <button
             type="button"
             disabled={safePage <= 1}
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            onClick={() => {
+              setFetching(true);
+              setPage((current) => Math.max(1, current - 1));
+            }}
             className="grid h-11 w-11 place-items-center border border-orange-200 bg-white text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-35"
             aria-label="Trang trước"
           >
@@ -255,7 +259,10 @@ export default function DistributionPointExplorer() {
           <button
             type="button"
             disabled={safePage >= totalPages}
-            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            onClick={() => {
+              setFetching(true);
+              setPage((current) => Math.min(totalPages, current + 1));
+            }}
             className="grid h-11 w-11 place-items-center border border-orange-200 bg-white text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-35"
             aria-label="Trang sau"
           >
