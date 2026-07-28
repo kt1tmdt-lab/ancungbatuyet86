@@ -36,6 +36,7 @@ type Product = {
 type ProductGroup = {
   id: string;
   label: string;
+  count: number;
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -118,6 +119,14 @@ function ProductChapter({
       <span className="pointer-events-none absolute -right-8 top-8 select-none text-[11rem] font-black leading-none text-white/45 sm:text-[18rem] lg:text-[25rem]">
         {String(index + 1).padStart(2, "0")}
       </span>
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 hidden select-none whitespace-nowrap text-center text-[8vw] font-black uppercase leading-none tracking-[-0.07em] text-slate-950/[0.025] lg:block">
+        {product.name}
+      </span>
+      <div className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 -rotate-90 items-center gap-3 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500 xl:flex">
+        <span>Signature product</span>
+        <span className="h-px w-10 bg-orange-400" />
+        <span>{String(index + 1).padStart(2, "0")}</span>
+      </div>
 
       <div className="relative mx-auto grid min-h-[78vh] max-w-[1600px] items-center lg:grid-cols-2">
         <motion.div
@@ -132,6 +141,7 @@ function ProductChapter({
           <div
             className={`absolute left-1/2 top-1/2 h-[min(76vw,360px)] w-[min(76vw,360px)] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[0_40px_100px_rgba(15,23,42,0.16)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px] ${theme.orb}`}
           />
+          <div className="absolute left-1/2 top-1/2 h-[min(88vw,410px)] w-[min(88vw,410px)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50 sm:h-[520px] sm:w-[520px] xl:h-[630px] xl:w-[630px]" />
           <div className="absolute left-[12%] top-[14%] h-20 w-20 rounded-full border border-white/50 sm:h-28 sm:w-28" />
           <div className="absolute bottom-[12%] right-[10%] h-28 w-28 rounded-full border border-orange-300/50 sm:h-40 sm:w-40" />
 
@@ -284,8 +294,12 @@ export default function ProductsPage() {
       unique.set(id, product.categoryLabel || CATEGORY_LABELS[id] || "Sản phẩm khác");
     });
     return [
-      { id: "all", label: "Tất cả chủ lực" },
-      ...Array.from(unique, ([id, label]) => ({ id, label })),
+      { id: "all", label: "Tất cả chủ lực", count: coreProducts.length },
+      ...Array.from(unique, ([id, label]) => ({
+        id,
+        label,
+        count: coreProducts.filter((product) => (product.category || "other") === id).length,
+      })),
     ];
   }, [coreProducts]);
 
@@ -303,42 +317,100 @@ export default function ProductsPage() {
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff4df] text-slate-950">
-      <section className="relative flex min-h-[68vh] items-end overflow-hidden border-b border-orange-100 bg-slate-950 px-5 pb-14 pt-28 text-white sm:px-8 sm:pb-20 lg:min-h-[78vh] lg:px-16 lg:pb-24">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_42%,rgba(234,88,12,0.48),transparent_28%),linear-gradient(120deg,#0f172a_0%,#111827_50%,#431407_100%)]" />
-        <div className="absolute -right-20 top-20 h-[420px] w-[420px] rounded-full border border-orange-400/30 sm:h-[620px] sm:w-[620px]" />
-        <div className="absolute right-[8%] top-[22%] h-40 w-40 rounded-full bg-orange-600/20 blur-2xl sm:h-72 sm:w-72" />
-        <span className="absolute right-4 top-24 select-none text-[9rem] font-black leading-none text-white/[0.035] sm:text-[16rem] lg:text-[24rem]">
-          ACBT
+      <section className="relative overflow-hidden border-b border-orange-100 bg-slate-950 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_42%,rgba(234,88,12,0.52),transparent_25%),linear-gradient(120deg,#0f172a_0%,#111827_52%,#431407_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-orange-500 via-yellow-300 to-green-600" />
+        <span className="absolute -left-4 bottom-[-0.12em] select-none text-[10rem] font-black leading-none tracking-[-0.1em] text-white/[0.035] sm:text-[18rem] lg:text-[27rem]">
+          TASTE
         </span>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mx-auto w-full max-w-7xl"
-        >
-          <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-300">
-            <Sparkles size={15} />
-            Bộ sưu tập chủ lực
-          </div>
-          <h1 className="mt-6 max-w-5xl text-[2.8rem] font-black leading-[0.88] tracking-[-0.075em] sm:text-6xl lg:text-8xl">
-            Không chỉ là sản phẩm.
-            <span className="block text-orange-500">Là một câu chuyện vị giác.</span>
-          </h1>
-          <p className="mt-7 max-w-2xl text-base font-semibold leading-8 text-white/70 sm:text-lg">
-            Khám phá những dòng sản phẩm đại diện của Ăn Cùng Bà Tuyết qua từng câu chuyện,
-            hương vị và cách chúng tôi đưa sản phẩm đến người tiêu dùng.
-          </p>
-          <button
-            type="button"
-            onClick={scrollToProducts}
-            className="mt-8 inline-flex items-center gap-3 border border-white/20 bg-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.15em] text-white backdrop-blur transition hover:border-orange-500 hover:bg-orange-600"
+        <div className="relative mx-auto grid min-h-[82vh] max-w-[1600px] items-center lg:grid-cols-[0.9fr_1.1fr]">
+          <motion.div
+            initial={{ opacity: 0, x: -34 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+            className="order-2 px-5 pb-14 pt-4 sm:px-8 sm:pb-20 lg:order-1 lg:px-16 lg:py-24 xl:px-24"
           >
-            Khám phá bộ sưu tập
-            <ArrowDown size={17} />
-          </button>
-        </motion.div>
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-300">
+              <Sparkles size={15} />
+              Signature collection · 2026
+            </div>
+            <h1 className="mt-6 max-w-4xl text-[2.8rem] font-black leading-[0.87] tracking-[-0.075em] sm:text-6xl lg:text-7xl xl:text-8xl">
+              Mỗi vị ngon,
+              <span className="block text-orange-500">một cá tính.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-base font-semibold leading-8 text-white/70 sm:text-lg">
+              Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết —
+              nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.
+            </p>
+            <button
+              type="button"
+              onClick={scrollToProducts}
+              className="mt-8 inline-flex items-center gap-3 border border-white/20 bg-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.15em] text-white backdrop-blur transition hover:border-orange-500 hover:bg-orange-600"
+            >
+              Bắt đầu khám phá
+              <ArrowDown size={17} />
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 38, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 0.85, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="relative order-1 min-h-[430px] overflow-hidden sm:min-h-[560px] lg:order-2 lg:min-h-[82vh]"
+          >
+            <div className="absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-600 shadow-[0_45px_120px_rgba(234,88,12,0.28)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px]" />
+            <div className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-orange-300/25 sm:h-[540px] sm:w-[540px] xl:h-[650px] xl:w-[650px]" />
+            <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-200">
+              ACBT / Core lineup
+            </div>
+            <div className="absolute bottom-[12%] right-[8%] text-right text-[10px] font-black uppercase tracking-[0.18em] text-white/50">
+              <span className="block text-3xl text-white">{String(coreProducts.length).padStart(2, "0")}</span>
+              sản phẩm đại diện
+            </div>
+
+            {coreProducts.slice(0, 3).map((product, index) => {
+              const image = productImage(product);
+              if (!image) return null;
+              const positions = [
+                "left-1/2 top-[48%] z-30 h-[300px] -translate-x-1/2 -translate-y-1/2 sm:h-[430px] xl:h-[540px]",
+                "left-[15%] top-[58%] z-20 h-[180px] -translate-y-1/2 -rotate-6 opacity-85 sm:h-[260px] xl:h-[320px]",
+                "right-[7%] top-[55%] z-10 h-[165px] -translate-y-1/2 rotate-6 opacity-75 sm:h-[240px] xl:h-[300px]",
+              ];
+              return (
+                <motion.img
+                  key={productKey(product)}
+                  src={image}
+                  alt={product.name || "Sản phẩm chủ lực"}
+                  initial={{ opacity: 0, y: 35, rotate: index === 1 ? -10 : index === 2 ? 10 : 0 }}
+                  animate={{ opacity: index === 0 ? 1 : index === 1 ? 0.85 : 0.75, y: 0 }}
+                  transition={{ duration: 0.75, delay: 0.22 + index * 0.12 }}
+                  className={`absolute w-auto object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)] ${positions[index]}`}
+                />
+              );
+            })}
+          </motion.div>
+        </div>
       </section>
+
+      <div className="relative overflow-hidden bg-orange-600 py-3 text-white">
+        <motion.div
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+          className="flex w-max whitespace-nowrap"
+        >
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center">
+              {["Hương vị Việt", "Sản phẩm chủ lực", "Rõ nguồn gốc", "Đóng gói chỉn chu", "Ăn Cùng Bà Tuyết"].map((item) => (
+                <span key={`${copy}-${item}`} className="flex items-center text-xs font-black uppercase tracking-[0.2em]">
+                  <span className="px-7">{item}</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
+                </span>
+              ))}
+            </div>
+          ))}
+        </motion.div>
+      </div>
 
       <section
         id="product-showcase"
@@ -350,13 +422,22 @@ export default function ProductsPage() {
               key={group.id}
               type="button"
               onClick={() => setActiveGroup(group.id)}
-              className={`shrink-0 border px-5 py-3 text-xs font-black uppercase tracking-[0.12em] transition ${
+              className={`group flex shrink-0 items-center gap-3 border px-5 py-3 text-xs font-black uppercase tracking-[0.12em] transition ${
                 activeGroup === group.id
                   ? "border-orange-600 bg-orange-600 text-white shadow-[0_10px_24px_rgba(234,88,12,0.2)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-700"
               }`}
             >
               {group.label}
+              <span
+                className={`grid h-6 min-w-6 place-items-center rounded-full px-1 text-[9px] ${
+                  activeGroup === group.id
+                    ? "bg-white text-orange-600"
+                    : "bg-orange-50 text-orange-600 group-hover:bg-orange-100"
+                }`}
+              >
+                {String(group.count).padStart(2, "0")}
+              </span>
             </button>
           ))}
         </div>
