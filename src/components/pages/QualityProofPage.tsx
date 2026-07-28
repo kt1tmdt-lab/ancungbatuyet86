@@ -102,14 +102,6 @@ function qualityImage(value: string | undefined, fallback: string) {
   return value && value.trim() ? value : fallback;
 }
 
-function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
-  return (
-    <p className={`inline-flex text-xs font-black uppercase tracking-[0.18em] ${dark ? "text-orange-300" : "text-orange-600"}`}>
-      {children}
-    </p>
-  );
-}
-
 function Placeholder({ children = "[CẦN BỔ SUNG]" }: { children?: ReactNode }) {
   return (
     <span className="inline-flex w-fit border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-orange-700">
@@ -222,7 +214,6 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
   const sourceImage = qualityImage(config.source.imageUrl, "/bento/bento-ingredients.png");
   const factoryImage = qualityImage(config.factory.imageUrl, "/bento/bento-factory.png");
   const pviImage = qualityImage(config.pvi.imageUrl, "/bento/bento-insurance.png");
-  const heroEyebrow = safeText(config.hero.eyebrow, "Hồ sơ chất lượng");
   const heroTitle = safeText(config.hero.title, "Chất lượng kiểm chứng được");
   const heroSubtitle = safeText(
     config.hero.subtitle,
@@ -258,10 +249,6 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
     ] as const;
   });
   const documentsTitle = safeText(config.documents.title, "Hồ sơ pháp lý & chứng nhận");
-  const documentsSubtitle = safeText(
-    config.documents.subtitle,
-    "Mỗi chứng nhận hoặc giấy tờ công khai cần đi kèm ảnh scan/PDF được phép hiển thị để khách hàng, đối tác và báo chí kiểm chứng.",
-  );
   const pviTitle = safeText(config.pvi.title, "Bảo hiểm trách nhiệm sản phẩm — PVI");
   const pviDescription = safeText(
     config.pvi.description,
@@ -307,8 +294,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
           className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12"
         >
           <div className="order-2 lg:order-1">
-            <SectionLabel>{heroEyebrow}</SectionLabel>
-            <h1 className="mt-5 max-w-5xl text-[1.85rem] font-black leading-[1.08] tracking-[-0.045em] sm:mt-7 sm:text-4xl lg:text-5xl">
+            <h1 className="max-w-5xl text-[1.85rem] font-black leading-[1.08] tracking-[-0.045em] sm:text-4xl lg:text-5xl">
               {heroTitle}
             </h1>
             <p className="mt-5 max-w-3xl text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-7 sm:text-lg sm:leading-8">
@@ -345,8 +331,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
           className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10"
         >
           <div className="order-2 lg:order-1">
-            <SectionLabel>01 · Nguồn nguyên liệu</SectionLabel>
-            <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               {sourceTitle}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
@@ -399,8 +384,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
             <div className="order-2 lg:order-1">
-              <SectionLabel>02 · Nhà máy & quy trình</SectionLabel>
-              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
                 {factoryTitle}
               </h2>
               <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
@@ -431,7 +415,6 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
           </div>
 
           <div className="mt-14">
-            <SectionLabel>Quy trình 6 bước có kiểm soát</SectionLabel>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {displayedProcessSteps.map(([title, desc], index) => (
                 <motion.article
@@ -468,16 +451,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
 
       <section id="ho-so-phap-ly" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+          <div>
             <div>
-              <SectionLabel>03 · Hồ sơ pháp lý</SectionLabel>
-              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
                 {documentsTitle}
               </h2>
             </div>
-            <p className="text-base font-semibold leading-8 text-slate-700">
-              {documentsSubtitle}
-            </p>
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -514,8 +493,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
       <section id="bao-hiem-san-pham" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-12 text-slate-950 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div className="order-2 lg:order-1">
-            <SectionLabel>04 · Bảo hiểm trách nhiệm sản phẩm</SectionLabel>
-            <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+            <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               {pviTitle}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
@@ -545,16 +523,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
 
       <section id="bao-ve-khach-hang" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
-          <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+          <div>
             <div>
-              <SectionLabel>05 · Quyền lợi khách hàng</SectionLabel>
-              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+              <h2 className="text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
                 {policyTitle}
               </h2>
             </div>
-            <p className="text-base font-semibold leading-8 text-slate-700">
-              Khi phát sinh vấn đề liên quan đến sản phẩm, khách hàng cần có kênh tiếp nhận rõ ràng, quy trình xử lý cụ thể và thông tin đầy đủ về quyền lợi của mình.
-            </p>
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -595,8 +569,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
       <section className="bg-[#FAF7F2] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_4px_15px_rgba(0,0,0,0.03)] sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
           <div>
-            <SectionLabel>06 · Tiếp tục xem</SectionLabel>
-            <h2 className="mt-4 max-w-4xl text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
+            <h2 className="max-w-4xl text-3xl font-black leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               Khám phá sản phẩm và điểm bán chính thức
             </h2>
             <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700">
