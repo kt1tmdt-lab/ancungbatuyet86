@@ -1496,8 +1496,8 @@ function FactoryProofSection() {
   );
 
   return (
-    <section className="overflow-hidden bg-[#fff8ed] px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-      <div className="mx-auto w-full max-w-7xl">
+    <section className="overflow-hidden bg-[#fff8ed] py-12 sm:py-20 lg:py-24">
+      <div className="w-full">
         <motion.div
           initial={{ opacity: 0, x: -24 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -1531,14 +1531,14 @@ function FactoryProofSection() {
           initial={{ opacity: 0, x: 24 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="w-full"
+          className="w-full px-4 sm:px-6 lg:px-12 xl:px-16"
         >
           <SectionTitle
             label={homeTextValue(homeTexts, "factory_section_label", "Bằng chứng thương hiệu")}
             title={homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
           />
 
-          <div className="mt-8 grid gap-5 sm:mt-14 sm:gap-8">
+          <div className="-mx-4 mt-8 grid gap-4 sm:-mx-6 sm:mt-14 sm:gap-6 lg:-mx-12 lg:gap-8 xl:-mx-16">
               {proofs.map((proof, index) => {
                 const Icon = proof.icon;
                 const imageOnRight = index % 2 === 1;
