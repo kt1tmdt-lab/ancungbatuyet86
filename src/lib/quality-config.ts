@@ -22,12 +22,16 @@ export type QualityPageConfig = {
     title: string;
     description: string;
     imageUrl: string;
+    videoTitle: string;
+    videoUrl: string;
     facts: QualitySimpleItem[];
   };
   factory: {
     title: string;
     description: string;
     imageUrl: string;
+    launchedAt: string;
+    address: string;
     gallery: QualitySimpleItem[];
     steps: QualitySimpleItem[];
   };
@@ -40,6 +44,10 @@ export type QualityPageConfig = {
     title: string;
     description: string;
     imageUrl: string;
+    insuredEntity: string;
+    coverageScope: string;
+    coveragePeriod: string;
+    documentLabel: string;
   };
   policy: {
     title: string;
@@ -68,6 +76,8 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     description:
       "Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác. Khi công bố claim này, cần đi kèm C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng.",
     imageUrl: "/bento/bento-ingredients.png",
+    videoTitle: "",
+    videoUrl: "",
     facts: [
       { id: "source-1", title: "Ba Lan, Hungary", description: "Nguồn nguyên liệu được trình bày theo hồ sơ xuất xứ và kiểm dịch." },
       { id: "source-2", title: "C/O & kiểm dịch", description: "Thông tin xuất xứ và kiểm dịch là cơ sở để kiểm tra nguồn nguyên liệu." },
@@ -79,6 +89,8 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     description:
       "Ghi đúng chủ thể: NMV Food đạt chứng nhận ISO 22000:2018. Không ghi thành ACBT nếu hồ sơ không thể hiện như vậy. Sử dụng cách diễn đạt trung tính như “quy trình 6 bước có kiểm soát”.",
     imageUrl: "/bento/bento-factory.png",
+    launchedAt: "",
+    address: "",
     gallery: [
       { id: "factory-gallery-1", title: "Không gian nhà máy", description: "Ảnh dây chuyền/khu sản xuất.", imageUrl: "/bento/bento-factory.png" },
       { id: "factory-gallery-2", title: "Đóng gói", description: "Ảnh đóng gói/phân phối.", imageUrl: "/bento/bento-tiktok.png" },
@@ -109,6 +121,10 @@ export const DEFAULT_QUALITY_CONFIG: QualityPageConfig = {
     description:
       "Bảo hiểm trách nhiệm sản phẩm do PVI cung cấp được trình bày theo phạm vi hợp đồng. Không trình bày như PVI trực tiếp kiểm nghiệm hoặc xác nhận chất lượng sản phẩm.",
     imageUrl: "/bento/bento-insurance.png",
+    insuredEntity: "",
+    coverageScope: "",
+    coveragePeriod: "",
+    documentLabel: "",
   },
   policy: {
     title: "Khách hàng cần biết mình được bảo vệ thế nào",
@@ -178,12 +194,16 @@ export function normalizeQualityConfig(input: unknown): QualityPageConfig {
       title: str(source.title, DEFAULT_QUALITY_CONFIG.source.title),
       description: str(source.description, DEFAULT_QUALITY_CONFIG.source.description),
       imageUrl: normalizeUploadPublicUrl(str(source.imageUrl, DEFAULT_QUALITY_CONFIG.source.imageUrl)),
+      videoTitle: str(source.videoTitle, DEFAULT_QUALITY_CONFIG.source.videoTitle),
+      videoUrl: str(source.videoUrl, DEFAULT_QUALITY_CONFIG.source.videoUrl),
       facts: items(source.facts, DEFAULT_QUALITY_CONFIG.source.facts),
     },
     factory: {
       title: str(factory.title, DEFAULT_QUALITY_CONFIG.factory.title),
       description: str(factory.description, DEFAULT_QUALITY_CONFIG.factory.description),
       imageUrl: normalizeUploadPublicUrl(str(factory.imageUrl, DEFAULT_QUALITY_CONFIG.factory.imageUrl)),
+      launchedAt: str(factory.launchedAt, DEFAULT_QUALITY_CONFIG.factory.launchedAt),
+      address: str(factory.address, DEFAULT_QUALITY_CONFIG.factory.address),
       gallery: items(factory.gallery, DEFAULT_QUALITY_CONFIG.factory.gallery),
       steps: items(factory.steps, DEFAULT_QUALITY_CONFIG.factory.steps),
     },
@@ -196,6 +216,10 @@ export function normalizeQualityConfig(input: unknown): QualityPageConfig {
       title: str(pvi.title, DEFAULT_QUALITY_CONFIG.pvi.title),
       description: str(pvi.description, DEFAULT_QUALITY_CONFIG.pvi.description),
       imageUrl: normalizeUploadPublicUrl(str(pvi.imageUrl, DEFAULT_QUALITY_CONFIG.pvi.imageUrl)),
+      insuredEntity: str(pvi.insuredEntity, DEFAULT_QUALITY_CONFIG.pvi.insuredEntity),
+      coverageScope: str(pvi.coverageScope, DEFAULT_QUALITY_CONFIG.pvi.coverageScope),
+      coveragePeriod: str(pvi.coveragePeriod, DEFAULT_QUALITY_CONFIG.pvi.coveragePeriod),
+      documentLabel: str(pvi.documentLabel, DEFAULT_QUALITY_CONFIG.pvi.documentLabel),
     },
     policy: {
       title: str(policy.title, DEFAULT_QUALITY_CONFIG.policy.title),

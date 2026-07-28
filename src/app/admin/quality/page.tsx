@@ -280,6 +280,10 @@ export default function AdminQualityPage() {
                 <Field label="Tiêu đề section"><TextArea value={config.source.title} onChange={(e) => patch({ source: { ...config.source, title: e.target.value } })} /></Field>
                 <Field label="Mô tả section"><TextArea value={config.source.description} onChange={(e) => patch({ source: { ...config.source, description: e.target.value } })} /></Field>
                 <Field label="Ảnh nguồn nguyên liệu"><ImageChooser value={config.source.imageUrl} onPick={() => setPickerTarget({ kind: "source" })} /></Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Tiêu đề video (để trống sẽ ẩn)"><TextInput value={config.source.videoTitle} onChange={(e) => patch({ source: { ...config.source, videoTitle: e.target.value } })} /></Field>
+                  <Field label="Link video"><TextInput value={config.source.videoUrl} onChange={(e) => patch({ source: { ...config.source, videoUrl: e.target.value } })} /></Field>
+                </div>
                 <h2 className="text-lg font-black text-slate-950">Các điểm chứng minh</h2>
                 {renderList(config.source.facts, (items) => patch({ source: { ...config.source, facts: items } }), "source")}
               </div>
@@ -290,6 +294,10 @@ export default function AdminQualityPage() {
                 <Field label="Tiêu đề nhà máy"><TextArea value={config.factory.title} onChange={(e) => patch({ factory: { ...config.factory, title: e.target.value } })} /></Field>
                 <Field label="Mô tả nhà máy"><TextArea value={config.factory.description} onChange={(e) => patch({ factory: { ...config.factory, description: e.target.value } })} /></Field>
                 <Field label="Ảnh chính nhà máy"><ImageChooser value={config.factory.imageUrl} onPick={() => setPickerTarget({ kind: "factory" })} /></Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Năm đưa vào vận hành (để trống sẽ ẩn)"><TextInput value={config.factory.launchedAt} onChange={(e) => patch({ factory: { ...config.factory, launchedAt: e.target.value } })} /></Field>
+                  <Field label="Địa chỉ nhà máy (để trống sẽ ẩn)"><TextInput value={config.factory.address} onChange={(e) => patch({ factory: { ...config.factory, address: e.target.value } })} /></Field>
+                </div>
                 <h2 className="text-lg font-black text-slate-950">Gallery ảnh</h2>
                 {renderList(config.factory.gallery, (items) => patch({ factory: { ...config.factory, gallery: items } }), "gallery", true, (index) => ({ kind: "factoryGallery", index }))}
                 <h2 className="text-lg font-black text-slate-950">Quy trình các bước</h2>
@@ -310,6 +318,12 @@ export default function AdminQualityPage() {
                 <Field label="Tiêu đề PVI"><TextArea value={config.pvi.title} onChange={(e) => patch({ pvi: { ...config.pvi, title: e.target.value } })} /></Field>
                 <Field label="Mô tả PVI"><TextArea value={config.pvi.description} onChange={(e) => patch({ pvi: { ...config.pvi, description: e.target.value } })} /></Field>
                 <Field label="Ảnh/scan PVI"><ImageChooser value={config.pvi.imageUrl} onPick={() => setPickerTarget({ kind: "pvi" })} /></Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Pháp nhân được bảo hiểm (để trống sẽ ẩn)"><TextInput value={config.pvi.insuredEntity} onChange={(e) => patch({ pvi: { ...config.pvi, insuredEntity: e.target.value } })} /></Field>
+                  <Field label="Phạm vi bảo hiểm (để trống sẽ ẩn)"><TextInput value={config.pvi.coverageScope} onChange={(e) => patch({ pvi: { ...config.pvi, coverageScope: e.target.value } })} /></Field>
+                  <Field label="Thời hạn bảo hiểm (để trống sẽ ẩn)"><TextInput value={config.pvi.coveragePeriod} onChange={(e) => patch({ pvi: { ...config.pvi, coveragePeriod: e.target.value } })} /></Field>
+                  <Field label="Tên hồ sơ/giấy chứng nhận (để trống sẽ ẩn)"><TextInput value={config.pvi.documentLabel} onChange={(e) => patch({ pvi: { ...config.pvi, documentLabel: e.target.value } })} /></Field>
+                </div>
               </div>
             ) : null}
 

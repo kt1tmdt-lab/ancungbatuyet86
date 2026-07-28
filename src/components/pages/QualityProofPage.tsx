@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -101,12 +101,10 @@ function qualityImage(value: string | undefined, fallback: string) {
   return value && value.trim() ? value : fallback;
 }
 
-function Placeholder({ children = "[CẦN BỔ SUNG]" }: { children?: ReactNode }) {
-  return (
-    <span className="inline-flex w-fit border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-orange-700">
-      {children}
-    </span>
-  );
+function optionalPublicText(value: string | undefined) {
+  const fixed = repairText(value || "").trim();
+  if (!fixed || /\[\s*cần\s+(xác nhận|bổ sung|cập nhật)[^\]]*\]/i.test(fixed)) return "";
+  return fixed;
 }
 
 function ImageBox({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
@@ -156,7 +154,7 @@ const defaultDocuments: EvidenceDocument[] = [
     id: "iso-22000",
     title: "ISO 22000:2018",
     entity: "Cấp cho NMV Food",
-    date: "[CẦN BỔ SUNG]",
+    date: "",
     scope: "Hệ thống quản lý an toàn thực phẩm theo phạm vi ghi trên chứng nhận.",
     description: "Chỉ hiển thị thông tin ISO khi có scan chứng nhận và phạm vi áp dụng rõ ràng.",
     note: "Không ghi chứng nhận này là cấp trực tiếp cho ACBT nếu hồ sơ đứng tên NMV Food.",
@@ -165,24 +163,24 @@ const defaultDocuments: EvidenceDocument[] = [
     id: "haccp",
     title: "HACCP",
     entity: "NMV Food",
-    date: "[CẦN BỔ SUNG]",
-    scope: "Loại hồ sơ HACCP cần xác nhận: chứng nhận, chương trình đào tạo hoặc hồ sơ nội bộ.",
+    date: "",
+    scope: "Loại hồ sơ HACCP: chứng nhận, chương trình đào tạo hoặc hồ sơ nội bộ.",
     description: "Nếu hiện tại chỉ có chương trình đào tạo HACCP, cần ghi rõ bản chất tài liệu.",
     note: "Không rút gọn thành “NMV Food đạt HACCP” nếu giấy tờ hiện có không chứng minh điều đó.",
   },
   {
     id: "attp",
     title: "Giấy đủ điều kiện ATTP",
-    entity: "Pháp nhân đứng tên: [CẦN XÁC NHẬN]",
-    date: "[CẦN BỔ SUNG]",
+    entity: "",
+    date: "",
     scope: "Phạm vi hoạt động và địa điểm áp dụng theo nội dung giấy phép.",
     description: "Cần bổ sung ảnh/PDF giấy phép được phép công khai.",
   },
   {
     id: "vntest",
     title: "Phiếu kiểm nghiệm",
-    entity: "Đơn vị kiểm nghiệm: [CẦN XÁC NHẬN]",
-    date: "[CẦN BỔ SUNG PHIẾU MỚI NHẤT]",
+    entity: "",
+    date: "",
     scope: "Kết quả kiểm nghiệm gắn với đúng mẫu, sản phẩm và thời điểm kiểm nghiệm.",
     description: "Không dùng một phiếu kiểm nghiệm để suy diễn cho mọi sản phẩm hoặc mọi lô hàng.",
   },
@@ -253,6 +251,18 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
     config.pvi.description,
     "Ăn Cùng Bà Tuyết mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm.",
   );
+  const sourceVideoTitle = optionalPublicText(config.source.videoTitle);
+  const sourceVideoUrl = optionalPublicText(config.source.videoUrl);
+  const factoryDetails = [
+    ["Năm đưa vào vận hành", optionalPublicText(config.factory.launchedAt)],
+    ["Địa chỉ nhà máy", optionalPublicText(config.factory.address)],
+  ].filter((item): item is [string, string] => Boolean(item[1]));
+  const pviDetails = [
+    ["Pháp nhân được bảo hiểm", optionalPublicText(config.pvi.insuredEntity)],
+    ["Phạm vi bảo hiểm", optionalPublicText(config.pvi.coverageScope)],
+    ["Thời hạn bảo hiểm", optionalPublicText(config.pvi.coveragePeriod)],
+    ["Hồ sơ/giấy chứng nhận", optionalPublicText(config.pvi.documentLabel)],
+  ].filter((item): item is [string, string] => Boolean(item[1]));
   const policyTitle = safeText(config.policy.title, "Chính sách bảo vệ quyền lợi khách hàng");
   const displayedPolicyItems = policyItems.map(([title, description], index) => {
     const configured = config.policy.items[index];
@@ -264,10 +274,10 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
   const gallery = useMemo(() => {
     const configured = config.factory.gallery.filter((item) => item.imageUrl);
     const fallback: QualitySimpleItem[] = [
-      { id: "gallery-1", title: "Khu vực tiếp nhận nguyên liệu", description: "[CẦN BỔ SUNG ẢNH ĐÃ XÁC NHẬN]", imageUrl: sourceImage },
+      { id: "gallery-1", title: "Khu vực tiếp nhận nguyên liệu", description: "", imageUrl: sourceImage },
       { id: "gallery-2", title: "Không gian nhà máy", description: "Ảnh minh họa khu vực sản xuất đang dùng tạm.", imageUrl: factoryImage },
-      { id: "gallery-3", title: "Khu vực đóng gói", description: "[CẦN BỔ SUNG ẢNH NMV FOOD]", imageUrl: "/bento/bento-tiktok.png" },
-      { id: "gallery-4", title: "Hồ sơ liên quan", description: "[CẦN BỔ SUNG ẢNH/PDF ĐƯỢC PHÉP CÔNG KHAI]", imageUrl: "/bento/bento-insurance.png" },
+      { id: "gallery-3", title: "Khu vực đóng gói", description: "", imageUrl: "/bento/bento-tiktok.png" },
+      { id: "gallery-4", title: "Hồ sơ liên quan", description: "", imageUrl: "/bento/bento-insurance.png" },
     ];
     const seenImages = new Set([heroImage, factoryImage]);
     return (configured.length ? configured : fallback)
@@ -289,6 +299,14 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
       imageUrl: configured?.imageUrl || item.imageUrl,
     };
   });
+  const activeDocumentDetails = activeDoc
+    ? [
+        ["Pháp nhân/đơn vị đứng tên", optionalPublicText(activeDoc.entity)],
+        ["Ngày cấp/ngày kiểm nghiệm", optionalPublicText(activeDoc.date)],
+        ["Phạm vi áp dụng", optionalPublicText(activeDoc.scope)],
+        ["Ghi chú", optionalPublicText(activeDoc.note)],
+      ].filter((item): item is [string, string] => Boolean(item[1]))
+    : [];
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#FAF7F2] font-sans text-slate-950 selection:bg-orange-500 selection:text-white">
@@ -358,12 +376,29 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
 
           <div className="contents">
             <div className="relative order-1 aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-950 sm:aspect-[21/8] lg:col-span-2 lg:h-[460px] lg:aspect-auto">
-              <ImageBox src={sourceImage} alt="Hồ sơ hoặc hình ảnh minh họa nguồn nguyên liệu" className="opacity-80" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-4 text-white sm:p-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-200 sm:text-xs">Video truy xuất nguồn nguyên liệu</p>
-                <p className="mt-1.5 text-lg font-black leading-tight sm:mt-2 sm:text-2xl">[CẦN CẬP NHẬT LINK EMBED]</p>
-              </div>
+              <ImageBox
+                src={sourceImage}
+                alt="Hồ sơ hoặc hình ảnh minh họa nguồn nguyên liệu"
+                className={sourceVideoTitle ? "opacity-80" : ""}
+              />
+              {sourceVideoTitle ? <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" /> : null}
+              {sourceVideoTitle ? (
+                <div className="absolute bottom-0 left-0 p-4 text-white sm:p-6">
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-200 sm:text-xs">Video truy xuất nguồn nguyên liệu</p>
+                  {sourceVideoUrl ? (
+                    <a
+                      href={sourceVideoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1.5 inline-flex items-center gap-2 text-lg font-black leading-tight transition hover:text-orange-200 sm:mt-2 sm:text-2xl"
+                    >
+                      {sourceVideoTitle} <ArrowRight size={18} />
+                    </a>
+                  ) : (
+                    <p className="mt-1.5 text-lg font-black leading-tight sm:mt-2 sm:text-2xl">{sourceVideoTitle}</p>
+                  )}
+                </div>
+              ) : null}
             </div>
             <div className="order-3 grid gap-4 sm:grid-cols-2">
               {displayedSourceFacts.map((item, index) => {
@@ -407,10 +442,15 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               <p className="mt-4 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
                 NMV Food là đơn vị sản xuất và là pháp nhân đứng tên trên các chứng nhận, giấy phép hoặc hồ sơ chuyên môn tương ứng. Năm đưa nhà máy vào vận hành và địa chỉ chi tiết chỉ hiển thị sau khi doanh nghiệp xác nhận.
               </p>
-              <div className="mt-6 grid gap-3 text-sm font-bold text-slate-700">
-                <Placeholder>Năm đưa vào vận hành: [CẦN XÁC NHẬN]</Placeholder>
-                <Placeholder>Địa chỉ nhà máy: [CẦN XÁC NHẬN]</Placeholder>
-              </div>
+              {factoryDetails.length > 0 ? (
+                <div className="mt-6 grid gap-3 text-sm font-bold text-slate-700">
+                  {factoryDetails.map(([label, value]) => (
+                    <p key={label} className="border border-orange-200 bg-orange-50 px-3 py-2">
+                      <span className="font-black">{label}:</span> {value}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             <div className="order-1 grid gap-4 lg:order-2">
@@ -458,7 +498,11 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 </div>
                 <div className="p-3 sm:p-5">
                   <h3 className="text-sm font-black tracking-[-0.03em] sm:text-base">{text(item.title, "Gallery nhà máy")}</h3>
-                  <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-6">{text(item.description, "[GALLERY NHÀ MÁY NMV FOOD — CẦN BỔ SUNG ẢNH ĐÃ XÁC NHẬN]")}</p>
+                  {optionalPublicText(item.description) ? (
+                    <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-6">
+                      {optionalPublicText(item.description)}
+                    </p>
+                  ) : null}
                 </div>
               </article>
             ))}
@@ -501,10 +545,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <FileSearch className="h-7 w-7 text-orange-600 sm:h-8 sm:w-8" />
                 <h3 className="mt-4 text-lg font-black tracking-[-0.04em] sm:mt-6 sm:text-xl">{item.title}</h3>
                 <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 sm:mt-3 sm:leading-7">{item.description}</p>
-                <div className="mt-4 space-y-1.5 text-[11px] font-bold leading-5 text-slate-500 sm:mt-6 sm:space-y-2 sm:text-xs">
-                  <p>Pháp nhân: {item.entity}</p>
-                  <p>Ngày cấp/kiểm nghiệm: {item.date}</p>
-                </div>
+                {optionalPublicText(item.entity) || optionalPublicText(item.date) ? (
+                  <div className="mt-4 space-y-1.5 text-[11px] font-bold leading-5 text-slate-500 sm:mt-6 sm:space-y-2 sm:text-xs">
+                    {optionalPublicText(item.entity) ? <p>Pháp nhân: {optionalPublicText(item.entity)}</p> : null}
+                    {optionalPublicText(item.date) ? <p>Ngày cấp/kiểm nghiệm: {optionalPublicText(item.date)}</p> : null}
+                  </div>
+                ) : null}
                 <span className="mt-4 inline-flex items-center gap-2 border border-orange-200 bg-white px-3 py-2.5 text-[10px] font-black uppercase tracking-wide text-orange-700 sm:mt-6 sm:px-4 sm:py-3 sm:text-xs">
                   Xem chi tiết <ArrowRight size={14} />
                 </span>
@@ -541,12 +587,15 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             <div className="aspect-[4/3] overflow-hidden bg-slate-100 sm:h-80 sm:aspect-auto">
               <ImageBox src={pviImage} alt="Hồ sơ bảo hiểm trách nhiệm sản phẩm PVI" />
             </div>
-            <div className="grid gap-2 p-3 text-xs font-bold text-slate-700 sm:gap-3 sm:p-5 sm:text-sm">
-              <Placeholder>Pháp nhân được bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
-              <Placeholder>Phạm vi bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
-              <Placeholder>Thời hạn bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
-              <Placeholder>Scan hợp đồng/giấy chứng nhận: [CẦN BỔ SUNG]</Placeholder>
-            </div>
+            {pviDetails.length > 0 ? (
+              <div className="grid gap-2 p-3 text-xs font-bold text-slate-700 sm:gap-3 sm:p-5 sm:text-sm">
+                {pviDetails.map(([label, value]) => (
+                  <p key={label} className="border border-orange-200 bg-orange-50 px-3 py-2">
+                    <span className="font-black">{label}:</span> {value}
+                  </p>
+                ))}
+              </div>
+            ) : null}
           </div>
         </motion.div>
       </section>
@@ -588,17 +637,6 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             })}
           </div>
 
-          <div className="mt-6 grid gap-4 border border-slate-200 bg-[#FAF7F2] p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] sm:mt-8 sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h3 className="text-xl font-black tracking-[-0.04em] sm:text-2xl">Kênh hỗ trợ cần xác nhận</h3>
-              <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">
-                Hotline, email, fanpage chính thức, thời gian làm việc và địa chỉ tiếp nhận văn bản cần được bổ sung sau khi doanh nghiệp xác nhận.
-              </p>
-            </div>
-            <Link href="#" className="inline-flex w-full items-center justify-center gap-3 border border-orange-200 bg-orange-50 px-5 py-3.5 text-xs font-black uppercase tracking-wide text-orange-700 hover:bg-orange-600 hover:text-white sm:w-auto sm:py-4">
-              Xem chính sách đầy đủ <ArrowRight size={14} />
-            </Link>
-          </div>
         </motion.div>
       </section>
 
@@ -638,14 +676,16 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <h3 className="mt-1 truncate text-lg font-black tracking-[-0.04em] sm:text-2xl">{activeDoc.title}</h3>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsZoomed((current) => !current)}
-                  className="grid h-9 w-9 place-items-center border border-slate-200 bg-white text-slate-700 hover:border-orange-300 hover:text-orange-600 sm:h-11 sm:w-11"
-                  aria-label={isZoomed ? "Thu nhỏ hồ sơ" : "Phóng to hồ sơ"}
-                >
-                  {isZoomed ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-                </button>
+                {activeDoc.imageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsZoomed((current) => !current)}
+                    className="grid h-9 w-9 place-items-center border border-slate-200 bg-white text-slate-700 hover:border-orange-300 hover:text-orange-600 sm:h-11 sm:w-11"
+                    aria-label={isZoomed ? "Thu nhỏ hồ sơ" : "Phóng to hồ sơ"}
+                  >
+                    {isZoomed ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => setActiveDoc(null)}
@@ -656,41 +696,28 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 </button>
               </div>
             </div>
-            <div className="grid max-h-[78vh] overflow-y-auto lg:grid-cols-[1.15fr_0.85fr]">
-              <div className="bg-slate-100 p-2 sm:p-4">
-                {activeDoc.imageUrl ? (
+            <div className={`grid max-h-[78vh] overflow-y-auto ${activeDoc.imageUrl ? "lg:grid-cols-[1.15fr_0.85fr]" : ""}`}>
+              {activeDoc.imageUrl ? (
+                <div className="bg-slate-100 p-2 sm:p-4">
                   <img
                     src={activeDoc.imageUrl}
                     alt={`Ảnh scan hoặc hình minh họa ${activeDoc.title}`}
                     className={`mx-auto bg-white object-contain transition ${isZoomed ? "max-h-none w-auto max-w-none" : "max-h-[72vh] w-full"}`}
                   />
-                ) : (
-                  <div className="grid min-h-[260px] place-items-center border border-dashed border-orange-200 bg-white p-5 text-center sm:min-h-[420px] sm:p-10">
-                    <div>
-                      <FileSearch className="mx-auto h-12 w-12 text-orange-600" />
-                      <p className="mt-5 text-xl font-black">[CẦN BỔ SUNG ẢNH/PDF]</p>
-                      <p className="mt-2 max-w-md text-sm font-semibold leading-7 text-slate-500">
-                        Khi có scan chứng nhận hoặc PDF được phép công khai, admin có thể cập nhật ảnh để người xem kiểm chứng.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : null}
               <div className="p-4 sm:p-7">
                 <p className="text-sm font-semibold leading-7 text-slate-700">{activeDoc.description}</p>
-                <div className="mt-6 space-y-4">
-                  {[
-                    ["Pháp nhân/đơn vị đứng tên", activeDoc.entity],
-                    ["Ngày cấp/ngày kiểm nghiệm", activeDoc.date],
-                    ["Phạm vi áp dụng", activeDoc.scope],
-                    ["Ghi chú", activeDoc.note || "Thông tin cần đối chiếu theo hồ sơ gốc."],
-                  ].map(([label, value]) => (
-                    <div key={label} className="border border-orange-100 bg-white p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
-                      <p className="mt-2 text-sm font-bold leading-7 text-slate-800">{value}</p>
-                    </div>
-                  ))}
-                </div>
+                {activeDocumentDetails.length > 0 ? (
+                  <div className="mt-6 space-y-4">
+                    {activeDocumentDetails.map(([label, value]) => (
+                      <div key={label} className="border border-orange-100 bg-white p-4">
+                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+                        <p className="mt-2 text-sm font-bold leading-7 text-slate-800">{value}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
           </article>
