@@ -404,8 +404,10 @@ export default function Navbar({
   const [language, setLanguage] = useState<LanguageCode>("vi");
   const [languageOpen, setLanguageOpen] = useState(false);
   const [mobileSubmenuOpen, setMobileSubmenuOpen] = useState<string | null>(null);
+  const [desktopSubmenuOpen, setDesktopSubmenuOpen] = useState<string | null>(null);
   const [currentProductMenuLinks, setCurrentProductMenuLinks] = useState<SiteConfigData["productMenuLinks"]>([]);
   const [productMenuLoaded, setProductMenuLoaded] = useState(false);
+  const desktopSubmenuCloseTimer = useRef<number | null>(null);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -537,6 +539,24 @@ export default function Navbar({
 
   const currentLanguage = LANGUAGE_OPTIONS.find((item) => item.code === language) || LANGUAGE_OPTIONS[0];
 
+  function openDesktopSubmenu(href: string) {
+    if (desktopSubmenuCloseTimer.current !== null) {
+      window.clearTimeout(desktopSubmenuCloseTimer.current);
+      desktopSubmenuCloseTimer.current = null;
+    }
+    setDesktopSubmenuOpen(href);
+  }
+
+  function closeDesktopSubmenu(delay = 160) {
+    if (desktopSubmenuCloseTimer.current !== null) {
+      window.clearTimeout(desktopSubmenuCloseTimer.current);
+    }
+    desktopSubmenuCloseTimer.current = window.setTimeout(() => {
+      setDesktopSubmenuOpen(null);
+      desktopSubmenuCloseTimer.current = null;
+    }, delay);
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <Script id="google-translate-init" strategy="afterInteractive">
@@ -574,9 +594,15 @@ export default function Navbar({
 
               if (submenu) {
                 const overviewHref = submenu.overviewHref || link.href;
+                const isDesktopSubmenuOpen = desktopSubmenuOpen === link.href;
                 const overviewLabel = link.href === "/san-pham" ? "Mở showcase sản phẩm" : "Xem tổng quan";
                 return (
-                  <div key={link.href} className="relative group py-2">
+                  <div
+                    key={link.href}
+                    className="group relative py-2 after:absolute after:inset-x-0 after:top-full after:h-3 after:content-['']"
+                    onMouseEnter={() => openDesktopSubmenu(link.href)}
+                    onMouseLeave={() => closeDesktopSubmenu()}
+                  >
                     <Link
                       href={overviewHref}
                       className={`flex items-center gap-1 px-3 py-2 rounded-none text-sm font-medium transition-colors ${
@@ -586,9 +612,22 @@ export default function Navbar({
                       }`}
                     >
                       <span>{link.label}</span>
-                      <ChevronDown size={14} className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-180" />
+                      <ChevronDown
+                        size={14}
+                        className={`transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                          isDesktopSubmenuOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </Link>
-                    <div className="pointer-events-none invisible fixed inset-x-0 top-16 z-50 w-screen origin-top -translate-y-3 scale-y-[0.96] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] before:absolute before:inset-x-0 before:-top-12 before:h-12 before:content-[''] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-y-100 group-hover:opacity-100 lg:top-[72px]">
+                    <div
+                      className={`fixed inset-x-0 top-16 z-50 w-screen origin-top transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] lg:top-[72px] ${
+                        isDesktopSubmenuOpen
+                          ? "visible translate-y-0 scale-y-100 opacity-100"
+                          : "pointer-events-none invisible -translate-y-3 scale-y-[0.96] opacity-0"
+                      }`}
+                      onMouseEnter={() => openDesktopSubmenu(link.href)}
+                      onMouseLeave={() => closeDesktopSubmenu()}
+                    >
                       <div className="border-y border-slate-200 bg-[#fffdf8]/98 px-6 py-8 shadow-[0_20px_45px_rgba(15,23,42,0.10)] backdrop-blur-xl">
                         <div className="mx-auto grid max-w-7xl grid-cols-[260px_minmax(0,1fr)] gap-10">
                           <div className="border-r border-slate-200 pr-10 text-slate-950">
@@ -615,7 +654,11 @@ export default function Navbar({
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
                                 style={{ transitionDelay: `${120 + itemIndex * 45}ms` }}
-                                className="group/item block min-h-36 translate-y-3 border-l border-slate-200 px-6 py-2 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] first:border-l-0 hover:bg-orange-50/60 group-hover:translate-y-0 group-hover:opacity-100"
+                                className={`group/item block min-h-36 border-l border-slate-200 px-6 py-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] first:border-l-0 hover:bg-orange-50/60 ${
+                                  isDesktopSubmenuOpen
+                                    ? "translate-y-0 opacity-100"
+                                    : "translate-y-3 opacity-0"
+                                }`}
                               >
                                 <span className="flex items-start justify-between gap-4 text-base font-black leading-6 text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
@@ -640,6 +683,13 @@ export default function Navbar({
                 <Link
                   key={link.href}
                   href={link.href}
+                  onMouseEnter={() => {
+                    if (desktopSubmenuCloseTimer.current !== null) {
+                      window.clearTimeout(desktopSubmenuCloseTimer.current);
+                      desktopSubmenuCloseTimer.current = null;
+                    }
+                    setDesktopSubmenuOpen(null);
+                  }}
                   className={`px-3 py-2 rounded-none text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-primary-light text-primary-dark"
