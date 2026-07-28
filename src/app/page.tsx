@@ -1031,6 +1031,7 @@ function FeaturedProducts() {
   const { homeTexts } = useHomeMarketingConfig();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
 
   useEffect(() => {
     fetchHomeProducts()
@@ -1079,6 +1080,77 @@ function FeaturedProducts() {
         </div>
 
         <div className="relative mt-10 w-full">
+          <div className="relative md:hidden">
+            {loading && displayProducts.length === 0 ? (
+              <div className="h-[520px] animate-pulse border border-orange-100 bg-[#fff8ed]" />
+            ) : (
+              <>
+                <div className="overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    {showcaseProducts.map((product, index) => {
+                      if (index !== activeFeaturedIndex) return null;
+                      return (
+                        <motion.div
+                          key={`${product.id || product.slug || product.name || ""}-${index}`}
+                          initial={{ opacity: 0, x: 36, scale: 0.98 }}
+                          animate={{ opacity: 1, x: 0, scale: 1 }}
+                          exit={{ opacity: 0, x: -36, scale: 0.98 }}
+                          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <ProductCard product={product} index={index} />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+
+                {showcaseProducts.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveFeaturedIndex((current) =>
+                          current === 0 ? showcaseProducts.length - 1 : current - 1
+                        )
+                      }
+                      aria-label="Xem sản phẩm trước"
+                      className="absolute -left-5 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-[0_6px_18px_rgba(15,23,42,0.18)] transition hover:scale-105 hover:border-orange-300 hover:text-orange-600"
+                    >
+                      <ChevronLeft size={19} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveFeaturedIndex((current) =>
+                          current === showcaseProducts.length - 1 ? 0 : current + 1
+                        )
+                      }
+                      aria-label="Xem sản phẩm tiếp theo"
+                      className="absolute -right-5 top-1/2 z-50 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-[0_6px_18px_rgba(15,23,42,0.18)] transition hover:scale-105 hover:border-orange-300 hover:text-orange-600"
+                    >
+                      <ChevronRight size={19} />
+                    </button>
+
+                    <div className="mt-5 flex justify-center gap-1.5">
+                      {showcaseProducts.map((product, index) => (
+                        <button
+                          key={`${product.id || product.slug || product.name || ""}-dot-${index}`}
+                          type="button"
+                          onClick={() => setActiveFeaturedIndex(index)}
+                          aria-label={`Xem sản phẩm ${index + 1}`}
+                          className={`h-1.5 transition-all duration-300 ${
+                            index === activeFeaturedIndex ? "w-7 bg-orange-600" : "w-2 bg-orange-200"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="hidden md:block">
           <AnimatePresence mode="wait">
             {loading && displayProducts.length === 0 ? (
               <motion.div
@@ -1111,6 +1183,7 @@ function FeaturedProducts() {
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>
