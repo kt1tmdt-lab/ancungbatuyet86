@@ -370,10 +370,10 @@ export default function AboutPage() {
   ];
 
   return (
-    <main className="bg-[#FAF7F2] text-slate-900 overflow-hidden font-sans">
+    <main className="min-w-0 overflow-x-clip bg-[#FAF7F2] font-sans text-slate-900">
       {/* SECTION 1: CÂU CHUYỆN THƯƠNG HIỆU */}
-      <section id="about-history" className="py-16 lg:py-24 bg-white border-b border-slate-200">
-        <div id="about-community" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="about-history" className="border-b border-slate-200 bg-white py-10 sm:py-16 lg:py-24">
+        <div id="about-community" className="mx-auto min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
           
           {/* Eyebrow Label Tagline */}
           <motion.div 
@@ -388,24 +388,24 @@ export default function AboutPage() {
 
           {/* Section Header */}
           <motion.div 
-            className="max-w-3xl mb-12 lg:mb-16"
+            className="mb-8 max-w-3xl sm:mb-12 lg:mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={fapUp}
           >
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-snug">
+            <h1 className="text-[1.75rem] sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.15] break-words">
               Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
             </h1>
             <div className="h-1.5 w-20 bg-orange-600 mt-4 rounded-sm" />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-start mb-16">
+          <div className="mb-10 grid min-w-0 grid-cols-1 gap-8 sm:mb-16 lg:grid-cols-12 lg:items-start lg:gap-12">
             
             {/* Story Paragraphs */}
             <div className="lg:col-span-7 space-y-8">
               <motion.div 
-                className="space-y-6 text-slate-800 text-base leading-relaxed font-semibold"
+                className="space-y-5 text-[0.9375rem] leading-relaxed text-slate-800 sm:space-y-6 sm:text-base font-semibold break-words"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-80px" }}
@@ -416,7 +416,7 @@ export default function AboutPage() {
                     key={index}
                     className={
                       index === 0
-                        ? "text-lg sm:text-xl font-bold text-slate-950 border-l-4 border-orange-600 pl-4 py-2.5 bg-[#FAF7F2] p-4 border border-slate-200/80 rounded-r-md shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
+                        ? "border border-l-4 border-slate-200/80 border-l-orange-600 bg-[#FAF7F2] p-3.5 text-base font-bold text-slate-950 shadow-[0_2px_8px_rgba(0,0,0,0.01)] sm:p-4 sm:text-xl"
                         : ""
                     }
                     variants={fapUp}
@@ -442,7 +442,7 @@ export default function AboutPage() {
               ].map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="p-6 bg-[#FAF7F2] border-l-4 border-orange-600 border-y border-r border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] flex flex-col justify-center items-center lg:items-start transition duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-orange-500/20"
+                  className="flex flex-col items-center justify-center border-y border-r border-l-4 border-slate-200/80 border-l-orange-600 bg-[#FAF7F2] p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:-translate-y-0.5 hover:border-orange-500/20 hover:shadow-md sm:p-6 lg:items-start"
                   variants={fapUp}
                 >
                   <span className="text-3xl lg:text-4xl font-black text-[#0F172A] tracking-tight">
@@ -459,7 +459,7 @@ export default function AboutPage() {
 
           {/* Bullet cards - Full Width Grid */}
           <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16"
+            className="mb-10 grid grid-cols-1 gap-4 sm:mb-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
@@ -468,13 +468,13 @@ export default function AboutPage() {
             {storyBullets.map((bullet, idx) => (
               <motion.div
                 key={idx}
-                className="flex flex-col gap-4 p-5 bg-white border border-slate-200/80 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20"
+                className="flex min-w-0 flex-row items-start gap-3 border border-slate-200/80 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20 sm:flex-col sm:gap-4 sm:p-5"
                 variants={fapUp}
               >
                 <div className="p-2 bg-orange-50 border border-orange-100 rounded-sm self-start">
                   {bullet.icon}
                 </div>
-                <p className="text-sm font-bold text-slate-800 leading-snug">
+                <p className="min-w-0 break-words text-sm font-bold leading-snug text-slate-800">
                   {bullet.text}
                 </p>
               </motion.div>
@@ -489,7 +489,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             variants={fapUp}
           >
-            <div className="relative overflow-hidden bg-slate-950 border-4 border-[#0F172A] aspect-video w-full rounded-md shadow-md">
+            <div className="relative aspect-video w-full overflow-hidden border-2 border-[#0F172A] bg-slate-950 shadow-md sm:border-4">
               {storyVideoUrl ? (
                 <iframe
                   src={storyVideoUrl}
@@ -517,12 +517,12 @@ export default function AboutPage() {
       </section>
 
       {/* SECTION 2: SỨ MỆNH - TẦM NHÌN - GIÁ TRỊ CỐT LÕI */}
-      <section id="about-trust" className="py-20 lg:py-24 bg-[#F6EFE5] text-slate-900 border-b border-orange-200/40 relative overflow-hidden">
+      <section id="about-trust" className="relative overflow-hidden border-b border-orange-200/40 bg-[#F6EFE5] py-12 text-slate-900 sm:py-20 lg:py-24">
         <div id="about-values" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           
           {/* Title */}
           <motion.div 
-            className="text-center max-w-2xl mx-auto mb-16"
+            className="mx-auto mb-10 max-w-2xl text-center sm:mb-16"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -534,7 +534,7 @@ export default function AboutPage() {
             <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-sm" />
           </motion.div>
 
-          <div className="space-y-24 mb-28">
+          <div className="mb-16 space-y-14 sm:mb-28 sm:space-y-24">
             {/* Sứ mệnh */}
             <motion.div 
               className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center"
@@ -555,7 +555,7 @@ export default function AboutPage() {
                 </p>
               </motion.div>
               <motion.div className="lg:col-span-4 flex justify-center items-center" variants={fapRight}>
-                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="80" strokeDasharray="4 4" className="text-orange-300" />
                   <circle cx="100" cy="100" r="50" className="text-orange-400" />
                   <circle cx="100" cy="100" r="20" className="text-orange-500/20" fill="currentColor" />
@@ -579,7 +579,7 @@ export default function AboutPage() {
               variants={staggerContainer}
             >
               <motion.div className="lg:col-span-4 flex justify-center items-center order-last lg:order-first" variants={fapLeft}>
-                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="70" className="text-orange-400" />
                   <ellipse cx="100" cy="100" rx="40" ry="70" className="text-orange-300" />
                   <ellipse cx="100" cy="100" rx="15" ry="70" className="text-orange-200" />
@@ -623,7 +623,7 @@ export default function AboutPage() {
                 </p>
               </motion.div>
               <motion.div className="lg:col-span-4 flex justify-center items-center" variants={fapRight}>
-                <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M100,35 C70,35 55,55 55,85 C55,110 75,125 75,140 L75,155 L125,155 L125,140 C125,130 145,110 145,85 C145,55 130,35 100,35 Z" className="text-orange-500" />
                   <circle cx="100" cy="85" r="18" className="text-orange-400" strokeDasharray="4 2" />
                   <circle cx="100" cy="85" r="6" className="text-orange-600" fill="#ff7a1a" />
@@ -641,9 +641,9 @@ export default function AboutPage() {
           </div>
 
           {/* Value cards - 5 columns layout */}
-          <div className="mb-24">
+          <div className="mb-16 sm:mb-24">
             <motion.h3 
-              className="text-2xl font-black tracking-tight text-slate-950 text-center mb-12"
+              className="mb-8 text-center text-2xl font-black tracking-tight text-slate-950 sm:mb-12"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -653,7 +653,7 @@ export default function AboutPage() {
             </motion.h3>
             
             <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 max-w-6xl mx-auto"
+              className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-8 lg:grid-cols-5"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-80px" }}
@@ -662,7 +662,7 @@ export default function AboutPage() {
               {coreValues.map((val, idx) => (
                 <motion.div
                   key={idx}
-                  className="relative flex flex-col gap-4 p-5 pt-8 bg-white border border-slate-200/60 rounded-md shadow-[0_4px_15px_rgba(0,0,0,0.01)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_12px_30px_rgba(255,122,26,0.04)] hover:border-orange-500/30 group"
+                  className="group relative flex min-w-0 flex-row items-start gap-4 border border-slate-200/60 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] transition-all duration-300 hover:-translate-y-2 hover:border-orange-500/30 hover:shadow-[0_12px_30px_rgba(255,122,26,0.04)] sm:flex-col sm:p-5 sm:pt-8"
                   variants={fapUp}
                 >
                   {/* Subtle top accent bar */}
@@ -694,7 +694,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             variants={fapUp}
           >
-            <h3 className="text-4xl sm:text-5xl lg:text-7xl font-black tracking-tight text-orange-600 uppercase italic select-none">
+            <h3 className="break-words text-3xl font-black uppercase italic tracking-tight text-orange-600 select-none sm:text-5xl lg:text-7xl">
               "Ăn vặt thì phải ăn cùng Bà Tuyết"
             </h3>
           </motion.div>
@@ -717,7 +717,7 @@ export default function AboutPage() {
           </motion.h2>
           
           <motion.div 
-            className="flex flex-wrap gap-4 justify-center items-center"
+            className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4 justify-center items-center"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -725,20 +725,20 @@ export default function AboutPage() {
           >
             <Link
               href="/chat-luong"
-              className="acbt-btn acbt-btn--primary acbt-btn--xl min-w-[200px] rounded-md"
+              className="acbt-btn acbt-btn--primary acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
               <span>Xem trang Chất lượng</span>
               <ArrowRight size={18} />
             </Link>
             <Link
               href="/san-pham"
-              className="acbt-btn acbt-btn--secondary acbt-btn--xl min-w-[200px] rounded-md"
+              className="acbt-btn acbt-btn--secondary acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
               <span>Xem sản phẩm</span>
             </Link>
             <Link
               href="/lien-he"
-              className="acbt-btn acbt-btn--outline acbt-btn--xl min-w-[200px] rounded-md"
+              className="acbt-btn acbt-btn--outline acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
               <span>Liên hệ với chúng tôi</span>
             </Link>
