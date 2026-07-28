@@ -508,16 +508,16 @@ function HeroSection() {
       <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-orange-300/20 blur-3xl" />
       <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-orange-300/50 xl:block" />
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-6 px-4 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-12 lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
         <motion.div
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-20 pt-2 lg:pr-4 xl:pr-8"
+          className="relative z-20 lg:pr-4 xl:pr-8"
         >
           <motion.div
             variants={fadeUp}
-            className="mb-8 inline-flex items-center gap-3 rounded-full border border-orange-200 bg-white/80 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm"
+            className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm sm:mb-8 sm:gap-3 sm:px-5 sm:py-3 sm:text-xs sm:tracking-[0.22em]"
           >
             <Leaf size={14} />
             {loading ? "Đang tải sản phẩm" : heroBanner.eyebrow}
@@ -525,7 +525,7 @@ function HeroSection() {
 
           <motion.h1
             variants={fadeUp}
-            className="max-w-4xl text-[clamp(3.05rem,7vw,5.25rem)] font-black leading-[0.98] tracking-[-0.06em] text-slate-950"
+            className="max-w-4xl text-[clamp(2.35rem,11vw,5.25rem)] font-black leading-[0.94] tracking-[-0.06em] text-slate-950"
           >
             <span className="block whitespace-nowrap">{heroTitlePrefix}</span>
             <span className="block whitespace-nowrap font-black text-primary">
@@ -535,19 +535,19 @@ function HeroSection() {
 
           <motion.p
             variants={fadeUp}
-            className="mt-8 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg xl:max-w-2xl"
+            className="mt-5 max-w-xl text-sm font-semibold leading-7 text-slate-700 sm:mt-8 sm:text-lg sm:leading-8 xl:max-w-2xl"
           >
             {heroBanner.subtitle}
           </motion.p>
 
           <motion.div
             variants={fadeUp}
-            className="mt-10 flex flex-col gap-4 sm:flex-row"
+            className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:flex sm:gap-4"
           >
             <CurtainAction
               href={heroBanner.secondaryCtaLink}
               variant="white"
-              className="h-14 w-full shadow-[0_14px_36px_rgba(15,23,42,0.08)] sm:w-56"
+              className="h-12 w-full px-3 shadow-[0_14px_36px_rgba(15,23,42,0.08)] sm:h-14 sm:w-56 sm:px-6"
             >
               {heroBanner.secondaryCtaText}
             </CurtainAction>
@@ -556,7 +556,7 @@ function HeroSection() {
               href={heroBanner.ctaLink}
               icon={<ArrowRight size={18} />}
               variant="orange"
-              className="h-14 w-full shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:w-56"
+              className="h-12 w-full px-3 shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:h-14 sm:w-56 sm:px-6"
             >
               Sản phẩm
             </CurtainAction>
@@ -565,17 +565,17 @@ function HeroSection() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65 }}
+          initial={{ opacity: 0, x: 28, scale: 0.96 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className={`relative z-10 overflow-visible ${
             showHeroProducts
-              ? "min-h-[700px] sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
-              : "min-h-[560px] sm:min-h-[600px] lg:min-h-[640px] xl:min-h-[680px]"
+              ? "min-h-[620px] sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
+              : "min-h-[330px] sm:min-h-[500px] lg:min-h-[640px] xl:min-h-[680px]"
           }`}
         >
-          <div className={`absolute left-1/2 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] xl:h-[520px] xl:w-[520px] ${
-            showHeroProducts ? "top-[8%] lg:top-[9%]" : "top-[14%] lg:top-[10%]"
+          <div className={`absolute left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] xl:h-[520px] xl:w-[520px] ${
+            showHeroProducts ? "top-[5%] lg:top-[9%]" : "top-0 sm:top-[8%] lg:top-[10%]"
           }`}>
             <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
           </div>
@@ -584,8 +584,8 @@ function HeroSection() {
           <img
             src={heroBanner.characterImage}
             alt={heroBanner.characterAlt}
-            className={`absolute left-1/2 z-20 h-[350px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
-              showHeroProducts ? "top-[8%] lg:top-[8%] xl:top-[7%]" : "top-[14%] lg:top-[10%] xl:top-[9%]"
+            className={`absolute left-1/2 z-20 h-[290px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
+              showHeroProducts ? "top-[5%] lg:top-[8%] xl:top-[7%]" : "top-0 sm:top-[8%] lg:top-[10%] xl:top-[9%]"
             }`}
           />
 
@@ -1496,7 +1496,7 @@ function FactoryProofSection() {
   );
 
   return (
-    <section className="bg-[#fff8ed] px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+    <section className="overflow-hidden bg-[#fff8ed] px-4 py-12 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
       <div className="mx-auto w-full max-w-7xl">
         <motion.div
           initial={{ opacity: 0, x: -24 }}
@@ -1538,7 +1538,7 @@ function FactoryProofSection() {
             title={homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
           />
 
-          <div className="mt-10 grid gap-6 sm:mt-14 sm:gap-8">
+          <div className="mt-8 grid gap-5 sm:mt-14 sm:gap-8">
               {proofs.map((proof, index) => {
                 const Icon = proof.icon;
                 const imageOnRight = index % 2 === 1;
@@ -1546,14 +1546,14 @@ function FactoryProofSection() {
                 return (
                   <motion.article
                     key={`${proof.title}-${index}`}
-                    initial={{ opacity: 0, x: imageOnRight ? 40 : -40 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, x: imageOnRight ? 24 : -24, scale: 0.97 }}
+                    whileInView={{ opacity: 1, x: 0, scale: 1 }}
                     viewport={{ once: true, margin: "-90px" }}
                     transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
                     className="group grid min-w-0 overflow-hidden border border-orange-100 bg-white text-left shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_65px_rgba(234,88,12,0.12)] lg:grid-cols-2"
                   >
                     <span
-                      className={`relative min-h-[240px] overflow-hidden bg-slate-100 sm:min-h-[320px] ${
+                      className={`relative min-h-[210px] overflow-hidden bg-slate-100 sm:min-h-[320px] ${
                         imageOnRight ? "lg:order-2" : "lg:order-1"
                       }`}
                     >
@@ -1566,7 +1566,7 @@ function FactoryProofSection() {
                     </span>
 
                     <span
-                      className={`relative flex min-w-0 flex-col justify-center p-6 sm:p-10 lg:p-12 ${
+                      className={`relative flex min-w-0 flex-col justify-center p-5 sm:p-10 lg:p-12 ${
                         imageOnRight ? "lg:order-1" : "lg:order-2"
                       }`}
                     >
@@ -1574,13 +1574,13 @@ function FactoryProofSection() {
                       <span className="flex h-12 w-12 items-center justify-center border border-orange-200 bg-orange-50 text-orange-600 transition-all duration-300 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white">
                         <Icon size={21} />
                       </span>
-                      <span className="mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-orange-600">
+                      <span className="mt-5 text-[10px] font-black uppercase tracking-[0.2em] text-orange-600 sm:mt-6">
                         Bằng chứng {String(index + 1).padStart(2, "0")}
                       </span>
-                      <span className="mt-2 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
+                      <span className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
                         {proof.title}
                       </span>
-                      <span className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base">
+                      <span className="mt-3 text-sm font-semibold leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-7">
                         {proof.text}
                       </span>
                       {proof.linkUrl && (
