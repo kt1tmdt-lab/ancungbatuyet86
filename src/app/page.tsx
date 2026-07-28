@@ -822,7 +822,8 @@ function TrustSection() {
         </div>
 
         <div className="mt-8 md:hidden">
-          <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+          <div className="relative border border-orange-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+            <div className="overflow-hidden">
             <AnimatePresence mode="wait">
               {trustItems.map((item, index) => {
                 if (index !== activeTrustIndex) return null;
@@ -855,8 +856,34 @@ function TrustSection() {
                 );
               })}
             </AnimatePresence>
+            </div>
 
-            <div className="flex items-center justify-between border-t border-orange-100 bg-orange-50/60 px-4 py-3">
+            <button
+              type="button"
+              onClick={() =>
+                setActiveTrustIndex((current) =>
+                  current === 0 ? trustItems.length - 1 : current - 1
+                )
+              }
+              aria-label="Xem nội dung trước"
+              className="absolute -left-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-[0_6px_18px_rgba(15,23,42,0.18)] transition hover:scale-105 hover:border-orange-300 hover:text-orange-600"
+            >
+              <ChevronLeft size={19} />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setActiveTrustIndex((current) =>
+                  current === trustItems.length - 1 ? 0 : current + 1
+                )
+              }
+              aria-label="Xem nội dung tiếp theo"
+              className="absolute -right-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-[0_6px_18px_rgba(15,23,42,0.18)] transition hover:scale-105 hover:border-orange-300 hover:text-orange-600"
+            >
+              <ChevronRight size={19} />
+            </button>
+
+            <div className="flex items-center justify-center border-t border-orange-100 bg-orange-50/60 px-4 py-3">
               <div className="flex gap-1.5">
                 {trustItems.map((item, index) => (
                   <button
@@ -869,32 +896,6 @@ function TrustSection() {
                     }`}
                   />
                 ))}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveTrustIndex((current) =>
-                      current === 0 ? trustItems.length - 1 : current - 1
-                    )
-                  }
-                  aria-label="Xem nội dung trước"
-                  className="flex h-10 w-10 items-center justify-center border border-orange-200 bg-white text-orange-700 transition hover:border-orange-600 hover:bg-orange-600 hover:text-white"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setActiveTrustIndex((current) =>
-                      current === trustItems.length - 1 ? 0 : current + 1
-                    )
-                  }
-                  aria-label="Xem nội dung tiếp theo"
-                  className="flex h-10 w-10 items-center justify-center border border-orange-600 bg-orange-600 text-white transition hover:bg-orange-700"
-                >
-                  <ChevronRight size={20} />
-                </button>
               </div>
             </div>
           </div>
