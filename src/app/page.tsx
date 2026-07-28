@@ -1662,7 +1662,6 @@ function FactoryProofSection() {
           {proofs.map((proof, index) => {
             const Icon = proof.icon;
             const imageOnRight = index % 2 === 1;
-            const isExternalLink = proof.linkUrl.startsWith("http");
 
             return (
               <motion.article
@@ -1709,17 +1708,6 @@ function FactoryProofSection() {
                   <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
                     {proof.text}
                   </p>
-                  {proof.linkUrl ? (
-                    <a
-                      href={proof.linkUrl}
-                      target={isExternalLink ? "_blank" : undefined}
-                      rel={isExternalLink ? "noopener noreferrer" : undefined}
-                      className="mt-7 inline-flex items-center gap-3 border-b border-orange-500 pb-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:gap-4 hover:text-orange-600"
-                    >
-                      Xem hồ sơ liên quan
-                      <ArrowRight size={16} />
-                    </a>
-                  ) : null}
                 </div>
 
                 <span className="absolute left-1/2 top-1/2 z-20 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 border-4 border-[#f7f0e5] bg-orange-600 lg:block" />
