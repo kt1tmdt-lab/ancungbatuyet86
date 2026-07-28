@@ -141,6 +141,45 @@ const staggerContainer = {
   },
 };
 
+const storyParagraphReveal = {
+  hidden: { opacity: 0, y: 28, filter: "blur(6px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1] as any,
+    },
+  },
+};
+
+const statCardReveal = {
+  hidden: { opacity: 0, x: 36, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1] as any,
+    },
+  },
+};
+
+const proofCardReveal = {
+  hidden: { opacity: 0, y: 32, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.55,
+      ease: [0.16, 1, 0.3, 1] as any,
+    },
+  },
+};
+
 function useCountUp(targetValueString: string, durationMs = 2000) {
   const [displayValue, setDisplayValue] = useState("0");
 
@@ -379,7 +418,13 @@ export default function AboutPage() {
             <h1 className="text-[1.75rem] sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.15] break-words">
               Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
             </h1>
-            <div className="h-1.5 w-20 bg-orange-600 mt-4 rounded-sm" />
+            <motion.div
+              className="mt-4 h-1.5 bg-orange-600"
+              initial={{ width: 0 }}
+              whileInView={{ width: 80 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55, delay: 0.25 }}
+            />
           </motion.div>
 
           <div className="mb-10 grid min-w-0 grid-cols-1 gap-8 sm:mb-16 lg:grid-cols-12 lg:items-start lg:gap-12">
@@ -401,7 +446,7 @@ export default function AboutPage() {
                         ? "border border-l-4 border-slate-200/80 border-l-orange-600 bg-[#FAF7F2] p-3.5 text-base font-bold text-slate-950 shadow-[0_2px_8px_rgba(0,0,0,0.01)] sm:p-4 sm:text-xl"
                         : ""
                     }
-                    variants={fapUp}
+                    variants={storyParagraphReveal}
                   >
                     {paragraph}
                   </motion.p>
@@ -425,7 +470,7 @@ export default function AboutPage() {
                 <motion.div
                   key={idx}
                   className="flex flex-col items-center justify-center border-y border-r border-l-4 border-slate-200/80 border-l-orange-600 bg-[#FAF7F2] p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:-translate-y-0.5 hover:border-orange-500/20 hover:shadow-md sm:p-6 lg:items-start"
-                  variants={fapUp}
+                  variants={statCardReveal}
                 >
                   <span className="text-3xl lg:text-4xl font-black text-[#0F172A] tracking-tight">
                     <Counter value={item.val} />
@@ -451,7 +496,7 @@ export default function AboutPage() {
               <motion.div
                 key={idx}
                 className="group relative flex min-w-0 flex-row items-start gap-3 overflow-hidden border border-slate-200/80 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-orange-300 hover:shadow-[0_16px_35px_rgba(234,88,12,0.12)] sm:flex-col sm:gap-4 sm:p-5"
-                variants={fapUp}
+                variants={proofCardReveal}
               >
                 <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-orange-600 transition-transform duration-300 group-hover:scale-x-100" />
                 <div className="self-start border border-orange-100 bg-orange-50 p-2 text-orange-600 transition-all duration-300 group-hover:rotate-3 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white group-hover:shadow-[0_8px_18px_rgba(234,88,12,0.22)]">
@@ -531,7 +576,7 @@ export default function AboutPage() {
                   Sứ mệnh
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                  "Để người Việt Nam tự hào về đồ ăn vặt của chính mình"
+                  Để người Việt Nam tự hào về đồ ăn vặt của chính mình
                 </h3>
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
                   Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
@@ -599,7 +644,7 @@ export default function AboutPage() {
                   Triết lý kinh doanh
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                  "Làm thật và làm khác biệt"
+                  Làm thật và làm khác biệt
                 </h3>
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
                   Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
