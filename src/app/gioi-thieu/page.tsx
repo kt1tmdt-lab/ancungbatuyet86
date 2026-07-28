@@ -537,7 +537,7 @@ export default function AboutPage() {
           <div className="mb-16 space-y-14 sm:mb-28 sm:space-y-24">
             {/* Sứ mệnh */}
             <motion.div 
-              className="grid grid-cols-1 items-center border-b border-orange-200/70 pb-10 lg:grid-cols-12 lg:gap-16 lg:border-0 lg:pb-0"
+              className="grid grid-cols-1 items-center gap-4 border-b border-orange-200/70 pb-10 lg:grid-cols-12 lg:gap-16 lg:border-0 lg:pb-0"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
@@ -554,8 +554,8 @@ export default function AboutPage() {
                   Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
                 </p>
               </motion.div>
-              <motion.div className="hidden items-center justify-center lg:col-span-4 lg:flex" variants={fapRight}>
-                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <motion.div className="order-first flex items-center justify-start lg:order-last lg:col-span-4 lg:justify-center" variants={fapRight}>
+                <svg viewBox="0 0 200 200" className="h-16 w-16 text-orange-600 opacity-90 sm:h-20 sm:w-20 lg:h-48 lg:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="80" strokeDasharray="4 4" className="text-orange-300" />
                   <circle cx="100" cy="100" r="50" className="text-orange-400" />
                   <circle cx="100" cy="100" r="20" className="text-orange-500/20" fill="currentColor" />
@@ -572,14 +572,14 @@ export default function AboutPage() {
 
             {/* Tầm nhìn */}
             <motion.div 
-              className="grid grid-cols-1 items-center border-b border-orange-200/70 pb-10 lg:grid-cols-12 lg:gap-16 lg:border-0 lg:pb-0"
+              className="grid grid-cols-1 items-center gap-4 border-b border-orange-200/70 pb-10 lg:grid-cols-12 lg:gap-16 lg:border-0 lg:pb-0"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
               variants={staggerContainer}
             >
-              <motion.div className="hidden items-center justify-center lg:order-first lg:col-span-4 lg:flex" variants={fapLeft}>
-                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <motion.div className="order-first flex items-center justify-start lg:col-span-4 lg:justify-center" variants={fapLeft}>
+                <svg viewBox="0 0 200 200" className="h-16 w-16 text-orange-600 opacity-90 sm:h-20 sm:w-20 lg:h-48 lg:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="70" className="text-orange-400" />
                   <ellipse cx="100" cy="100" rx="40" ry="70" className="text-orange-300" />
                   <ellipse cx="100" cy="100" rx="15" ry="70" className="text-orange-200" />
@@ -605,7 +605,7 @@ export default function AboutPage() {
 
             {/* Triết lý kinh doanh */}
             <motion.div 
-              className="grid grid-cols-1 items-center lg:grid-cols-12 lg:gap-16"
+              className="grid grid-cols-1 items-center gap-4 lg:grid-cols-12 lg:gap-16"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
@@ -622,8 +622,8 @@ export default function AboutPage() {
                   Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
                 </p>
               </motion.div>
-              <motion.div className="hidden items-center justify-center lg:col-span-4 lg:flex" variants={fapRight}>
-                <svg viewBox="0 0 200 200" className="h-36 w-36 text-orange-600 opacity-90 sm:h-48 sm:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <motion.div className="order-first flex items-center justify-start lg:order-last lg:col-span-4 lg:justify-center" variants={fapRight}>
+                <svg viewBox="0 0 200 200" className="h-16 w-16 text-orange-600 opacity-90 sm:h-20 sm:w-20 lg:h-48 lg:w-48" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M100,35 C70,35 55,55 55,85 C55,110 75,125 75,140 L75,155 L125,155 L125,140 C125,130 145,110 145,85 C145,55 130,35 100,35 Z" className="text-orange-500" />
                   <circle cx="100" cy="85" r="18" className="text-orange-400" strokeDasharray="4 2" />
                   <circle cx="100" cy="85" r="6" className="text-orange-600" fill="#ff7a1a" />
