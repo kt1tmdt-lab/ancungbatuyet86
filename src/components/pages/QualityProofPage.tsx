@@ -330,15 +330,15 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
         </motion.div>
       </section>
 
-      <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
+      <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-slate-200 bg-[#FAF7F2] px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <motion.div
           initial={{ opacity: 0, x: -28, scale: 0.99 }}
           whileInView={{ opacity: 1, x: 0, scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.65 }}
-          className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10"
+          className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-x-14 lg:gap-y-12"
         >
-          <div className="order-2 lg:order-1">
+          <div className="order-2">
             <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
               {sourceTitle}
             </h2>
@@ -356,8 +356,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             </div>
           </div>
 
-          <div className="order-1 grid gap-4 lg:order-2">
-            <div className="relative aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-950 sm:min-h-[360px] sm:aspect-auto">
+          <div className="contents">
+            <div className="relative order-1 aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-950 sm:aspect-[21/8] lg:col-span-2 lg:h-[460px] lg:aspect-auto">
               <ImageBox src={sourceImage} alt="Hồ sơ hoặc hình ảnh minh họa nguồn nguyên liệu" className="opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
               <div className="absolute bottom-0 left-0 p-4 text-white sm:p-6">
@@ -365,7 +365,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <p className="mt-1.5 text-lg font-black leading-tight sm:mt-2 sm:text-2xl">[CẦN CẬP NHẬT LINK EMBED]</p>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="order-3 grid gap-4 sm:grid-cols-2">
               {displayedSourceFacts.map((item, index) => {
                 const Icon = item.icon;
                 return (
