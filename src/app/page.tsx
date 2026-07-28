@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   ShieldCheck,
   Factory,
   TrendingUp,
@@ -513,7 +515,7 @@ function HeroSection() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-20 lg:pr-4 xl:pr-8"
+          className="relative z-20 order-2 lg:order-1 lg:pr-4 xl:pr-8"
         >
           <motion.div
             variants={fadeUp}
@@ -568,7 +570,7 @@ function HeroSection() {
           initial={{ opacity: 0, x: 28, scale: 0.96 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative z-10 overflow-visible ${
+          className={`relative z-10 order-1 overflow-visible lg:order-2 ${
             showHeroProducts
               ? "min-h-[620px] sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
               : "min-h-[330px] sm:min-h-[500px] lg:min-h-[640px] xl:min-h-[680px]"
@@ -776,6 +778,7 @@ function StatsSection() {
 // ==========================================
 function TrustSection() {
   const { homeTexts } = useHomeMarketingConfig();
+  const [activeTrustIndex, setActiveTrustIndex] = useState(0);
   const trustItems: { title: string; desc: string; icon: LucideIcon }[] = [
     {
       title: homeTextValue(homeTexts, "trust_item_1_title", "Kiểm soát đầu vào"),
@@ -818,7 +821,86 @@ function TrustSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-0 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 md:hidden">
+          <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+            <AnimatePresence mode="wait">
+              {trustItems.map((item, index) => {
+                if (index !== activeTrustIndex) return null;
+                const Icon = item.icon;
+
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, x: 36, scale: 0.98 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -36, scale: 0.98 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="grid min-h-[210px] grid-cols-[58px_minmax(0,1fr)] items-start gap-4 p-5"
+                  >
+                    <div className="flex h-14 w-14 items-center justify-center border border-orange-200 bg-orange-50 text-orange-700">
+                      <Icon size={26} strokeWidth={1.8} />
+                    </div>
+                    <div className="min-w-0 pt-1">
+                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
+                        {String(index + 1).padStart(2, "0")} / {String(trustItems.length).padStart(2, "0")}
+                      </p>
+                      <h3 className="mt-2 text-xl font-black tracking-[-0.03em] text-slate-950">
+                        {item.title}
+                      </h3>
+                      <p className="mt-3 text-sm leading-7 text-slate-600">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
+            <div className="flex items-center justify-between border-t border-orange-100 bg-orange-50/60 px-4 py-3">
+              <div className="flex gap-1.5">
+                {trustItems.map((item, index) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    onClick={() => setActiveTrustIndex(index)}
+                    aria-label={`Xem ${item.title}`}
+                    className={`h-1.5 transition-all duration-300 ${
+                      index === activeTrustIndex ? "w-7 bg-orange-600" : "w-2 bg-orange-200"
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveTrustIndex((current) =>
+                      current === 0 ? trustItems.length - 1 : current - 1
+                    )
+                  }
+                  aria-label="Xem nội dung trước"
+                  className="flex h-10 w-10 items-center justify-center border border-orange-200 bg-white text-orange-700 transition hover:border-orange-600 hover:bg-orange-600 hover:text-white"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveTrustIndex((current) =>
+                      current === trustItems.length - 1 ? 0 : current + 1
+                    )
+                  }
+                  aria-label="Xem nội dung tiếp theo"
+                  className="flex h-10 w-10 items-center justify-center border border-orange-600 bg-orange-600 text-white transition hover:bg-orange-700"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 hidden gap-0 md:grid md:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item, i) => {
             const Icon = item.icon;
             return (
@@ -1550,7 +1632,7 @@ function FactoryProofSection() {
                     whileInView={{ opacity: 1, x: 0, scale: 1 }}
                     viewport={{ once: true, margin: "-90px" }}
                     transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-                    className="group grid min-w-0 overflow-hidden border border-orange-100 bg-white text-left shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:border-orange-300 hover:shadow-[0_24px_65px_rgba(234,88,12,0.12)] lg:grid-cols-2"
+                    className="group grid min-w-0 overflow-hidden border border-orange-100 bg-white text-left shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_24px_65px_rgba(234,88,12,0.12)] lg:grid-cols-2"
                   >
                     <span
                       className={`relative min-h-[210px] overflow-hidden bg-slate-100 sm:min-h-[320px] ${
