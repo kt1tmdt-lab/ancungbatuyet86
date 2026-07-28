@@ -108,6 +108,30 @@ const fapUp = {
   },
 };
 
+const fapLeft = {
+  hidden: { opacity: 0, x: -35 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+    },
+  },
+};
+
+const fapRight = {
+  hidden: { opacity: 0, x: 35 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.7,
+      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+    },
+  },
+};
+
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
@@ -517,9 +541,9 @@ export default function AboutPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              variants={fapUp}
+              variants={staggerContainer}
             >
-              <div className="lg:col-span-8 space-y-4">
+              <motion.div className="lg:col-span-8 space-y-4" variants={fapLeft}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Sứ mệnh
                 </span>
@@ -529,8 +553,8 @@ export default function AboutPage() {
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
                   Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
                 </p>
-              </div>
-              <div className="lg:col-span-4 flex justify-center items-center">
+              </motion.div>
+              <motion.div className="lg:col-span-4 flex justify-center items-center" variants={fapRight}>
                 <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="80" strokeDasharray="4 4" className="text-orange-300" />
                   <circle cx="100" cy="100" r="50" className="text-orange-400" />
@@ -543,7 +567,7 @@ export default function AboutPage() {
                   <circle cx="50" cy="100" r="4" fill="#ff7a1a" />
                   <circle cx="100" cy="100" r="6" fill="#ff7a1a" />
                 </svg>
-              </div>
+              </motion.div>
             </motion.div>
 
             {/* Tầm nhìn */}
@@ -552,9 +576,9 @@ export default function AboutPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              variants={fapUp}
+              variants={staggerContainer}
             >
-              <div className="lg:col-span-4 flex justify-center items-center order-last lg:order-first">
+              <motion.div className="lg:col-span-4 flex justify-center items-center order-last lg:order-first" variants={fapLeft}>
                 <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="100" cy="100" r="70" className="text-orange-400" />
                   <ellipse cx="100" cy="100" rx="40" ry="70" className="text-orange-300" />
@@ -565,8 +589,8 @@ export default function AboutPage() {
                   <path d="M140,50 L165,42 L157,67 Z" fill="#ff7a1a" />
                   <path d="M100,100 Q135,90 157,56" className="text-orange-500" strokeDasharray="4 4" />
                 </svg>
-              </div>
-              <div className="lg:col-span-8 space-y-4">
+              </motion.div>
+              <motion.div className="lg:col-span-8 space-y-4" variants={fapRight}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Tầm nhìn
                 </span>
@@ -576,7 +600,7 @@ export default function AboutPage() {
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
                   Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
                 </p>
-              </div>
+              </motion.div>
             </motion.div>
 
             {/* Triết lý kinh doanh */}
@@ -585,9 +609,9 @@ export default function AboutPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-100px" }}
-              variants={fapUp}
+              variants={staggerContainer}
             >
-              <div className="lg:col-span-8 space-y-4">
+              <motion.div className="lg:col-span-8 space-y-4" variants={fapLeft}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
                   Triết lý kinh doanh
                 </span>
@@ -597,8 +621,8 @@ export default function AboutPage() {
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
                   Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
                 </p>
-              </div>
-              <div className="lg:col-span-4 flex justify-center items-center">
+              </motion.div>
+              <motion.div className="lg:col-span-4 flex justify-center items-center" variants={fapRight}>
                 <svg viewBox="0 0 200 200" className="w-48 h-48 text-orange-600 opacity-90" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M100,35 C70,35 55,55 55,85 C55,110 75,125 75,140 L75,155 L125,155 L125,140 C125,130 145,110 145,85 C145,55 130,35 100,35 Z" className="text-orange-500" />
                   <circle cx="100" cy="85" r="18" className="text-orange-400" strokeDasharray="4 2" />
@@ -611,7 +635,7 @@ export default function AboutPage() {
                   <line x1="30" y1="85" x2="42" y2="85" className="text-orange-600" />
                   <line x1="170" y1="85" x2="158" y2="85" className="text-orange-600" />
                 </svg>
-              </div>
+              </motion.div>
             </motion.div>
 
           </div>
