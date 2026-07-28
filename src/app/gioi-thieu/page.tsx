@@ -324,19 +324,19 @@ export default function AboutPage() {
 
   const storyBullets = [
     {
-      icon: <Globe className="text-orange-600 h-6 w-6" />,
+      icon: <Globe className="h-6 w-6" />,
       text: "Nguyên liệu chân gà chất lượng cao nhập khẩu từ Châu Âu",
     },
     {
-      icon: <Factory className="text-orange-600 h-6 w-6" />,
+      icon: <Factory className="h-6 w-6" />,
       text: "Hai nhà máy sản xuất phục vụ hàng triệu khách hàng",
     },
     {
-      icon: <ShieldCheck className="text-orange-600 h-6 w-6" />,
+      icon: <ShieldCheck className="h-6 w-6" />,
       text: "Bảo hiểm trách nhiệm sản phẩm khẳng định đồng hành bảo vệ quyền lợi khách hàng",
     },
     {
-      icon: <Store className="text-orange-600 h-6 w-6" />,
+      icon: <Store className="h-6 w-6" />,
       text: "Phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử",
     },
   ];
@@ -468,13 +468,14 @@ export default function AboutPage() {
             {storyBullets.map((bullet, idx) => (
               <motion.div
                 key={idx}
-                className="flex min-w-0 flex-row items-start gap-3 border border-slate-200/80 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition duration-300 hover:border-orange-500/20 sm:flex-col sm:gap-4 sm:p-5"
+                className="group relative flex min-w-0 flex-row items-start gap-3 overflow-hidden border border-slate-200/80 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-orange-300 hover:shadow-[0_16px_35px_rgba(234,88,12,0.12)] sm:flex-col sm:gap-4 sm:p-5"
                 variants={fapUp}
               >
-                <div className="p-2 bg-orange-50 border border-orange-100 rounded-sm self-start">
+                <span className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-orange-600 transition-transform duration-300 group-hover:scale-x-100" />
+                <div className="self-start border border-orange-100 bg-orange-50 p-2 text-orange-600 transition-all duration-300 group-hover:rotate-3 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white group-hover:shadow-[0_8px_18px_rgba(234,88,12,0.22)]">
                   {bullet.icon}
                 </div>
-                <p className="min-w-0 break-words text-sm font-bold leading-snug text-slate-800">
+                <p className="min-w-0 break-words text-sm font-bold leading-snug text-slate-800 transition-colors duration-300 group-hover:text-orange-700">
                   {bullet.text}
                 </p>
               </motion.div>
