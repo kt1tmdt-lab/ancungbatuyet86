@@ -588,10 +588,10 @@ export default function Navbar({
                       <span>{link.label}</span>
                       <ChevronDown size={14} className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-180" />
                     </Link>
-                    <div className="pointer-events-none invisible absolute left-1/2 top-full z-50 w-[min(92vw,540px)] origin-top -translate-x-1/2 -translate-y-2 scale-[0.97] pt-3 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100">
-                      <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white/98 p-2 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-                        <div className="grid">
-                          <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(120deg,#fff4df_0%,#fffaf3_100%)] px-5 py-5 text-slate-950">
+                    <div className="pointer-events-none invisible fixed inset-x-0 top-[72px] z-50 w-screen origin-top -translate-y-3 scale-y-[0.96] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-y-100 group-hover:opacity-100">
+                      <div className="border-y border-orange-200 bg-[#fffdf4]/98 px-6 py-7 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+                        <div className="mx-auto grid max-w-7xl grid-cols-[300px_minmax(0,1fr)] gap-8">
+                          <div className="relative overflow-hidden rounded-2xl border border-orange-100 bg-[linear-gradient(135deg,#fff4df_0%,#fffaf3_100%)] px-6 py-6 text-slate-950">
                             <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-300/25" />
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                               {submenu.eyebrow}
@@ -599,34 +599,37 @@ export default function Navbar({
                             <p className="absolute right-4 top-4 rounded-full border border-orange-200 bg-white px-3 py-1 text-[10px] font-black tracking-[-0.02em] text-orange-600">
                               {submenu.accent}
                             </p>
-                            <p className="mt-2 pr-20 text-xl font-black leading-6 tracking-[-0.03em]">
+                            <p className="mt-3 pr-20 text-2xl font-black leading-7 tracking-[-0.04em]">
                               {submenu.title}
                             </p>
-                            <p className="mt-2 max-w-sm text-xs font-semibold leading-5 text-slate-500">
+                            <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-500">
                               {submenu.description}
                             </p>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 bg-white pt-2">
                             <Link
                               href={overviewHref}
-                              className="group/item col-span-2 flex translate-y-2 items-center justify-between rounded-xl border border-orange-200 bg-orange-600 px-4 py-3.5 text-sm font-black text-white opacity-0 transition-all delay-75 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-orange-700 group-hover:translate-y-0 group-hover:opacity-100"
+                              className="group/item mt-6 flex items-center justify-between rounded-xl bg-orange-600 px-4 py-3.5 text-sm font-black text-white transition hover:bg-orange-700"
                             >
                               <span>{overviewLabel}</span>
                               <span className="transition group-hover/item:translate-x-1">→</span>
                             </Link>
+                          </div>
+                          <div className="grid grid-cols-3 content-start gap-3">
                             {submenu.links.map((item, itemIndex) => (
                               <Link
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
                                 style={{ transitionDelay: `${120 + itemIndex * 45}ms` }}
-                                className="group/item block translate-y-2 rounded-xl border border-slate-100 bg-white px-4 py-3.5 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-[#fffaf3] group-hover:translate-y-0 group-hover:opacity-100"
+                                className="group/item block min-h-32 translate-y-3 rounded-xl border border-orange-100 bg-white px-5 py-5 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-orange-300 hover:bg-[#fffaf3] hover:shadow-[0_16px_34px_rgba(234,88,12,0.09)] group-hover:translate-y-0 group-hover:opacity-100"
                               >
-                                <span className="flex items-center justify-between gap-4 text-sm font-black text-slate-900 group-hover/item:text-orange-700">
+                                <span className="mb-4 block text-[10px] font-black uppercase tracking-[0.16em] text-orange-500">
+                                  Collection
+                                </span>
+                                <span className="flex items-center justify-between gap-4 text-base font-black text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
                                   <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
                                 </span>
                                 {item.note && (
-                                  <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">
+                                  <span className="mt-2 block text-xs font-semibold leading-5 text-slate-500">
                                     {item.note}
                                   </span>
                                 )}
