@@ -12,7 +12,6 @@ import {
   Eye,
   Heart,
   Zap,
-  Sparkles,
   Award,
   Video,
   ExternalLink,
@@ -297,12 +296,6 @@ export default function AboutPage() {
   );
 
   // Dynamic config resolution with fallbacks
-  const heroTagline = marketingTextValue(
-    homeTexts,
-    "about_hero_label",
-    "Hồ sơ thương hiệu"
-  );
-  
   const stat1Value = marketingTextValue(homeTexts, "about_hero_stat_1_value", "15+ triệu");
   const stat1Label = marketingTextValue(homeTexts, "about_hero_stat_1_label", "đơn hàng");
   const stat2Value = marketingTextValue(homeTexts, "about_hero_stat_2_value", "50.000+");
@@ -375,17 +368,6 @@ export default function AboutPage() {
       <section id="about-history" className="border-b border-slate-200 bg-white py-10 sm:py-16 lg:py-24">
         <div id="about-community" className="mx-auto min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
           
-          {/* Eyebrow Label Tagline */}
-          <motion.div 
-            className="inline-flex items-center gap-2 px-3.5 py-1 bg-orange-600 text-white font-bold text-xs uppercase tracking-wider rounded-sm mb-6"
-            initial="hidden"
-            animate="visible"
-            variants={fapUp}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>{heroTagline}</span>
-          </motion.div>
-
           {/* Section Header */}
           <motion.div 
             className="mb-8 max-w-3xl sm:mb-12 lg:mb-16"
