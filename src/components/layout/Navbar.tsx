@@ -114,20 +114,19 @@ function getHeaderSubmenu(
 
   if (link.href === "/san-pham") {
     return {
-      eyebrow: "Sản phẩm",
-      title: "Danh mục sản phẩm",
-      description: "Các dòng sản phẩm chính đang được giới thiệu trên website.",
-      accent: "03",
+      eyebrow: "Signature collection",
+      title: "Showcase sản phẩm",
+      description: "Khám phá cá tính, hương vị và câu chuyện riêng của từng dòng sản phẩm đại diện.",
+      accent: "ACBT",
       overviewHref: "/san-pham",
       links: [
         ...(productMenuLinks.length
-          ? productMenuLinks.map((item) => ({ href: item.href, label: item.label, note: item.note }))
+          ? productMenuLinks.map((item) => ({ href: item.href, label: item.label, note: item.note || "Xem câu chuyện sản phẩm" }))
           : [
-              { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà Bà Tuyết", note: "Dòng sản phẩm chủ lực" },
-              { href: "/san-pham/tam-cay", label: "Tăm cay Bà Tuyết", note: "Dòng snack cay" },
-              { href: "/san-pham/snack-banh-trang", label: "Snack Bánh tráng", note: "Đóng gói tiện lợi" },
+              { href: "/san-pham/chan-ga-rut-xuong", label: "Chân gà Bà Tuyết", note: "Dấu ấn hương vị" },
+              { href: "/san-pham/tam-cay", label: "Tăm cay Bà Tuyết", note: "Cá tính cay giòn" },
+              { href: "/san-pham/snack-banh-trang", label: "Snack Bánh tráng", note: "Câu chuyện vị giác" },
             ]),
-        { href: "/san-pham/bo-suu-tap", label: "Sản phẩm khác", note: "Các dòng bổ sung" },
       ],
     };
   }
@@ -575,6 +574,7 @@ export default function Navbar({
 
               if (submenu) {
                 const overviewHref = submenu.overviewHref || link.href;
+                const overviewLabel = link.href === "/san-pham" ? "Mở showcase sản phẩm" : "Xem tổng quan";
                 return (
                   <div key={link.href} className="relative group py-2">
                     <Link
@@ -586,39 +586,40 @@ export default function Navbar({
                       }`}
                     >
                       <span>{link.label}</span>
-                      <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                      <ChevronDown size={14} className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-180" />
                     </Link>
-                    <div className="absolute left-1/2 top-full z-50 hidden w-[min(90vw,430px)] -translate-x-1/2 pt-3 group-hover:block">
-                      <div className="overflow-hidden border border-orange-100 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.14)]">
+                    <div className="pointer-events-none invisible absolute left-1/2 top-full z-50 w-[min(92vw,540px)] origin-top -translate-x-1/2 -translate-y-2 scale-[0.97] pt-3 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100">
+                      <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white/98 p-2 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl">
                         <div className="grid">
-                          <div className="relative border-b border-orange-100 bg-[#fffaf3] px-5 py-4 text-slate-950">
-                            <div className="absolute inset-x-0 top-0 h-0.5 bg-orange-500" />
+                          <div className="relative overflow-hidden rounded-xl bg-[linear-gradient(120deg,#fff4df_0%,#fffaf3_100%)] px-5 py-5 text-slate-950">
+                            <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-300/25" />
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                               {submenu.eyebrow}
                             </p>
-                            <p className="absolute right-4 top-4 border border-orange-200 bg-white px-2 py-1 text-[10px] font-black tracking-[-0.02em] text-orange-600">
+                            <p className="absolute right-4 top-4 rounded-full border border-orange-200 bg-white px-3 py-1 text-[10px] font-black tracking-[-0.02em] text-orange-600">
                               {submenu.accent}
                             </p>
-                            <p className="mt-2 pr-16 text-base font-black leading-5">
+                            <p className="mt-2 pr-20 text-xl font-black leading-6 tracking-[-0.03em]">
                               {submenu.title}
                             </p>
-                            <p className="mt-1.5 pr-10 text-xs font-semibold leading-5 text-slate-500">
+                            <p className="mt-2 max-w-sm text-xs font-semibold leading-5 text-slate-500">
                               {submenu.description}
                             </p>
                           </div>
-                          <div className="grid gap-1 bg-white p-2.5">
+                          <div className="grid grid-cols-2 gap-2 bg-white pt-2">
                             <Link
                               href={overviewHref}
-                              className="group/item flex items-center justify-between border border-orange-100 bg-orange-50 px-4 py-3 text-sm font-black text-orange-700 transition hover:border-orange-300 hover:bg-orange-100"
+                              className="group/item col-span-2 flex translate-y-2 items-center justify-between rounded-xl border border-orange-200 bg-orange-600 px-4 py-3.5 text-sm font-black text-white opacity-0 transition-all delay-75 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-orange-700 group-hover:translate-y-0 group-hover:opacity-100"
                             >
-                              <span>Xem tổng quan</span>
+                              <span>{overviewLabel}</span>
                               <span className="transition group-hover/item:translate-x-1">→</span>
                             </Link>
-                            {submenu.links.map((item) => (
+                            {submenu.links.map((item, itemIndex) => (
                               <Link
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
-                                className="group/item block border border-transparent px-4 py-3 transition hover:border-orange-100 hover:bg-[#fffaf3]"
+                                style={{ transitionDelay: `${120 + itemIndex * 45}ms` }}
+                                className="group/item block translate-y-2 rounded-xl border border-slate-100 bg-white px-4 py-3.5 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-orange-200 hover:bg-[#fffaf3] group-hover:translate-y-0 group-hover:opacity-100"
                               >
                                 <span className="flex items-center justify-between gap-4 text-sm font-black text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
@@ -724,6 +725,7 @@ export default function Navbar({
               if (submenu) {
                 const isSubmenuOpen = mobileSubmenuOpen === link.href;
                 const overviewHref = submenu.overviewHref || link.href;
+                const overviewLabel = link.href === "/san-pham" ? "Mở showcase sản phẩm" : "Xem tổng quan";
                 return (
                   <div key={link.href} className="flex flex-col">
                     <button
@@ -737,8 +739,8 @@ export default function Navbar({
                       <ChevronDown size={18} className={`transition-transform duration-200 ${isSubmenuOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
                     </button>
                     {isSubmenuOpen && (
-                      <div className="border-l-2 border-orange-300 bg-orange-50/40 p-3">
-                        <div className="mb-2 border border-orange-100 bg-white p-3">
+                      <div className="rounded-2xl bg-orange-50/50 p-3">
+                        <div className="mb-2 rounded-xl border border-orange-100 bg-white p-4">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">{submenu.eyebrow}</p>
                           <p className="mt-1 text-sm font-black text-slate-950">{submenu.title}</p>
                           <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{submenu.description}</p>
@@ -746,9 +748,9 @@ export default function Navbar({
                         <Link
                           href={overviewHref}
                           onClick={() => setOpen(false)}
-                          className="mb-1 flex items-center justify-between border border-orange-100 bg-white px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-orange-700"
+                          className="mb-2 flex items-center justify-between rounded-xl bg-orange-600 px-4 py-3.5 text-xs font-black uppercase tracking-[0.1em] text-white"
                         >
-                          Xem tổng quan
+                          {overviewLabel}
                           <span>→</span>
                         </Link>
                         {submenu.links.map((item) => (
@@ -756,7 +758,7 @@ export default function Navbar({
                             key={`${link.href}-${item.href}-${item.label}`}
                             href={item.href}
                             onClick={() => setOpen(false)}
-                            className="block border border-transparent px-4 py-3 text-sm font-bold text-gray-700 hover:border-orange-100 hover:bg-white hover:text-orange-700"
+                            className="mb-1 block rounded-xl border border-orange-100 bg-white px-4 py-3 text-sm font-bold text-gray-700 hover:border-orange-200 hover:text-orange-700"
                           >
                             <span className="block">{item.label}</span>
                             {item.note && <span className="mt-1 block text-xs font-semibold text-slate-500">{item.note}</span>}

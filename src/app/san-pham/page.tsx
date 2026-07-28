@@ -10,7 +10,6 @@ import {
   Check,
   Loader,
   PackageCheck,
-  ShieldCheck,
   Sparkles,
 } from "lucide-react";
 
@@ -25,18 +24,13 @@ type Product = {
   tagline?: string;
   description?: string;
   shortDescription?: string | null;
-  price?: string;
-  priceRange?: string;
-  purchaseUrl?: string;
   featured?: boolean;
   sortOrder?: number;
-  stats?: { label: string; value: string }[];
 };
 
 type ProductGroup = {
   id: string;
   label: string;
-  count: number;
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -56,19 +50,19 @@ const PRODUCT_THEMES = [
   },
   {
     section: "bg-[#f5efe5]",
-    orb: "bg-slate-950",
+    orb: "bg-amber-500",
     accent: "text-orange-600",
     soft: "bg-white/70",
   },
   {
     section: "bg-[#fffaf3]",
-    orb: "bg-[#166534]",
-    accent: "text-[#166534]",
-    soft: "bg-green-50",
+    orb: "bg-orange-400",
+    accent: "text-orange-600",
+    soft: "bg-orange-50",
   },
   {
     section: "bg-[#f6eee3]",
-    orb: "bg-[#9a3412]",
+    orb: "bg-yellow-500",
     accent: "text-orange-700",
     soft: "bg-white/70",
   },
@@ -105,7 +99,6 @@ function ProductChapter({
   const imageOnRight = index % 2 === 0;
   const image = productImage(product);
   const detailHref = productHref(product);
-  const stats = Array.isArray(product.stats) ? product.stats.slice(0, 3) : [];
 
   return (
     <motion.section
@@ -116,16 +109,12 @@ function ProductChapter({
       transition={{ duration: 0.55 }}
       className={`relative scroll-mt-36 overflow-hidden border-b border-orange-100 ${theme.section}`}
     >
-      <span className="pointer-events-none absolute -right-8 top-8 select-none text-[11rem] font-black leading-none text-white/45 sm:text-[18rem] lg:text-[25rem]">
-        {String(index + 1).padStart(2, "0")}
-      </span>
       <span className="pointer-events-none absolute inset-x-0 bottom-0 hidden select-none whitespace-nowrap text-center text-[8vw] font-black uppercase leading-none tracking-[-0.07em] text-slate-950/[0.025] lg:block">
         {product.name}
       </span>
       <div className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 -rotate-90 items-center gap-3 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500 xl:flex">
         <span>Signature product</span>
         <span className="h-px w-10 bg-orange-400" />
-        <span>{String(index + 1).padStart(2, "0")}</span>
       </div>
 
       <div className="relative mx-auto grid min-h-[78vh] max-w-[1600px] items-center lg:grid-cols-2">
@@ -176,9 +165,6 @@ function ProductChapter({
               {product.categoryLabel || CATEGORY_LABELS[product.category || ""] || "Sản phẩm chủ lực"}
             </span>
             <span className="h-px w-12 bg-current text-orange-300" />
-            <span className="text-xs font-black text-slate-400">
-              {String(index + 1).padStart(2, "0")}
-            </span>
           </div>
 
           <h2 className="mt-5 max-w-2xl text-[2.35rem] font-black leading-[0.96] tracking-[-0.06em] text-slate-950 sm:text-5xl lg:text-6xl xl:text-7xl">
@@ -195,53 +181,29 @@ function ProductChapter({
             {productDescription(product)}
           </p>
 
-          {stats.length > 0 ? (
-            <div className="mt-7 grid grid-cols-2 gap-px overflow-hidden border border-orange-100 bg-orange-100 sm:grid-cols-3">
-              {stats.map((stat) => (
-                <div key={`${stat.label}-${stat.value}`} className="bg-white/90 p-4">
-                  <p className="text-xl font-black tracking-[-0.04em] text-slate-950">{stat.value}</p>
-                  <p className="mt-1 text-[10px] font-black uppercase tracking-[0.12em] text-slate-500">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-7 flex flex-wrap gap-2">
-              <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
-                <Check size={15} className={theme.accent} />
-                Thông tin rõ ràng
-              </span>
-              <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
-                <PackageCheck size={15} className={theme.accent} />
-                Đóng gói chỉn chu
-              </span>
-              <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
-                <ShieldCheck size={15} className={theme.accent} />
-                Phân phối chính thức
-              </span>
-            </div>
-          )}
+          <div className="mt-7 flex flex-wrap gap-2">
+            <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
+              <Sparkles size={15} className={theme.accent} />
+              Dấu ấn hương vị
+            </span>
+            <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
+              <PackageCheck size={15} className={theme.accent} />
+              Thiết kế nhận diện
+            </span>
+            <span className={`inline-flex items-center gap-2 px-3 py-2 text-xs font-black text-slate-700 ${theme.soft}`}>
+              <Check size={15} className={theme.accent} />
+              Câu chuyện riêng
+            </span>
+          </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8">
             <Link
               href={detailHref}
-              className="inline-flex h-13 items-center justify-center gap-3 bg-slate-950 px-6 text-xs font-black uppercase tracking-[0.13em] text-white transition hover:bg-orange-600"
+              className="inline-flex h-13 items-center justify-center gap-3 bg-orange-600 px-6 text-xs font-black uppercase tracking-[0.13em] text-white transition hover:bg-orange-700"
             >
-              Khám phá sản phẩm
+              Xem câu chuyện sản phẩm
               <ArrowRight size={17} />
             </Link>
-            {product.purchaseUrl && (
-              <a
-                href={product.purchaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-13 items-center justify-center gap-3 border border-slate-300 bg-white/75 px-6 text-xs font-black uppercase tracking-[0.13em] text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
-              >
-                Mua chính hãng
-                <ArrowRight size={17} />
-              </a>
-            )}
           </div>
         </motion.div>
       </div>
@@ -294,12 +256,8 @@ export default function ProductsPage() {
       unique.set(id, product.categoryLabel || CATEGORY_LABELS[id] || "Sản phẩm khác");
     });
     return [
-      { id: "all", label: "Tất cả chủ lực", count: coreProducts.length },
-      ...Array.from(unique, ([id, label]) => ({
-        id,
-        label,
-        count: coreProducts.filter((product) => (product.category || "other") === id).length,
-      })),
+      { id: "all", label: "Tất cả chủ lực" },
+      ...Array.from(unique, ([id, label]) => ({ id, label })),
     ];
   }, [coreProducts]);
 
@@ -317,10 +275,10 @@ export default function ProductsPage() {
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff4df] text-slate-950">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_42%,rgba(234,88,12,0.52),transparent_25%),linear-gradient(120deg,#0f172a_0%,#111827_52%,#431407_100%)]" />
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff4df] text-slate-950">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_42%,rgba(251,146,60,0.38),transparent_25%),linear-gradient(120deg,#fffaf3_0%,#fff4df_52%,#ffedd5_100%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-orange-500 via-yellow-300 to-green-600" />
-        <span className="absolute -left-4 bottom-[-0.12em] select-none text-[10rem] font-black leading-none tracking-[-0.1em] text-white/[0.035] sm:text-[18rem] lg:text-[27rem]">
+        <span className="absolute -left-4 bottom-[-0.12em] select-none text-[10rem] font-black leading-none tracking-[-0.1em] text-orange-950/[0.035] sm:text-[18rem] lg:text-[27rem]">
           TASTE
         </span>
 
@@ -331,22 +289,22 @@ export default function ProductsPage() {
             transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
             className="order-2 px-5 pb-14 pt-4 sm:px-8 sm:pb-20 lg:order-1 lg:px-16 lg:py-24 xl:px-24"
           >
-            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-300">
+            <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
               <Sparkles size={15} />
-              Signature collection · 2026
+              Signature collection
             </div>
             <h1 className="mt-6 max-w-4xl text-[2.8rem] font-black leading-[0.87] tracking-[-0.075em] sm:text-6xl lg:text-7xl xl:text-8xl">
               Mỗi vị ngon,
               <span className="block text-orange-500">một cá tính.</span>
             </h1>
-            <p className="mt-7 max-w-xl text-base font-semibold leading-8 text-white/70 sm:text-lg">
+            <p className="mt-7 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
               Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết —
               nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.
             </p>
             <button
               type="button"
               onClick={scrollToProducts}
-              className="mt-8 inline-flex items-center gap-3 border border-white/20 bg-white/10 px-6 py-4 text-xs font-black uppercase tracking-[0.15em] text-white backdrop-blur transition hover:border-orange-500 hover:bg-orange-600"
+              className="mt-8 inline-flex items-center gap-3 border border-orange-600 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.15em] text-white transition hover:border-orange-700 hover:bg-orange-700"
             >
               Bắt đầu khám phá
               <ArrowDown size={17} />
@@ -359,16 +317,11 @@ export default function ProductsPage() {
             transition={{ duration: 0.85, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="relative order-1 min-h-[430px] overflow-hidden sm:min-h-[560px] lg:order-2 lg:min-h-[82vh]"
           >
-            <div className="absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-600 shadow-[0_45px_120px_rgba(234,88,12,0.28)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px]" />
-            <div className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-orange-300/25 sm:h-[540px] sm:w-[540px] xl:h-[650px] xl:w-[650px]" />
-            <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-200">
+            <div className="absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500 shadow-[0_45px_120px_rgba(234,88,12,0.2)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px]" />
+            <div className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-orange-400/30 sm:h-[540px] sm:w-[540px] xl:h-[650px] xl:w-[650px]" />
+            <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-700">
               ACBT / Core lineup
             </div>
-            <div className="absolute bottom-[12%] right-[8%] text-right text-[10px] font-black uppercase tracking-[0.18em] text-white/50">
-              <span className="block text-3xl text-white">{String(coreProducts.length).padStart(2, "0")}</span>
-              sản phẩm đại diện
-            </div>
-
             {coreProducts.slice(0, 3).map((product, index) => {
               const image = productImage(product);
               if (!image) return null;
@@ -422,22 +375,13 @@ export default function ProductsPage() {
               key={group.id}
               type="button"
               onClick={() => setActiveGroup(group.id)}
-              className={`group flex shrink-0 items-center gap-3 border px-5 py-3 text-xs font-black uppercase tracking-[0.12em] transition ${
+              className={`shrink-0 border px-5 py-3 text-xs font-black uppercase tracking-[0.12em] transition ${
                 activeGroup === group.id
                   ? "border-orange-600 bg-orange-600 text-white shadow-[0_10px_24px_rgba(234,88,12,0.2)]"
                   : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-700"
               }`}
             >
               {group.label}
-              <span
-                className={`grid h-6 min-w-6 place-items-center rounded-full px-1 text-[9px] ${
-                  activeGroup === group.id
-                    ? "bg-white text-orange-600"
-                    : "bg-orange-50 text-orange-600 group-hover:bg-orange-100"
-                }`}
-              >
-                {String(group.count).padStart(2, "0")}
-              </span>
             </button>
           ))}
         </div>
@@ -485,26 +429,24 @@ export default function ProductsPage() {
       <section className="bg-white px-5 py-16 sm:px-8 lg:px-16 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-8 border border-orange-100 bg-[#fff8ed] p-7 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-14">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
-              Tìm sản phẩm phù hợp
-            </p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Câu chuyện phía sau</p>
             <h2 className="mt-4 max-w-3xl text-3xl font-black leading-tight tracking-[-0.05em] sm:text-5xl">
-              Xem đầy đủ thông tin hoặc tìm điểm bán chính thức
+              Mỗi sản phẩm bắt đầu từ một lựa chọn và một niềm tin
             </h2>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
             <Link
-              href="/diem-ban"
-              className="inline-flex h-13 items-center justify-center gap-3 bg-orange-600 px-6 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950"
+              href="/gioi-thieu"
+              className="inline-flex h-13 items-center justify-center gap-3 bg-orange-600 px-6 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-700"
             >
-              Tìm điểm bán
+              Câu chuyện thương hiệu
               <ArrowRight size={17} />
             </Link>
             <Link
-              href="/lien-he"
+              href="/chat-luong"
               className="inline-flex h-13 items-center justify-center gap-3 border border-slate-300 bg-white px-6 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
             >
-              Liên hệ tư vấn
+              Hành trình chất lượng
             </Link>
           </div>
         </div>
