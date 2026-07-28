@@ -1588,7 +1588,6 @@ function TrustEvidenceSections() {
 // ==========================================
 function FactoryProofSection() {
   const { homeTexts, pageAssets } = useHomeMarketingConfig();
-  const [activeProofIndex] = useState(0);
   const fallbackProofs = [
     {
       title: "Nguyên liệu đầu vào",
@@ -1639,123 +1638,97 @@ function FactoryProofSection() {
       linkUrl: asset?.linkUrl || "",
     };
   });
-  const activeProof = proofs[activeProofIndex] || proofs[0];
-  const activeProofImage = activeProof.imageUrl || imageAsset?.imageUrl || "/bento/bento-factory.png";
-  const activeProofLink = activeProof.linkUrl || imageAsset?.linkUrl || "";
-
-  const imageNode = (
-    <img
-      src={activeProofImage}
-      alt={activeProof.title || imageAsset?.label || "Bằng chứng thương hiệu Ăn Cùng Bà Tuyết"}
-      className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300"
-    />
-  );
-
   return (
-    <section className="overflow-hidden bg-[#fff8ed] py-12 sm:py-20 lg:py-24">
-      <div className="w-full">
+    <section className="relative overflow-hidden border-y border-orange-100 bg-[#f7f0e5] px-4 py-14 sm:px-6 sm:py-20 lg:px-10 lg:py-28">
+      <div className="pointer-events-none absolute -left-40 top-40 h-[520px] w-[520px] rounded-full bg-orange-300/15 blur-3xl" />
+      <div className="pointer-events-none absolute -right-48 bottom-20 h-[600px] w-[600px] rounded-full bg-yellow-200/30 blur-3xl" />
+
+      <div className="relative mx-auto max-w-[1480px]">
         <motion.div
-          initial={{ opacity: 0, x: -24 }}
-          whileInView={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="hidden"
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-5xl"
         >
-          <div className="relative min-h-[560px] overflow-hidden bg-slate-100 lg:min-h-[680px]">
-            {activeProofLink ? (
-              <a
-                href={activeProofLink}
-                target={activeProofLink.startsWith("http") ? "_blank" : undefined}
-                rel={activeProofLink.startsWith("http") ? "noopener noreferrer" : undefined}
+          <h2 className="text-3xl font-black leading-[1.02] tracking-[-0.055em] text-slate-950 sm:text-5xl lg:text-6xl">
+            {homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
+          </h2>
+        </motion.div>
+
+        <div className="relative mt-10 space-y-12 sm:mt-16 sm:space-y-16 lg:mt-24 lg:space-y-28">
+          <div className="pointer-events-none absolute bottom-8 left-1/2 top-8 hidden w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-orange-300 to-transparent lg:block" />
+
+          {proofs.map((proof, index) => {
+            const Icon = proof.icon;
+            const imageOnRight = index % 2 === 1;
+            const isExternalLink = proof.linkUrl.startsWith("http");
+
+            return (
+              <motion.article
+                key={`${proof.title}-${index}`}
+                initial={{ opacity: 0, y: 42 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative grid min-w-0 lg:grid-cols-12 lg:items-center"
               >
-                {imageNode}
-              </a>
-            ) : (
-              imageNode
-            )}
-            <div className="absolute inset-x-0 bottom-0 bg-white/92 p-6 backdrop-blur-sm">
-              <h3 className="mt-2 text-3xl font-black tracking-[-0.04em] text-slate-950">
-                {activeProof.title}
-              </h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600">
-                {activeProof.text}
-              </p>
-            </div>
-          </div>
-        </motion.div>
+                <div
+                  className={`relative order-1 aspect-[4/3] min-w-0 overflow-hidden border border-white/80 bg-slate-100 shadow-[0_28px_80px_rgba(72,38,12,0.14)] sm:aspect-[16/9] lg:row-start-1 lg:aspect-auto lg:min-h-[520px] ${
+                    imageOnRight
+                      ? "lg:col-start-5 lg:col-span-8"
+                      : "lg:col-start-1 lg:col-span-8"
+                  }`}
+                >
+                  <img
+                    src={proof.imageUrl}
+                    alt={proof.title}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+                </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 24 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="w-full px-4 sm:px-6 lg:px-12 xl:px-16"
-        >
-          <SectionTitle
-            label={homeTextValue(homeTexts, "factory_section_label", "Bằng chứng thương hiệu")}
-            title={homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
-          />
-
-          <div className="-mx-4 mt-8 grid gap-4 sm:-mx-6 sm:mt-14 sm:gap-6 lg:-mx-12 lg:gap-8 xl:-mx-16">
-              {proofs.map((proof, index) => {
-                const Icon = proof.icon;
-                const imageOnRight = index % 2 === 1;
-                const isExternalLink = proof.linkUrl.startsWith("http");
-                return (
-                  <motion.article
-                    key={`${proof.title}-${index}`}
-                    initial={{ opacity: 0, x: imageOnRight ? 24 : -24, scale: 0.97 }}
-                    whileInView={{ opacity: 1, x: 0, scale: 1 }}
-                    viewport={{ once: true, margin: "-90px" }}
-                    transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-                    className="group grid min-w-0 overflow-hidden border border-orange-100 bg-white text-left shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition-all duration-300 hover:border-orange-300 hover:shadow-[0_24px_65px_rgba(234,88,12,0.12)] lg:grid-cols-2"
-                  >
-                    <span
-                      className={`relative min-h-[210px] overflow-hidden bg-slate-100 sm:min-h-[320px] ${
-                        imageOnRight ? "lg:order-2" : "lg:order-1"
-                      }`}
-                    >
-                      <img
-                        src={proof.imageUrl}
-                        alt={proof.title}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      />
-                      <span className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent" />
+                <div
+                  className={`relative z-10 order-2 -mt-5 min-w-0 border border-orange-100 bg-white p-5 shadow-[0_24px_65px_rgba(60,31,9,0.13)] sm:-mt-10 sm:p-8 lg:row-start-1 lg:mt-0 lg:p-10 xl:p-12 ${
+                    imageOnRight
+                      ? "lg:col-start-1 lg:col-span-5 lg:mr-[-72px]"
+                      : "lg:col-start-8 lg:col-span-5 lg:ml-[-72px]"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0 h-1 w-full bg-orange-600 ${
+                      imageOnRight ? "left-0 lg:h-full lg:w-1" : "left-0 lg:left-auto lg:right-0 lg:h-full lg:w-1"
+                    }`}
+                  />
+                  <div>
+                    <span className="grid h-12 w-12 place-items-center border border-orange-200 bg-orange-50 text-orange-600 transition duration-300 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white sm:h-14 sm:w-14">
+                      <Icon size={23} />
                     </span>
-
-                    <span
-                      className={`relative flex min-w-0 flex-col justify-center p-5 sm:p-10 lg:p-12 ${
-                        imageOnRight ? "lg:order-1" : "lg:order-2"
-                      }`}
+                  </div>
+                  <h3 className="mt-6 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                    {proof.title}
+                  </h3>
+                  <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
+                    {proof.text}
+                  </p>
+                  {proof.linkUrl ? (
+                    <a
+                      href={proof.linkUrl}
+                      target={isExternalLink ? "_blank" : undefined}
+                      rel={isExternalLink ? "noopener noreferrer" : undefined}
+                      className="mt-7 inline-flex items-center gap-3 border-b border-orange-500 pb-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition hover:gap-4 hover:text-orange-600"
                     >
-                      <span className="absolute left-0 top-0 h-1 w-full bg-orange-600 lg:h-full lg:w-1" />
-                      <span className="flex h-12 w-12 items-center justify-center border border-orange-200 bg-orange-50 text-orange-600 transition-all duration-300 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white">
-                        <Icon size={21} />
-                      </span>
-                      <span className="mt-5 text-[10px] font-black uppercase tracking-[0.2em] text-orange-600 sm:mt-6">
-                        Bằng chứng {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">
-                        {proof.title}
-                      </span>
-                      <span className="mt-3 text-sm font-semibold leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-7">
-                        {proof.text}
-                      </span>
-                      {proof.linkUrl && (
-                        <a
-                          href={proof.linkUrl}
-                          target={isExternalLink ? "_blank" : undefined}
-                          rel={isExternalLink ? "noopener noreferrer" : undefined}
-                          className="mt-7 inline-flex w-fit items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-700 transition-all hover:gap-3 hover:text-orange-600"
-                        >
-                          Xem chi tiết
-                          <ArrowRight size={16} />
-                        </a>
-                      )}
-                    </span>
-                  </motion.article>
-                );
-              })}
-          </div>
-        </motion.div>
+                      Xem hồ sơ liên quan
+                      <ArrowRight size={16} />
+                    </a>
+                  ) : null}
+                </div>
+
+                <span className="absolute left-1/2 top-1/2 z-20 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 border-4 border-[#f7f0e5] bg-orange-600 lg:block" />
+              </motion.article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
