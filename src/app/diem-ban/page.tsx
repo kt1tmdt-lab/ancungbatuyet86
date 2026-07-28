@@ -1,29 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, MapPin, PackageCheck, Phone, SearchCheck, ShieldCheck, ShoppingBag, Store, Truck } from "lucide-react";
+import { ArrowRight, BadgeCheck, SearchCheck, ShieldCheck, ShoppingBag, Store, Truck } from "lucide-react";
 import prisma from "@/lib/prisma";
-
-function typeLabel(type: string) {
-  if (type === "chi-nhanh") return "Chi nhánh";
-  if (type === "sieu-thi") return "Siêu thị";
-  if (type === "online") return "Online";
-  return "Đại lý";
-}
+import DistributionPointExplorer from "@/components/pages/DistributionPointExplorer";
 
 export default async function SalesPointPage() {
-  const [locations, onlineChannels] = await Promise.all([
-    prisma.location.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }),
-    prisma.onlineChannel.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    }),
-  ]);
-  const firstLocation = locations[0];
-  const mapSrc = firstLocation
-    ? `https://www.google.com/maps?q=${firstLocation.lat},${firstLocation.lng}&z=13&hl=vi&output=embed`
-    : "";
+  const onlineChannels = await prisma.onlineChannel.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  });
 
   return (
     <main className="min-h-screen bg-[#fff8ed] text-slate-950">
@@ -53,7 +37,7 @@ export default async function SalesPointPage() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              [String(locations.length), "Điểm bán offline", Store],
+              ["63.426", "Điểm phân phối", Store],
               [String(onlineChannels.length), "Kênh online", ShoppingBag],
               ["3", "Bước nhận diện", SearchCheck],
             ].map(([value, label, Icon]) => (
@@ -93,66 +77,8 @@ export default async function SalesPointPage() {
             </p>
           </div>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="overflow-hidden border border-orange-200 bg-white shadow-[16px_16px_0_rgba(234,88,12,0.10)]">
-              {mapSrc ? (
-                <iframe
-                  title="Bản đồ điểm bán Ăn Cùng Bà Tuyết"
-                  src={mapSrc}
-                  className="h-[420px] w-full border-0"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="grid h-[420px] place-items-center bg-orange-50 p-8 text-center">
-                  <div>
-                    <MapPin className="mx-auto h-12 w-12 text-orange-600" />
-                    <p className="mt-4 text-sm font-black uppercase tracking-[0.16em] text-slate-500">Chưa có tọa độ điểm bán</p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">Khi có tọa độ điểm bán, bản đồ sẽ hiển thị tại đây.</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="border border-orange-200 bg-white p-6">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Bản đồ</p>
-              <h3 className="mt-3 text-3xl font-black tracking-[-0.05em] text-slate-950">Bản đồ điểm bán chính thức</h3>
-              <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">
-                Các điểm bán có tọa độ sẽ được hiển thị trên bản đồ để khách hàng dễ tra cứu vị trí, giờ mở cửa và thông tin liên hệ.
-              </p>
-              {firstLocation ? (
-                <Link
-                  href={`https://www.google.com/maps/search/?api=1&query=${firstLocation.lat},${firstLocation.lng}`}
-                  target="_blank"
-                  className="mt-6 inline-flex items-center gap-2 bg-orange-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-950"
-                >
-                  Mở trên Google Maps <ArrowRight size={14} />
-                </Link>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {locations.length ? locations.map((location) => (
-              <article key={location.id} className="border border-orange-200 bg-white p-6 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-600">{typeLabel(location.type)}</p>
-                    <h3 className="mt-3 text-xl font-black tracking-[-0.04em]">{location.name}</h3>
-                  </div>
-                  <MapPin className="h-7 w-7 text-orange-600" />
-                </div>
-                <p className="mt-4 text-sm font-semibold leading-7 text-slate-600">{location.address}</p>
-                <p className="mt-2 text-sm font-bold text-slate-500">{location.province}</p>
-                <div className="mt-5 grid gap-2 text-sm font-bold text-slate-700">
-                  <span className="inline-flex items-center gap-2"><Phone size={15} className="text-orange-600" /> {location.phone}</span>
-                  <span>{location.hours}</span>
-                </div>
-              </article>
-            )) : (
-              <div className="border border-dashed border-orange-200 bg-white p-8 text-sm font-bold text-slate-500 md:col-span-2 xl:col-span-3">
-                Hiện chưa có điểm bán offline nào được công bố.
-              </div>
-            )}
+          <div className="mt-10">
+            <DistributionPointExplorer />
           </div>
         </div>
       </section>
