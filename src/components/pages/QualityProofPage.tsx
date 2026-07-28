@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   ClipboardCheck,
@@ -103,7 +104,7 @@ function qualityImage(value: string | undefined, fallback: string) {
 
 function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
   return (
-    <p className={`inline-flex border-l-4 border-orange-600 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] ${dark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"}`}>
+    <p className={`inline-flex text-xs font-black uppercase tracking-[0.18em] ${dark ? "text-orange-300" : "text-orange-600"}`}>
       {children}
     </p>
   );
@@ -295,31 +296,36 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
   });
 
   return (
-    <main className="min-h-screen bg-[#fff8ed] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="absolute inset-0 bg-[linear-gradient(112deg,#f7efe3_0%,#f7efe3_52%,#fffaf2_52%,#fffaf2_100%)]" />
+    <main className="min-h-screen overflow-x-clip bg-[#FAF7F2] font-sans text-slate-950 selection:bg-orange-500 selection:text-white">
+      <section className="relative overflow-hidden border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
+        <div className="absolute inset-0 bg-[linear-gradient(112deg,#ffffff_0%,#ffffff_52%,#fffaf2_52%,#fffaf2_100%)]" />
         <div className="absolute -right-28 top-10 h-96 w-96 rounded-full bg-orange-400/15 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12"
+        >
+          <div className="order-2 lg:order-1">
             <SectionLabel>{heroEyebrow}</SectionLabel>
-            <h1 className="mt-7 max-w-5xl text-5xl font-black leading-[0.9] tracking-[-0.075em] sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 max-w-5xl text-[1.85rem] font-black leading-[1.08] tracking-[-0.045em] sm:mt-7 sm:text-4xl lg:text-5xl">
               {heroTitle}
             </h1>
-            <p className="mt-7 max-w-3xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
+            <p className="mt-5 max-w-3xl text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-7 sm:text-lg sm:leading-8">
               {heroSubtitle}
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href={heroCtaLink} className="inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
+              <Link href={heroCtaLink} className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
                 {heroCtaText} <ArrowRight size={16} />
               </Link>
-              <Link href={heroSecondaryCtaLink} className="inline-flex items-center gap-3 border border-slate-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-400 hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
+              <Link href={heroSecondaryCtaLink} className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-400 hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
                 {heroSecondaryCtaText} <ArrowRight size={16} />
               </Link>
             </div>
           </div>
 
-          <div className="border border-orange-100 bg-white p-4 shadow-[18px_18px_0_rgba(234,88,12,0.10)]">
-            <div className="relative h-[420px] overflow-hidden bg-orange-50">
+          <div className="order-1 border border-slate-200 bg-white p-3 shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-4 lg:order-2">
+            <div className="relative h-[280px] overflow-hidden bg-orange-50 sm:h-[420px]">
               <ImageBox src={heroImage} alt="Hình ảnh nhà máy hoặc hồ sơ kiểm chứng của Ăn Cùng Bà Tuyết" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950/85 to-transparent p-6 text-white">
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-200">Nguyên tắc trình bày</p>
@@ -327,14 +333,20 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
+      <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.65 }}
+          className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-10"
+        >
+          <div className="order-2 lg:order-1">
             <SectionLabel>01 · Nguồn nguyên liệu</SectionLabel>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+            <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
               {sourceTitle}
             </h2>
             <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
@@ -343,7 +355,7 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             <p className="mt-4 text-base font-semibold leading-8 text-slate-700">
               Các thông tin được công khai trên trang cần đối chiếu với hồ sơ của từng lô nguyên liệu. Không sử dụng tuyên bố chung cho toàn bộ sản phẩm nếu tài liệu hiện có chỉ áp dụng cho một số sản phẩm hoặc một số thời điểm nhất định.
             </p>
-            <div className="mt-7 border-l-4 border-orange-600 bg-orange-50 p-5">
+            <div className="mt-7 border border-l-4 border-slate-200 border-l-orange-600 bg-[#FAF7F2] p-4 sm:p-5">
               <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-700">Cách kiểm chứng nguồn gốc</p>
               <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
                 Mỗi thông tin về xuất xứ cần được đối chiếu với hồ sơ của từng lô hàng: chứng nhận xuất xứ, phiếu kiểm dịch, hồ sơ nhập khẩu và điều kiện lưu kho tương ứng.
@@ -351,8 +363,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <div className="relative min-h-[360px] overflow-hidden border border-orange-100 bg-slate-950">
+          <div className="order-1 grid gap-4 lg:order-2">
+            <div className="relative min-h-[280px] overflow-hidden border border-slate-200 bg-slate-950 sm:min-h-[360px]">
               <ImageBox src={sourceImage} alt="Hồ sơ hoặc hình ảnh minh họa nguồn nguyên liệu" className="opacity-80" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
               <div className="absolute bottom-0 left-0 p-6 text-white">
@@ -361,27 +373,34 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              {displayedSourceFacts.map((item) => {
+              {displayedSourceFacts.map((item, index) => {
                 const Icon = item.icon;
                 return (
-                  <article key={item.title} className="border border-orange-100 bg-[#fffaf2] p-5">
+                  <motion.article
+                    key={item.title}
+                    initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.5, delay: index * 0.07 }}
+                    className="border border-slate-200 bg-[#FAF7F2] p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md"
+                  >
                     <Icon className="h-7 w-7 text-orange-600" />
                     <h3 className="mt-4 text-lg font-black tracking-[-0.035em]">{item.title}</h3>
                     <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">{item.desc}</p>
-                  </article>
+                  </motion.article>
                 );
               })}
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      <section id="nha-may-quy-trinh" className="scroll-mt-28 border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+      <section id="nha-may-quy-trinh" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
-            <div>
+            <div className="order-2 lg:order-1">
               <SectionLabel>02 · Nhà máy & quy trình</SectionLabel>
-              <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
                 {factoryTitle}
               </h2>
               <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
@@ -396,8 +415,8 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               </div>
             </div>
 
-            <div className="grid gap-4">
-              <div className="grid border border-orange-100 bg-white md:grid-cols-3">
+            <div className="order-1 grid gap-4 lg:order-2">
+              <div className="grid border border-slate-200 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.02)] md:grid-cols-3">
                 {factoryStats.map(([value, label]) => (
                   <div key={value} className="border-b border-orange-100 p-5 md:border-b-0 md:border-r last:md:border-r-0">
                     <p className="text-3xl font-black tracking-[-0.06em] text-orange-600">{value}</p>
@@ -415,20 +434,27 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
             <SectionLabel>Quy trình 6 bước có kiểm soát</SectionLabel>
             <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {displayedProcessSteps.map(([title, desc], index) => (
-                <article key={title} className="border border-orange-100 bg-white p-6 shadow-sm">
+                <motion.article
+                  key={title}
+                  initial={{ opacity: 0, y: 28, scale: 0.98 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-70px" }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  className="border border-slate-200 bg-white p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md sm:p-6"
+                >
                   <p className="text-4xl font-black tracking-[-0.07em] text-orange-600">{String(index + 1).padStart(2, "0")}</p>
                   <h3 className="mt-5 text-xl font-black tracking-[-0.04em]">{title}</h3>
                   <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{desc}</p>
-                </article>
+                </motion.article>
               ))}
             </div>
           </div>
 
           <div className="mt-14 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {gallery.map((item) => (
-              <article key={item.id} className="border border-orange-100 bg-white">
+              <article key={item.id} className="group overflow-hidden border border-slate-200 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md">
                 <div className="h-52 overflow-hidden bg-orange-50">
-                  <ImageBox src={qualityImage(item.imageUrl, "/bento/bento-factory.png")} alt={text(item.title, "Ảnh nhà máy NMV Food")} />
+                  <ImageBox src={qualityImage(item.imageUrl, "/bento/bento-factory.png")} alt={text(item.title, "Ảnh nhà máy NMV Food")} className="transition duration-500 group-hover:scale-105" />
                 </div>
                 <div className="p-5">
                   <h3 className="font-black tracking-[-0.03em]">{text(item.title, "Gallery nhà máy")}</h3>
@@ -440,12 +466,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
         </div>
       </section>
 
-      <section id="ho-so-phap-ly" className="scroll-mt-28 border-b border-orange-100 bg-white px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+      <section id="ho-so-phap-ly" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
             <div>
               <SectionLabel>03 · Hồ sơ pháp lý</SectionLabel>
-              <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
                 {documentsTitle}
               </h2>
             </div>
@@ -455,15 +481,19 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {documents.map((item) => (
-              <button
+            {documents.map((item, index) => (
+              <motion.button
                 key={item.id}
                 type="button"
+                initial={{ opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-70px" }}
+                transition={{ duration: 0.5, delay: index * 0.07 }}
                 onClick={() => {
                   setActiveDoc(item);
                   setIsZoomed(false);
                 }}
-                className="group min-h-80 border border-orange-100 bg-[#fffaf2] p-6 text-left transition hover:-translate-y-1 hover:border-orange-400 hover:bg-white hover:shadow-[0_24px_70px_rgba(234,88,12,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+                className="group min-h-80 border border-slate-200 bg-[#FAF7F2] p-6 text-left shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:bg-white hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
               >
                 <FileSearch className="h-8 w-8 text-orange-600" />
                 <h3 className="mt-6 text-xl font-black tracking-[-0.04em]">{item.title}</h3>
@@ -475,35 +505,35 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
                 <span className="mt-6 inline-flex items-center gap-2 border border-orange-200 bg-white px-4 py-3 text-xs font-black uppercase tracking-wide text-orange-700">
                   Xem chi tiết <ArrowRight size={14} />
                 </span>
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="bao-hiem-san-pham" className="scroll-mt-28 border-b border-orange-100 bg-slate-950 px-5 py-20 text-white sm:px-8 lg:px-14 xl:px-20">
+      <section id="bao-hiem-san-pham" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-12 text-slate-950 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div>
-            <SectionLabel dark>04 · Bảo hiểm trách nhiệm sản phẩm</SectionLabel>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+          <div className="order-2 lg:order-1">
+            <SectionLabel>04 · Bảo hiểm trách nhiệm sản phẩm</SectionLabel>
+            <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
               {pviTitle}
             </h2>
-            <p className="mt-6 text-base font-semibold leading-8 text-white/75">
+            <p className="mt-6 text-base font-semibold leading-8 text-slate-700">
               {pviDescription}
             </p>
-            <div className="mt-7 border border-orange-400/30 bg-orange-500/10 p-5">
-              <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-200">Lưu ý</p>
-              <p className="mt-3 text-sm font-semibold leading-7 text-white/75">
+            <div className="mt-7 border border-l-4 border-orange-200 border-l-orange-600 bg-white p-5">
+              <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-700">Lưu ý</p>
+              <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
                 Bảo hiểm trách nhiệm sản phẩm không thay thế chứng nhận chất lượng, phiếu kiểm nghiệm hoặc trách nhiệm trực tiếp của đơn vị sản xuất và kinh doanh.
               </p>
             </div>
           </div>
 
-          <div className="border border-white/10 bg-white/5 p-4">
-            <div className="h-80 overflow-hidden bg-slate-900">
-              <ImageBox src={pviImage} alt="Hồ sơ bảo hiểm trách nhiệm sản phẩm PVI" className="opacity-85" />
+          <div className="order-1 border border-slate-200 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.03)] lg:order-2">
+            <div className="h-72 overflow-hidden bg-slate-100 sm:h-80">
+              <ImageBox src={pviImage} alt="Hồ sơ bảo hiểm trách nhiệm sản phẩm PVI" />
             </div>
-            <div className="grid gap-3 p-5 text-sm font-bold text-white/75">
+            <div className="grid gap-3 p-5 text-sm font-bold text-slate-700">
               <Placeholder>Pháp nhân được bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
               <Placeholder>Phạm vi bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
               <Placeholder>Thời hạn bảo hiểm: [CẦN XÁC NHẬN]</Placeholder>
@@ -513,12 +543,12 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
         </div>
       </section>
 
-      <section id="bao-ve-khach-hang" className="scroll-mt-28 border-b border-orange-100 bg-[#f7efe3] px-5 py-20 sm:px-8 lg:px-14 xl:px-20">
+      <section id="bao-ve-khach-hang" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
             <div>
               <SectionLabel>05 · Quyền lợi khách hàng</SectionLabel>
-              <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
                 {policyTitle}
               </h2>
             </div>
@@ -532,16 +562,23 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
               const icons = [FileCheck2, PackageCheck, Headphones, ShieldCheck, ClipboardCheck];
               const Icon = icons[index] || FileCheck2;
               return (
-                <article key={title} className="border border-orange-100 bg-white p-6">
+                <motion.article
+                  key={title}
+                  initial={{ opacity: 0, y: 26, scale: 0.98 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, margin: "-70px" }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  className="border border-slate-200 bg-[#FAF7F2] p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md sm:p-6"
+                >
                   <Icon className="h-8 w-8 text-orange-600" />
                   <h3 className="mt-6 text-lg font-black tracking-[-0.03em]">{title}</h3>
                   <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{desc}</p>
-                </article>
+                </motion.article>
               );
             })}
           </div>
 
-          <div className="mt-8 grid gap-4 border border-orange-100 bg-white p-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="mt-8 grid gap-4 border border-slate-200 bg-[#FAF7F2] p-5 shadow-[0_4px_15px_rgba(0,0,0,0.02)] sm:p-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <h3 className="text-2xl font-black tracking-[-0.04em]">Kênh hỗ trợ cần xác nhận</h3>
               <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">
@@ -555,22 +592,22 @@ export default function QualityProofPage({ config }: { config: QualityPageConfig
         </div>
       </section>
 
-      <section className="bg-white px-5 py-16 sm:px-8 lg:px-14 xl:px-20">
-        <div className="mx-auto grid max-w-7xl gap-8 border border-orange-100 bg-slate-950 p-8 text-white lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
+      <section className="bg-[#FAF7F2] px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_4px_15px_rgba(0,0,0,0.03)] sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
           <div>
-            <SectionLabel dark>06 · Tiếp tục xem</SectionLabel>
-            <h2 className="mt-6 max-w-4xl text-4xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+            <SectionLabel>06 · Tiếp tục xem</SectionLabel>
+            <h2 className="mt-4 max-w-4xl text-3xl font-black leading-tight tracking-[-0.04em] sm:mt-6 sm:text-4xl lg:text-5xl">
               Khám phá sản phẩm và điểm bán chính thức
             </h2>
-            <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-white/70">
+            <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700">
               Xem danh mục sản phẩm của Ăn Cùng Bà Tuyết hoặc tìm các kênh phân phối phù hợp tại khu vực của bạn.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/san-pham" className="inline-flex items-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950">
+            <Link href="/san-pham" className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
               Xem sản phẩm <ArrowRight size={16} />
             </Link>
-            <Link href="/diem-ban" className="inline-flex items-center gap-3 border border-white/15 bg-white/10 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-white hover:text-slate-950">
+            <Link href="/diem-ban" className="inline-flex items-center justify-center gap-3 border border-slate-300 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-400 hover:text-orange-700">
               Tìm điểm bán gần nhất <Truck size={16} />
             </Link>
           </div>
