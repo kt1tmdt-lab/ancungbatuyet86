@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   AlertCircle,
   ArrowDown,
@@ -26,11 +26,6 @@ type Product = {
   shortDescription?: string | null;
   featured?: boolean;
   sortOrder?: number;
-};
-
-type ProductGroup = {
-  id: string;
-  label: string;
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -214,7 +209,6 @@ function ProductChapter({
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeGroup, setActiveGroup] = useState("all");
 
   useEffect(() => {
     fetch("/api/products")
@@ -248,26 +242,6 @@ export default function ProductsPage() {
     });
     return Array.from(firstByCategory.values()).slice(0, 6);
   }, [products]);
-
-  const groups = useMemo<ProductGroup[]>(() => {
-    const unique = new Map<string, string>();
-    coreProducts.forEach((product) => {
-      const id = product.category || "other";
-      unique.set(id, product.categoryLabel || CATEGORY_LABELS[id] || "Sản phẩm khác");
-    });
-    return [
-      { id: "all", label: "Tất cả chủ lực" },
-      ...Array.from(unique, ([id, label]) => ({ id, label })),
-    ];
-  }, [coreProducts]);
-
-  const displayedProducts = useMemo(
-    () =>
-      activeGroup === "all"
-        ? coreProducts
-        : coreProducts.filter((product) => (product.category || "other") === activeGroup),
-    [activeGroup, coreProducts],
-  );
 
   const scrollToProducts = () => {
     document.getElementById("product-showcase")?.scrollIntoView({ behavior: "smooth" });
@@ -365,66 +339,35 @@ export default function ProductsPage() {
         </motion.div>
       </div>
 
-      <section
-        id="product-showcase"
-        className="sticky top-16 z-40 border-b border-orange-100 bg-white/95 px-3 py-3 shadow-[0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur sm:px-6"
-      >
-        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto pb-1">
-          {groups.map((group) => (
-            <button
-              key={group.id}
-              type="button"
-              onClick={() => setActiveGroup(group.id)}
-              className={`shrink-0 border px-5 py-3 text-xs font-black uppercase tracking-[0.12em] transition ${
-                activeGroup === group.id
-                  ? "border-orange-600 bg-orange-600 text-white shadow-[0_10px_24px_rgba(234,88,12,0.2)]"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-700"
-              }`}
-            >
-              {group.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {loading ? (
-        <section className="grid min-h-[60vh] place-items-center bg-[#fff4df]">
-          <div className="text-center">
-            <Loader className="mx-auto animate-spin text-orange-600" size={38} />
-            <p className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-slate-500">
-              Đang tải bộ sưu tập
-            </p>
-          </div>
-        </section>
-      ) : displayedProducts.length === 0 ? (
-        <section className="grid min-h-[55vh] place-items-center bg-white px-5 text-center">
-          <div>
-            <AlertCircle className="mx-auto text-orange-400" size={46} />
-            <h2 className="mt-5 text-2xl font-black">Chưa có sản phẩm chủ lực trong nhóm này</h2>
-            <button
-              type="button"
-              onClick={() => setActiveGroup("all")}
-              className="mt-6 bg-orange-600 px-6 py-3 text-xs font-black uppercase tracking-wider text-white"
-            >
-              Xem tất cả chủ lực
-            </button>
-          </div>
-        </section>
-      ) : (
-        <AnimatePresence mode="wait">
+      <div id="product-showcase" className="scroll-mt-16">
+        {loading ? (
+          <section className="grid min-h-[60vh] place-items-center bg-[#fff4df]">
+            <div className="text-center">
+              <Loader className="mx-auto animate-spin text-orange-600" size={38} />
+              <p className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-slate-500">
+                Đang tải bộ sưu tập
+              </p>
+            </div>
+          </section>
+        ) : coreProducts.length === 0 ? (
+          <section className="grid min-h-[55vh] place-items-center bg-white px-5 text-center">
+            <div>
+              <AlertCircle className="mx-auto text-orange-400" size={46} />
+              <h2 className="mt-5 text-2xl font-black">Chưa có sản phẩm chủ lực</h2>
+            </div>
+          </section>
+        ) : (
           <motion.div
-            key={activeGroup}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {displayedProducts.map((product, index) => (
+            {coreProducts.map((product, index) => (
               <ProductChapter key={productKey(product)} product={product} index={index} />
             ))}
           </motion.div>
-        </AnimatePresence>
-      )}
+        )}
+      </div>
 
       <section className="bg-white px-5 py-16 sm:px-8 lg:px-16 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-8 border border-orange-100 bg-[#fff8ed] p-7 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-14">
