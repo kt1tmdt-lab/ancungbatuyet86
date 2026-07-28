@@ -654,17 +654,21 @@ export default function Navbar({
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
                                 style={{ transitionDelay: `${120 + itemIndex * 45}ms` }}
-                                className={`group/item block min-h-36 border-l border-slate-200 px-6 py-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] first:border-l-0 hover:bg-orange-50/60 ${
+                                className={`group/item min-h-36 border-l border-slate-200 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] first:border-l-0 hover:bg-orange-50/60 ${
+                                  link.href === "/san-pham"
+                                    ? "flex items-center px-7 py-6"
+                                    : "block px-6 py-2"
+                                } ${
                                   isDesktopSubmenuOpen
                                     ? "translate-y-0 opacity-100"
                                     : "translate-y-3 opacity-0"
                                 }`}
                               >
-                                <span className="flex items-start justify-between gap-4 text-base font-black leading-6 text-slate-900 group-hover/item:text-orange-700">
+                                <span className="flex w-full items-start justify-between gap-4 text-base font-black leading-6 text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
                                   <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
                                 </span>
-                                {item.note && (
+                                {link.href !== "/san-pham" && item.note && (
                                   <span className="mt-3 block text-xs font-semibold leading-5 text-slate-500">
                                     {item.note}
                                   </span>
@@ -807,7 +811,9 @@ export default function Navbar({
                             className="block border-b border-slate-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-700"
                           >
                             <span className="block">{item.label}</span>
-                            {item.note && <span className="mt-1 block text-xs font-semibold text-slate-500">{item.note}</span>}
+                            {link.href !== "/san-pham" && item.note ? (
+                              <span className="mt-1 block text-xs font-semibold text-slate-500">{item.note}</span>
+                            ) : null}
                           </Link>
                         ))}
                       </div>
