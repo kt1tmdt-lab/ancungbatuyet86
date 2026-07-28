@@ -114,10 +114,10 @@ function getHeaderSubmenu(
 
   if (link.href === "/san-pham") {
     return {
-      eyebrow: "Signature collection",
-      title: "Showcase sản phẩm",
-      description: "Khám phá cá tính, hương vị và câu chuyện riêng của từng dòng sản phẩm đại diện.",
-      accent: "ACBT",
+      eyebrow: "Sản phẩm",
+      title: "Sản phẩm chủ lực",
+      description: "Thông tin và câu chuyện của các dòng sản phẩm đại diện.",
+      accent: "",
       overviewHref: "/san-pham",
       links: [
         ...(productMenuLinks.length
@@ -588,18 +588,14 @@ export default function Navbar({
                       <span>{link.label}</span>
                       <ChevronDown size={14} className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-180" />
                     </Link>
-                    <div className="pointer-events-none invisible fixed inset-x-0 top-[72px] z-50 w-screen origin-top -translate-y-3 scale-y-[0.96] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-y-100 group-hover:opacity-100">
-                      <div className="border-y border-orange-200 bg-[#fffdf4]/98 px-6 py-7 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-xl">
-                        <div className="mx-auto grid max-w-7xl grid-cols-[300px_minmax(0,1fr)] gap-8">
-                          <div className="relative overflow-hidden rounded-2xl border border-orange-100 bg-[linear-gradient(135deg,#fff4df_0%,#fffaf3_100%)] px-6 py-6 text-slate-950">
-                            <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-300/25" />
+                    <div className="pointer-events-none invisible fixed inset-x-0 top-16 z-50 w-screen origin-top -translate-y-3 scale-y-[0.96] opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] before:absolute before:inset-x-0 before:-top-12 before:h-12 before:content-[''] group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:scale-y-100 group-hover:opacity-100 lg:top-[72px]">
+                      <div className="border-y border-slate-200 bg-[#fffdf8]/98 px-6 py-8 shadow-[0_20px_45px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+                        <div className="mx-auto grid max-w-7xl grid-cols-[260px_minmax(0,1fr)] gap-10">
+                          <div className="border-r border-slate-200 pr-10 text-slate-950">
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                               {submenu.eyebrow}
                             </p>
-                            <p className="absolute right-4 top-4 rounded-full border border-orange-200 bg-white px-3 py-1 text-[10px] font-black tracking-[-0.02em] text-orange-600">
-                              {submenu.accent}
-                            </p>
-                            <p className="mt-3 pr-20 text-2xl font-black leading-7 tracking-[-0.04em]">
+                            <p className="mt-3 text-2xl font-black leading-7 tracking-[-0.04em]">
                               {submenu.title}
                             </p>
                             <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-500">
@@ -607,29 +603,26 @@ export default function Navbar({
                             </p>
                             <Link
                               href={overviewHref}
-                              className="group/item mt-6 flex items-center justify-between rounded-xl bg-orange-600 px-4 py-3.5 text-sm font-black text-white transition hover:bg-orange-700"
+                              className="group/item mt-6 inline-flex items-center gap-3 border-b border-orange-500 pb-1.5 text-xs font-black uppercase tracking-[0.1em] text-orange-700 transition hover:text-orange-600"
                             >
                               <span>{overviewLabel}</span>
                               <span className="transition group-hover/item:translate-x-1">→</span>
                             </Link>
                           </div>
-                          <div className="grid grid-cols-3 content-start gap-3">
+                          <div className="grid grid-cols-4 content-start">
                             {submenu.links.map((item, itemIndex) => (
                               <Link
                                 key={`${link.href}-${item.href}-${item.label}`}
                                 href={item.href}
                                 style={{ transitionDelay: `${120 + itemIndex * 45}ms` }}
-                                className="group/item block min-h-32 translate-y-3 rounded-xl border border-orange-100 bg-white px-5 py-5 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-orange-300 hover:bg-[#fffaf3] hover:shadow-[0_16px_34px_rgba(234,88,12,0.09)] group-hover:translate-y-0 group-hover:opacity-100"
+                                className="group/item block min-h-36 translate-y-3 border-l border-slate-200 px-6 py-2 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] first:border-l-0 hover:bg-orange-50/60 group-hover:translate-y-0 group-hover:opacity-100"
                               >
-                                <span className="mb-4 block text-[10px] font-black uppercase tracking-[0.16em] text-orange-500">
-                                  Collection
-                                </span>
-                                <span className="flex items-center justify-between gap-4 text-base font-black text-slate-900 group-hover/item:text-orange-700">
+                                <span className="flex items-start justify-between gap-4 text-base font-black leading-6 text-slate-900 group-hover/item:text-orange-700">
                                   {item.label}
                                   <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
                                 </span>
                                 {item.note && (
-                                  <span className="mt-2 block text-xs font-semibold leading-5 text-slate-500">
+                                  <span className="mt-3 block text-xs font-semibold leading-5 text-slate-500">
                                     {item.note}
                                   </span>
                                 )}
@@ -742,8 +735,8 @@ export default function Navbar({
                       <ChevronDown size={18} className={`transition-transform duration-200 ${isSubmenuOpen ? "rotate-180 text-primary-dark" : "text-gray-500"}`} />
                     </button>
                     {isSubmenuOpen && (
-                      <div className="rounded-2xl bg-orange-50/50 p-3">
-                        <div className="mb-2 rounded-xl border border-orange-100 bg-white p-4">
+                      <div className="border-l-2 border-orange-300 bg-[#fffdf8] px-3 py-2">
+                        <div className="mb-2 border-b border-slate-200 bg-white px-3 py-4">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">{submenu.eyebrow}</p>
                           <p className="mt-1 text-sm font-black text-slate-950">{submenu.title}</p>
                           <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{submenu.description}</p>
@@ -751,7 +744,7 @@ export default function Navbar({
                         <Link
                           href={overviewHref}
                           onClick={() => setOpen(false)}
-                          className="mb-2 flex items-center justify-between rounded-xl bg-orange-600 px-4 py-3.5 text-xs font-black uppercase tracking-[0.1em] text-white"
+                          className="mb-1 flex items-center justify-between border-b border-orange-200 bg-orange-50 px-4 py-3.5 text-xs font-black uppercase tracking-[0.1em] text-orange-700"
                         >
                           {overviewLabel}
                           <span>→</span>
@@ -761,7 +754,7 @@ export default function Navbar({
                             key={`${link.href}-${item.href}-${item.label}`}
                             href={item.href}
                             onClick={() => setOpen(false)}
-                            className="mb-1 block rounded-xl border border-orange-100 bg-white px-4 py-3 text-sm font-bold text-gray-700 hover:border-orange-200 hover:text-orange-700"
+                            className="block border-b border-slate-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-700"
                           >
                             <span className="block">{item.label}</span>
                             {item.note && <span className="mt-1 block text-xs font-semibold text-slate-500">{item.note}</span>}
