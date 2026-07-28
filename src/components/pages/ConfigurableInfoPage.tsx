@@ -1196,6 +1196,86 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
         if (block.type === "split") {
           const imageLeft = data.imagePosition === "left";
+          const isMediaPartnerIntro = fallback.routePath === "/hop-tac/truyen-thong";
+
+          if (isMediaPartnerIntro) {
+            const mediaPrinciples = [
+              {
+                icon: "BookOpen",
+                title: "Câu chuyện thương hiệu",
+                description: "Thông tin giới thiệu, hành trình phát triển và định hướng của Ăn Cùng Bà Tuyết.",
+              },
+              {
+                icon: "FileCheck2",
+                title: "Hồ sơ chất lượng",
+                description: "Nguồn nguyên liệu, nhà máy, chứng nhận và các tài liệu được phép công khai.",
+              },
+              {
+                icon: "BadgeCheck",
+                title: "Kênh thông tin chính thức",
+                description: "Sản phẩm đại diện, kênh mua hàng và chính sách dành cho khách hàng.",
+              },
+            ];
+
+            return (
+              <section key={block.id || index} className="relative overflow-hidden border-b border-orange-100 bg-white px-5 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24">
+                <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full bg-orange-100/70 blur-3xl" />
+                <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-16">
+                  <motion.div
+                    initial={{ opacity: 0, x: -30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                    className="lg:sticky lg:top-28"
+                  >
+                    <span className="text-[5.5rem] font-black leading-none tracking-[-0.09em] text-orange-100 sm:text-[8rem]">
+                      02
+                    </span>
+                    <h2 className="-mt-4 max-w-2xl text-3xl font-black leading-[1.02] tracking-[-0.055em] text-slate-950 sm:-mt-7 sm:text-5xl">
+                      {data.title}
+                    </h2>
+                    <p className="mt-6 max-w-2xl text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
+                      {data.description}
+                    </p>
+                    {data.ctaText && (
+                      <Link
+                        href={data.ctaLink || "#"}
+                        className="mt-7 inline-flex items-center gap-3 border border-orange-200 bg-orange-50 px-6 py-4 text-xs font-black uppercase tracking-wider text-orange-700 transition hover:border-orange-600 hover:bg-orange-600 hover:text-white"
+                      >
+                        {data.ctaText}
+                        <ArrowRight size={15} />
+                      </Link>
+                    )}
+                  </motion.div>
+
+                  <div className="grid gap-3">
+                    {mediaPrinciples.map((item, itemIndex) => (
+                      <motion.article
+                        key={item.title}
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: "-70px" }}
+                        transition={{ duration: 0.55, delay: itemIndex * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                        className="group grid grid-cols-[48px_minmax(0,1fr)] gap-4 border border-slate-200 bg-[#fffaf3] p-5 transition hover:border-orange-300 hover:bg-white hover:shadow-[0_18px_45px_rgba(15,23,42,0.07)] sm:grid-cols-[60px_minmax(0,1fr)] sm:p-7"
+                      >
+                        <span className="grid h-12 w-12 place-items-center bg-orange-600 text-white transition group-hover:bg-slate-950 sm:h-14 sm:w-14">
+                          <DynIcon name={item.icon} className="h-6 w-6" />
+                        </span>
+                        <div>
+                          <div className="flex items-start justify-between gap-4">
+                            <h3 className="text-lg font-black tracking-[-0.035em] text-slate-950 sm:text-xl">{item.title}</h3>
+                            <span className="text-xs font-black text-orange-300">0{itemIndex + 1}</span>
+                          </div>
+                          <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 sm:leading-7">{item.description}</p>
+                        </div>
+                      </motion.article>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }
+
           return (
             <section key={block.id || index} className={`relative overflow-hidden px-5 py-24 sm:px-8 lg:px-16 ${index % 2 === 0 ? "bg-[#fff8ed]" : "bg-white"}`}>
               <div className="absolute left-0 top-0 h-full w-24 bg-orange-50/70" />
