@@ -11,13 +11,19 @@ import {
 } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
+  AlertTriangle,
+  CheckCircle2,
   Download,
   Edit3,
+  Eye,
   ExternalLink,
+  FileSpreadsheet,
   Heart,
   Plus,
   Trash2,
   Upload,
+  X,
+  XCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth-context";
@@ -55,10 +61,35 @@ interface Product {
   sortOrder: number;
 }
 
+type ImportFieldDefinition = {
+  key: string;
+  label: string;
+  required: boolean;
+};
+
+type ImportRowDetail = {
+  rowNumber: number;
+  status: "success" | "error";
+  action: "created" | "updated" | null;
+  productName: string;
+  source: Record<string, string>;
+  saved: Record<string, unknown> | null;
+  importedFields: string[];
+  missingRequired: string[];
+  missingOptional: string[];
+  defaultedFields: string[];
+  error?: string;
+};
+
 type ImportResult = {
+  fileName: string;
+  totalRows: number;
   successCount: number;
   errorCount: number;
-  errors?: unknown[];
+  errors: string[];
+  fields: ImportFieldDefinition[];
+  ignoredHeaders: string[];
+  rows: ImportRowDetail[];
 };
 
 const HERO_PRODUCTS_ASSET_KEY = "products_landing_hero_products";
@@ -107,6 +138,334 @@ function getShowcaseProductIds(config: MarketingConfigData | null) {
   return parseProductIds(listAsset?.linkUrl || "");
 }
 
+function formatImportValue(value: unknown) {
+  if (Array.isArray(value)) return value.length > 0 ? value.join("; ") : "—";
+  if (typeof value === "boolean") return value ? "Có" : "Không";
+  if (value === null || value === undefined || String(value).trim() === "") {
+    return "—";
+  }
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function ImportReportDialog({
+  report,
+  open,
+  selectedRow,
+  onSelectRow,
+  onClose,
+}: {
+  report: ImportResult | null;
+  open: boolean;
+  selectedRow: ImportRowDetail | null;
+  onSelectRow: (row: ImportRowDetail) => void;
+  onClose: () => void;
+}) {
+  if (!open || !report) return null;
+
+  const fieldLabel = (key: string) =>
+    report.fields.find((field) => field.key === key)?.label || key;
+  const completeRows = report.rows.filter(
+    (row) =>
+      row.status === "success" &&
+      row.missingRequired.length === 0 &&
+      row.missingOptional.length === 0,
+  ).length;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Chi tiết kết quả nhập sản phẩm"
+    >
+      <div className="flex max-h-[94vh] w-full max-w-7xl flex-col overflow-hidden border border-slate-200 bg-white shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-600">
+              <FileSpreadsheet size={16} />
+              Báo cáo nhập CSV
+            </div>
+            <h2 className="mt-2 text-xl font-black text-slate-950 sm:text-2xl">
+              {report.fileName}
+            </h2>
+            <p className="mt-1 text-sm font-semibold text-slate-500">
+              {report.successCount} đã lưu · {report.errorCount} lỗi ·{" "}
+              {completeRows} dòng đủ toàn bộ trường
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-10 w-10 shrink-0 place-items-center border border-slate-200 text-slate-500 transition hover:border-slate-400 hover:text-slate-950"
+            aria-label="Đóng báo cáo nhập"
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        {report.ignoredHeaders.length > 0 && (
+          <div className="border-b border-amber-200 bg-amber-50 px-5 py-3 text-xs font-bold leading-5 text-amber-800 sm:px-6">
+            Cột không dùng và đã bỏ qua: {report.ignoredHeaders.join(", ")}
+          </div>
+        )}
+
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <aside className="min-h-0 overflow-y-auto border-b border-slate-200 bg-slate-50 p-3 lg:border-b-0 lg:border-r">
+            <p className="px-2 pb-2 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">
+              Chọn dòng để đối chiếu
+            </p>
+            <div className="space-y-2">
+              {report.rows.map((row) => {
+                const selected = selectedRow?.rowNumber === row.rowNumber;
+                const isComplete =
+                  row.status === "success" &&
+                  row.missingOptional.length === 0;
+                return (
+                  <button
+                    key={row.rowNumber}
+                    type="button"
+                    onClick={() => onSelectRow(row)}
+                    className={`w-full border p-3 text-left transition ${
+                      selected
+                        ? "border-orange-500 bg-white shadow-sm"
+                        : "border-slate-200 bg-white hover:border-orange-300"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black text-slate-950">
+                          {row.productName}
+                        </span>
+                        <span className="mt-1 block text-[11px] font-bold text-slate-400">
+                          Dòng {row.rowNumber} ·{" "}
+                          {row.action === "created"
+                            ? "Tạo mới"
+                            : row.action === "updated"
+                              ? "Cập nhật"
+                              : "Chưa lưu"}
+                        </span>
+                      </span>
+                      {row.status === "error" ? (
+                        <XCircle
+                          size={18}
+                          className="shrink-0 text-red-500"
+                        />
+                      ) : isComplete ? (
+                        <CheckCircle2
+                          size={18}
+                          className="shrink-0 text-emerald-600"
+                        />
+                      ) : (
+                        <AlertTriangle
+                          size={18}
+                          className="shrink-0 text-amber-500"
+                        />
+                      )}
+                    </div>
+                    <span
+                      className={`mt-2 inline-flex px-2 py-1 text-[10px] font-black uppercase tracking-wide ${
+                        row.status === "error"
+                          ? "bg-red-50 text-red-700"
+                          : isComplete
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {row.status === "error"
+                        ? `Thiếu bắt buộc: ${row.missingRequired.length}`
+                        : isComplete
+                          ? "Đã nhập đủ"
+                          : `Thiếu bổ sung: ${row.missingOptional.length}`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+
+          <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
+            {selectedRow ? (
+              <div>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-orange-600">
+                      Dòng {selectedRow.rowNumber}
+                    </p>
+                    <h3 className="mt-1 text-xl font-black text-slate-950">
+                      {selectedRow.productName}
+                    </h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-[11px] font-black">
+                    <span className="bg-slate-100 px-2.5 py-1.5 text-slate-700">
+                      CSV có{" "}
+                      {
+                        selectedRow.importedFields.filter(
+                          (key) => key !== "id",
+                        ).length
+                      }{" "}
+                      trường nội dung
+                    </span>
+                    {selectedRow.missingRequired.length === 0 ? (
+                      <span className="bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
+                        Đủ trường bắt buộc
+                      </span>
+                    ) : (
+                      <span className="bg-red-50 px-2.5 py-1.5 text-red-700">
+                        Thiếu {selectedRow.missingRequired.length} bắt buộc
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {selectedRow.error && (
+                  <div className="mt-4 border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700">
+                    {selectedRow.error}
+                  </div>
+                )}
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="border border-emerald-200 bg-emerald-50 p-3">
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                      Đã có trong file
+                    </p>
+                    <p className="mt-1 text-xs font-semibold leading-5 text-emerald-900">
+                      {selectedRow.importedFields.length > 0
+                        ? selectedRow.importedFields
+                            .map(fieldLabel)
+                            .join(", ")
+                        : "Không có trường hợp lệ"}
+                    </p>
+                  </div>
+                  <div
+                    className={`border p-3 ${
+                      selectedRow.missingRequired.length > 0
+                        ? "border-red-200 bg-red-50"
+                        : "border-amber-200 bg-amber-50"
+                    }`}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-700">
+                      Còn thiếu
+                    </p>
+                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-800">
+                      {selectedRow.missingRequired.length > 0 && (
+                        <>
+                          Bắt buộc:{" "}
+                          {selectedRow.missingRequired
+                            .map(fieldLabel)
+                            .join(", ")}
+                          .{" "}
+                        </>
+                      )}
+                      {selectedRow.missingOptional.length > 0
+                        ? `Bổ sung: ${selectedRow.missingOptional
+                            .map(fieldLabel)
+                            .join(", ")}.`
+                        : selectedRow.missingRequired.length === 0
+                          ? "Không thiếu trường nào."
+                          : ""}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedRow.defaultedFields.length > 0 && (
+                  <div className="mt-3 border border-blue-200 bg-blue-50 p-3 text-xs font-semibold leading-5 text-blue-800">
+                    Hệ thống tự điền:{" "}
+                    {selectedRow.defaultedFields.map(fieldLabel).join(", ")}.
+                    Giá trị cụ thể nằm ở cột “Đã lưu vào hệ thống”.
+                  </div>
+                )}
+
+                <div className="mt-5 grid gap-4 xl:grid-cols-2">
+                  <ImportValueColumn
+                    title="Dữ liệu trong file CSV"
+                    fields={report.fields}
+                    values={selectedRow.source}
+                    missingRequired={selectedRow.missingRequired}
+                  />
+                  <ImportValueColumn
+                    title="Đã lưu vào hệ thống"
+                    fields={report.fields}
+                    values={selectedRow.saved || {}}
+                    missingRequired={[]}
+                    emptyMessage="Dòng này chưa được lưu."
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="grid min-h-72 place-items-center text-center text-sm font-bold text-slate-400">
+                Chưa có dòng dữ liệu để xem.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImportValueColumn({
+  title,
+  fields,
+  values,
+  missingRequired,
+  emptyMessage,
+}: {
+  title: string;
+  fields: ImportFieldDefinition[];
+  values: Record<string, unknown>;
+  missingRequired: string[];
+  emptyMessage?: string;
+}) {
+  if (Object.keys(values).length === 0 && emptyMessage) {
+    return (
+      <section className="border border-slate-200">
+        <h4 className="border-b border-slate-200 bg-slate-950 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white">
+          {title}
+        </h4>
+        <p className="p-5 text-sm font-semibold text-slate-400">
+          {emptyMessage}
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="border border-slate-200">
+      <h4 className="border-b border-slate-200 bg-slate-950 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-white">
+        {title}
+      </h4>
+      <dl className="divide-y divide-slate-100">
+        {fields.map((field) => {
+          const missing = missingRequired.includes(field.key);
+          return (
+            <div
+              key={field.key}
+              className={`grid grid-cols-[130px_minmax(0,1fr)] gap-3 px-4 py-2.5 text-xs ${
+                missing ? "bg-red-50" : "bg-white"
+              }`}
+            >
+              <dt className="font-black text-slate-500">
+                {field.label}
+                {field.required && (
+                  <span className="ml-1 text-red-500">*</span>
+                )}
+              </dt>
+              <dd
+                className={`break-words font-semibold ${
+                  missing ? "text-red-700" : "text-slate-800"
+                }`}
+              >
+                {formatImportValue(values[field.key])}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    </section>
+  );
+}
+
 export default function AdminProductsPage() {
   const { token } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +477,10 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [isImporting, setIsImporting] = useState(false);
+  const [importReport, setImportReport] = useState<ImportResult | null>(null);
+  const [importReportOpen, setImportReportOpen] = useState(false);
+  const [selectedImportRow, setSelectedImportRow] =
+    useState<ImportRowDetail | null>(null);
   const [marketingConfig, setMarketingConfig] =
     useState<MarketingConfigData | null>(null);
 
@@ -354,6 +717,9 @@ export default function AdminProductsPage() {
         "/api/admin/products/import",
         { method: "POST", token, body },
       );
+      setImportReport(result);
+      setSelectedImportRow(result.rows[0] || null);
+      setImportReportOpen(true);
       toast.success(
         `Đã tạo hoặc cập nhật ${result.successCount} sản phẩm.`,
       );
@@ -741,6 +1107,32 @@ export default function AdminProductsPage() {
           </Link>
         </div>
 
+        {importReport && (
+          <div className="flex flex-col gap-4 border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center bg-emerald-50 text-emerald-600">
+                <FileSpreadsheet size={19} />
+              </span>
+              <div>
+                <p className="text-sm font-black text-slate-950">
+                  Kết quả nhập gần nhất: {importReport.fileName}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">
+                  {importReport.successCount}/{importReport.totalRows} dòng đã
+                  lưu · {importReport.errorCount} dòng lỗi
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="adminSecondary"
+              leftIcon={<Eye size={16} />}
+              onClick={() => setImportReportOpen(true)}
+            >
+              Xem chi tiết đối chiếu
+            </Button>
+          </div>
+        )}
+
         <CmsPanel>
           <AdminToolbar>
             <AdminSearchInput
@@ -799,6 +1191,14 @@ export default function AdminProductsPage() {
         )}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ImportReportDialog
+        report={importReport}
+        open={importReportOpen}
+        selectedRow={selectedImportRow}
+        onSelectRow={setSelectedImportRow}
+        onClose={() => setImportReportOpen(false)}
       />
     </ProtectedRoute>
   );

@@ -4,6 +4,99 @@ import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { Prisma, ProductStatus } from "@prisma/client";
 
+const IMPORT_FIELDS = [
+  { csv: "id", key: "id", label: "ID", required: false, reportMissing: false },
+  { csv: "slug", key: "slug", label: "Đường dẫn", required: true, reportMissing: true },
+  { csv: "name", key: "name", label: "Tên sản phẩm", required: true, reportMissing: true },
+  { csv: "tagline", key: "tagline", label: "Thông điệp ngắn", required: false, reportMissing: true },
+  { csv: "description", key: "description", label: "Mô tả", required: false, reportMissing: true },
+  { csv: "category", key: "category", label: "Mã nhóm", required: true, reportMissing: true },
+  { csv: "categorylabel", key: "categoryLabel", label: "Tên nhóm", required: false, reportMissing: true },
+  { csv: "price", key: "price", label: "Giá", required: false, reportMissing: true },
+  { csv: "pricerange", key: "priceRange", label: "Khoảng giá", required: false, reportMissing: true },
+  { csv: "image", key: "image", label: "Ảnh đại diện", required: true, reportMissing: true },
+  { csv: "heroimage", key: "heroImage", label: "Ảnh hero", required: false, reportMissing: true },
+  { csv: "featured", key: "featured", label: "Sản phẩm chủ lực", required: false, reportMissing: true },
+  { csv: "purchaseurl", key: "purchaseUrl", label: "Liên kết mua hàng", required: false, reportMissing: true },
+  { csv: "ingredients", key: "ingredients", label: "Thành phần", required: false, reportMissing: true },
+  { csv: "story", key: "story", label: "Câu chuyện sản phẩm", required: false, reportMissing: true },
+  { csv: "status", key: "status", label: "Trạng thái", required: false, reportMissing: true },
+  { csv: "sortorder", key: "sortOrder", label: "Thứ tự", required: false, reportMissing: true },
+  { csv: "shortdescription", key: "shortDescription", label: "Mô tả ngắn", required: false, reportMissing: true },
+] as const;
+
+type ImportFieldKey = (typeof IMPORT_FIELDS)[number]["key"];
+
+type ImportRowDetail = {
+  rowNumber: number;
+  status: "success" | "error";
+  action: "created" | "updated" | null;
+  productName: string;
+  source: Record<ImportFieldKey, string>;
+  saved: Record<ImportFieldKey, unknown> | null;
+  importedFields: ImportFieldKey[];
+  missingRequired: ImportFieldKey[];
+  missingOptional: ImportFieldKey[];
+  defaultedFields: ImportFieldKey[];
+  error?: string;
+};
+
+const REQUIRED_HEADERS = IMPORT_FIELDS
+  .filter((field) => field.required)
+  .map((field) => field.csv);
+const ACCEPTED_HEADERS = new Set<string>(
+  IMPORT_FIELDS.map((field) => field.csv),
+);
+
+function emptySource(): Record<ImportFieldKey, string> {
+  return Object.fromEntries(
+    IMPORT_FIELDS.map((field) => [field.key, ""]),
+  ) as Record<ImportFieldKey, string>;
+}
+
+function mapSourceRow(headers: string[], row: string[]) {
+  const byHeader: Record<string, string> = {};
+  headers.forEach((header, index) => {
+    byHeader[header] = row[index]?.trim() || "";
+  });
+
+  const source = emptySource();
+  IMPORT_FIELDS.forEach((field) => {
+    source[field.key] = byHeader[field.csv] || "";
+  });
+  return source;
+}
+
+function hasValue(value: unknown) {
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== null && value !== undefined && String(value).trim() !== "";
+}
+
+function serializeSavedProduct(
+  product: Awaited<ReturnType<typeof prisma.product.upsert>>,
+): Record<ImportFieldKey, unknown> {
+  return {
+    id: product.id,
+    slug: product.slug,
+    name: product.name,
+    tagline: product.tagline,
+    description: product.description,
+    category: product.category,
+    categoryLabel: product.categoryLabel,
+    price: product.price,
+    priceRange: product.priceRange,
+    image: product.image,
+    heroImage: product.heroImage,
+    featured: product.featured,
+    purchaseUrl: product.purchaseUrl,
+    ingredients: product.ingredients,
+    story: product.story,
+    status: product.status,
+    sortOrder: product.sortOrder,
+    shortDescription: product.shortDescription,
+  };
+}
+
 function parseCSV(text: string): string[][] {
   const result: string[][] = [];
   let row: string[] = [];
@@ -83,9 +176,7 @@ export async function POST(req: NextRequest) {
 
     const headers = rows[0].map((h) => h.trim().toLowerCase());
     
-    // Check if required headers are present: name, slug, category, image
-    const required = ["name", "slug", "category", "image"];
-    for (const reqHeader of required) {
+    for (const reqHeader of REQUIRED_HEADERS) {
       if (!headers.includes(reqHeader)) {
         return NextResponse.json({ error: `Thiếu cột bắt buộc: ${reqHeader}` }, { status: 400 });
       }
@@ -94,96 +185,151 @@ export async function POST(req: NextRequest) {
     let successCount = 0;
     let errorCount = 0;
     const errors: string[] = [];
+    const rowDetails: ImportRowDetail[] = [];
+    const ignoredHeaders = headers.filter(
+      (header) => header && !ACCEPTED_HEADERS.has(header),
+    );
 
     // Parse data rows
     for (let rIdx = 1; rIdx < rows.length; rIdx++) {
       const row = rows[rIdx];
-      if (row.length < required.length) continue; // skip blank/corrupted rows
+      const source = mapSourceRow(headers, row);
+      const importedFields = IMPORT_FIELDS
+        .filter((field) => hasValue(source[field.key]))
+        .map((field) => field.key);
+      const missingRequired = IMPORT_FIELDS
+        .filter((field) => field.required && !hasValue(source[field.key]))
+        .map((field) => field.key);
+      const missingOptional = IMPORT_FIELDS
+        .filter(
+          (field) =>
+            !field.required &&
+            field.reportMissing &&
+            !hasValue(source[field.key]),
+        )
+        .map((field) => field.key);
 
-      // Map headers to row cell values
-      const p: Record<string, string> = {};
-      headers.forEach((h, colIdx) => {
-        p[h] = row[colIdx] || "";
-      });
-
-      const {
-        id,
-        slug,
-        name,
-        tagline,
-        description,
-        category,
-        categorylabel,
-        price,
-        pricerange,
-        image,
-        heroimage,
-        featured,
-        purchaseurl,
-        ingredients,
-        story,
-        status,
-        sortorder,
-        shortdescription,
-      } = p;
-
-      if (!name || !slug || !category || !image) {
+      if (missingRequired.length > 0) {
         errorCount++;
-        errors.push(`Dòng ${rIdx + 1}: Thiếu trường dữ liệu bắt buộc (name/slug/category/image)`);
+        const message = `Thiếu trường bắt buộc: ${missingRequired.join(", ")}`;
+        errors.push(`Dòng ${rIdx + 1}: ${message}`);
+        rowDetails.push({
+          rowNumber: rIdx + 1,
+          status: "error",
+          action: null,
+          productName: source.name || source.slug || `Dòng ${rIdx + 1}`,
+          source,
+          saved: null,
+          importedFields,
+          missingRequired,
+          missingOptional,
+          defaultedFields: [],
+          error: message,
+        });
         continue;
       }
 
-      const cleanSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+      const cleanSlug = source.slug
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-");
 
       const productStatus = Object.values(ProductStatus).includes(
-        status as ProductStatus,
+        source.status as ProductStatus,
       )
-        ? (status as ProductStatus)
+        ? (source.status as ProductStatus)
         : ProductStatus.PUBLISHED;
 
       const data: Prisma.ProductUncheckedCreateInput = {
         slug: cleanSlug,
-        name: name.trim(),
-        tagline: tagline ? tagline.trim() : "",
-        description: description ? description.trim() : "",
-        category: category.trim(),
-        categoryLabel: categorylabel ? categorylabel.trim() : category.trim(),
-        price: price ? price.trim() : "0đ",
-        priceRange: pricerange ? pricerange.trim() : (price ? price.trim() : null),
-        image: image.trim(),
-        heroImage: heroimage ? heroimage.trim() : null,
-        featured: featured === "true" || featured === "1",
-        purchaseUrl: purchaseurl ? purchaseurl.trim() : "",
-        ingredients: ingredients ? ingredients.split(";").map((i) => i.trim()).filter(Boolean) : [],
-        story: story ? story.trim() : "",
+        name: source.name.trim(),
+        tagline: source.tagline,
+        description: source.description,
+        category: source.category.trim(),
+        categoryLabel: source.categoryLabel || source.category.trim(),
+        price: source.price || "0đ",
+        priceRange: source.priceRange || source.price || null,
+        image: source.image.trim(),
+        heroImage: source.heroImage || null,
+        featured: source.featured === "true" || source.featured === "1",
+        purchaseUrl: source.purchaseUrl,
+        ingredients: source.ingredients
+          ? source.ingredients
+              .split(";")
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : [],
+        story: source.story,
         status: productStatus,
-        sortOrder: parseInt(sortorder) || 0,
-        shortDescription: shortdescription ? shortdescription.trim() : null,
+        sortOrder: Number.parseInt(source.sortOrder, 10) || 0,
+        shortDescription: source.shortDescription || null,
       };
 
       try {
-        if (id && id.trim()) {
-          // Upsert by ID
-          const cleanId = id.trim();
-          await prisma.product.upsert({
-            where: { id: cleanId },
+        const existingProduct = source.id
+          ? await prisma.product.findUnique({ where: { id: source.id } })
+          : await prisma.product.findUnique({ where: { slug: cleanSlug } });
+        let savedProduct;
+
+        if (source.id) {
+          savedProduct = await prisma.product.upsert({
+            where: { id: source.id },
             update: data,
-            create: { id: cleanId, ...data },
+            create: { id: source.id, ...data },
           });
         } else {
-          // Upsert by Slug
-          await prisma.product.upsert({
+          savedProduct = await prisma.product.upsert({
             where: { slug: cleanSlug },
             update: data,
             create: data,
           });
         }
+
+        const saved = serializeSavedProduct(savedProduct);
+        const defaultedFields = IMPORT_FIELDS
+          .filter(
+            (field) =>
+              field.reportMissing &&
+              !hasValue(source[field.key]) &&
+              hasValue(saved[field.key]),
+          )
+          .map((field) => field.key);
+
         successCount++;
+        rowDetails.push({
+          rowNumber: rIdx + 1,
+          status: "success",
+          action: existingProduct ? "updated" : "created",
+          productName: savedProduct.name,
+          source,
+          saved,
+          importedFields,
+          missingRequired,
+          missingOptional,
+          defaultedFields,
+        });
       } catch (err: unknown) {
         console.error(`Import error row ${rIdx + 1}:`, err);
         errorCount++;
-        const message = err instanceof Error ? err.message : String(err);
-        errors.push(`Dòng ${rIdx + 1}: Lỗi lưu vào cơ sở dữ liệu (${message})`);
+        const message =
+          err instanceof Prisma.PrismaClientKnownRequestError
+            ? `Không thể lưu dữ liệu (${err.code})`
+            : "Không thể lưu dữ liệu vào hệ thống";
+        errors.push(`Dòng ${rIdx + 1}: ${message}`);
+        rowDetails.push({
+          rowNumber: rIdx + 1,
+          status: "error",
+          action: null,
+          productName: source.name || source.slug || `Dòng ${rIdx + 1}`,
+          source,
+          saved: null,
+          importedFields,
+          missingRequired,
+          missingOptional,
+          defaultedFields: [],
+          error: message,
+        });
       }
     }
 
@@ -196,9 +342,18 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      fileName: file.name,
+      totalRows: rowDetails.length,
       successCount,
       errorCount,
       errors,
+      fields: IMPORT_FIELDS.map(({ key, label, required }) => ({
+        key,
+        label,
+        required,
+      })),
+      ignoredHeaders,
+      rows: rowDetails,
     });
   } catch (error: unknown) {
     console.error("POST Products Import Error:", error);
