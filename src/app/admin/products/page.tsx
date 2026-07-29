@@ -247,7 +247,7 @@ export default function AdminProductsPage() {
       },
       {
         accessorKey: "featured",
-        header: "Nổi bật",
+        header: "Chủ lực",
         enableSorting: false,
         cell: ({ row }) => {
           const product = row.original;
@@ -292,7 +292,7 @@ export default function AdminProductsPage() {
                 href={`/admin/products/${product.id}/edit`}
                 className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
                 aria-label={`Sửa ${product.name}`}
-                title="Chỉnh sửa"
+                title="Chỉnh landing sản phẩm"
               >
                 <Edit3 size={16} />
               </Link>
@@ -318,9 +318,9 @@ export default function AdminProductsPage() {
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-5">
         <CmsPageHeader
-          eyebrow="Sản phẩm & phân phối"
-          title="Quản lý sản phẩm"
-          description="Cập nhật nội dung showcase, trạng thái hiển thị và thứ tự sản phẩm trên website."
+          eyebrow="Landing sản phẩm"
+          title="Quản lý từng landing sản phẩm"
+          description="Mỗi dòng bên dưới là một landing page riêng. Sửa tên, nội dung, ảnh hero, câu chuyện, thành phần, quy trình và hồ sơ sản phẩm tại đây."
           actions={
             <>
               <input
@@ -357,6 +357,30 @@ export default function AdminProductsPage() {
             </>
           }
         />
+
+        <div className="grid gap-3 border border-orange-200 bg-orange-50 p-4 sm:grid-cols-[1fr_auto_auto] sm:items-center">
+          <div>
+            <p className="text-sm font-black text-slate-950">Cần sửa phần mở đầu của trang tổng Sản phẩm?</p>
+            <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+              Tiêu đề “Mỗi vị ngon, một cá tính”, mô tả, dải chữ chạy và lời kết được quản lý ở màn riêng.
+            </p>
+          </div>
+          <Link
+            href="/admin/website/products"
+            className="inline-flex items-center justify-center gap-2 border border-orange-300 bg-white px-4 py-2.5 text-xs font-black text-orange-700 transition hover:bg-orange-600 hover:text-white"
+          >
+            Quản lý trang tổng
+            <Edit3 size={15} />
+          </Link>
+          <Link
+            href="/san-pham"
+            target="_blank"
+            className="inline-flex items-center justify-center gap-2 border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-700 transition hover:border-orange-300 hover:text-orange-600"
+          >
+            Xem ngoài web
+            <ExternalLink size={15} />
+          </Link>
+        </div>
 
         <CmsPanel>
           <AdminToolbar>

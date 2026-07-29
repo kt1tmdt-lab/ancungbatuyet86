@@ -23,7 +23,14 @@ const pageGroups = [
     items: [
       { title: "Hero đầu trang", description: "Ảnh Bà Tuyết, tiêu đề, mô tả, số liệu và hai nút bấm.", href: "/admin/settings?tab=hero", icon: Home },
       { title: "Nội dung trang chủ", description: "Tiêu đề, mô tả, bật/tắt section, ảnh và link đang dùng trên trang chủ.", href: "/admin/website/home", icon: Home },
-      { title: "Sản phẩm nổi bật", description: "Chọn sản phẩm, ảnh, mô tả và liên kết mua hàng.", href: "/admin/products", icon: Package },
+    ],
+  },
+  {
+    title: "Sản phẩm",
+    description: "Quản lý riêng trang tổng showcase và nội dung landing của từng sản phẩm.",
+    items: [
+      { title: "Trang tổng Sản phẩm", description: "Sửa nhãn, tiêu đề, mô tả, nút khám phá, dải chữ chạy và lời kết của trang /san-pham.", href: "/admin/website/products", icon: ShoppingBag },
+      { title: "Landing từng sản phẩm", description: "Quản lý tên, tagline, câu chuyện, hình ảnh, thành phần, quy trình, hồ sơ và thứ tự xuất hiện của từng sản phẩm.", href: "/admin/products", icon: Package },
     ],
   },
   {
@@ -78,7 +85,6 @@ const pageGroups = [
     title: "Bán hàng & truyền thông",
     description: "Những dữ liệu được cập nhật thường xuyên.",
     items: [
-      { title: "Sản phẩm", description: "Thêm, sửa, ẩn hiện sản phẩm, ảnh và link mua.", href: "/admin/products", icon: Package },
       { title: "Tin tức", description: "Viết, sửa và xuất bản bài viết trên website.", href: "/admin/posts", icon: Newspaper },
       { title: "Báo chí & phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
     ],

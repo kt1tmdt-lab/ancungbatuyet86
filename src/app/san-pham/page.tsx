@@ -12,6 +12,11 @@ import {
   PackageCheck,
   Sparkles,
 } from "lucide-react";
+import {
+  DEFAULT_MARKETING_CONFIG,
+  normalizeMarketingConfig,
+  type HomeTextItem,
+} from "@/lib/marketing-config";
 
 type Product = {
   id: string | number;
@@ -81,6 +86,11 @@ function productDescription(product: Product) {
     product.description ||
     "Dòng sản phẩm được phát triển với thông tin rõ ràng, quy cách đóng gói chỉn chu và hương vị phù hợp với người tiêu dùng Việt."
   );
+}
+
+function pageText(items: HomeTextItem[], key: string, fallback: string) {
+  const value = items.find((item) => item.key === key)?.value?.trim();
+  return value || fallback;
 }
 
 function ProductChapter({
@@ -208,6 +218,9 @@ function ProductChapter({
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [pageTexts, setPageTexts] = useState<HomeTextItem[]>(
+    DEFAULT_MARKETING_CONFIG.homeTexts,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -225,6 +238,18 @@ export default function ProductsPage() {
         setProducts([]);
       })
       .finally(() => setLoading(false));
+
+    fetch("/api/settings/marketing", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error("Marketing settings request failed");
+        return response.json();
+      })
+      .then((data) => {
+        setPageTexts(normalizeMarketingConfig(data?.data).homeTexts);
+      })
+      .catch((error) => {
+        console.error("Failed to load product landing content", error);
+      });
   }, []);
 
   const coreProducts = useMemo(() => {
@@ -247,6 +272,15 @@ export default function ProductsPage() {
     document.getElementById("product-showcase")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const tickerItems = pageText(
+    pageTexts,
+    "products_landing_ticker",
+    "Hương vị Việt\nSản phẩm chủ lực\nRõ nguồn gốc\nĐóng gói chỉn chu\nĂn Cùng Bà Tuyết",
+  )
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff4df] text-slate-950">
       <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff4df] text-slate-950">
@@ -265,22 +299,27 @@ export default function ProductsPage() {
           >
             <div className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-orange-700">
               <Sparkles size={15} />
-              Signature collection
+              {pageText(pageTexts, "products_landing_eyebrow", "Signature collection")}
             </div>
             <h1 className="mt-6 max-w-4xl text-[2.8rem] font-black leading-[0.87] tracking-[-0.075em] sm:text-6xl lg:text-7xl xl:text-8xl">
-              Mỗi vị ngon,
-              <span className="block text-orange-500">một cá tính.</span>
+              {pageText(pageTexts, "products_landing_title_line_1", "Mỗi vị ngon,")}
+              <span className="block text-orange-500">
+                {pageText(pageTexts, "products_landing_title_line_2", "một cá tính.")}
+              </span>
             </h1>
             <p className="mt-7 max-w-xl text-base font-semibold leading-8 text-slate-700 sm:text-lg">
-              Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết —
-              nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.
+              {pageText(
+                pageTexts,
+                "products_landing_description",
+                "Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết — nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.",
+              )}
             </p>
             <button
               type="button"
               onClick={scrollToProducts}
               className="mt-8 inline-flex items-center gap-3 border border-orange-600 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.15em] text-white transition hover:border-orange-700 hover:bg-orange-700"
             >
-              Bắt đầu khám phá
+              {pageText(pageTexts, "products_landing_cta", "Bắt đầu khám phá")}
               <ArrowDown size={17} />
             </button>
           </motion.div>
@@ -294,7 +333,7 @@ export default function ProductsPage() {
             <div className="absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500 shadow-[0_45px_120px_rgba(234,88,12,0.2)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px]" />
             <div className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-orange-400/30 sm:h-[540px] sm:w-[540px] xl:h-[650px] xl:w-[650px]" />
             <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-700">
-              ACBT / Core lineup
+              {pageText(pageTexts, "products_landing_visual_label", "ACBT / Core lineup")}
             </div>
             {coreProducts.slice(0, 3).map((product, index) => {
               const image = productImage(product);
@@ -328,7 +367,7 @@ export default function ProductsPage() {
         >
           {[0, 1].map((copy) => (
             <div key={copy} className="flex items-center">
-              {["Hương vị Việt", "Sản phẩm chủ lực", "Rõ nguồn gốc", "Đóng gói chỉn chu", "Ăn Cùng Bà Tuyết"].map((item) => (
+              {tickerItems.map((item) => (
                 <span key={`${copy}-${item}`} className="flex items-center text-xs font-black uppercase tracking-[0.2em]">
                   <span className="px-7">{item}</span>
                   <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
@@ -372,9 +411,15 @@ export default function ProductsPage() {
       <section className="bg-white px-5 py-16 sm:px-8 lg:px-16 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-8 border border-orange-100 bg-[#fff8ed] p-7 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center lg:p-14">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Câu chuyện phía sau</p>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
+              {pageText(pageTexts, "products_landing_closing_label", "Câu chuyện phía sau")}
+            </p>
             <h2 className="mt-4 max-w-3xl text-3xl font-black leading-tight tracking-[-0.05em] sm:text-5xl">
-              Mỗi sản phẩm bắt đầu từ một lựa chọn và một niềm tin
+              {pageText(
+                pageTexts,
+                "products_landing_closing_title",
+                "Mỗi sản phẩm bắt đầu từ một lựa chọn và một niềm tin",
+              )}
             </h2>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
@@ -382,14 +427,14 @@ export default function ProductsPage() {
               href="/gioi-thieu"
               className="inline-flex h-13 items-center justify-center gap-3 bg-orange-600 px-6 text-xs font-black uppercase tracking-wider text-white transition hover:bg-orange-700"
             >
-              Câu chuyện thương hiệu
+              {pageText(pageTexts, "products_landing_closing_primary", "Câu chuyện thương hiệu")}
               <ArrowRight size={17} />
             </Link>
             <Link
               href="/chat-luong"
               className="inline-flex h-13 items-center justify-center gap-3 border border-slate-300 bg-white px-6 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
             >
-              Hành trình chất lượng
+              {pageText(pageTexts, "products_landing_closing_secondary", "Hành trình chất lượng")}
             </Link>
           </div>
         </div>

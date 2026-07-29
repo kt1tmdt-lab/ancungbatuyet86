@@ -92,8 +92,13 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
             roles: PAGE_ROLES,
           },
           {
+            href: "/admin/website/products",
+            label: "Trang Sản phẩm",
+            roles: PAGE_ROLES,
+          },
+          {
             href: "/admin/products",
-            label: "Sản phẩm",
+            label: "Landing từng sản phẩm",
             roles: CONTENT_ROLES,
           },
           {

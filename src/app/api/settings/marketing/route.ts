@@ -80,6 +80,7 @@ export async function PUT(req: NextRequest) {
     revalidatePath("/gioi-thieu/cong-dong");
     revalidatePath("/chat-luong");
     revalidatePath("/diem-ban");
+    revalidatePath("/san-pham");
 
     return NextResponse.json(config);
   } catch (error) {

@@ -11,9 +11,9 @@ export default function NewProductPage() {
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
         <CmsPageHeader
-          eyebrow="Sản phẩm"
-          title="Thêm sản phẩm"
-          description="Tạo hồ sơ sản phẩm mới để sử dụng trong khu vực showcase của website."
+          eyebrow="Landing sản phẩm"
+          title="Tạo landing sản phẩm"
+          description="Tạo một sản phẩm mới cùng trang giới thiệu riêng để xuất hiện trong showcase của website."
         />
         <ProductForm />
       </div>

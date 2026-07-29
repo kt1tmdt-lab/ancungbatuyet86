@@ -157,7 +157,7 @@ function getPageAssetScope(item: PageAssetItem) {
   return "other";
 }
 
-type HomeTextScope = "home" | "about" | "sales";
+type HomeTextScope = "home" | "about" | "products" | "sales";
 type MarketingTextScope = HomeTextScope | "quality";
 export type WebsiteContentScope = HomeTextScope;
 export type WebsiteContentTab = "history" | "trust" | "community";
@@ -175,6 +175,11 @@ const WEBSITE_SCOPE_META: Record<
     title: "Trang Giới thiệu",
     description: "Quản lý riêng câu chuyện, số liệu, video, sứ mệnh, tầm nhìn và giá trị cốt lõi.",
     previewPath: "/gioi-thieu",
+  },
+  products: {
+    title: "Trang Sản phẩm",
+    description: "Quản lý phần mở đầu, dải chữ và lời kết của trang tổng Sản phẩm. Ảnh trong hero tự lấy từ các sản phẩm được đánh dấu nổi bật.",
+    previewPath: "/san-pham",
   },
   sales: {
     title: "Trang Điểm bán",
@@ -225,6 +230,9 @@ function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; n
   const key = item.key || "";
   const group = item.group || "";
 
+  if (key.startsWith("products_landing_")) {
+    return { page: "Sản phẩm", section: group.replace("Trang Sản phẩm - ", ""), note: "Nội dung đang hiển thị trực tiếp trên trang tổng Sản phẩm.", previewPath: "/san-pham", scope: "products" };
+  }
   if (key.startsWith("about_hero")) {
     return { page: "Giới thiệu", section: "Hero hồ sơ thương hiệu", note: "Đoạn đầu trang Giới thiệu: tiêu đề, mô tả, nút và 3 ô số liệu.", previewPath: "/gioi-thieu", scope: "about" };
   }
@@ -317,7 +325,7 @@ function MarketingPageContent({
   const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>(() => {
     if (websiteScope) return websiteScope;
     const scope = searchParams.get("scope");
-    return scope === "home" || scope === "about" || scope === "sales"
+    return scope === "home" || scope === "about" || scope === "products" || scope === "sales"
       ? scope
       : "home";
   });
@@ -353,7 +361,7 @@ function MarketingPageContent({
     const requestedScope = searchParams.get("scope");
     const normalizedScope: HomeTextScope =
       websiteScope ||
-      (requestedScope === "about" || requestedScope === "sales"
+      (requestedScope === "about" || requestedScope === "products" || requestedScope === "sales"
         ? requestedScope
         : "home");
 
@@ -392,8 +400,10 @@ function MarketingPageContent({
             ? "/admin/website/about/community"
             : scope === "about"
               ? "/admin/website/about"
-              : scope === "sales"
-                ? "/admin/website/sales"
+            : scope === "sales"
+              ? "/admin/website/sales"
+              : scope === "products"
+                ? "/admin/website/products"
                 : "/admin/website/home";
 
     router.replace(destination);
@@ -822,7 +832,7 @@ function MarketingPageContent({
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
   const visibleAssetList = assetList.filter((item) => {
     const assetScope = getPageAssetScope(item);
-    if (homeTextScope === "sales") return false;
+    if (homeTextScope === "sales" || homeTextScope === "products") return false;
     if (homeTextScope === "about") return item.key === "about_video";
     return assetScope === homeTextScope;
   });
@@ -1943,6 +1953,26 @@ function MarketingPageContent({
                       ))}
                   </div>
                 </section>
+                )}
+
+                {homeTextScope === "products" && (
+                  <section className="grid gap-4 border border-orange-200 bg-orange-50 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
+                    <div>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">
+                        Ảnh hero và các section sản phẩm
+                      </h3>
+                      <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
+                        Ba ảnh ở đầu trang và các section phía dưới lấy từ sản phẩm được đánh dấu “Chủ lực”. Ảnh, nội dung và thứ tự của từng landing được sửa trong danh sách sản phẩm.
+                      </p>
+                    </div>
+                    <a
+                      href="/admin/products"
+                      className="inline-flex items-center justify-center gap-2 border border-orange-300 bg-white px-4 py-2.5 text-xs font-black text-orange-700 transition hover:bg-orange-600 hover:text-white"
+                    >
+                      <ImageIcon size={15} />
+                      Quản lý ảnh và sản phẩm chủ lực
+                    </a>
+                  </section>
                 )}
 
                 <section className="border border-orange-200 bg-orange-50 p-4">

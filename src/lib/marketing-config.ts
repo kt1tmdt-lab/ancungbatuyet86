@@ -328,6 +328,17 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
 ].filter((item) => !isUnusedAboutAssetKey(item.key));
 
 export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
+  { id: "products-landing-eyebrow", key: "products_landing_eyebrow", group: "Trang Sản phẩm - Hero", label: "Nhãn nhỏ đầu trang", value: "Signature collection", multiline: false, sortOrder: 1 },
+  { id: "products-landing-title-line-1", key: "products_landing_title_line_1", group: "Trang Sản phẩm - Hero", label: "Tiêu đề - dòng 1", value: "Mỗi vị ngon,", multiline: false, sortOrder: 2 },
+  { id: "products-landing-title-line-2", key: "products_landing_title_line_2", group: "Trang Sản phẩm - Hero", label: "Tiêu đề - dòng màu cam", value: "một cá tính.", multiline: false, sortOrder: 3 },
+  { id: "products-landing-description", key: "products_landing_description", group: "Trang Sản phẩm - Hero", label: "Mô tả đầu trang", value: "Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết — nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.", multiline: true, sortOrder: 4 },
+  { id: "products-landing-cta", key: "products_landing_cta", group: "Trang Sản phẩm - Hero", label: "Chữ nút khám phá", value: "Bắt đầu khám phá", multiline: false, sortOrder: 5 },
+  { id: "products-landing-visual-label", key: "products_landing_visual_label", group: "Trang Sản phẩm - Hero", label: "Nhãn trên cụm ảnh", value: "ACBT / Core lineup", multiline: false, sortOrder: 6 },
+  { id: "products-landing-ticker", key: "products_landing_ticker", group: "Trang Sản phẩm - Dải chữ", label: "Các cụm chữ chạy (mỗi dòng một mục)", value: "Hương vị Việt\nSản phẩm chủ lực\nRõ nguồn gốc\nĐóng gói chỉn chu\nĂn Cùng Bà Tuyết", multiline: true, sortOrder: 10 },
+  { id: "products-landing-closing-label", key: "products_landing_closing_label", group: "Trang Sản phẩm - Cuối trang", label: "Nhãn nhỏ cuối trang", value: "Câu chuyện phía sau", multiline: false, sortOrder: 20 },
+  { id: "products-landing-closing-title", key: "products_landing_closing_title", group: "Trang Sản phẩm - Cuối trang", label: "Tiêu đề cuối trang", value: "Mỗi sản phẩm bắt đầu từ một lựa chọn và một niềm tin", multiline: true, sortOrder: 21 },
+  { id: "products-landing-closing-primary", key: "products_landing_closing_primary", group: "Trang Sản phẩm - Cuối trang", label: "Nút câu chuyện thương hiệu", value: "Câu chuyện thương hiệu", multiline: false, sortOrder: 22 },
+  { id: "products-landing-closing-secondary", key: "products_landing_closing_secondary", group: "Trang Sản phẩm - Cuối trang", label: "Nút hành trình chất lượng", value: "Hành trình chất lượng", multiline: false, sortOrder: 23 },
   { id: "home-text-factory-proof-1-title", key: "factory_proof_1_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 1 - tên mục", value: "Nguyên liệu đầu vào", multiline: false, sortOrder: 70 },
   { id: "home-text-factory-proof-2-title", key: "factory_proof_2_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 2 - tên mục", value: "Quy trình sản xuất", multiline: false, sortOrder: 80 },
   { id: "home-text-factory-proof-3-title", key: "factory_proof_3_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 3 - tên mục", value: "Đóng gói - tem nhãn", multiline: false, sortOrder: 90 },

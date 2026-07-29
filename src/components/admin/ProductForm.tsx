@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { Loader, AlertCircle, Save, ArrowLeft, Plus, Trash } from "lucide-react";
+import {
+  Loader,
+  AlertCircle,
+  Save,
+  ArrowLeft,
+  Plus,
+  Trash,
+  ExternalLink,
+  ImagePlus,
+} from "lucide-react";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
@@ -112,7 +121,9 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
-  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [mediaPickerTarget, setMediaPickerTarget] = useState<
+    "image" | "heroImage" | null
+  >(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<ProductFieldErrors>({});
@@ -136,6 +147,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       });
       if (data.url) {
         setImage(data.url);
+        if (!heroImage) setHeroImage(data.url);
         setFieldErrors((current) => ({ ...current, image: undefined }));
       }
     } catch (err) {
@@ -246,6 +258,16 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
           <ArrowLeft size={14} />
           <span>Quay lại danh sách</span>
         </Link>
+        {initialData?.id && slug ? (
+          <Link
+            href={`/san-pham/${slug}`}
+            target="_blank"
+            className="ml-auto mr-2 inline-flex items-center gap-2 border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-orange-300 hover:text-orange-600"
+          >
+            <ExternalLink size={15} />
+            Xem landing
+          </Link>
+        ) : null}
         <button
           type="submit"
           disabled={loading}
@@ -267,7 +289,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         {/* Left Column: Form Fields */}
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white  border border-slate-100 p-6 sm:p-8 shadow-sm space-y-5">
-            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Thông tin cơ bản</h3>
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="text-lg font-bold text-slate-900">Nội dung hero landing</h3>
+              <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
+                Tên, tagline, mô tả ngắn và mô tả chi tiết được dùng trực tiếp ở đầu trang sản phẩm.
+              </p>
+            </div>
             
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
@@ -625,7 +652,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         {/* Right Column: Settings & Media */}
         <div className="space-y-6">
           <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-5">
-            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại & hiển thị trang chủ</h3>
+            <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Phân loại & hiển thị showcase</h3>
 
             <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Danh mục</label>
@@ -647,8 +674,8 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
 
             <div className="p-4 bg-orange-50/50  border border-orange-100 flex items-center justify-between">
               <div>
-                <span className="block text-sm font-bold text-orange-950">Hiện ở trang chủ</span>
-                <span className="block text-xs text-orange-700">Bật thì hiện ở hero và mục Sản phẩm nổi bật.</span>
+                <span className="block text-sm font-bold text-orange-950">Đánh dấu sản phẩm chủ lực</span>
+                <span className="block text-xs text-orange-700">Bật để sản phẩm xuất hiện ở hero và các section trên trang tổng Sản phẩm.</span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -674,7 +701,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thứ tự trên trang chủ</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thứ tự trong showcase</label>
               <input
                 type="number"
                 value={sortOrder}
@@ -682,7 +709,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 placeholder="Ví dụ: 1"
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Số nhỏ hiện trước. Dùng cho cả hero và mục Sản phẩm nổi bật.</p>
+              <p className="text-[11px] text-slate-400 mt-1">Số nhỏ hiện trước trong hero và các section của trang tổng Sản phẩm.</p>
             </div>
           </div>
 
@@ -729,7 +756,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   </label>
                   <button
                     type="button"
-                    onClick={() => setMediaPickerOpen(true)}
+                    onClick={() => setMediaPickerTarget("image")}
                     className="shrink-0 px-4 py-3 bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-primary hover:text-primary-dark transition"
                   >
                     Thư viện
@@ -756,6 +783,37 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   />
                   {fieldErrors.image && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.image}</p>}
                 </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 pt-5">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Ảnh hero / ảnh kể chuyện
+              </label>
+              <p className="mb-3 text-xs font-medium leading-5 text-slate-500">
+                Ảnh này xuất hiện ở landing chi tiết. Để trống thì website tự dùng ảnh sản phẩm chính.
+              </p>
+              {heroImage && (
+                <div className="mb-3 h-40 overflow-hidden border border-slate-200 bg-slate-50">
+                  <img src={heroImage} alt="" className="h-full w-full object-contain p-3" />
+                </div>
+              )}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={heroImage}
+                  onChange={(event) => setHeroImage(event.target.value)}
+                  placeholder="/uploads/anh-hero-san-pham.png"
+                  className="min-w-0 flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaPickerTarget("heroImage")}
+                  className="inline-flex shrink-0 items-center gap-2 border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:border-orange-300 hover:text-orange-600"
+                >
+                  <ImagePlus size={15} />
+                  Thư viện
+                </button>
               </div>
             </div>
 
@@ -806,13 +864,17 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       </div>
     </form>
     <MediaPickerModal
-      open={mediaPickerOpen}
-      onClose={() => setMediaPickerOpen(false)}
+      open={Boolean(mediaPickerTarget)}
+      onClose={() => setMediaPickerTarget(null)}
       onSelect={(url) => {
-        setImage(url);
-        setHeroImage(url);
-        setFieldErrors((current) => ({ ...current, image: undefined }));
-        setMediaPickerOpen(false);
+        if (mediaPickerTarget === "heroImage") {
+          setHeroImage(url);
+        } else {
+          setImage(url);
+          if (!heroImage) setHeroImage(url);
+          setFieldErrors((current) => ({ ...current, image: undefined }));
+        }
+        setMediaPickerTarget(null);
       }}
     />
     </>

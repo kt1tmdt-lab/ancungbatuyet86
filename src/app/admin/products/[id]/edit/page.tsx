@@ -39,9 +39,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
         <CmsPageHeader
-          eyebrow="Sản phẩm"
-          title="Chỉnh sửa sản phẩm"
-          description="Cập nhật hồ sơ giới thiệu, hình ảnh, quy cách và nội dung chi tiết."
+          eyebrow="Landing sản phẩm"
+          title="Chỉnh sửa landing sản phẩm"
+          description="Các trường bên dưới được nối trực tiếp với hero, câu chuyện, hương vị, quy trình và hồ sơ trên trang chi tiết sản phẩm."
         />
 
         {loading ? (
