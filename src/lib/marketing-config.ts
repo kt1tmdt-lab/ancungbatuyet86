@@ -130,6 +130,13 @@ function isUnusedAboutTextKey(key: string) {
 
 export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   {
+    id: "default-products-landing-hero-products",
+    key: "products_landing_hero_products",
+    label: "Danh sách sản phẩm trong hero",
+    imageUrl: "",
+    linkUrl: "",
+  },
+  {
     id: "default-products-landing-hero-image-1",
     key: "products_landing_hero_image_1",
     label: "Ảnh chính giữa",

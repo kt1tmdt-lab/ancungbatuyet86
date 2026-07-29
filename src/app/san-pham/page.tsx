@@ -8,6 +8,8 @@ import {
   ArrowDown,
   ArrowRight,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Loader,
   PackageCheck,
   Sparkles,
@@ -225,6 +227,7 @@ export default function ProductsPage() {
   const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(
     DEFAULT_MARKETING_CONFIG.pageAssets,
   );
+  const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -287,29 +290,72 @@ export default function ProductsPage() {
     .map((item) => item.trim())
     .filter(Boolean);
 
-  const heroVisuals = [0, 1, 2]
-    .map((index) => {
-      const product = coreProducts[index];
-      const configuredAsset = pageAssets.find(
-        (item) => item.key === `products_landing_hero_image_${index + 1}`,
-      );
-      const linkedProductId = configuredAsset?.linkUrl?.startsWith("product:")
-        ? configuredAsset.linkUrl.slice("product:".length)
-        : "";
-      const linkedProduct = linkedProductId
-        ? products.find((item) => String(item.id) === linkedProductId)
-        : undefined;
-      const configuredImage = linkedProduct
-        ? productImage(linkedProduct)
-        : configuredAsset?.imageUrl?.trim();
+  const heroProductIds = (() => {
+    const listAsset = pageAssets.find(
+      (item) => item.key === "products_landing_hero_products",
+    );
+    const savedIds = (listAsset?.linkUrl || "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
 
-      return {
-        slot: index,
-        image: configuredImage || (product ? productImage(product) : ""),
-        alt: linkedProduct?.name || product?.name || `Ảnh sản phẩm hero ${index + 1}`,
-      };
-    })
-    .filter((item) => Boolean(item.image));
+    if (savedIds.length > 0) return Array.from(new Set(savedIds));
+
+    return pageAssets
+      .filter((item) => /^products_landing_hero_image_[1-3]$/.test(item.key))
+      .sort((a, b) => a.key.localeCompare(b.key))
+      .map((item) =>
+        item.linkUrl.startsWith("product:")
+          ? item.linkUrl.slice("product:".length)
+          : "",
+      )
+      .filter(Boolean);
+  })();
+
+  const heroProducts = heroProductIds
+    .map((id) => products.find((product) => String(product.id) === id))
+    .filter((product): product is Product => Boolean(product));
+
+  useEffect(() => {
+    if (heroProducts.length <= 3) return;
+
+    const timer = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % heroProducts.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [heroProducts.length]);
+
+  const visibleHeroIndex =
+    heroProducts.length > 0 ? heroIndex % heroProducts.length : 0;
+
+  const heroVisuals =
+    heroProducts.length > 0
+      ? Array.from({ length: Math.min(3, heroProducts.length) }, (_, slot) => {
+          const product =
+            heroProducts[(visibleHeroIndex + slot) % heroProducts.length];
+          return {
+            key: `${productKey(product)}-${visibleHeroIndex}-${slot}`,
+            slot,
+            image: productImage(product),
+            alt: product.name || `Ảnh sản phẩm hero ${slot + 1}`,
+          };
+        }).filter((item) => Boolean(item.image))
+      : [0, 1, 2]
+          .map((index) => {
+            const product = coreProducts[index];
+            const configuredAsset = pageAssets.find(
+              (item) => item.key === `products_landing_hero_image_${index + 1}`,
+            );
+            return {
+              key: `manual-hero-${index}`,
+              slot: index,
+              image:
+                configuredAsset?.imageUrl?.trim() ||
+                (product ? productImage(product) : ""),
+              alt: product?.name || `Ảnh sản phẩm hero ${index + 1}`,
+            };
+          })
+          .filter((item) => Boolean(item.image));
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff4df] text-slate-950">
@@ -365,7 +411,7 @@ export default function ProductsPage() {
             <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-700">
               {pageText(pageTexts, "products_landing_visual_label", "ACBT / Core lineup")}
             </div>
-            {heroVisuals.map(({ slot, image, alt }) => {
+            {heroVisuals.map(({ key, slot, image, alt }) => {
               const positions = [
                 "left-1/2 top-[48%] z-30 h-[300px] -translate-x-1/2 -translate-y-1/2 sm:h-[430px] xl:h-[540px]",
                 "left-[15%] top-[58%] z-20 h-[180px] -translate-y-1/2 -rotate-6 opacity-85 sm:h-[260px] xl:h-[320px]",
@@ -373,7 +419,7 @@ export default function ProductsPage() {
               ];
               return (
                 <motion.img
-                  key={`hero-visual-${slot}`}
+                  key={key}
                   src={image}
                   alt={alt}
                   initial={{ opacity: 0, y: 35, rotate: slot === 1 ? -10 : slot === 2 ? 10 : 0 }}
@@ -383,6 +429,38 @@ export default function ProductsPage() {
                 />
               );
             })}
+            {heroProducts.length > 3 && (
+              <div className="absolute bottom-5 right-5 z-40 flex items-center gap-2 sm:bottom-8 sm:right-8">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setHeroIndex(
+                      (current) =>
+                        (current - 1 + heroProducts.length) % heroProducts.length,
+                    )
+                  }
+                  className="grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white/95 text-slate-950 shadow-lg transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
+                  aria-label="Xem sản phẩm hero trước"
+                >
+                  <ChevronLeft size={19} />
+                </button>
+                <span className="min-w-14 rounded-full border border-orange-200 bg-white/95 px-3 py-2 text-center text-[10px] font-black tracking-wider text-orange-700 shadow-lg">
+                  {visibleHeroIndex + 1}/{heroProducts.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setHeroIndex(
+                      (current) => (current + 1) % heroProducts.length,
+                    )
+                  }
+                  className="grid h-11 w-11 place-items-center rounded-full border border-orange-200 bg-white/95 text-slate-950 shadow-lg transition hover:border-orange-500 hover:bg-orange-600 hover:text-white"
+                  aria-label="Xem sản phẩm hero tiếp theo"
+                >
+                  <ChevronRight size={19} />
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>

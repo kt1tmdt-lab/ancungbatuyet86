@@ -61,6 +61,32 @@ type ImportResult = {
   errors?: unknown[];
 };
 
+const HERO_PRODUCTS_ASSET_KEY = "products_landing_hero_products";
+
+function getHeroProductIds(config: MarketingConfigData | null) {
+  if (!config) return [];
+
+  const listAsset = config.pageAssets.find(
+    (item) => item.key === HERO_PRODUCTS_ASSET_KEY,
+  );
+  const savedIds = (listAsset?.linkUrl || "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  if (savedIds.length > 0) return Array.from(new Set(savedIds));
+
+  return config.pageAssets
+    .filter((item) => /^products_landing_hero_image_[1-3]$/.test(item.key))
+    .sort((a, b) => a.key.localeCompare(b.key))
+    .map((item) =>
+      item.linkUrl.startsWith("product:")
+        ? item.linkUrl.slice("product:".length)
+        : "",
+    )
+    .filter(Boolean);
+}
+
 export default function AdminProductsPage() {
   const { token } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,10 +131,10 @@ export default function AdminProductsPage() {
     }
   }, [token]);
 
-  const handlePushToHero = useCallback(
-    async (product: Product, slot: 1 | 2 | 3) => {
+  const handleToggleHero = useCallback(
+    async (product: Product) => {
       if (!token) return;
-      const actionKey = `hero:${product.id}:${slot}`;
+      const actionKey = `hero:${product.id}`;
       setActionLoading(actionKey);
 
       try {
@@ -121,16 +147,22 @@ export default function AdminProductsPage() {
           currentConfig = normalizeMarketingConfig(settings.data);
         }
 
-        const assetKey = `products_landing_hero_image_${slot}`;
+        const currentIds = getHeroProductIds(currentConfig);
+        const isActive = currentIds.includes(String(product.id));
+        const nextIds = isActive
+          ? currentIds.filter((id) => id !== String(product.id))
+          : [...currentIds, String(product.id)];
         const nextAssets = currentConfig.pageAssets.map((item) =>
-          item.key === assetKey
+          item.key === HERO_PRODUCTS_ASSET_KEY
             ? {
                 ...item,
-                label: product.name,
-                imageUrl: product.heroImage || product.image || "",
-                linkUrl: `product:${product.id}`,
+                label: `Danh sách hero (${nextIds.length} sản phẩm)`,
+                linkUrl: nextIds.join(","),
               }
-            : item,
+            : /^products_landing_hero_image_[1-3]$/.test(item.key) &&
+                item.linkUrl.startsWith("product:")
+              ? { ...item, linkUrl: "" }
+              : item,
         );
         const nextConfig = { ...currentConfig, pageAssets: nextAssets };
 
@@ -142,8 +174,11 @@ export default function AdminProductsPage() {
         });
 
         setMarketingConfig(nextConfig);
-        const slotLabel = slot === 1 ? "chính giữa" : slot === 2 ? "bên trái" : "bên phải";
-        toast.success(`Đã đưa “${product.name}” lên hero ${slotLabel}.`);
+        toast.success(
+          isActive
+            ? `Đã bỏ “${product.name}” khỏi hero.`
+            : `Đã thêm “${product.name}” vào hero.`,
+        );
       } catch (error) {
         toast.error(
           getAdminErrorMessage(error, "Không thể đưa sản phẩm lên hero."),
@@ -342,44 +377,33 @@ export default function AdminProductsPage() {
       },
       {
         id: "heroPlacement",
-        header: "Đưa lên hero",
+        header: "Hero trang tổng",
         enableSorting: false,
         cell: ({ row }) => {
           const product = row.original;
-          const slots = [
-            { value: 1 as const, label: "Giữa" },
-            { value: 2 as const, label: "Trái" },
-            { value: 3 as const, label: "Phải" },
-          ];
+          const active = getHeroProductIds(marketingConfig).includes(
+            String(product.id),
+          );
+          const loadingKey = `hero:${product.id}`;
 
           return (
-            <div className="flex min-w-48 items-center gap-1">
-              {slots.map((slot) => {
-                const asset = marketingConfig?.pageAssets.find(
-                  (item) =>
-                    item.key === `products_landing_hero_image_${slot.value}`,
-                );
-                const active = asset?.linkUrl === `product:${product.id}`;
-                const loadingKey = `hero:${product.id}:${slot.value}`;
-
-                return (
-                  <button
-                    key={slot.value}
-                    type="button"
-                    onClick={() => void handlePushToHero(product, slot.value)}
-                    disabled={actionLoading === loadingKey}
-                    className={`min-h-9 border px-2.5 text-[11px] font-black transition disabled:cursor-wait disabled:opacity-50 ${
-                      active
-                        ? "border-orange-600 bg-orange-600 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
-                    }`}
-                    title={`Đưa ${product.name} lên vị trí ${slot.label.toLowerCase()} của hero`}
-                  >
-                    {active ? `✓ ${slot.label}` : slot.label}
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              type="button"
+              onClick={() => void handleToggleHero(product)}
+              disabled={actionLoading === loadingKey}
+              className={`inline-flex min-h-9 min-w-28 items-center justify-center border px-3 text-xs font-black transition disabled:cursor-wait disabled:opacity-50 ${
+                active
+                  ? "border-orange-600 bg-orange-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
+              }`}
+              title={
+                active
+                  ? `Bỏ ${product.name} khỏi hero`
+                  : `Thêm ${product.name} vào hero`
+              }
+            >
+              {active ? "✓ Đang ở hero" : "+ Thêm vào hero"}
+            </button>
           );
         },
       },
@@ -423,7 +447,7 @@ export default function AdminProductsPage() {
         },
       },
     ],
-    [actionLoading, handlePushToHero, handleToggleFeatured, marketingConfig],
+    [actionLoading, handleToggleFeatured, handleToggleHero, marketingConfig],
   );
 
   return (
@@ -474,7 +498,10 @@ export default function AdminProductsPage() {
           <div>
             <p className="text-sm font-black text-slate-950">Cần sửa phần mở đầu của trang tổng Sản phẩm?</p>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-              Dùng ba nút Giữa / Trái / Phải trong bảng để đẩy ảnh sản phẩm lên hero. Tiêu đề, mô tả và dải chữ chạy được quản lý ở màn trang tổng.
+              Bấm “Thêm vào hero” ở bất kỳ sản phẩm nào; không giới hạn số lượng. Ngoài website hiển thị ba sản phẩm mỗi lượt và có nút chuyển tiếp.
+              {marketingConfig
+                ? ` Hiện đang chọn ${getHeroProductIds(marketingConfig).length} sản phẩm.`
+                : ""}
             </p>
           </div>
           <Link

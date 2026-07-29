@@ -859,6 +859,7 @@ function MarketingPageContent({
 
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
   const visibleAssetList = assetList.filter((item) => {
+    if (item.key === "products_landing_hero_products") return false;
     const assetScope = getPageAssetScope(item);
     if (homeTextScope === "sales") return false;
     if (homeTextScope === "about") return item.key === "about_video";
@@ -1996,7 +1997,7 @@ function MarketingPageContent({
                         Ảnh của từng landing sản phẩm
                       </h3>
                       <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                        Ba ảnh hero được chọn ngay ở các ô bên dưới. Nếu để trống, website mới tự lấy ảnh của sản phẩm “Chủ lực”. Ảnh và nội dung của các section phía dưới vẫn sửa trong từng landing sản phẩm.
+                        Có thể thêm không giới hạn sản phẩm từ danh sách landing. Ba ô ảnh thủ công bên dưới chỉ được dùng khi danh sách hero chưa chọn sản phẩm nào.
                       </p>
                     </div>
                     <a
