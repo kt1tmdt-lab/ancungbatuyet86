@@ -281,15 +281,6 @@ export default function ProductsPage() {
     document.getElementById("product-showcase")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const tickerItems = pageText(
-    pageTexts,
-    "products_landing_ticker",
-    "Hương vị Việt\nSản phẩm chủ lực\nRõ nguồn gốc\nĐóng gói chỉn chu\nĂn Cùng Bà Tuyết",
-  )
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
   const heroProductIds = (() => {
     const listAsset = pageAssets.find(
       (item) => item.key === "products_landing_hero_products",
@@ -464,25 +455,6 @@ export default function ProductsPage() {
           </motion.div>
         </div>
       </section>
-
-      <div className="relative overflow-hidden bg-orange-600 py-3 text-white">
-        <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-          className="flex w-max whitespace-nowrap"
-        >
-          {[0, 1].map((copy) => (
-            <div key={copy} className="flex items-center">
-              {tickerItems.map((item) => (
-                <span key={`${copy}-${item}`} className="flex items-center text-xs font-black uppercase tracking-[0.2em]">
-                  <span className="px-7">{item}</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </motion.div>
-      </div>
 
       <div id="product-showcase" className="scroll-mt-16">
         {loading ? (

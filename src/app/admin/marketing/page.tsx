@@ -197,7 +197,7 @@ const WEBSITE_SCOPE_META: Record<
   },
   products: {
     title: "Trang Sản phẩm",
-    description: "Quản lý phần mở đầu, dải chữ và lời kết của trang tổng Sản phẩm. Ảnh trong hero tự lấy từ các sản phẩm được đánh dấu nổi bật.",
+    description: "Quản lý phần mở đầu, cụm ảnh hero và lời kết của trang tổng Sản phẩm.",
     previewPath: "/san-pham",
   },
   sales: {

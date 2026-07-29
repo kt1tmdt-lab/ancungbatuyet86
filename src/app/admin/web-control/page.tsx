@@ -29,7 +29,7 @@ const pageGroups = [
     title: "Sản phẩm",
     description: "Quản lý riêng trang tổng showcase và nội dung landing của từng sản phẩm.",
     items: [
-      { title: "Trang tổng Sản phẩm", description: "Sửa nhãn, tiêu đề, mô tả, nút khám phá, dải chữ chạy và lời kết của trang /san-pham.", href: "/admin/website/products", icon: ShoppingBag },
+      { title: "Trang tổng Sản phẩm", description: "Sửa nhãn, tiêu đề, mô tả, nút khám phá, cụm ảnh hero và lời kết của trang /san-pham.", href: "/admin/website/products", icon: ShoppingBag },
       { title: "Landing từng sản phẩm", description: "Quản lý tên, tagline, câu chuyện, hình ảnh, thành phần, quy trình, hồ sơ và thứ tự xuất hiện của từng sản phẩm.", href: "/admin/products", icon: Package },
     ],
   },
