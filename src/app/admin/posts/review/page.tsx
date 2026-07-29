@@ -3,17 +3,20 @@
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { PostsTable } from "@/components/admin/PostsTable";
 import { AlertCircle } from "lucide-react";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel } from "@/components/admin/CmsPanel";
 
 export default function ReviewPage() {
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Bài viết chờ duyệt</h1>
-          <p className="text-slate-500 text-sm mt-1">Xem xét, phê duyệt hoặc từ chối bài viết từ ban biên tập.</p>
-        </div>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
+      <div className="space-y-5">
+        <CmsPageHeader
+          eyebrow="Quy trình biên tập"
+          title="Bài viết chờ duyệt"
+          description="Xem nội dung, phê duyệt để xuất bản hoặc phản hồi rõ lý do cho tác giả."
+        />
 
-        <div className="bg-orange-50 border border-orange-200  p-4 flex gap-3 shadow-sm">
+        <div className="flex gap-3 border border-orange-200 bg-orange-50 p-4 shadow-sm">
           <AlertCircle className="text-orange-600 shrink-0 mt-0.5" size={20} />
           <div>
             <p className="text-sm font-bold text-orange-800">Quy định phê duyệt bài viết</p>
@@ -23,9 +26,9 @@ export default function ReviewPage() {
           </div>
         </div>
 
-        <div className="bg-white  border border-slate-100 p-6 shadow-sm">
+        <CmsPanel>
           <PostsTable status="PENDING_REVIEW" />
-        </div>
+        </CmsPanel>
       </div>
     </ProtectedRoute>
   );

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { Prisma, ProductStatus } from "@prisma/client";
 
 function parseCSV(text: string): string[][] {
   const result: string[][] = [];
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -134,7 +135,13 @@ export async function POST(req: NextRequest) {
 
       const cleanSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
 
-      const data: any = {
+      const productStatus = Object.values(ProductStatus).includes(
+        status as ProductStatus,
+      )
+        ? (status as ProductStatus)
+        : ProductStatus.PUBLISHED;
+
+      const data: Prisma.ProductUncheckedCreateInput = {
         slug: cleanSlug,
         name: name.trim(),
         tagline: tagline ? tagline.trim() : "",
@@ -149,7 +156,7 @@ export async function POST(req: NextRequest) {
         purchaseUrl: purchaseurl ? purchaseurl.trim() : "",
         ingredients: ingredients ? ingredients.split(";").map((i) => i.trim()).filter(Boolean) : [],
         story: story ? story.trim() : "",
-        status: (status === "DRAFT" || status === "PUBLISHED" || status === "OUT_OF_STOCK" || status === "ARCHIVED") ? status : "PUBLISHED",
+        status: productStatus,
         sortOrder: parseInt(sortorder) || 0,
         shortDescription: shortdescription ? shortdescription.trim() : null,
       };
@@ -172,10 +179,11 @@ export async function POST(req: NextRequest) {
           });
         }
         successCount++;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(`Import error row ${rIdx + 1}:`, err);
         errorCount++;
-        errors.push(`Dòng ${rIdx + 1}: Lỗi lưu vào cơ sở dữ liệu (${err?.message || String(err)})`);
+        const message = err instanceof Error ? err.message : String(err);
+        errors.push(`Dòng ${rIdx + 1}: Lỗi lưu vào cơ sở dữ liệu (${message})`);
       }
     }
 
@@ -192,7 +200,7 @@ export async function POST(req: NextRequest) {
       errorCount,
       errors,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST Products Import Error:", error);
     return NextResponse.json({ error: "Lỗi hệ thống khi import dữ liệu" }, { status: 500 });
   }

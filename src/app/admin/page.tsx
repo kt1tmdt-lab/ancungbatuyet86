@@ -18,7 +18,7 @@ import {
   ClipboardCheck,
   MonitorCog
 } from "lucide-react";
-import { PostsTable } from "@/components/admin/PostsTable";
+import { PostsTable, type PostStatus } from "@/components/admin/PostsTable";
 
 interface Stats {
   total: number;
@@ -42,7 +42,7 @@ export default function AdminPage() {
   const { user, token } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<PostStatus | "">("");
 
   const fetchStats = useCallback(async () => {
     try {
@@ -66,10 +66,18 @@ export default function AdminPage() {
     return () => window.clearTimeout(timer);
   }, [token, fetchStats]);
 
-  const isEditorOrAdmin = user?.role === "ADMIN" || user?.role === "EDITOR";
+  const isEditorOrAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    user?.role === "ADMIN" ||
+    user?.role === "EDITOR";
+  const isContentUser = isEditorOrAdmin || user?.role === "AUTHOR";
+  const canManageWebsite =
+    isEditorOrAdmin || user?.role === "MARKETING";
+  const canManageUsers =
+    user?.role === "SUPER_ADMIN" || user?.role === "ADMIN";
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR", "AUTHOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "AUTHOR", "MARKETING", "SUPPORT"]}>
       <div className="space-y-8">
         {/* Banner Chào Mừng */}
         <div className="relative overflow-hidden bg-slate-900 p-6 sm:p-8 text-white shadow-lg border border-slate-800">
@@ -167,7 +175,7 @@ export default function AdminPage() {
               <p className="text-xs text-orange-500 font-semibold mt-1">Cần xem xét</p>
             </div>
 
-            {/* Card 5: Form Liên hệ mới */}
+            {user?.role !== "AUTHOR" && (
             <Link href="/admin/contacts" className="block">
               <div className="bg-red-50 border border-red-100 p-5 shadow-sm hover:shadow-md transition select-none h-full relative overflow-hidden">
                 <div className="absolute right-0 top-0 translate-y-1 translate-x-1">
@@ -183,6 +191,7 @@ export default function AdminPage() {
                 <p className="text-xs text-red-600 font-semibold mt-1">Yêu cầu liên hệ mới</p>
               </div>
             </Link>
+            )}
 
             {/* Card 6: Tổng lượt xem */}
             <div className="bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md transition col-span-2 lg:col-span-1 select-none">
@@ -465,7 +474,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Danh sách bài viết động */}
+        {isContentUser && (
         <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-4">
             <div>
@@ -493,8 +502,13 @@ export default function AdminPage() {
               </button>
             )}
           </div>
-          <PostsTable key={selectedStatus} status={selectedStatus} onActionSuccess={fetchStats} />
+          <PostsTable
+            key={selectedStatus}
+            status={selectedStatus || undefined}
+            onActionSuccess={fetchStats}
+          />
         </div>
+        )}
 
         {/* Quick Actions & Navigation Section */}
         <div className="grid md:grid-cols-3 gap-8">
@@ -502,7 +516,7 @@ export default function AdminPage() {
           <div className="md:col-span-2 bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">
             <h2 className="text-lg font-bold text-slate-900">Thao tác nhanh</h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              {isEditorOrAdmin && (
+              {canManageWebsite && (
                 <Link
                   href="/admin/web-control"
                   className="group border border-orange-200 bg-orange-50 hover:border-orange-500 transition-all block sm:col-span-2"
@@ -528,7 +542,8 @@ export default function AdminPage() {
                 </Link>
               )}
 
-              {/* Action: Viết bài */}
+              {isContentUser && (
+              <>
               <Link 
                 href="/admin/posts/new"
                 className="group border border-slate-100 hover:border-orange-200 transition-all block"
@@ -560,7 +575,6 @@ export default function AdminPage() {
                 </CurtainHover>
               </Link>
 
-              {/* Action: Quản lý bài viết */}
               <Link 
                 href="/admin/posts"
                 className="group border border-slate-100 hover:border-slate-800 transition-all block"
@@ -591,6 +605,8 @@ export default function AdminPage() {
                   </div>
                 </CurtainHover>
               </Link>
+              </>
+              )}
 
               {/* Action: Duyệt bài (Admin/Editor) */}
               {isEditorOrAdmin && (
@@ -661,7 +677,7 @@ export default function AdminPage() {
               )}
 
               {/* Action: Quản lý user (Admin Only) */}
-              {user?.role === "ADMIN" && (
+              {canManageUsers && (
                 <Link 
                   href="/admin/users"
                   className="group border border-slate-100 hover:border-orange-200 transition-all block sm:col-span-2"

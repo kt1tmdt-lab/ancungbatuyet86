@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const viewer = requireRole(req, ["ADMIN", "EDITOR"]);
+    const viewer = requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     const product = await createProduct(await req.json());
 
     await logAudit({

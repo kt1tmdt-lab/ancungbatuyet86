@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   BarChart3,
@@ -189,7 +189,7 @@ export default function MediaIntelligencePage() {
     [token],
   );
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
     if (!token) return;
     setLoading(true);
     try {
@@ -204,11 +204,12 @@ export default function MediaIntelligencePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [headers, token]);
 
   useEffect(() => {
-    fetchDashboard();
-  }, [token]);
+    const timer = window.setTimeout(() => void fetchDashboard(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchDashboard]);
 
   const saveKeywords = async (keywords: MediaIntelligenceKeyword[]) => {
     setSaving(true);

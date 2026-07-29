@@ -14,7 +14,6 @@ import {
   Trash,
   ArrowUp,
   ArrowDown,
-  Eye,
   Settings,
   ChevronDown,
   ChevronUp,
@@ -39,6 +38,8 @@ import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
 import { getSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/admin/AdminPrimitives";
 
 // Define block interfaces
 interface Block {
@@ -63,6 +64,28 @@ interface FeatureItem {
   description: string;
 }
 
+interface TestimonialItem {
+  name: string;
+  role: string;
+  review: string;
+  rating: number;
+  avatarUrl?: string;
+}
+
+interface ComboItem {
+  name: string;
+  price: string;
+  originalPrice?: string;
+  benefits?: string[];
+  tag?: string;
+  ctaLink?: string;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 // Pre-defined icons for features
 const FEATURE_ICONS = [
   { name: "Truck", label: "Giao hàng hỏa tốc" },
@@ -84,6 +107,12 @@ export function PageForm({ pageId }: { pageId?: string }) {
   const [fetching, setFetching] = useState(Boolean(pageId));
   const [productsLoading, setProductsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; slug?: string }>({});
+  const [confirmation, setConfirmation] = useState<{
+    title: string;
+    description: string;
+    action: () => void;
+  } | null>(null);
   const [success, setSuccess] = useState("");
 
   // Page Basic Meta Data
@@ -102,7 +131,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
@@ -123,7 +152,6 @@ export function PageForm({ pageId }: { pageId?: string }) {
   const [productsList, setProductsList] = useState<Product[]>([]);
 
   // Preview Drawer Modal
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [uploadingBlock, setUploadingBlock] = useState<{
     blockId: string;
@@ -312,10 +340,15 @@ export function PageForm({ pageId }: { pageId?: string }) {
 
   // Delete a block
   const deleteBlock = (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa khối này không?")) {
-      setBlocks(blocks.filter((b) => b.id !== id));
-      if (expandedBlockId === id) setExpandedBlockId(null);
-    }
+    setConfirmation({
+      title: "Xóa khối nội dung?",
+      description:
+        "Khối này sẽ bị loại khỏi trang. Thay đổi chỉ được ghi vào website sau khi bấm Lưu thiết kế.",
+      action: () => {
+        setBlocks((current) => current.filter((block) => block.id !== id));
+        if (expandedBlockId === id) setExpandedBlockId(null);
+      },
+    });
   };
 
   // Update block data
@@ -358,7 +391,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
       }
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : "Lỗi kết nối khi tải ảnh");
+      toast.error(err instanceof Error ? err.message : "Lỗi kết nối khi tải ảnh");
     } finally {
       setUploadingBlock(null);
     }
@@ -382,31 +415,36 @@ export function PageForm({ pageId }: { pageId?: string }) {
       return;
     }
 
-    const shouldReplace = window.confirm(
-      "Nạp mẫu sẽ thay toàn bộ các khối nội dung hiện tại bằng mẫu mới. Bạn có chắc muốn nạp không?",
-    );
-
-    if (!shouldReplace) return;
-
-    setTitle(template.title);
-    setSlug(template.cmsSlug);
-    const templateBlocks = getSystemPageSeedContent(template);
-    setBlocks(JSON.parse(JSON.stringify(templateBlocks)) as Block[]);
-    setExpandedBlockId(templateBlocks[0]?.id || null);
-    setError("");
-    setSuccess("Đã nạp mẫu vào trình sửa. Bấm Lưu thiết kế để cập nhật lên website.");
+    setConfirmation({
+      title: "Nạp nội dung mẫu?",
+      description:
+        "Toàn bộ khối nội dung đang chỉnh sửa sẽ được thay bằng mẫu tương ứng với đường dẫn trang.",
+      action: () => {
+        setTitle(template.title);
+        setSlug(template.cmsSlug);
+        const templateBlocks = getSystemPageSeedContent(template);
+        setBlocks(JSON.parse(JSON.stringify(templateBlocks)) as Block[]);
+        setExpandedBlockId(templateBlocks[0]?.id || null);
+        setError("");
+        setSuccess(
+          "Đã nạp mẫu vào trình sửa. Bấm Lưu thiết kế để cập nhật lên website.",
+        );
+      },
+    });
   };
 
   // Submit Page
   const handleSubmit = async () => {
-    if (!title.trim()) {
-      setError("Tiêu đề trang không được để trống");
-      return;
-    }
+    const validationErrors: { title?: string; slug?: string } = {};
+    if (!title.trim()) validationErrors.title = "Vui lòng nhập tiêu đề trang.";
     if (!slug.trim()) {
-      setError("Slug trang không được để trống");
-      return;
+      validationErrors.slug = "Vui lòng nhập đường dẫn trang.";
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      validationErrors.slug =
+        "Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.";
     }
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
     
     setError("");
     setSuccess("");
@@ -435,14 +473,18 @@ export function PageForm({ pageId }: { pageId?: string }) {
       const data = await res.json();
       if (res.ok) {
         setSuccess(pageId ? "Cập nhật trang thành công!" : "Tạo trang mới thành công!");
+        toast.success(pageId ? "Đã cập nhật trang." : "Đã tạo trang mới.");
         setTimeout(() => {
           router.push("/admin/pages");
         }, 1200);
       } else {
-        setError(data.error || "Lỗi khi lưu trang");
+        const message = data.error || "Lỗi khi lưu trang";
+        setError(message);
+        toast.error(message);
       }
     } catch {
       setError("Không thể lưu trang, vui lòng thử lại sau");
+      toast.error("Không thể lưu trang, vui lòng thử lại sau");
     } finally {
       setLoading(false);
     }
@@ -546,11 +588,15 @@ export function PageForm({ pageId }: { pageId?: string }) {
               <input
                 type="text"
                 value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
+                onChange={(e) => {
+                  handleTitleChange(e.target.value);
+                  setFieldErrors((current) => ({ ...current, title: undefined }));
+                }}
                 placeholder="Ví dụ: Khuyến Mãi Hè 2026..."
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none"
                 required
               />
+              {fieldErrors.title && <p className="text-xs font-semibold text-red-600">{fieldErrors.title}</p>}
             </div>
 
             {/* Page Slug */}
@@ -566,12 +612,16 @@ export function PageForm({ pageId }: { pageId?: string }) {
                 <input
                   type="text"
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
+                  onChange={(e) => {
+                    setSlug(normalizePageSlug(e.target.value));
+                    setFieldErrors((current) => ({ ...current, slug: undefined }));
+                  }}
                   placeholder="khuyen-mai-he-2026"
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-r-xl text-xs font-medium text-slate-700 focus:outline-none"
                   required
                 />
               </div>
+              {fieldErrors.slug && <p className="text-xs font-semibold text-red-600">{fieldErrors.slug}</p>}
             </div>
 
             {/* Status selection */}
@@ -612,7 +662,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                       key={block.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, index)}
-                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, index)}
                       className={`border overflow-hidden transition-all cursor-grab active:cursor-grabbing ${
                         draggedIndex === index ? "opacity-40 border-dashed border-orange-450 bg-orange-50/20" : ""
@@ -1165,12 +1215,12 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 </div>
 
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
-                                  {(block.data.items || []).map((item: any, idx: number) => (
+                                  {(block.data.items || []).map((item: TestimonialItem, idx: number) => (
                                     <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2.5">
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          const newItems = (block.data.items || []).filter((_: TestimonialItem, i: number) => i !== idx);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
                                         className="absolute top-2 right-2 text-red-500 hover:text-red-700"
@@ -1311,7 +1361,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const newImages = (block.data.images || []).filter((_: any, i: number) => i !== idx);
+                                          const newImages = (block.data.images || []).filter((_: string, i: number) => i !== idx);
                                           updateBlockData(block.id, { images: newImages });
                                         }}
                                         className="absolute top-2 right-2 text-red-500 hover:text-red-700"
@@ -1392,12 +1442,12 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 </div>
 
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
-                                  {(block.data.items || []).map((combo: any, idx: number) => (
+                                  {(block.data.items || []).map((combo: ComboItem, idx: number) => (
                                     <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2.5">
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          const newItems = (block.data.items || []).filter((_: ComboItem, i: number) => i !== idx);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
                                         className="absolute top-2 right-2 text-red-500 hover:text-red-700"
@@ -1533,12 +1583,12 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                 </div>
 
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto border border-slate-100 p-3 bg-slate-50/50">
-                                  {(block.data.items || []).map((faqItem: any, idx: number) => (
+                                  {(block.data.items || []).map((faqItem: FaqItem, idx: number) => (
                                     <div key={idx} className="bg-white border border-slate-200 p-3 relative space-y-2">
                                       <button
                                         type="button"
                                         onClick={() => {
-                                          const newItems = (block.data.items || []).filter((_: any, i: number) => i !== idx);
+                                          const newItems = (block.data.items || []).filter((_: FaqItem, i: number) => i !== idx);
                                           updateBlockData(block.id, { items: newItems });
                                         }}
                                         className="absolute top-2 right-2 text-red-500 hover:text-red-700"
@@ -1978,7 +2028,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                              {(block.data.items || []).map((item: any, tIdx: number) => (
+                              {(block.data.items || []).map((item: TestimonialItem, tIdx: number) => (
                                 <div key={tIdx} className="bg-white border border-slate-100 p-4 shadow-sm relative flex flex-col justify-between rounded">
                                   <div className="space-y-2">
                                     <div className="flex gap-1 text-amber-500">
@@ -1986,7 +2036,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                                         <Star key={i} size={10} fill="currentColor" className="text-amber-500" />
                                       ))}
                                     </div>
-                                    <p className="text-[10px] text-slate-600 italic leading-relaxed">"{item.review}"</p>
+                                    <p className="text-[10px] text-slate-600 italic leading-relaxed">&ldquo;{item.review}&rdquo;</p>
                                   </div>
                                   <div className="flex items-center gap-2 pt-4 border-t border-slate-50 mt-4">
                                     {item.avatarUrl ? (
@@ -2054,7 +2104,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               )}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-center">
-                              {(block.data.items || []).map((combo: any, cIdx: number) => (
+                              {(block.data.items || []).map((combo: ComboItem, cIdx: number) => (
                                 <div key={cIdx} className="bg-white border-2 border-orange-100 p-5 flex flex-col justify-between relative shadow-sm rounded">
                                   {combo.tag && (
                                     <span className="absolute -top-2.5 right-4 bg-orange-600 text-white text-[8px] font-black px-2 py-0.5 uppercase tracking-wider rounded">
@@ -2101,7 +2151,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
                               <h2 className="text-xl font-black text-slate-900 tracking-tight">{block.data.title || "Câu hỏi thường gặp"}</h2>
                             </div>
                             <div className="space-y-3">
-                              {(block.data.items || []).map((faqItem: any, fIdx: number) => (
+                              {(block.data.items || []).map((faqItem: FaqItem, fIdx: number) => (
                                 <div key={fIdx} className="border border-orange-100 bg-[#fffbf5] rounded overflow-hidden text-xs">
                                   <div className="flex items-center justify-between p-3 font-bold text-slate-900 border-b border-orange-100">
                                     <span>{faqItem.question}</span>
@@ -2141,6 +2191,17 @@ export function PageForm({ pageId }: { pageId?: string }) {
         open={Boolean(mediaPickerTarget)}
         onClose={() => setMediaPickerTarget(null)}
         onSelect={handleBlockMediaSelect}
+      />
+      <ConfirmDialog
+        open={Boolean(confirmation)}
+        title={confirmation?.title}
+        description={confirmation?.description || ""}
+        confirmLabel="Tiếp tục"
+        onClose={() => setConfirmation(null)}
+        onConfirm={() => {
+          confirmation?.action();
+          setConfirmation(null);
+        }}
       />
     </div>
   );

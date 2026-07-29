@@ -1,26 +1,43 @@
 "use client";
 
 import {
-  ColumnDef,
+  type ColumnDef,
+  type SortingState,
   flexRender,
   getCoreRowModel,
-  useReactTable,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from "lucide-react";
+import { AdminEmptyState } from "./AdminPrimitives";
+import { cn } from "@/components/ui/Button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  searchKey?: string;
+  pageSize?: number;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pageSize = 10,
+  emptyTitle = "Không có dữ liệu",
+  emptyDescription = "Không có mục nào phù hợp với điều kiện hiện tại.",
+  className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -29,116 +46,186 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
+    onSortingChange: setSorting,
+    autoResetPageIndex: true,
+    state: { sorting },
     initialState: {
-      pagination: {
-        pageSize: 10,
-      },
+      pagination: { pageSize },
     },
   });
 
+  if (data.length === 0) {
+    return (
+      <AdminEmptyState
+        title={emptyTitle}
+        description={emptyDescription}
+      />
+    );
+  }
+
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const pageCount = Math.max(table.getPageCount(), 1);
+
   return (
-    <div className="space-y-4">
-      <div className="border border-slate-200 bg-white overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left text-slate-700">
-            <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200 font-bold">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <th key={header.id} className="px-5 py-4 whitespace-nowrap">
-                        {header.isPlaceholder ? null : (
-                          <div
-                            className={
-                              header.column.getCanSort()
-                                ? "cursor-pointer select-none flex items-center gap-2 hover:text-slate-700"
-                                : ""
-                            }
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {header.column.getCanSort() && (
-                              <ArrowUpDown size={12} className="opacity-50" />
-                            )}
-                          </div>
-                        )}
-                      </th>
-                    );
-                  })}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-slate-50/50 transition bg-white"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-5 py-4 align-top">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columns.length} className="h-24 text-center text-slate-500">
-                    Không có dữ liệu.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+    <div className={cn("space-y-0", className)}>
+      <div className="max-w-full overflow-x-auto border border-slate-200 bg-white">
+        <table className="w-full min-w-[760px] text-left text-sm text-slate-700">
+          <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-[0.06em] text-slate-500">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => {
+                  const sorted = header.column.getIsSorted();
+                  const isLast = index === headerGroup.headers.length - 1;
+                  return (
+                    <th
+                      key={header.id}
+                      scope="col"
+                      className={cn(
+                        "whitespace-nowrap px-4 py-3.5 sm:px-5",
+                        isLast &&
+                          "sticky right-0 z-20 border-l border-slate-100 bg-slate-50 text-right",
+                      )}
+                    >
+                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                        <button
+                          type="button"
+                          onClick={header.column.getToggleSortingHandler()}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 transition hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500",
+                            isLast && "ml-auto",
+                          )}
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                          {sorted === "asc" ? (
+                            <ArrowUp size={13} />
+                          ) : sorted === "desc" ? (
+                            <ArrowDown size={13} />
+                          ) : (
+                            <ArrowUpDown size={13} className="opacity-45" />
+                          )}
+                        </button>
+                      ) : (
+                        <div className={cn(isLast && "text-right")}>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className="bg-white transition-colors hover:bg-orange-50/35"
+              >
+                {row.getVisibleCells().map((cell, index) => {
+                  const isLast = index === row.getVisibleCells().length - 1;
+                  return (
+                    <td
+                      key={cell.id}
+                      className={cn(
+                        "px-4 py-4 align-top sm:px-5",
+                        isLast &&
+                          "sticky right-0 z-[5] border-l border-slate-100 bg-inherit text-right shadow-[-8px_0_14px_-14px_rgba(15,23,42,0.35)]",
+                      )}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-2">
-        <div className="flex-1 text-xs text-slate-500">
-          Trang {table.getState().pagination.pageIndex + 1} /{" "}
-          {table.getPageCount() || 1}
+
+      <div className="flex flex-col gap-3 border-x border-b border-slate-200 bg-white px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 text-slate-500">
+          <span className="font-semibold">
+            Trang {currentPage}/{pageCount} · {data.length} mục
+          </span>
+          <label className="hidden items-center gap-2 sm:flex">
+            <span>Số dòng</span>
+            <select
+              value={table.getState().pagination.pageSize}
+              onChange={(event) => table.setPageSize(Number(event.target.value))}
+              className="border border-slate-200 bg-white px-2 py-1 font-bold text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+              aria-label="Số dòng mỗi trang"
+            >
+              {[10, 20, 50].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => table.setPageIndex(0)}
+
+        <div className="flex items-center gap-1.5">
+          <PaginationButton
+            label="Trang đầu"
             disabled={!table.getCanPreviousPage()}
-            className="p-1 border border-slate-200 rounded disabled:opacity-50 hover:bg-slate-50 transition"
+            onClick={() => table.setPageIndex(0)}
+            className="hidden sm:grid"
           >
             <ChevronsLeft size={16} />
-          </button>
-          <button
-            onClick={() => table.previousPage()}
+          </PaginationButton>
+          <PaginationButton
+            label="Trang trước"
             disabled={!table.getCanPreviousPage()}
-            className="p-1 border border-slate-200 rounded disabled:opacity-50 hover:bg-slate-50 transition"
+            onClick={() => table.previousPage()}
           >
             <ChevronLeft size={16} />
-          </button>
-          <button
-            onClick={() => table.nextPage()}
+          </PaginationButton>
+          <PaginationButton
+            label="Trang sau"
             disabled={!table.getCanNextPage()}
-            className="p-1 border border-slate-200 rounded disabled:opacity-50 hover:bg-slate-50 transition"
+            onClick={() => table.nextPage()}
           >
             <ChevronRight size={16} />
-          </button>
-          <button
-            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          </PaginationButton>
+          <PaginationButton
+            label="Trang cuối"
             disabled={!table.getCanNextPage()}
-            className="p-1 border border-slate-200 rounded disabled:opacity-50 hover:bg-slate-50 transition"
+            onClick={() => table.setPageIndex(pageCount - 1)}
+            className="hidden sm:grid"
           >
             <ChevronsRight size={16} />
-          </button>
+          </PaginationButton>
         </div>
       </div>
     </div>
+  );
+}
+
+function PaginationButton({
+  label,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className={cn(
+        "grid h-9 w-9 place-items-center border border-slate-200 text-slate-600 transition hover:border-orange-300 hover:bg-orange-50 hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-35",
+        className,
+      )}
+      {...props}
+    />
   );
 }

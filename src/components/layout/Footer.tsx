@@ -3,39 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, ChevronDown } from "lucide-react";
-
-interface FooterLink {
-  href: string;
-  label: string;
-}
-
-interface FooterContact {
-  phone?: string;
-  email?: string;
-  address?: string;
-  workingHours?: string;
-  shopeeUrl?: string;
-  tiktokUrl?: string;
-  facebookUrl?: string;
-  instagramUrl?: string;
-  boCongThuongUrl?: string;
-}
-
-const SUPPORT_LINKS = [
-  { href: "/trang/huong-dan-mua-hang", label: "Hướng dẫn mua hàng" },
-  { href: "/trang/tra-cuu-don-hang", label: "Tra cứu đơn hàng" },
-  { href: "/trang/chinh-sach-giao-hang", label: "Chính sách giao hàng" },
-  { href: "/trang/chinh-sach-doi-tra-va-hoan-tien", label: "Chính sách đổi trả và hoàn tiền" },
-  { href: "/trang/tiep-nhan-phan-anh-khieu-nai", label: "Tiếp nhận phản ánh, khiếu nại" },
-];
-
-const POLICY_LINKS = [
-  { href: "/trang/chinh-sach-thanh-toan", label: "Chính sách thanh toán" },
-  { href: "/trang/chinh-sach-kiem-hang", label: "Chính sách kiểm hàng" },
-  { href: "/trang/chinh-sach-bao-mat-thong-tin", label: "Chính sách bảo mật thông tin" },
-  { href: "/trang/dieu-khoan-su-dung", label: "Điều khoản sử dụng" },
-  { href: "/gioi-thieu/thong-tin-doanh-nghiep", label: "Thông tin doanh nghiệp" },
-];
+import { DEFAULT_SITE_CONFIG, type SiteConfigData } from "@/lib/site-config-defaults";
 
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   <svg
@@ -85,9 +53,11 @@ const InstagramIcon = ({ size = 20 }: { size?: number }) => (
 export default function Footer({
   initialLinks,
   initialContact,
+  initialBrand,
 }: {
-  initialLinks?: { products?: FooterLink[]; explore?: FooterLink[] };
-  initialContact?: FooterContact;
+  initialLinks?: SiteConfigData["footerLinks"];
+  initialContact?: SiteConfigData["footerContact"];
+  initialBrand?: SiteConfigData["brand"];
 }) {
   const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -95,16 +65,20 @@ export default function Footer({
     setOpenSection((prev) => (prev === section ? null : section));
   };
 
-  const contact = {
-    phone: initialContact?.phone || "0989 852 948",
-    email: initialContact?.email || "cskh@ancungbatuyet.vn",
-    address: initialContact?.address || "Xuân Phương, Hà Nội",
-    workingHours: initialContact?.workingHours || "Thứ 2 – Thứ 7, 08:00 – 17:00",
-    tiktokUrl: initialContact?.tiktokUrl || "https://tiktok.com/@batuyethanhvi",
-    facebookUrl: initialContact?.facebookUrl || "https://facebook.com/ancungbatuyet",
-    instagramUrl: initialContact?.instagramUrl || "https://instagram.com/ancungbatuyet",
-    boCongThuongUrl: initialContact?.boCongThuongUrl || "",
-  };
+  const brand = initialBrand || DEFAULT_SITE_CONFIG.brand;
+  const contact = initialContact || DEFAULT_SITE_CONFIG.footerContact;
+  const supportLinks = initialLinks?.support || DEFAULT_SITE_CONFIG.footerLinks.support;
+  const policyLinks = initialLinks?.policies || DEFAULT_SITE_CONFIG.footerLinks.policies;
+  const legalRows = [
+    { label: "Đơn vị chủ quản", value: contact.legalName },
+    { label: "Mã số thuế", value: contact.taxCode },
+    { label: "Địa chỉ đăng ký", value: contact.registeredAddress },
+  ].filter((row) => row.value.trim());
+  const socialLinks = [
+    { label: "TikTok", url: contact.tiktokUrl, icon: TikTokIcon },
+    { label: "Facebook", url: contact.facebookUrl, icon: FacebookIcon },
+    { label: "Instagram", url: contact.instagramUrl, icon: InstagramIcon },
+  ].filter((item) => item.url.trim());
 
   return (
     <footer className="bg-[#fbfaf7] text-slate-900 border-t border-orange-100 font-sans">
@@ -115,25 +89,23 @@ export default function Footer({
           <div className="lg:col-span-4 md:col-span-1 col-span-12 space-y-4">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-white p-1 rounded border border-orange-100 shadow-sm">
-                <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
+                <img src={brand.logoUrl} alt={brand.logoAlt} className="h-full w-full object-contain" />
               </div>
               <div>
-                <p className="text-base font-bold leading-tight text-slate-950">Ăn Cùng Bà Tuyết</p>
-                <p className="text-xs text-slate-500 mt-1">Ăn vặt thì phải Ăn Cùng Bà Tuyết</p>
+                <p className="text-base font-bold leading-tight text-slate-950">{brand.name}</p>
+                <p className="text-xs text-slate-500 mt-1">{brand.tagline}</p>
               </div>
             </div>
             
-            <div className="space-y-2 text-xs leading-relaxed text-slate-600">
-              <p>
-                <span className="font-semibold text-slate-800">Đơn vị chủ quản:</span> [TÊN PHÁP LÝ DOANH NGHIỆP]
-              </p>
-              <p>
-                <span className="font-semibold text-slate-800">Mã số thuế:</span> [MÃ SỐ THUẾ]
-              </p>
-              <p>
-                <span className="font-semibold text-slate-800">Địa chỉ đăng ký:</span> [ĐỊA CHỈ DOANH NGHIỆP]
-              </p>
-            </div>
+            {legalRows.length > 0 && (
+              <div className="space-y-2 text-xs leading-relaxed text-slate-600">
+                {legalRows.map((row) => (
+                  <p key={row.label}>
+                    <span className="font-semibold text-slate-800">{row.label}:</span> {row.value}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* CỘT 2 — HỖ TRỢ KHÁCH HÀNG */}
@@ -159,7 +131,7 @@ export default function Footer({
 
             <nav id="footer-support-nav" className={`md:block ${openSection === "support" ? "block" : "hidden"}`}>
               <ul className="space-y-1 mt-2 md:mt-0">
-                {SUPPORT_LINKS.map((link) => (
+                {supportLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -196,7 +168,7 @@ export default function Footer({
 
             <nav id="footer-policy-nav" className={`md:block ${openSection === "policy" ? "block" : "hidden"}`}>
               <ul className="space-y-1 mt-2 md:mt-0">
-                {POLICY_LINKS.map((link) => (
+                {policyLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
@@ -250,23 +222,7 @@ export default function Footer({
 
             {/* Mạng xã hội */}
             <div className="flex gap-2.5 pt-1">
-              {[
-                {
-                  label: "TikTok",
-                  url: contact.tiktokUrl,
-                  icon: TikTokIcon,
-                },
-                {
-                  label: "Facebook",
-                  url: contact.facebookUrl,
-                  icon: FacebookIcon,
-                },
-                {
-                  label: "Instagram",
-                  url: contact.instagramUrl,
-                  icon: InstagramIcon,
-                },
-              ].map((s) => (
+              {socialLinks.map((s) => (
                 <a
                   key={s.label}
                   href={s.url}
@@ -281,9 +237,8 @@ export default function Footer({
               ))}
             </div>
 
-            {/* BỘ CÔNG THƯƠNG LOGO PLACEHOLDER */}
-            <div className="pt-1">
-              {contact.boCongThuongUrl ? (
+            {contact.boCongThuongUrl && contact.boCongThuongImageUrl && (
+              <div className="pt-1">
                 <a
                   href={contact.boCongThuongUrl}
                   target="_blank"
@@ -292,23 +247,13 @@ export default function Footer({
                   aria-label="Đã thông báo Bộ Công Thương"
                 >
                   <img
-                    src="/bo-cong-thuong.png"
+                    src={contact.boCongThuongImageUrl}
                     alt="Đã thông báo Bộ Công Thương"
                     className="h-10 w-auto object-contain"
                   />
                 </a>
-              ) : (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-[#fffaf3] border border-dashed border-orange-200 text-slate-500 max-w-[200px] shadow-sm">
-                  <svg className="w-4 h-4 shrink-0 opacity-60 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                  <div className="text-left leading-tight">
-                    <span className="text-[8px] block uppercase font-bold text-slate-400">[Chờ xác thực]</span>
-                    <span className="text-[9px] block font-black uppercase text-slate-500">Bộ Công Thương</span>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
           </div>
 
@@ -317,7 +262,7 @@ export default function Footer({
         {/* THANH CUỐI FOOTER */}
         <div className="border-t border-orange-100 mt-10 pt-6 text-center">
           <p className="text-slate-500 text-xs font-medium">
-            © 2026 Ăn Cùng Bà Tuyết. Bảo lưu mọi quyền.
+            {contact.copyrightText}
           </p>
         </div>
 

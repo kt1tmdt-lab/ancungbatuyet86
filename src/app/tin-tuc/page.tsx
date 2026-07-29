@@ -50,49 +50,64 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCategories();
+    const controller = new AbortController();
+
+    async function loadCategories() {
+      try {
+        const res = await fetch("/api/categories", { signal: controller.signal });
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+        console.error("Failed to fetch categories", error);
+      }
+    }
+
+    void loadCategories();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
-    fetchPosts();
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      async function loadPosts() {
+        setLoading(true);
+        try {
+          const params = new URLSearchParams();
+          params.append("status", "PUBLISHED");
+          if (selectedCategorySlug && selectedCategorySlug !== "all") {
+            params.append("categorySlug", selectedCategorySlug);
+          }
+          if (searchQuery.trim()) {
+            params.append("search", searchQuery.trim());
+          }
+
+          const res = await fetch(`/api/posts?${params.toString()}`, {
+            signal: controller.signal,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setPosts(Array.isArray(data) ? data : []);
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name === "AbortError") return;
+          console.error("Failed to fetch posts", error);
+          setPosts([]);
+        } finally {
+          if (!controller.signal.aborted) setLoading(false);
+        }
+      }
+
+      void loadPosts();
+    }, searchQuery.trim() ? 250 : 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, [selectedCategorySlug, searchQuery]);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      if (res.ok) {
-        const data = await res.json();
-        setCategories(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch categories", error);
-    }
-  };
-
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.append("status", "PUBLISHED");
-      if (selectedCategorySlug && selectedCategorySlug !== "all") {
-        params.append("categorySlug", selectedCategorySlug);
-      }
-      if (searchQuery.trim()) {
-        params.append("search", searchQuery.trim());
-      }
-
-      const res = await fetch(`/api/posts?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(Array.isArray(data) ? data : []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch posts", error);
-      setPosts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const featured = posts.length > 0 ? posts[0] : null;
   const listPosts = posts.length > 1 ? posts.slice(1) : [];

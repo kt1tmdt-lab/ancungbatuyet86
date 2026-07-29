@@ -1,7 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 import { reviewPost } from "@/features/posts/mutations";
 import { logAudit } from "@/lib/audit";
 
@@ -14,7 +12,7 @@ export async function POST(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Only ADMIN and EDITOR can review posts
-    if (payload.role !== "ADMIN" && payload.role !== "EDITOR") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -37,10 +35,11 @@ export async function POST(req: NextRequest) {
       });
 
       return NextResponse.json(updatedPost);
-    } catch (err: any) {
-      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
-      if (err.message === "Rejection reason (note) is required") return NextResponse.json({ error: err.message }, { status: 400 });
-      return NextResponse.json({ error: err.message }, { status: 400 });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unable to review post";
+      if (message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      if (message === "Rejection reason (note) is required") return NextResponse.json({ error: message }, { status: 400 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
   } catch (error) {
     console.error("POST Review Error:", error);

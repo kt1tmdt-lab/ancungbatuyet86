@@ -94,6 +94,8 @@ function marketingTextValue(items: HomeTextItem[], key: string, fallback: string
   return repairMojibakeText(value && value.trim() ? value : fallback);
 }
 
+const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
 // Animation variants for minimal corporate transitions
 const fapUp = {
   hidden: { opacity: 0, y: 15 },
@@ -102,7 +104,7 @@ const fapUp = {
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -114,7 +116,7 @@ const fapLeft = {
     x: 0,
     transition: {
       duration: 0.7,
-      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -126,7 +128,7 @@ const fapRight = {
     x: 0,
     transition: {
       duration: 0.7,
-      ease: [0.16, 1, 0.3, 1] as any, // easeOutExpo
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -149,7 +151,7 @@ const storyParagraphReveal = {
     filter: "blur(0px)",
     transition: {
       duration: 0.65,
-      ease: [0.16, 1, 0.3, 1] as any,
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -162,7 +164,7 @@ const statCardReveal = {
     scale: 1,
     transition: {
       duration: 0.6,
-      ease: [0.16, 1, 0.3, 1] as any,
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -175,7 +177,7 @@ const proofCardReveal = {
     scale: 1,
     transition: {
       duration: 0.55,
-      ease: [0.16, 1, 0.3, 1] as any,
+      ease: EASE_OUT_EXPO,
     },
   },
 };
@@ -184,15 +186,17 @@ function useCountUp(targetValueString: string, durationMs = 2000) {
   const [displayValue, setDisplayValue] = useState("0");
 
   useEffect(() => {
+    let animationFrameId: number;
+
     if (!targetValueString) {
-      setDisplayValue("0");
-      return;
+      animationFrameId = window.requestAnimationFrame(() => setDisplayValue("0"));
+      return () => window.cancelAnimationFrame(animationFrameId);
     }
 
     const match = targetValueString.match(/([0-9.,]+)/);
     if (!match) {
-      setDisplayValue(targetValueString);
-      return;
+      animationFrameId = window.requestAnimationFrame(() => setDisplayValue(targetValueString));
+      return () => window.cancelAnimationFrame(animationFrameId);
     }
 
     const numberPartString = match[1];
@@ -241,12 +245,11 @@ function useCountUp(targetValueString: string, durationMs = 2000) {
 
     const targetNumber = parseFloat(cleanNumberString);
     if (isNaN(targetNumber)) {
-      setDisplayValue(targetValueString);
-      return;
+      animationFrameId = window.requestAnimationFrame(() => setDisplayValue(targetValueString));
+      return () => window.cancelAnimationFrame(animationFrameId);
     }
 
     let startTimestamp: number | null = null;
-    let animationFrameId: number;
 
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
@@ -346,58 +349,62 @@ export default function AboutPage() {
     assetByKey.about_video?.linkUrl || "https://www.youtube.com/embed/NbWkmT79i5s?autoplay=0&rel=0"
   );
 
-  // Brand Story content constant
-  const BRAND_STORY_PARAGRAPHS = [
-    "Bà Tuyết Diamond - Đỗ Thị Tuyết - xuất phát điểm là một nông dân ở Thái Nguyên. Công việc hằng ngày của bà là làm ruộng và trồng chè. Gia đình từng gánh khoản nợ hàng trăm triệu đồng từ việc sửa nhà, chữa bệnh và chăn nuôi thất bại. Năm 2014, một tai nạn gãy chân khiến bà phải ở nhà suốt hai năm, mất đi cơ hội làm việc ổn định.",
-    "Cuối năm 2020, con trai bà - Nguyễn Minh Trường - bắt đầu rủ mẹ cùng tham gia quay video đời thường. Bằng chiếc điện thoại cũ, những thước phim về cuộc sống gia đình mộc mạc, không tô vẽ, không dàn dựng đã chạm đến hàng triệu người xem. Năm 2022, khi TikTok bắt đầu phát triển mạnh tại Việt Nam, bà Tuyết cùng gia đình bắt đầu chia sẻ nội dung về đồ ăn vặt. Cộng đồng yêu mến không chỉ xem mà còn đặt hàng - và Ăn Cùng Bà Tuyết ra đời từ chính nhu cầu và sự ủng hộ đó.",
-    "Trong quá trình phục vụ khách hàng, đội ngũ Ăn Cùng Bà Tuyết nhận ra một thực tế: người Việt Nam vẫn còn nhiều định kiến với đồ ăn vặt nội địa: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu Việt thật sự đứng sau sản phẩm. Từ nhận thức đó, Ăn Cùng Bà Tuyết xác định sứ mệnh của mình: để người Việt Nam tự hào về đồ ăn vặt của chính mình, với sản phẩm do người Việt làm chủ, nguyên liệu rõ ràng, quy trình kiểm soát được.",
-    "Đến nay, Ăn Cùng Bà Tuyết đã xây dựng những nhà máy sản xuất thực phẩm tại Hà Nội và Thái Nguyên, sử dụng những nguồn nguyên liệu chất lượng cao nhập khẩu từ châu Âu, sản phẩm được bảo hiểm trách nhiệm bởi PVI, và phân phối tại hàng nghìn điểm bán trên toàn quốc, từ tạp hóa gần trường học đến các sàn thương mại điện tử."
-  ];
+  const storyTitle = marketingTextValue(
+    homeTexts,
+    "about_current_story_title",
+    "Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam"
+  );
+  const brandStoryParagraphs = [
+    marketingTextValue(homeTexts, "about_current_story_1", "Bà Tuyết Diamond - Đỗ Thị Tuyết - xuất phát điểm là một nông dân ở Thái Nguyên. Công việc hằng ngày của bà là làm ruộng và trồng chè. Gia đình từng gánh khoản nợ hàng trăm triệu đồng từ việc sửa nhà, chữa bệnh và chăn nuôi thất bại. Năm 2014, một tai nạn gãy chân khiến bà phải ở nhà suốt hai năm, mất đi cơ hội làm việc ổn định."),
+    marketingTextValue(homeTexts, "about_current_story_2", "Cuối năm 2020, con trai bà - Nguyễn Minh Trường - bắt đầu rủ mẹ cùng tham gia quay video đời thường. Bằng chiếc điện thoại cũ, những thước phim về cuộc sống gia đình mộc mạc, không tô vẽ, không dàn dựng đã chạm đến hàng triệu người xem. Năm 2022, khi TikTok bắt đầu phát triển mạnh tại Việt Nam, bà Tuyết cùng gia đình bắt đầu chia sẻ nội dung về đồ ăn vặt. Cộng đồng yêu mến không chỉ xem mà còn đặt hàng - và Ăn Cùng Bà Tuyết ra đời từ chính nhu cầu và sự ủng hộ đó."),
+    marketingTextValue(homeTexts, "about_current_story_3", "Trong quá trình phục vụ khách hàng, đội ngũ Ăn Cùng Bà Tuyết nhận ra một thực tế: người Việt Nam vẫn còn nhiều định kiến với đồ ăn vặt nội địa: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu Việt thật sự đứng sau sản phẩm. Từ nhận thức đó, Ăn Cùng Bà Tuyết xác định sứ mệnh của mình: để người Việt Nam tự hào về đồ ăn vặt của chính mình, với sản phẩm do người Việt làm chủ, nguyên liệu rõ ràng, quy trình kiểm soát được."),
+    marketingTextValue(homeTexts, "about_current_story_4", "Đến nay, Ăn Cùng Bà Tuyết đã xây dựng những nhà máy sản xuất thực phẩm tại Hà Nội và Thái Nguyên, sử dụng những nguồn nguyên liệu chất lượng cao nhập khẩu từ châu Âu, sản phẩm được bảo hiểm trách nhiệm bởi PVI, và phân phối tại hàng nghìn điểm bán trên toàn quốc, từ tạp hóa gần trường học đến các sàn thương mại điện tử."),
+  ].filter(Boolean);
 
   const storyBullets = [
     {
       icon: <Globe className="h-6 w-6" />,
-      text: "Nguyên liệu chân gà chất lượng cao nhập khẩu từ Châu Âu",
+      text: marketingTextValue(homeTexts, "about_current_proof_1", "Nguyên liệu chân gà chất lượng cao nhập khẩu từ Châu Âu"),
     },
     {
       icon: <Factory className="h-6 w-6" />,
-      text: "Hai nhà máy sản xuất phục vụ hàng triệu khách hàng",
+      text: marketingTextValue(homeTexts, "about_current_proof_2", "Hai nhà máy sản xuất phục vụ hàng triệu khách hàng"),
     },
     {
       icon: <ShieldCheck className="h-6 w-6" />,
-      text: "Bảo hiểm trách nhiệm sản phẩm khẳng định đồng hành bảo vệ quyền lợi khách hàng",
+      text: marketingTextValue(homeTexts, "about_current_proof_3", "Bảo hiểm trách nhiệm sản phẩm khẳng định đồng hành bảo vệ quyền lợi khách hàng"),
     },
     {
       icon: <Store className="h-6 w-6" />,
-      text: "Phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử",
+      text: marketingTextValue(homeTexts, "about_current_proof_4", "Phân phối toàn quốc qua hệ thống bán lẻ và thương mại điện tử"),
     },
   ];
 
   const coreValues = [
     {
       icon: <ShieldCheck className="h-6 w-6 stroke-[1.8]" />,
-      title: "An toàn",
-      desc: "Sản phẩm phải đạt chuẩn từ nguyên liệu đến thành phẩm, không thỏa hiệp để đổi lấy giá rẻ, sức khoẻ khách hàng là quan trọng nhất và không có ngoại lệ.",
+      title: marketingTextValue(homeTexts, "about_current_core_1_title", "An toàn"),
+      desc: marketingTextValue(homeTexts, "about_current_core_1_description", "Sản phẩm phải đạt chuẩn từ nguyên liệu đến thành phẩm, không thỏa hiệp để đổi lấy giá rẻ, sức khoẻ khách hàng là quan trọng nhất và không có ngoại lệ."),
     },
     {
       icon: <Eye className="h-6 w-6 stroke-[1.8]" />,
-      title: "Minh bạch",
-      desc: "Nguồn gốc nguyên liệu, quy trình sản xuất, chứng nhận chất lượng, tất cả phải được công khai để khách hàng có thể tự kiểm chứng.",
+      title: marketingTextValue(homeTexts, "about_current_core_2_title", "Minh bạch"),
+      desc: marketingTextValue(homeTexts, "about_current_core_2_description", "Nguồn gốc nguyên liệu, quy trình sản xuất, chứng nhận chất lượng, tất cả phải được công khai để khách hàng có thể tự kiểm chứng."),
     },
     {
       icon: <Award className="h-6 w-6 stroke-[1.8]" />,
-      title: "Trách nhiệm",
-      desc: "Khi có vấn đề, Ăn Cùng Bà Tuyết luôn sẵn sàng nhận trách nhiệm và không né tránh. Sản phẩm được bảo hiểm trách nhiệm PVI là 1 phần trong những nỗ lực này.",
+      title: marketingTextValue(homeTexts, "about_current_core_3_title", "Trách nhiệm"),
+      desc: marketingTextValue(homeTexts, "about_current_core_3_description", "Khi có vấn đề, Ăn Cùng Bà Tuyết luôn sẵn sàng nhận trách nhiệm và không né tránh. Sản phẩm được bảo hiểm trách nhiệm PVI là 1 phần trong những nỗ lực này."),
     },
     {
       icon: <Zap className="h-6 w-6 stroke-[1.8]" />,
-      title: "Quyết liệt",
-      desc: "Để có thể phát triển và mang lại nhiều giá trị hơn cho khách hàng, chúng tôi luôn quyết liệt làm tốt hơn mỗi ngày để phục vụ được khách hàng tốt và tốt hơn nữa.",
+      title: marketingTextValue(homeTexts, "about_current_core_4_title", "Quyết liệt"),
+      desc: marketingTextValue(homeTexts, "about_current_core_4_description", "Để có thể phát triển và mang lại nhiều giá trị hơn cho khách hàng, chúng tôi luôn quyết liệt làm tốt hơn mỗi ngày để phục vụ được khách hàng tốt và tốt hơn nữa."),
     },
     {
       icon: <Heart className="h-6 w-6 stroke-[1.8]" />,
-      title: "Người Việt làm chủ",
-      desc: "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới.",
+      title: marketingTextValue(homeTexts, "about_current_core_5_title", "Người Việt làm chủ"),
+      desc: marketingTextValue(homeTexts, "about_current_core_5_description", "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới."),
     },
   ];
 
@@ -416,7 +423,7 @@ export default function AboutPage() {
             variants={fapUp}
           >
             <h1 className="text-[1.75rem] sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-[1.15] break-words">
-              Từ người nông dân Thái Nguyên đến thương hiệu đồ ăn vặt Việt Nam
+              {storyTitle}
             </h1>
             <motion.div
               className="mt-4 h-1.5 bg-orange-600"
@@ -438,7 +445,7 @@ export default function AboutPage() {
                 viewport={{ once: true, margin: "-80px" }}
                 variants={staggerContainer}
               >
-                {BRAND_STORY_PARAGRAPHS.map((paragraph, index) => (
+                {brandStoryParagraphs.map((paragraph, index) => (
                   <motion.p
                     key={index}
                     className={
@@ -536,7 +543,7 @@ export default function AboutPage() {
               )}
             </div>
             <div className="mt-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-slate-500">
-              <span>Xem quy trình nhà máy thực tế</span>
+              <span>{marketingTextValue(homeTexts, "about_current_video_caption", "Xem quy trình nhà máy thực tế")}</span>
               <ExternalLink size={12} />
             </div>
           </motion.div>
@@ -557,7 +564,7 @@ export default function AboutPage() {
             variants={fapUp}
           >
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-950">
-              Chúng tôi tin vào điều gì
+              {marketingTextValue(homeTexts, "about_current_beliefs_title", "Chúng tôi tin vào điều gì")}
             </h2>
             <div className="h-1.5 w-20 bg-orange-600 mx-auto mt-4 rounded-sm" />
           </motion.div>
@@ -573,13 +580,13 @@ export default function AboutPage() {
             >
               <motion.div className="lg:col-span-8 space-y-4" variants={fapLeft}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                  Sứ mệnh
+                  {marketingTextValue(homeTexts, "about_current_mission_label", "Sứ mệnh")}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                  Để người Việt Nam tự hào về đồ ăn vặt của chính mình
+                  {marketingTextValue(homeTexts, "about_current_mission_title", "Để người Việt Nam tự hào về đồ ăn vặt của chính mình")}
                 </h3>
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
-                  Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.
+                  {marketingTextValue(homeTexts, "about_current_mission_description", "Đồ ăn vặt Việt Nam từ lâu chịu nhiều định kiến: về chất lượng, về nguồn gốc, về sự thiếu vắng những thương hiệu nội địa thật sự đứng sau sản phẩm. Ăn Cùng Bà Tuyết ra đời và phát triển với mong muốn thay đổi điều đó: xây dựng một thương hiệu đồ ăn vặt mà người Việt có thể yên tâm chọn, tự hào giới thiệu, và biết rõ ai đang chịu trách nhiệm.")}
                 </p>
               </motion.div>
               <motion.div className="order-first flex items-center justify-start lg:order-last lg:col-span-4 lg:justify-center" variants={fapRight}>
@@ -620,13 +627,13 @@ export default function AboutPage() {
               </motion.div>
               <motion.div className="lg:col-span-8 space-y-4" variants={fapRight}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                  Tầm nhìn
+                  {marketingTextValue(homeTexts, "about_current_vision_label", "Tầm nhìn")}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                  Vươn tầm quốc tế & khẳng định chất lượng Việt
+                  {marketingTextValue(homeTexts, "about_current_vision_title", "Vươn tầm quốc tế & khẳng định chất lượng Việt")}
                 </h3>
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
-                  Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.
+                  {marketingTextValue(homeTexts, "about_current_vision_description", "Ăn Cùng Bà Tuyết khao khát trở thành một thương hiệu đồ ăn vặt được tin yêu và ủng hộ tại Việt Nam, xa hơn nữa là đưa đồ ăn vặt Việt Nam ra thị trường quốc tế.")}
                 </p>
               </motion.div>
             </motion.div>
@@ -641,13 +648,13 @@ export default function AboutPage() {
             >
               <motion.div className="lg:col-span-8 space-y-4" variants={fapLeft}>
                 <span className="text-xs font-black uppercase tracking-wider text-orange-600">
-                  Triết lý kinh doanh
+                  {marketingTextValue(homeTexts, "about_current_philosophy_label", "Triết lý kinh doanh")}
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
-                  Làm thật và làm khác biệt
+                  {marketingTextValue(homeTexts, "about_current_philosophy_title", "Làm thật và làm khác biệt")}
                 </h3>
                 <p className="text-base text-slate-700 leading-relaxed font-semibold">
-                  Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.
+                  {marketingTextValue(homeTexts, "about_current_philosophy_description", "Ăn Cùng Bà Tuyết không chọn cách làm đồ ăn vặt giống những gì thị trường đã có. Nguyên liệu nhập khẩu từ châu Âu khi phần lớn ngành hàng dùng nguồn nguyên liệu không rõ xuất xứ. Đầu tư và gánh chịu rất nhiều rủi ro khi xây dựng nhà máy hàng chục tỷ đồng thay vì đi thuê nhà máy gia công để tiết kiệm chi phí. Mua bảo hiểm trách nhiệm sản phẩm cho từng gói hàng vài nghìn đồng chỉ với mong muốn được bảo vệ và đồng hành với khách hàng được nhiều hơn. Mỗi quyết định đều đắt hơn, chậm hơn, rủi ro hơn nhưng chúng tôi vẫn chọn chỉ cần nó có thể mang đến nhiều lợi ích hơn cho khách hàng.")}
                 </p>
               </motion.div>
               <motion.div className="order-first flex items-center justify-start lg:order-last lg:col-span-4 lg:justify-center" variants={fapRight}>
@@ -677,7 +684,7 @@ export default function AboutPage() {
               viewport={{ once: true }}
               variants={fapUp}
             >
-              Giá trị cốt lõi
+              {marketingTextValue(homeTexts, "about_current_core_title", "Giá trị cốt lõi")}
             </motion.h3>
             
             <motion.div 
@@ -723,7 +730,7 @@ export default function AboutPage() {
             variants={fapUp}
           >
             <h3 className="break-words text-3xl font-black uppercase italic tracking-tight text-orange-600 select-none sm:text-5xl lg:text-7xl">
-              "Ăn vặt thì phải ăn cùng Bà Tuyết"
+              “{marketingTextValue(homeTexts, "about_current_slogan", "Ăn vặt thì phải ăn cùng Bà Tuyết")}”
             </h3>
           </motion.div>
 
@@ -741,7 +748,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             variants={fapUp}
           >
-            Tìm hiểu thêm về chất lượng và quy trình sản xuất hoặc liên hệ với chúng tôi
+            {marketingTextValue(homeTexts, "about_current_cta_title", "Tìm hiểu thêm về chất lượng và quy trình sản xuất hoặc liên hệ với chúng tôi")}
           </motion.h2>
           
           <motion.div 
@@ -752,23 +759,23 @@ export default function AboutPage() {
             variants={fapUp}
           >
             <Link
-              href="/chat-luong"
+              href={marketingTextValue(homeTexts, "about_current_cta_1_link", "/chat-luong")}
               className="acbt-btn acbt-btn--primary acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
-              <span>Xem trang Chất lượng</span>
+              <span>{marketingTextValue(homeTexts, "about_current_cta_1_text", "Xem trang Chất lượng")}</span>
               <ArrowRight size={18} />
             </Link>
             <Link
-              href="/san-pham"
+              href={marketingTextValue(homeTexts, "about_current_cta_2_link", "/san-pham")}
               className="acbt-btn acbt-btn--secondary acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
-              <span>Xem sản phẩm</span>
+              <span>{marketingTextValue(homeTexts, "about_current_cta_2_text", "Xem sản phẩm")}</span>
             </Link>
             <Link
-              href="/lien-he"
+              href={marketingTextValue(homeTexts, "about_current_cta_3_link", "/lien-he")}
               className="acbt-btn acbt-btn--outline acbt-btn--xl w-full sm:w-auto sm:min-w-[200px] rounded-md"
             >
-              <span>Liên hệ với chúng tôi</span>
+              <span>{marketingTextValue(homeTexts, "about_current_cta_3_text", "Liên hệ với chúng tôi")}</span>
             </Link>
           </motion.div>
 

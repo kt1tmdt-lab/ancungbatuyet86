@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { PostStatus, type Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { normalizeSlug } from "@/lib/slug";
 import type { AuthPayload } from "@/lib/auth";
@@ -6,9 +6,21 @@ import type { PostPayload } from "./types";
 import { postInclude, postSlugExists } from "./queries";
 import { revalidatePath } from "next/cache";
 
-function resolveCreateStatus(status: string | undefined, viewer: AuthPayload) {
+function isPostStatus(value: string): value is PostStatus {
+  return Object.values(PostStatus).includes(value as PostStatus);
+}
+
+function resolveCreateStatus(
+  status: string | undefined,
+  viewer: AuthPayload,
+): PostStatus {
   if (status === "PENDING_REVIEW") return "PENDING_REVIEW";
-  if (status === "PUBLISHED" && (viewer.role === "ADMIN" || viewer.role === "EDITOR")) {
+  if (
+    status === "PUBLISHED" &&
+    (viewer.role === "SUPER_ADMIN" ||
+      viewer.role === "ADMIN" ||
+      viewer.role === "EDITOR")
+  ) {
     return "PUBLISHED";
   }
 
@@ -72,7 +84,7 @@ export async function createPost(input: PostPayload, viewer: AuthPayload) {
         postId: post.id,
         reviewerId: viewer.id,
         action: "SUBMIT",
-        note: "Gá»­i duyá»‡t bÃ i viáº¿t má»›i",
+        note: "Gửi duyệt bài viết mới",
       },
     });
   }
@@ -93,16 +105,19 @@ export async function updatePost(postId: string, input: Partial<PostPayload>, vi
     }
   }
 
-  let finalStatus = existingPost.status;
+  let finalStatus: PostStatus = existingPost.status;
   if (input.status) {
+    if (!isPostStatus(input.status)) {
+      throw new Error("Invalid post status");
+    }
     if (viewer.role === "AUTHOR") {
       if (input.status === "DRAFT" || input.status === "PENDING_REVIEW") {
-        finalStatus = input.status as any;
+        finalStatus = input.status;
       } else if (input.status === "PUBLISHED") {
         throw new Error("Authors cannot publish posts directly");
       }
     } else {
-      finalStatus = input.status as any;
+      finalStatus = input.status;
     }
   }
 
@@ -113,7 +128,7 @@ export async function updatePost(postId: string, input: Partial<PostPayload>, vi
     tagRelations = { create: tagRel };
   }
 
-  const updateData: any = {
+  const updateData: Prisma.PostUncheckedUpdateInput = {
     title: input.title !== undefined ? input.title : existingPost.title,
     slug: input.slug !== undefined ? input.slug : existingPost.slug,
     excerpt: input.excerpt !== undefined ? input.excerpt : existingPost.excerpt,

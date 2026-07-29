@@ -1,17 +1,30 @@
 "use client";
 
-import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
-import { useState, useEffect } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useState,
+} from "react";
+import { Eye } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { 
-  ClipboardList, 
-  Loader, 
-  AlertCircle, 
-  Search, 
-  ChevronLeft, 
-  ChevronRight,
-  Eye
-} from "lucide-react";
+import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
+import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel } from "@/components/admin/CmsPanel";
+import {
+  AdminEmptyState,
+  AdminErrorState,
+  AdminLoadingState,
+  AdminModal,
+  AdminPagination,
+  AdminSearchInput,
+  AdminToolbar,
+} from "@/components/admin/AdminPrimitives";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+
+type AuditDetails = Record<string, unknown> | unknown[] | string | number | null;
 
 interface AuditLog {
   id: string;
@@ -19,7 +32,7 @@ interface AuditLog {
   action: string;
   entityType: string;
   entityId: string | null;
-  details: any;
+  details: AuditDetails;
   createdAt: string;
   user: {
     email: string;
@@ -28,162 +41,188 @@ interface AuditLog {
   } | null;
 }
 
+type AuditResponse = {
+  logs: AuditLog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+function getActionVariant(action: string) {
+  const normalized = action.toUpperCase();
+  if (normalized.includes("DELETE")) return "danger" as const;
+  if (normalized.includes("CREATE")) return "success" as const;
+  if (
+    normalized.includes("UPDATE") ||
+    normalized.includes("APPROVE") ||
+    normalized.includes("REJECT")
+  ) {
+    return "default" as const;
+  }
+  return "muted" as const;
+}
+
 export default function ActivityLogsPage() {
   const { token } = useAuth();
-  
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
-  // Debounce search input
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
-    }, 400);
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  useEffect(() => {
-    if (token) {
-      fetchLogs();
-    }
-  }, [token, page, debouncedSearch]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
+    if (!token) return;
     setLoading(true);
+    setLoadError("");
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: "20",
+    });
+    if (deferredSearch.trim()) {
+      params.set("search", deferredSearch.trim());
+    }
+
     try {
-      const res = await fetch(`/api/admin/activity-logs?page=${page}&limit=20&search=${encodeURIComponent(debouncedSearch)}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs);
-        setTotalPages(data.pagination.totalPages);
-        setTotal(data.pagination.total);
-      } else {
-        setError("Không thể tải nhật ký hoạt động");
-      }
-    } catch (err) {
-      console.error("Error fetching logs:", err);
-      setError("Đã xảy ra lỗi khi kết nối máy chủ");
+      const data = await adminRequest<AuditResponse>(
+        `/api/admin/activity-logs?${params.toString()}`,
+        { token },
+      );
+      setLogs(data.logs);
+      setTotalPages(Math.max(data.pagination.totalPages, 1));
+      setTotal(data.pagination.total);
+    } catch (error) {
+      setLoadError(
+        getAdminErrorMessage(error, "Không thể tải nhật ký hoạt động."),
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [deferredSearch, page, token]);
 
-  const getActionBadge = (action: string) => {
-    const act = action.toUpperCase();
-    if (act.includes("CREATE")) return "bg-green-50 text-green-700 border-green-200";
-    if (act.includes("UPDATE") || act.includes("APPROVE") || act.includes("REJECT")) return "bg-blue-50 text-blue-700 border-blue-200";
-    if (act.includes("DELETE")) return "bg-red-50 text-red-700 border-red-200";
-    return "bg-slate-50 text-slate-700 border-slate-200";
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchLogs(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchLogs]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
   };
 
   return (
-    <ProtectedRoute requiredRole="ADMIN">
-      <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 text-white flex items-center justify-center shadow-md">
-            <ClipboardList size={20} />
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Nhật ký hoạt động</h1>
-            <p className="text-slate-500 text-sm mt-1">Giám sát các thao tác tạo mới, cập nhật, duyệt hoặc xóa tài nguyên trên hệ thống.</p>
-          </div>
-        </div>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
+      <div className="space-y-5">
+        <CmsPageHeader
+          eyebrow="Hệ thống"
+          title="Nhật ký hoạt động"
+          description="Theo dõi thao tác tạo, cập nhật, duyệt và xóa dữ liệu trong khu vực quản trị."
+        />
 
-        {/* Search & Stats Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-white border border-slate-150 p-4 shadow-sm">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-3 text-slate-400" size={16} />
-            <input
-              type="text"
+        <CmsPanel>
+          <AdminToolbar>
+            <AdminSearchInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm hành động, đối tượng..."
-              className="w-full pl-9 pr-4 py-2 border border-slate-300 focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-sm outline-none"
+              onChange={handleSearchChange}
+              placeholder="Tìm hành động, loại hoặc mã đối tượng..."
             />
-          </div>
-          <div className="text-xs text-slate-500 font-semibold">
-            Tổng số: <span className="text-slate-900 font-bold">{total}</span> nhật ký hoạt động
-          </div>
-        </div>
+            <p className="text-xs font-semibold text-slate-500">
+              Tổng cộng <strong className="text-slate-950">{total}</strong> hoạt
+              động
+            </p>
+          </AdminToolbar>
 
-        {/* Messaging responses */}
-        {error && (
-          <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 max-w-md">
-            <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={16} />
-            <p className="text-xs text-red-700 font-semibold leading-normal">{error}</p>
-          </div>
-        )}
-
-        {/* Logs list table */}
-        <div className="bg-white border border-slate-100 p-6 shadow-sm">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-2">
-              <Loader className="animate-spin text-orange-500" size={36} />
-              <p className="text-xs text-slate-400 font-semibold">Đang tải nhật ký hoạt động...</p>
-            </div>
+            <AdminLoadingState title="Đang tải nhật ký" />
+          ) : loadError ? (
+            <AdminErrorState
+              description={loadError}
+              action={
+                <Button
+                  variant="adminSecondary"
+                  onClick={() => void fetchLogs()}
+                >
+                  Thử lại
+                </Button>
+              }
+            />
           ) : logs.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <AlertCircle className="mx-auto text-slate-350 mb-2" size={36} />
-              <p className="text-sm font-semibold">Không tìm thấy nhật ký hoạt động nào</p>
-            </div>
+            <AdminEmptyState
+              title="Không tìm thấy hoạt động"
+              description={
+                search
+                  ? "Hãy thử một từ khóa khác."
+                  : "Các hoạt động mới sẽ xuất hiện tại đây."
+              }
+            />
           ) : (
-            <div className="space-y-4">
-              <div className="overflow-x-auto border border-slate-100">
-                <table className="w-full text-sm text-left text-slate-700">
-                  <thead className="text-xs text-slate-450 uppercase bg-slate-50 font-bold border-b border-slate-100">
+            <>
+              <div className="max-w-full overflow-x-auto">
+                <table className="w-full min-w-[900px] text-left text-sm">
+                  <thead className="sticky top-0 z-10 border-b border-slate-200 bg-slate-50 text-[11px] font-black uppercase tracking-wide text-slate-500">
                     <tr>
-                      <th scope="col" className="px-6 py-3.5">Thời gian</th>
-                      <th scope="col" className="px-6 py-3.5">Thành viên</th>
-                      <th scope="col" className="px-6 py-3.5">Hành động</th>
-                      <th scope="col" className="px-6 py-3.5">Đối tượng</th>
-                      <th scope="col" className="px-6 py-3.5">ID Đối tượng</th>
-                      <th scope="col" className="px-6 py-3.5 text-center">Chi tiết</th>
+                      <th className="px-5 py-3.5">Thời gian</th>
+                      <th className="px-5 py-3.5">Thành viên</th>
+                      <th className="px-5 py-3.5">Hành động</th>
+                      <th className="px-5 py-3.5">Đối tượng</th>
+                      <th className="px-5 py-3.5">Mã đối tượng</th>
+                      <th className="sticky right-0 border-l border-slate-100 bg-slate-50 px-5 py-3.5 text-right">
+                        Chi tiết
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-medium text-xs">
+                  <tbody className="divide-y divide-slate-100">
                     {logs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/55 transition-colors">
-                        <td className="px-6 py-4 text-slate-500">
+                      <tr
+                        key={log.id}
+                        className="bg-white transition hover:bg-orange-50/35"
+                      >
+                        <td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500">
                           {new Date(log.createdAt).toLocaleString("vi-VN")}
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-5 py-4">
                           {log.user ? (
-                            <div className="flex flex-col">
-                              <span className="text-slate-900 font-bold">{log.user.name || "N/A"}</span>
-                              <span className="text-[10px] text-slate-400">{log.user.email}</span>
-                            </div>
+                            <>
+                              <p className="font-black text-slate-900">
+                                {log.user.name || "Chưa đặt tên"}
+                              </p>
+                              <p className="mt-0.5 text-[10px] text-slate-400">
+                                {log.user.email}
+                              </p>
+                            </>
                           ) : (
-                            <span className="text-slate-400 italic">Hệ thống / Ẩn danh</span>
+                            <span className="text-xs italic text-slate-400">
+                              Hệ thống
+                            </span>
                           )}
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex px-2 py-1 border text-[10px] font-black uppercase tracking-wider ${getActionBadge(log.action)}`}>
+                        <td className="px-5 py-4">
+                          <Badge variant={getActionVariant(log.action)}>
                             {log.action}
-                          </span>
+                          </Badge>
                         </td>
-                        <td className="px-6 py-4 text-slate-650 font-semibold">{log.entityType}</td>
-                        <td className="px-6 py-4 text-slate-400 font-mono text-[10px] truncate max-w-[120px]">
-                          {log.entityId || "N/A"}
+                        <td className="px-5 py-4 text-xs font-bold text-slate-700">
+                          {log.entityType}
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="max-w-48 truncate px-5 py-4 font-mono text-[10px] text-slate-400">
+                          {log.entityId || "—"}
+                        </td>
+                        <td className="sticky right-0 border-l border-slate-100 bg-inherit px-5 py-4 text-right">
                           <button
+                            type="button"
                             onClick={() => setSelectedLog(log)}
-                            className="p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition"
-                            title="Xem chi tiết JSON"
+                            className="acbt-icon-btn ml-auto grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+                            title="Xem dữ liệu chi tiết"
+                            aria-label={`Xem chi tiết ${log.action}`}
                           >
-                            <Eye size={15} />
+                            <Eye size={16} />
                           </button>
                         </td>
                       </tr>
@@ -191,65 +230,40 @@ export default function ActivityLogsPage() {
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
-                  <div className="text-xs text-slate-500 font-semibold">
-                    Trang {page} / {totalPages}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      className="p-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:hover:bg-transparent transition"
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-                    <button
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      className="p-1.5 border border-slate-200 hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:hover:bg-transparent transition"
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+              <AdminPagination
+                page={page}
+                pageCount={totalPages}
+                totalItems={total}
+                onPageChange={setPage}
+              />
+            </>
           )}
-        </div>
+        </CmsPanel>
       </div>
 
-      {/* Details JSON Modal */}
-      {selectedLog && (
-        <div className="fixed inset-0 bg-black/55 z-55 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white border border-slate-200 shadow-2xl p-6 w-full max-w-xl max-h-[80vh] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">Chi tiết hoạt động</h3>
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="text-slate-400 hover:text-slate-700 text-sm font-semibold p-1"
-              >
-                Đóng
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-4 font-mono text-xs text-slate-800 bg-slate-900 p-4 border border-slate-950 mt-4 text-left">
-              <pre className="text-green-400 whitespace-pre-wrap">
-                {JSON.stringify(selectedLog.details, null, 2) || "No details available"}
-              </pre>
-            </div>
-            <div className="mt-6 border-t border-slate-100 pt-3 flex justify-end">
-              <button
-                onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition"
-              >
-                Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AdminModal
+        open={Boolean(selectedLog)}
+        title="Chi tiết hoạt động"
+        description={
+          selectedLog
+            ? `${selectedLog.action} · ${new Date(selectedLog.createdAt).toLocaleString("vi-VN")}`
+            : undefined
+        }
+        onClose={() => setSelectedLog(null)}
+        size="md"
+        footer={
+          <Button
+            variant="adminSecondary"
+            onClick={() => setSelectedLog(null)}
+          >
+            Đóng
+          </Button>
+        }
+      >
+        <pre className="max-h-[55vh] overflow-auto whitespace-pre-wrap break-words bg-slate-950 p-4 font-mono text-xs leading-6 text-emerald-300">
+          {JSON.stringify(selectedLog?.details ?? {}, null, 2)}
+        </pre>
+      </AdminModal>
     </ProtectedRoute>
   );
 }

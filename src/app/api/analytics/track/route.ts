@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         ipHash,
         path,
         referrer,
-      } as any,
+      },
     });
 
     return NextResponse.json({ success: true });

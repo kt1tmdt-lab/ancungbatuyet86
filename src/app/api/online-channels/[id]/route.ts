@@ -6,7 +6,7 @@ function canManage(req: NextRequest) {
   const token = getTokenFromReq(req);
   if (!token) return false;
   const payload = verifyToken(token);
-  return Boolean(payload && (payload.role === "ADMIN" || payload.role === "EDITOR"));
+  return Boolean(payload && (payload.role === "SUPER_ADMIN" || payload.role === "ADMIN" || payload.role === "EDITOR"));
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

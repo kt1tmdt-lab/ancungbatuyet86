@@ -9,7 +9,7 @@ export default function EditPostPage() {
   const id = params.id as string;
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR", "AUTHOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "AUTHOR"]}>
       <CreatePostForm postId={id} />
     </ProtectedRoute>
   );

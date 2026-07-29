@@ -15,7 +15,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    requireRole(req, ["ADMIN", "EDITOR"]);
+    requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     const category = await createCategory(await req.json());
 
     return jsonOk(category, { status: 201 });

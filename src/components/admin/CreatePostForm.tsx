@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -16,6 +16,8 @@ import { SeoScorePanel } from "@/components/admin/SeoScorePanel";
 import { normalizeContentAssetUrls } from "@/lib/content-assets";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/admin/AdminPrimitives";
 
 const POST_TEMPLATES = [
   {
@@ -43,6 +45,11 @@ interface Category {
   name: string;
 }
 
+type PostDetails = Omit<PostFormValues, "categoryId" | "tags"> & {
+  categoryId?: string | null;
+  tags?: Array<{ tag: { name: string } }>;
+};
+
 export function CreatePostForm({ postId }: { postId?: string }) {
   const router = useRouter();
   const { token, user } = useAuth();
@@ -57,6 +64,9 @@ export function CreatePostForm({ postId }: { postId?: string }) {
   const [coverUploadProgress, setCoverUploadProgress] = useState(0);
   const [coverUploadError, setCoverUploadError] = useState("");
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [pendingTemplate, setPendingTemplate] = useState<
+    (typeof POST_TEMPLATES)[number] | null
+  >(null);
 
   const {
     register,
@@ -83,33 +93,27 @@ export function CreatePostForm({ postId }: { postId?: string }) {
 
   const formValues = watch();
 
-  useEffect(() => {
-    fetchCategories();
-    if (postId) {
-      fetchPostDetails();
-    }
-  }, [postId]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch("/api/categories");
       if (res.ok) {
         const data = await res.json();
         setCategories(data);
       }
-    } catch (err) {
+    } catch {
       console.error("Failed to fetch categories");
     }
-  };
+  }, []);
 
-  const fetchPostDetails = async () => {
+  const fetchPostDetails = useCallback(async () => {
+    if (!postId || !token) return;
     setFetching(true);
     try {
       const res = await fetch(`/api/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as PostDetails;
         reset({
           title: data.title,
           slug: data.slug,
@@ -120,17 +124,27 @@ export function CreatePostForm({ postId }: { postId?: string }) {
           seoTitle: data.seoTitle || "",
           seoDescription: data.seoDescription || "",
           seoKeywords: data.seoKeywords || "",
-          tags: data.tags ? data.tags.map((t: any) => t.tag.name).join(", ") : ""
+          tags: data.tags ? data.tags.map((item) => item.tag.name).join(", ") : ""
         });
       } else {
         setError("Không thể tải chi tiết bài viết");
       }
-    } catch (err) {
+    } catch {
       setError("Có lỗi xảy ra khi tải bài viết");
     } finally {
       setFetching(false);
     }
-  };
+  }, [postId, reset, token]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchCategories();
+      if (postId && token) {
+        void fetchPostDetails();
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchCategories, fetchPostDetails, postId, token]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -153,8 +167,8 @@ export function CreatePostForm({ postId }: { postId?: string }) {
 
   const applyTemplate = (tmpl: typeof POST_TEMPLATES[0]) => {
     if (formValues.content?.trim()) {
-      const confirmOverwrite = confirm(`Bạn có chắc muốn áp dụng mẫu "${tmpl.name}"?`);
-      if (!confirmOverwrite) return;
+      setPendingTemplate(tmpl);
+      return;
     }
     setValue("content", tmpl.content, { shouldValidate: true });
   };
@@ -219,17 +233,29 @@ export function CreatePostForm({ postId }: { postId?: string }) {
           : status === "PENDING_REVIEW" ? "Đã gửi duyệt!" 
           : "Đã lưu bản nháp!"
       );
+      toast.success(
+        status === "PUBLISHED"
+          ? "Bài viết đã được xuất bản."
+          : status === "PENDING_REVIEW"
+            ? "Đã gửi bài viết để duyệt."
+            : "Đã lưu bản nháp.",
+      );
       
       setTimeout(() => router.push("/admin/posts"), 1500);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+      const message = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const isEditorOrAdmin = user?.role === "ADMIN" || user?.role === "EDITOR";
+  const isEditorOrAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    user?.role === "ADMIN" ||
+    user?.role === "EDITOR";
 
   if (fetching) {
     return (
@@ -336,6 +362,9 @@ export function CreatePostForm({ postId }: { postId?: string }) {
                   <ImagePlus size={13} /> Thư viện
                 </button>
               </div>
+              {coverUploadError ? (
+                <p className="text-xs font-semibold text-red-600">{coverUploadError}</p>
+              ) : null}
               {formValues.coverImageUrl && (
                 <div className="mt-2 relative bg-slate-50 border border-slate-100 aspect-video flex items-center justify-center overflow-hidden">
                   <img
@@ -414,6 +443,21 @@ export function CreatePostForm({ postId }: { postId?: string }) {
       </form>
 
       <MediaPickerModal open={mediaPickerOpen} onClose={() => setMediaPickerOpen(false)} onSelect={(url) => { setValue("coverImageUrl", url, { shouldValidate: true }); setMediaPickerOpen(false); }} />
+      <ConfirmDialog
+        open={Boolean(pendingTemplate)}
+        title="Áp dụng mẫu bài viết?"
+        description={`Nội dung hiện tại sẽ được thay thế bằng mẫu “${pendingTemplate?.name || ""}”.`}
+        confirmLabel="Áp dụng mẫu"
+        onClose={() => setPendingTemplate(null)}
+        onConfirm={() => {
+          if (pendingTemplate) {
+            setValue("content", pendingTemplate.content, {
+              shouldValidate: true,
+            });
+          }
+          setPendingTemplate(null);
+        }}
+      />
     </div>
   );
 }

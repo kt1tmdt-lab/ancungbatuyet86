@@ -6,7 +6,7 @@ async function requireEditor(req: NextRequest) {
   const token = getTokenFromReq(req);
   if (!token) return null;
   const payload = verifyToken(token);
-  if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) return null;
+  if (!payload || (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR")) return null;
   return payload;
 }
 

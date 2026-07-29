@@ -46,14 +46,9 @@ export function getTokenFromReq(req: NextRequest | Request) {
     }
   }
 
-  // Safe check for NextRequest cookies
-  try {
-    if ("cookies" in req && typeof (req as any).cookies?.get === "function") {
-      const cookie = (req as NextRequest).cookies.get("auth_token");
-      if (cookie) return cookie.value;
-    }
-  } catch (e) {
-    // Ignore error
+  if (req instanceof NextRequest) {
+    const cookie = req.cookies.get("auth_token");
+    if (cookie) return cookie.value;
   }
 
   // Safe manual cookies parsing

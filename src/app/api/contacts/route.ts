@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || !["ADMIN", "SUPER_ADMIN", "EDITOR", "MARKETING"].includes(payload.role)) {
+    if (!payload || !["ADMIN", "SUPER_ADMIN", "EDITOR", "MARKETING", "SUPPORT"].includes(payload.role)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

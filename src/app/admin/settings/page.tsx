@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
@@ -47,6 +47,12 @@ const statItemSchema = z.object({
 });
 
 const settingsSchema = z.object({
+  brand: z.object({
+    name: z.string().min(1, "Vui lòng nhập tên thương hiệu"),
+    tagline: z.string().min(1, "Vui lòng nhập câu giới thiệu"),
+    logoUrl: z.string().min(1, "Vui lòng chọn logo"),
+    logoAlt: z.string().min(1, "Vui lòng nhập mô tả logo"),
+  }),
   heroBanner: z.object({
     eyebrow: z.string().min(1, "Vui lòng nhập nhãn thương hiệu"),
     title: z.string().min(1, "Vui lòng nhập tiêu đề"),
@@ -75,6 +81,8 @@ const settingsSchema = z.object({
   footerLinks: z.object({
     products: z.array(linkItemSchema),
     explore: z.array(linkItemSchema),
+    support: z.array(linkItemSchema),
+    policies: z.array(linkItemSchema),
   }),
   footerContact: z.object({
     phone: z.string().min(1, "Vui lòng nhập hotline"),
@@ -84,6 +92,13 @@ const settingsSchema = z.object({
     shopeeUrl: z.string().optional(),
     tiktokUrl: z.string().optional(),
     facebookUrl: z.string().optional(),
+    instagramUrl: z.string().optional(),
+    legalName: z.string().optional(),
+    taxCode: z.string().optional(),
+    registeredAddress: z.string().optional(),
+    boCongThuongUrl: z.string().optional(),
+    boCongThuongImageUrl: z.string().optional(),
+    copyrightText: z.string().optional(),
   }),
   stats: z.object({
     followers: statItemSchema,
@@ -108,6 +123,8 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"hero" | "seo" | "navigation" | "stats">("hero");
   const [heroMediaOpen, setHeroMediaOpen] = useState(false);
+  const [brandMediaOpen, setBrandMediaOpen] = useState(false);
+  const [commerceMediaOpen, setCommerceMediaOpen] = useState(false);
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
 
   useEffect(() => {
@@ -125,7 +142,7 @@ export default function SettingsPage() {
   const { control, register, handleSubmit, reset, setValue, getValues, formState: { errors } } = form;
 
   // Field arrays for menus
-  const { fields: navbarFields, append: appendNavbar, remove: removeNavbar, move: moveNavbar } = useFieldArray({
+  const { fields: navbarFields, move: moveNavbar } = useFieldArray({
     control,
     name: "navbarLinks",
   });
@@ -137,24 +154,17 @@ export default function SettingsPage() {
   const watchedProductMenuLinks = useWatch({ control, name: "productMenuLinks" });
   const watchedHeroImage = useWatch({ control, name: "heroBanner.characterImage" });
 
-  const { fields: footerProductsFields, append: appendFooterProduct, remove: removeFooterProduct } = useFieldArray({
+  const { fields: footerSupportFields, append: appendFooterSupport, remove: removeFooterSupport } = useFieldArray({
     control,
-    name: "footerLinks.products",
+    name: "footerLinks.support",
   });
 
-  const { fields: footerExploreFields, append: appendFooterExplore, remove: removeFooterExplore } = useFieldArray({
+  const { fields: footerPolicyFields, append: appendFooterPolicy, remove: removeFooterPolicy } = useFieldArray({
     control,
-    name: "footerLinks.explore",
+    name: "footerLinks.policies",
   });
 
-  useEffect(() => {
-    if (token) {
-      fetchSettings();
-      fetchProducts();
-    }
-  }, [token]);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch("/api/settings");
       if (res.ok) {
@@ -167,9 +177,9 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [reset]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       let res = await fetch("/api/products?status=ALL", {
         headers: {
@@ -191,7 +201,16 @@ export default function SettingsPage() {
       console.error("Failed to fetch products", error);
       toast.error("Không thể tải danh sách sản phẩm");
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    const timer = window.setTimeout(() => {
+      void fetchSettings();
+      void fetchProducts();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchProducts, fetchSettings, token]);
 
   const getProductHref = (product: ProductOption) => `/san-pham/${product.slug}`;
 
@@ -638,6 +657,58 @@ export default function SettingsPage() {
 
             {activeTab === "navigation" && (
               <div className="space-y-8 animate-fade-in">
+                <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+                    <Globe className="text-orange-500" size={20} />
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900">Nhận diện thương hiệu</h2>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        Tên, câu giới thiệu và logo dùng ở chân trang website.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Tên thương hiệu</label>
+                      <input
+                        {...register("brand.name")}
+                        className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Câu giới thiệu</label>
+                      <input
+                        {...register("brand.tagline")}
+                        className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Logo</label>
+                      <div className="flex gap-2">
+                        <input
+                          {...register("brand.logoUrl")}
+                          className="min-w-0 flex-1 border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setBrandMediaOpen(true)}
+                          className="inline-flex items-center gap-1.5 bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-700"
+                        >
+                          <ImagePlus size={15} />
+                          Chọn ảnh
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Mô tả logo</label>
+                      <input
+                        {...register("brand.logoAlt")}
+                        className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Section: Menu Navbar */}
                 <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
                   <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
@@ -656,7 +727,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="border border-orange-100 bg-orange-50 px-4 py-3 text-xs font-semibold leading-6 text-orange-900">
-                      Menu header đang dùng sitemap hệ thống để đồng bộ với dropdown và các trang nội dung. Không sửa tay từng dòng ở đây; nếu dữ liệu cũ bị lệch, bấm <span className="font-black">Reset menu chuẩn</span> rồi lưu lại.
+                      Menu chỉ gồm các trang đang tồn tại. Dùng hai nút mũi tên để đổi thứ tự; nếu dữ liệu cũ bị lệch, bấm <span className="font-black">Reset menu chuẩn</span> rồi lưu lại.
                     </div>
                     {navbarFields.length === 0 ? (
                       <p className="text-center py-6 text-xs text-slate-400 font-semibold italic">Chưa có liên kết nào, hệ thống sẽ sử dụng danh sách tĩnh mặc định.</p>
@@ -683,7 +754,7 @@ export default function SettingsPage() {
                               <button
                                 type="button"
                                 onClick={() => moveNavbar(idx, idx - 1)}
-                                disabled
+                                disabled={idx === 0}
                                 className="p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
                                 aria-label="Đưa mục menu lên trên"
                               >
@@ -692,21 +763,13 @@ export default function SettingsPage() {
                               <button
                                 type="button"
                                 onClick={() => moveNavbar(idx, idx + 1)}
-                                disabled
+                                disabled={idx === navbarFields.length - 1}
                                 className="border-l border-slate-200 p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-30"
                                 aria-label="Đưa mục menu xuống dưới"
                               >
                                 <ArrowDown size={14} />
                               </button>
                             </div>
-                            <button
-                              type="button"
-                              disabled
-                              onClick={() => removeNavbar(idx)}
-                              className="p-2 border border-slate-200 text-slate-300 cursor-not-allowed"
-                            >
-                              <Trash2 size={16} />
-                            </button>
                           </div>
                         ))}
                       </div>
@@ -818,13 +881,12 @@ export default function SettingsPage() {
 
                 {/* Section: Footer Links */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Footer Product links */}
                   <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
                     <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                      <h2 className="text-sm font-black text-slate-900 uppercase">Liên kết Sản Phẩm Footer</h2>
+                      <h2 className="text-sm font-black text-slate-900 uppercase">Hỗ trợ khách hàng</h2>
                       <button
                         type="button"
-                        onClick={() => appendFooterProduct({ label: "", href: "" })}
+                        onClick={() => appendFooterSupport({ label: "", href: "" })}
                         className="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[10px] uppercase cursor-pointer"
                       >
                         <Plus size={12} />
@@ -832,21 +894,21 @@ export default function SettingsPage() {
                       </button>
                     </div>
                     <div className="p-5 space-y-3">
-                      {footerProductsFields.map((field, idx) => (
+                      {footerSupportFields.map((field, idx) => (
                         <div key={field.id} className="flex gap-2 items-center">
                           <input
-                            {...register(`footerLinks.products.${idx}.label` as const)}
+                            {...register(`footerLinks.support.${idx}.label` as const)}
                             placeholder="Nhãn"
                             className="border border-slate-350 p-1.5 text-xs font-semibold outline-none w-1/2"
                           />
                           <input
-                            {...register(`footerLinks.products.${idx}.href` as const)}
+                            {...register(`footerLinks.support.${idx}.href` as const)}
                             placeholder="Link"
                             className="border border-slate-350 p-1.5 text-xs font-semibold outline-none w-1/2"
                           />
                           <button
                             type="button"
-                            onClick={() => removeFooterProduct(idx)}
+                            onClick={() => removeFooterSupport(idx)}
                             className="p-1.5 text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200"
                           >
                             <Trash2 size={14} />
@@ -856,13 +918,12 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  {/* Footer Explore links */}
                   <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
                     <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                      <h2 className="text-sm font-black text-slate-900 uppercase">Liên kết Khám Phá Footer</h2>
+                      <h2 className="text-sm font-black text-slate-900 uppercase">Chính sách</h2>
                       <button
                         type="button"
-                        onClick={() => appendFooterExplore({ label: "", href: "" })}
+                        onClick={() => appendFooterPolicy({ label: "", href: "" })}
                         className="flex items-center gap-1 px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[10px] uppercase cursor-pointer"
                       >
                         <Plus size={12} />
@@ -870,21 +931,21 @@ export default function SettingsPage() {
                       </button>
                     </div>
                     <div className="p-5 space-y-3">
-                      {footerExploreFields.map((field, idx) => (
+                      {footerPolicyFields.map((field, idx) => (
                         <div key={field.id} className="flex gap-2 items-center">
                           <input
-                            {...register(`footerLinks.explore.${idx}.label` as const)}
+                            {...register(`footerLinks.policies.${idx}.label` as const)}
                             placeholder="Nhãn"
                             className="border border-slate-350 p-1.5 text-xs font-semibold outline-none w-1/2"
                           />
                           <input
-                            {...register(`footerLinks.explore.${idx}.href` as const)}
+                            {...register(`footerLinks.policies.${idx}.href` as const)}
                             placeholder="Link"
                             className="border border-slate-350 p-1.5 text-xs font-semibold outline-none w-1/2"
                           />
                           <button
                             type="button"
-                            onClick={() => removeFooterExplore(idx)}
+                            onClick={() => removeFooterPolicy(idx)}
                             className="p-1.5 text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200"
                           >
                             <Trash2 size={14} />
@@ -949,11 +1010,41 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="border-t border-slate-100 pt-4 space-y-4">
+                      <h3 className="text-sm font-black text-slate-900">Thông tin pháp lý</h3>
+                      <p className="text-xs font-semibold text-slate-500">
+                        Trường để trống sẽ được ẩn hoàn toàn ở website, không hiện nội dung chờ cập nhật.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Đơn vị chủ quản</label>
+                          <input
+                            {...register("footerContact.legalName")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Mã số thuế</label>
+                          <input
+                            {...register("footerContact.taxCode")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Địa chỉ đăng ký</label>
+                          <input
+                            {...register("footerContact.registeredAddress")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-4 space-y-4">
                       <h3 className="text-sm font-black text-slate-900 flex items-center gap-1.5">
                         <Share2 size={16} />
                         Liên kết Kênh bán hàng & Mạng xã hội
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-600 mb-1">Shopee URL</label>
                           <input
@@ -978,6 +1069,55 @@ export default function SettingsPage() {
                             placeholder="https://facebook.com/..."
                           />
                         </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Instagram URL</label>
+                          <input
+                            {...register("footerContact.instagramUrl")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none"
+                            placeholder="https://instagram.com/..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100 pt-4 space-y-4">
+                      <h3 className="text-sm font-black text-slate-900">Xác nhận Bộ Công Thương</h3>
+                      <p className="text-xs font-semibold text-slate-500">
+                        Chỉ hiển thị khi có đủ cả liên kết xác nhận và ảnh huy hiệu.
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Liên kết xác nhận</label>
+                          <input
+                            {...register("footerContact.boCongThuongUrl")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            placeholder="https://online.gov.vn/..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">Ảnh huy hiệu</label>
+                          <div className="flex gap-2">
+                            <input
+                              {...register("footerContact.boCongThuongImageUrl")}
+                              className="min-w-0 flex-1 border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setCommerceMediaOpen(true)}
+                              className="inline-flex items-center gap-1.5 bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-700"
+                            >
+                              <ImagePlus size={15} />
+                              Chọn ảnh
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 mb-1">Dòng bản quyền</label>
+                        <input
+                          {...register("footerContact.copyrightText")}
+                          className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                        />
                       </div>
                     </div>
                   </div>
@@ -993,6 +1133,22 @@ export default function SettingsPage() {
         onSelect={(url) => {
           setValue("heroBanner.characterImage", url, { shouldDirty: true, shouldValidate: true });
           setHeroMediaOpen(false);
+        }}
+      />
+      <MediaPickerModal
+        open={brandMediaOpen}
+        onClose={() => setBrandMediaOpen(false)}
+        onSelect={(url) => {
+          setValue("brand.logoUrl", url, { shouldDirty: true, shouldValidate: true });
+          setBrandMediaOpen(false);
+        }}
+      />
+      <MediaPickerModal
+        open={commerceMediaOpen}
+        onClose={() => setCommerceMediaOpen(false)}
+        onSelect={(url) => {
+          setValue("footerContact.boCongThuongImageUrl", url, { shouldDirty: true, shouldValidate: true });
+          setCommerceMediaOpen(false);
         }}
       />
     </ProtectedRoute>

@@ -1,26 +1,56 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useAuth } from "@/lib/auth-context";
-import { DataTable } from "./DataTable";
-import { ColumnDef } from "@tanstack/react-table";
-import { 
-  AlertCircle, Check, X, Loader, Search, Filter, 
-  Edit3, Trash2, ExternalLink, Send, Eye 
-} from "lucide-react";
 import Link from "next/link";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Check,
+  Edit3,
+  ExternalLink,
+  Eye,
+  Send,
+  Trash2,
+  X,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuth } from "@/lib/auth-context";
+import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
+import { DataTable } from "./DataTable";
+import CmsStatusBadge from "./CmsStatusBadge";
+import {
+  AdminErrorState,
+  AdminFormField,
+  AdminLoadingState,
+  AdminModal,
+  AdminSearchInput,
+  AdminSelect,
+  AdminToolbar,
+  ConfirmDialog,
+} from "./AdminPrimitives";
+import Button from "@/components/ui/Button";
+
+export type PostStatus =
+  | "DRAFT"
+  | "PENDING_REVIEW"
+  | "PUBLISHED"
+  | "REJECTED"
+  | "ARCHIVED";
 
 interface Post {
   id: string;
   title: string;
   slug: string;
-  status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED";
-  coverImageUrl?: string;
-  author: { id: string; name: string; email: string };
+  status: PostStatus;
+  author: { id: string; name: string | null; email: string };
   category?: { id: string; name: string; slug: string } | null;
   viewCount: number;
   createdAt: string;
-  updatedAt: string;
   rejectedReason?: string | null;
 }
 
@@ -30,283 +60,485 @@ interface Category {
   slug: string;
 }
 
-export function PostsTable({ status: propStatus, onActionSuccess }: { status?: string; onActionSuccess?: () => void; }) {
+type PostsTableProps = {
+  status?: PostStatus;
+  onActionSuccess?: () => void;
+};
+
+export function PostsTable({
+  status: fixedStatus,
+  onActionSuccess,
+}: PostsTableProps) {
+  const { user, token } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
-  const [statusFilter, setStatusFilter] = useState(propStatus || "");
+  const [statusFilter, setStatusFilter] = useState<PostStatus | "">(
+    fixedStatus || "",
+  );
   const [categoryFilter, setCategoryFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const [rejectingPostId, setRejectingPostId] = useState<string | null>(null);
+  const deferredSearch = useDeferredValue(searchQuery);
+  const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<Post | null>(null);
   const [rejectNote, setRejectNote] = useState("");
+  const [rejectError, setRejectError] = useState("");
 
-  const { user } = useAuth();
-
-  useEffect(() => {
-    fetchCategories();
+  const fetchCategories = useCallback(async () => {
+    try {
+      setCategories(await adminRequest<Category[]>("/api/categories"));
+    } catch {
+      setCategories([]);
+    }
   }, []);
 
-  useEffect(() => {
-    fetchPosts();
-  }, [statusFilter, categoryFilter, searchQuery]);
+  const fetchPosts = useCallback(async () => {
+    if (!token) return;
 
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("/api/categories");
-      if (res.ok) {
-        setCategories(await res.json());
-      }
-    } catch (err) {}
-  };
-
-  const fetchPosts = async () => {
     setLoading(true);
-    try {
-      let url = "/api/posts?";
-      const params = new URLSearchParams();
-      if (statusFilter) params.append("status", statusFilter);
-      if (categoryFilter) params.append("categoryId", categoryFilter);
-      if (searchQuery) params.append("search", searchQuery);
+    setLoadError("");
+    const params = new URLSearchParams();
+    if (statusFilter) params.set("status", statusFilter);
+    if (categoryFilter) params.set("categoryId", categoryFilter);
+    if (deferredSearch.trim()) params.set("search", deferredSearch.trim());
 
-      const res = await fetch(url + params.toString());
-      if (res.ok) {
-        setPosts(await res.json());
-      }
-    } catch (err) {
+    try {
+      setPosts(
+        await adminRequest<Post[]>(`/api/posts?${params.toString()}`, {
+          token,
+        }),
+      );
+    } catch (error) {
+      setLoadError(
+        getAdminErrorMessage(error, "Không thể tải danh sách bài viết."),
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryFilter, deferredSearch, statusFilter, token]);
 
-  const handleApprove = async (postId: string) => {
-    setActionLoading(postId);
-    try {
-      const res = await fetch("/api/posts/review", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, action: "approve" }),
-      });
-      if (res.ok) {
-        if (propStatus === "PENDING_REVIEW") setPosts(posts.filter((p) => p.id !== postId));
-        else setPosts(posts.map(p => p.id === postId ? { ...p, status: "PUBLISHED" } : p));
-        onActionSuccess?.();
-      } else {
-        alert("Không thể duyệt bài viết");
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchCategories(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchCategories]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchPosts(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchPosts]);
+
+  const updatePostLocally = useCallback(
+    (postId: string, nextStatus: PostStatus, rejectedReason?: string) => {
+      setPosts((current) =>
+        fixedStatus === "PENDING_REVIEW"
+          ? current.filter((post) => post.id !== postId)
+          : current.map((post) =>
+              post.id === postId
+                ? { ...post, status: nextStatus, rejectedReason }
+                : post,
+            ),
+      );
+      onActionSuccess?.();
+    },
+    [fixedStatus, onActionSuccess],
+  );
+
+  const handleApprove = useCallback(
+    async (post: Post) => {
+      if (!token) return;
+      setActionLoading(post.id);
+      try {
+        await adminRequest("/api/posts/review", {
+          method: "POST",
+          token,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ postId: post.id, action: "approve" }),
+        });
+        updatePostLocally(post.id, "PUBLISHED");
+        toast.success("Bài viết đã được duyệt và xuất bản.");
+      } catch (error) {
+        toast.error(getAdminErrorMessage(error, "Không thể duyệt bài viết."));
+      } finally {
+        setActionLoading(null);
       }
-    } finally {
-      setActionLoading(null);
-    }
-  };
+    },
+    [token, updatePostLocally],
+  );
 
-  const submitReject = async (postId: string) => {
-    if (!rejectNote.trim()) return alert("Vui lòng nhập lý do từ chối");
-    setActionLoading(postId);
+  const handleReject = async () => {
+    if (!rejectTarget || !token) return;
+    if (!rejectNote.trim()) {
+      setRejectError("Vui lòng nhập lý do để tác giả có thể chỉnh sửa.");
+      return;
+    }
+
+    setRejectError("");
+    setActionLoading(rejectTarget.id);
     try {
-      const res = await fetch("/api/posts/review", {
+      await adminRequest("/api/posts/review", {
         method: "POST",
+        token,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, action: "reject", note: rejectNote }),
+        body: JSON.stringify({
+          postId: rejectTarget.id,
+          action: "reject",
+          note: rejectNote.trim(),
+        }),
       });
-      if (res.ok) {
-        if (propStatus === "PENDING_REVIEW") setPosts(posts.filter((p) => p.id !== postId));
-        else setPosts(posts.map(p => p.id === postId ? { ...p, status: "REJECTED", rejectedReason: rejectNote } : p));
-        setRejectingPostId(null);
-        onActionSuccess?.();
-      } else {
-        alert("Không thể từ chối");
+      updatePostLocally(rejectTarget.id, "REJECTED", rejectNote.trim());
+      toast.success("Đã từ chối bài viết và lưu lý do.");
+      setRejectTarget(null);
+      setRejectNote("");
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể từ chối bài viết."));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleSendToReview = useCallback(
+    async (post: Post) => {
+      if (!token) return;
+      setActionLoading(post.id);
+      try {
+        await adminRequest(`/api/posts/${post.id}`, {
+          method: "PUT",
+          token,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "PENDING_REVIEW" }),
+        });
+        updatePostLocally(post.id, "PENDING_REVIEW");
+        toast.success("Đã gửi bài viết tới hàng chờ duyệt.");
+      } catch (error) {
+        toast.error(getAdminErrorMessage(error, "Không thể gửi duyệt."));
+      } finally {
+        setActionLoading(null);
       }
-    } finally {
-      setActionLoading(null);
-    }
-  };
+    },
+    [token, updatePostLocally],
+  );
 
-  const handleSendToReview = async (postId: string) => {
-    setActionLoading(postId);
+  const handleDelete = async () => {
+    if (!deleteTarget || !token) return;
+    setActionLoading(deleteTarget.id);
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "PENDING_REVIEW" })
-      });
-      if (res.ok) {
-        setPosts(posts.map(p => p.id === postId ? { ...p, status: "PENDING_REVIEW" } : p));
-        onActionSuccess?.();
-      } else alert("Không thể gửi duyệt");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleDelete = async (postId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa bài viết này không?")) return;
-    setActionLoading(postId);
-    try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      await adminRequest(`/api/posts/${deleteTarget.id}`, {
         method: "DELETE",
+        token,
       });
-      if (res.ok) {
-        setPosts(posts.filter((p) => p.id !== postId));
-        onActionSuccess?.();
-      } else alert("Không thể xóa bài viết");
+      setPosts((current) =>
+        current.filter((post) => post.id !== deleteTarget.id),
+      );
+      onActionSuccess?.();
+      toast.success("Đã xóa bài viết.");
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xóa bài viết."));
     } finally {
       setActionLoading(null);
     }
   };
 
-  const isEditorOrAdmin = user?.role === "ADMIN" || user?.role === "EDITOR";
+  const canReview =
+    user?.role === "SUPER_ADMIN" ||
+    user?.role === "ADMIN" ||
+    user?.role === "EDITOR";
 
-  const columns = useMemo<ColumnDef<Post>[]>(() => [
-    {
-      accessorKey: "title",
-      header: "Bài viết",
-      cell: ({ row }) => {
-        const post = row.original;
-        return (
-          <div className="flex flex-col gap-0.5">
-            <span className="font-bold text-slate-900 line-clamp-2 leading-tight">
-              {post.title}
+  const columns = useMemo<ColumnDef<Post>[]>(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Bài viết",
+        cell: ({ row }) => {
+          const post = row.original;
+          return (
+            <div className="min-w-64 max-w-lg">
+              <p className="line-clamp-2 font-black leading-5 text-slate-950">
+                {post.title}
+              </p>
+              <p className="mt-1 text-[10px] font-medium text-slate-400">
+                {new Date(post.createdAt).toLocaleDateString("vi-VN")}
+              </p>
+              {post.status === "REJECTED" && post.rejectedReason ? (
+                <p className="mt-2 border-l-2 border-red-400 bg-red-50 px-2 py-1 text-[11px] font-medium leading-5 text-red-700">
+                  {post.rejectedReason}
+                </p>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
+        id: "author",
+        accessorFn: (post) => post.author.name || post.author.email,
+        header: "Tác giả",
+        cell: ({ row }) => (
+          <span className="text-xs font-bold text-slate-700">
+            {row.original.author.name || row.original.author.email}
+          </span>
+        ),
+      },
+      {
+        id: "category",
+        accessorFn: (post) => post.category?.name || "",
+        header: "Danh mục",
+        cell: ({ row }) =>
+          row.original.category ? (
+            <span className="inline-flex border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+              {row.original.category.name}
             </span>
-            <span className="text-[10px] text-slate-400">
-              Tạo ngày: {new Date(post.createdAt).toLocaleDateString("vi-VN")}
-            </span>
-            {post.status === "REJECTED" && post.rejectedReason && (
-              <span className="text-[11px] text-red-600 font-medium bg-red-50 px-2 py-0.5 border border-red-100 w-fit mt-1">
-                Lý do: {post.rejectedReason}
-              </span>
-            )}
-            {rejectingPostId === post.id && (
-              <div className="mt-3 text-left p-3 bg-red-50 border border-red-200 space-y-2">
-                <textarea
-                  value={rejectNote}
-                  onChange={(e) => setRejectNote(e.target.value)}
-                  rows={2}
-                  placeholder="Lý do từ chối..."
-                  className="w-full text-xs p-2 border border-red-300"
-                />
-                <div className="flex gap-2 justify-end">
-                  <button onClick={() => setRejectingPostId(null)} className="px-2 py-1 text-xs">Hủy</button>
-                  <button onClick={() => submitReject(post.id)} className="px-2 py-1 bg-red-600 text-white text-xs">Từ chối</button>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: "author.name",
-      header: "Tác giả",
-      cell: ({ row }) => <span className="font-semibold text-xs">{row.original.author.name}</span>
-    },
-    {
-      accessorKey: "category.name",
-      header: "Danh mục",
-      cell: ({ row }) => row.original.category ? (
-        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5">
-          {row.original.category.name}
-        </span>
-      ) : <span className="text-xs text-slate-400 italic">Không có</span>
-    },
-    {
-      accessorKey: "viewCount",
-      header: "Lượt xem",
-      cell: ({ row }) => (
-        <div className="inline-flex items-center gap-1 text-slate-500 font-medium text-xs bg-slate-100/60 px-2 py-0.5">
-          <Eye size={12} /><span>{row.original.viewCount}</span>
-        </div>
-      )
-    },
-    {
-      accessorKey: "status",
-      header: "Trạng thái",
-      cell: ({ row }) => {
-        const statuses: any = {
-          DRAFT: { label: "Nháp", style: "bg-slate-100 text-slate-700" },
-          PENDING_REVIEW: { label: "Chờ duyệt", style: "bg-amber-100 text-amber-700" },
-          PUBLISHED: { label: "Đã đăng", style: "bg-green-100 text-green-700" },
-          REJECTED: { label: "Từ chối", style: "bg-red-100 text-red-700" },
-          ARCHIVED: { label: "Lưu trữ", style: "bg-purple-100 text-purple-700" }
-        };
-        const s = statuses[row.original.status] || statuses.DRAFT;
-        return <span className={`inline-block border text-[10px] font-extrabold px-2.5 py-0.5 uppercase tracking-wider ${s.style}`}>{s.label}</span>;
-      }
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      cell: ({ row }) => {
-        const post = row.original;
-        const isAuthorOwner = post.author.id === user?.id;
-        return (
-          <div className="flex items-center justify-end gap-1">
-            {post.status === "PUBLISHED" && (
-              <Link href={`/tin-tuc/${post.slug}`} target="_blank" className="p-1.5 hover:bg-slate-100"><ExternalLink size={15} /></Link>
-            )}
-            {user?.role === "AUTHOR" && isAuthorOwner && (post.status === "DRAFT" || post.status === "REJECTED") && (
-              <button onClick={() => handleSendToReview(post.id)} className="p-1.5 bg-primary text-white hover:bg-primary-dark"><Send size={11} /></button>
-            )}
-            {isEditorOrAdmin && post.status === "PENDING_REVIEW" && (
-              <>
-                <button onClick={() => handleApprove(post.id)} className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100"><Check size={14} /></button>
-                <button onClick={() => { setRejectingPostId(post.id); setRejectNote(""); }} className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100"><X size={14} /></button>
-              </>
-            )}
-            {(isEditorOrAdmin || (isAuthorOwner && ["DRAFT", "REJECTED"].includes(post.status))) && (
-              <>
-                <Link href={`/admin/posts/${post.id}/edit`} className="p-1.5 hover:bg-slate-100"><Edit3 size={15} /></Link>
-                <button onClick={() => handleDelete(post.id)} className="p-1.5 hover:bg-red-50 text-red-500"><Trash2 size={15} /></button>
-              </>
-            )}
-          </div>
-        );
-      }
-    }
-  ], [user, rejectingPostId, rejectNote]);
+          ) : (
+            <span className="text-xs italic text-slate-400">Chưa phân loại</span>
+          ),
+      },
+      {
+        accessorKey: "viewCount",
+        header: "Lượt xem",
+        cell: ({ row }) => (
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600">
+            <Eye size={13} /> {row.original.viewCount}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        cell: ({ row }) => <CmsStatusBadge status={row.original.status} />,
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const post = row.original;
+          const isOwner = post.author.id === user?.id;
+          const canEdit =
+            canReview ||
+            (isOwner && ["DRAFT", "REJECTED"].includes(post.status));
+
+          return (
+            <div className="flex items-center justify-end gap-1">
+              {post.status === "PUBLISHED" ? (
+                <Link
+                  href={`/tin-tuc/${post.slug}`}
+                  target="_blank"
+                  className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                  title="Xem trên website"
+                  aria-label={`Xem ${post.title}`}
+                >
+                  <ExternalLink size={16} />
+                </Link>
+              ) : null}
+              {user?.role === "AUTHOR" &&
+              isOwner &&
+              ["DRAFT", "REJECTED"].includes(post.status) ? (
+                <button
+                  type="button"
+                  onClick={() => void handleSendToReview(post)}
+                  disabled={actionLoading === post.id}
+                  className="acbt-icon-btn grid h-9 w-9 place-items-center bg-orange-50 text-orange-600 hover:bg-orange-100 disabled:opacity-50"
+                  title="Gửi duyệt"
+                  aria-label={`Gửi duyệt ${post.title}`}
+                >
+                  <Send size={15} />
+                </button>
+              ) : null}
+              {canReview && post.status === "PENDING_REVIEW" ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void handleApprove(post)}
+                    disabled={actionLoading === post.id}
+                    className="acbt-icon-btn grid h-9 w-9 place-items-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                    title="Duyệt bài"
+                    aria-label={`Duyệt ${post.title}`}
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRejectTarget(post);
+                      setRejectNote("");
+                      setRejectError("");
+                    }}
+                    disabled={actionLoading === post.id}
+                    className="acbt-icon-btn grid h-9 w-9 place-items-center bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
+                    title="Từ chối"
+                    aria-label={`Từ chối ${post.title}`}
+                  >
+                    <X size={16} />
+                  </button>
+                </>
+              ) : null}
+              {canEdit ? (
+                <>
+                  <Link
+                    href={`/admin/posts/${post.id}/edit`}
+                    className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+                    title="Chỉnh sửa"
+                    aria-label={`Sửa ${post.title}`}
+                  >
+                    <Edit3 size={16} />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(post)}
+                    disabled={actionLoading === post.id}
+                    className="acbt-icon-btn grid h-9 w-9 place-items-center text-red-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                    title="Xóa"
+                    aria-label={`Xóa ${post.title}`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </>
+              ) : null}
+            </div>
+          );
+        },
+      },
+    ],
+    [
+      actionLoading,
+      canReview,
+      handleApprove,
+      handleSendToReview,
+      user?.id,
+      user?.role,
+    ],
+  );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-4 border-b border-slate-100">
-        <div className="flex-1 max-w-md relative">
-          <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Tìm kiếm tiêu đề..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
+    <>
+      <AdminToolbar>
+        <AdminSearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Tìm theo tiêu đề hoặc nội dung..."
+        />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {!fixedStatus ? (
+            <AdminSelect
+              label="Lọc trạng thái"
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as PostStatus | "")
+              }
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option value="DRAFT">Bản nháp</option>
+              <option value="PENDING_REVIEW">Chờ duyệt</option>
+              <option value="PUBLISHED">Đã xuất bản</option>
+              <option value="REJECTED">Bị từ chối</option>
+              <option value="ARCHIVED">Lưu trữ</option>
+            </AdminSelect>
+          ) : null}
+          <AdminSelect
+            label="Lọc danh mục"
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+          >
+            <option value="">Tất cả danh mục</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </AdminSelect>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {!propStatus && (
-            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5">
-              <Filter size={14} className="text-slate-400" />
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-transparent text-xs font-semibold focus:outline-none">
-                <option value="">Tất cả trạng thái</option>
-                <option value="DRAFT">Bản nháp</option>
-                <option value="PENDING_REVIEW">Chờ duyệt</option>
-                <option value="PUBLISHED">Đã xuất bản</option>
-                <option value="REJECTED">Bị từ chối</option>
-              </select>
-            </div>
-          )}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5">
-            <Filter size={14} className="text-slate-400" />
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="bg-transparent text-xs font-semibold focus:outline-none">
-              <option value="">Tất cả danh mục</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
+      </AdminToolbar>
 
       {loading ? (
-        <div className="py-20 text-center"><Loader className="animate-spin text-primary mx-auto mb-2" size={30} /></div>
+        <AdminLoadingState title="Đang tải bài viết" />
+      ) : loadError ? (
+        <AdminErrorState
+          description={loadError}
+          action={
+            <Button
+              variant="adminSecondary"
+              onClick={() => void fetchPosts()}
+            >
+              Thử lại
+            </Button>
+          }
+        />
       ) : (
-        <DataTable columns={columns} data={posts} />
+        <DataTable
+          columns={columns}
+          data={posts}
+          emptyTitle={
+            fixedStatus === "PENDING_REVIEW"
+              ? "Không có bài chờ duyệt"
+              : "Không tìm thấy bài viết"
+          }
+          emptyDescription={
+            searchQuery || statusFilter || categoryFilter
+              ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
+              : "Bài viết mới sẽ xuất hiện tại đây."
+          }
+        />
       )}
-    </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Xóa bài viết?"
+        description={`Bài viết “${deleteTarget?.title || ""}” sẽ không còn xuất hiện trong hệ thống.`}
+        loading={Boolean(
+          deleteTarget && actionLoading === deleteTarget.id,
+        )}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
+
+      <AdminModal
+        open={Boolean(rejectTarget)}
+        title="Từ chối bài viết"
+        description={`Gửi phản hồi rõ ràng cho tác giả của “${rejectTarget?.title || ""}”.`}
+        onClose={() => {
+          if (!actionLoading) setRejectTarget(null);
+        }}
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="adminSecondary"
+              onClick={() => setRejectTarget(null)}
+              disabled={Boolean(actionLoading)}
+            >
+              Hủy
+            </Button>
+            <Button
+              variant="adminDanger"
+              onClick={() => void handleReject()}
+              loading={Boolean(
+                rejectTarget && actionLoading === rejectTarget.id,
+              )}
+            >
+              Xác nhận từ chối
+            </Button>
+          </>
+        }
+      >
+        <AdminFormField
+          label="Lý do từ chối"
+          error={rejectError}
+          required
+        >
+          <textarea
+            value={rejectNote}
+            onChange={(event) => {
+              setRejectNote(event.target.value);
+              if (rejectError) setRejectError("");
+            }}
+            rows={5}
+            autoFocus
+            className="w-full border border-slate-200 px-3 py-2.5 text-sm leading-6 text-slate-900 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+            placeholder="Nêu nội dung cần chỉnh sửa..."
+          />
+        </AdminFormField>
+      </AdminModal>
+    </>
   );
 }

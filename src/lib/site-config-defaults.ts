@@ -14,6 +14,12 @@ export type StatItem = {
 };
 
 export type SiteConfigData = {
+  brand: {
+    name: string;
+    tagline: string;
+    logoUrl: string;
+    logoAlt: string;
+  };
   heroBanner: {
     eyebrow: string;
     title: string;
@@ -39,6 +45,8 @@ export type SiteConfigData = {
   footerLinks: {
     products: LinkItem[];
     explore: LinkItem[];
+    support: LinkItem[];
+    policies: LinkItem[];
   };
   footerContact: {
     phone: string;
@@ -48,6 +56,13 @@ export type SiteConfigData = {
     shopeeUrl: string;
     tiktokUrl: string;
     facebookUrl: string;
+    instagramUrl: string;
+    legalName: string;
+    taxCode: string;
+    registeredAddress: string;
+    boCongThuongUrl: string;
+    boCongThuongImageUrl: string;
+    copyrightText: string;
   };
   stats: {
     followers: StatItem;
@@ -71,6 +86,12 @@ export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [];
 
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
+  brand: {
+    name: "Ăn Cùng Bà Tuyết",
+    tagline: "Ăn vặt thì phải Ăn Cùng Bà Tuyết",
+    logoUrl: "/logo-acbt.png",
+    logoAlt: "Logo Ăn Cùng Bà Tuyết",
+  },
   heroBanner: {
     eyebrow: "Thương hiệu Việt, vì người Việt",
     title: "Ăn vặt thì phải Ăn Cùng Bà Tuyết",
@@ -123,6 +144,20 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
       { href: "/tin-tuc", label: "Tin tức" },
       { href: "/lien-he", label: "Liên hệ" },
     ],
+    support: [
+      { href: "/trang/huong-dan-mua-hang", label: "Hướng dẫn mua hàng" },
+      { href: "/trang/tra-cuu-don-hang", label: "Tra cứu đơn hàng" },
+      { href: "/trang/chinh-sach-giao-hang", label: "Chính sách giao hàng" },
+      { href: "/trang/chinh-sach-doi-tra-va-hoan-tien", label: "Chính sách đổi trả và hoàn tiền" },
+      { href: "/trang/tiep-nhan-phan-anh-khieu-nai", label: "Tiếp nhận phản ánh, khiếu nại" },
+    ],
+    policies: [
+      { href: "/trang/chinh-sach-thanh-toan", label: "Chính sách thanh toán" },
+      { href: "/trang/chinh-sach-kiem-hang", label: "Chính sách kiểm hàng" },
+      { href: "/trang/chinh-sach-bao-mat-thong-tin", label: "Chính sách bảo mật thông tin" },
+      { href: "/trang/dieu-khoan-su-dung", label: "Điều khoản sử dụng" },
+      { href: "/gioi-thieu/thong-tin-doanh-nghiep", label: "Thông tin doanh nghiệp" },
+    ],
   },
   footerContact: {
     phone: "0989 852 948",
@@ -132,6 +167,13 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     shopeeUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     tiktokUrl: "https://tiktok.com/@batuyethanhvi",
     facebookUrl: "https://facebook.com/ancungbatuyet",
+    instagramUrl: "",
+    legalName: "",
+    taxCode: "",
+    registeredAddress: "",
+    boCongThuongUrl: "",
+    boCongThuongImageUrl: "",
+    copyrightText: "© 2026 Ăn Cùng Bà Tuyết. Bảo lưu mọi quyền.",
   },
   stats: {
     followers: {
@@ -225,6 +267,7 @@ function normalizeProductMenuLinks(value: unknown) {
 
 export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const source = isRecord(input) ? input : {};
+  const brand = isRecord(source.brand) ? source.brand : {};
   const heroBanner = isRecord(source.heroBanner) ? source.heroBanner : {};
   const heroHighlights = Array.isArray(heroBanner.highlights) ? heroBanner.highlights : [];
   const seo = isRecord(source.seo) ? source.seo : {};
@@ -237,6 +280,12 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const insurance = isRecord(stats.insurance) ? stats.insurance : {};
 
   return {
+    brand: {
+      name: stringOrDefault(brand.name, DEFAULT_SITE_CONFIG.brand.name),
+      tagline: stringOrDefault(brand.tagline, DEFAULT_SITE_CONFIG.brand.tagline),
+      logoUrl: stringOrDefault(brand.logoUrl, DEFAULT_SITE_CONFIG.brand.logoUrl),
+      logoAlt: stringOrDefault(brand.logoAlt, DEFAULT_SITE_CONFIG.brand.logoAlt),
+    },
     heroBanner: {
       eyebrow: stringOrDefault(heroBanner.eyebrow, DEFAULT_SITE_CONFIG.heroBanner.eyebrow),
       title: stringOrDefault(heroBanner.title, DEFAULT_SITE_CONFIG.heroBanner.title),
@@ -271,6 +320,8 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
     footerLinks: {
       products: normalizeLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
       explore: normalizeLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),
+      support: normalizeLinks(footerLinks.support, DEFAULT_SITE_CONFIG.footerLinks.support),
+      policies: normalizeLinks(footerLinks.policies, DEFAULT_SITE_CONFIG.footerLinks.policies),
     },
     footerContact: {
       phone: stringOrDefault(footerContact.phone, DEFAULT_SITE_CONFIG.footerContact.phone),
@@ -292,6 +343,34 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
         typeof footerContact.facebookUrl === "string"
           ? footerContact.facebookUrl
           : DEFAULT_SITE_CONFIG.footerContact.facebookUrl,
+      instagramUrl:
+        typeof footerContact.instagramUrl === "string"
+          ? footerContact.instagramUrl
+          : DEFAULT_SITE_CONFIG.footerContact.instagramUrl,
+      legalName:
+        typeof footerContact.legalName === "string"
+          ? footerContact.legalName
+          : DEFAULT_SITE_CONFIG.footerContact.legalName,
+      taxCode:
+        typeof footerContact.taxCode === "string"
+          ? footerContact.taxCode
+          : DEFAULT_SITE_CONFIG.footerContact.taxCode,
+      registeredAddress:
+        typeof footerContact.registeredAddress === "string"
+          ? footerContact.registeredAddress
+          : DEFAULT_SITE_CONFIG.footerContact.registeredAddress,
+      boCongThuongUrl:
+        typeof footerContact.boCongThuongUrl === "string"
+          ? footerContact.boCongThuongUrl
+          : DEFAULT_SITE_CONFIG.footerContact.boCongThuongUrl,
+      boCongThuongImageUrl:
+        typeof footerContact.boCongThuongImageUrl === "string"
+          ? footerContact.boCongThuongImageUrl
+          : DEFAULT_SITE_CONFIG.footerContact.boCongThuongImageUrl,
+      copyrightText:
+        typeof footerContact.copyrightText === "string"
+          ? footerContact.copyrightText
+          : DEFAULT_SITE_CONFIG.footerContact.copyrightText,
     },
     stats: {
       followers: {

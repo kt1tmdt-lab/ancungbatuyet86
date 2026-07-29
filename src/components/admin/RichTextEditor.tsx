@@ -5,11 +5,43 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import { Bold, Italic, Heading2, Heading3, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Code, Quote, Undo, Redo } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, type ReactNode } from 'react';
 
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+}
+
+type ToolbarButtonProps = {
+  onClick: () => void;
+  isActive?: boolean;
+  disabled?: boolean;
+  title: string;
+  children: ReactNode;
+};
+
+function ToolbarButton({
+  onClick,
+  isActive,
+  disabled,
+  title,
+  children,
+}: ToolbarButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`p-1.5 rounded transition ${
+        isActive
+          ? 'bg-primary/20 text-primary-dark'
+          : 'text-slate-600 hover:bg-slate-200'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      {children}
+    </button>
+  );
 }
 
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
@@ -71,22 +103,6 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
   if (!editor) {
     return <div className="min-h-[300px] bg-slate-50 flex items-center justify-center text-slate-400">Loading editor...</div>;
   }
-
-  const ToolbarButton = ({ onClick, isActive, disabled, title, children }: any) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      title={title}
-      className={`p-1.5 rounded transition ${
-        isActive
-          ? 'bg-primary/20 text-primary-dark'
-          : 'text-slate-600 hover:bg-slate-200'
-      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div className="border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-primary transition-all">

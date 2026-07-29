@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getAuthErrorStatus, requireRole } from "@/lib/authz";
+import type { AuthRole } from "@/lib/auth";
 import { getErrorMessage, jsonError } from "@/lib/api-response";
 import {
   MEDIA_INTELLIGENCE_CONFIG_ID,
   normalizeMediaIntelligence,
 } from "@/lib/media-intelligence";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"] as const;
+const ALLOWED_ROLES: AuthRole[] = ["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"];
 
 function csvCell(value: unknown) {
   const text = Array.isArray(value) ? value.join("; ") : String(value ?? "");
@@ -16,7 +17,7 @@ function csvCell(value: unknown) {
 
 export async function GET(req: NextRequest) {
   try {
-    requireRole(req, ALLOWED_ROLES as any);
+    requireRole(req, ALLOWED_ROLES);
 
     const config = await prisma.siteConfig.findUnique({
       where: { id: MEDIA_INTELLIGENCE_CONFIG_ID },

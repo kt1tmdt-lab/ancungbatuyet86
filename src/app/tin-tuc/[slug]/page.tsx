@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: PageProps) {
           isPreview = true;
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
 
@@ -109,7 +109,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           isPreview = true;
         }
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
 
@@ -134,22 +134,21 @@ export default async function BlogPostPage({ params }: PageProps) {
   const currentViewCount = post.viewCount + (isPreview ? 0 : 1);
   const postContent = normalizeContentAssetUrls(post.content);
 
-  let relatedPosts: any[] = [];
-  if (post.categoryId) {
-    relatedPosts = await prisma.post.findMany({
-      where: {
-        categoryId: post.categoryId,
-        status: "PUBLISHED",
-        NOT: { id: post.id },
-      },
-      include: {
-        author: { select: { name: true } },
-        category: true,
-      },
-      take: 3,
-      orderBy: { createdAt: "desc" },
-    });
-  }
+  const relatedPosts = post.categoryId
+    ? await prisma.post.findMany({
+        where: {
+          categoryId: post.categoryId,
+          status: "PUBLISHED",
+          NOT: { id: post.id },
+        },
+        include: {
+          author: { select: { name: true } },
+          category: true,
+        },
+        take: 3,
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
 
   const authorName = post.author?.name || "Ăn Cùng Bà Tuyết";
 
@@ -265,7 +264,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                   <Tag size={13} />
                   Thẻ
                 </span>
-                {post.tags.map((pt: any) => (
+                {post.tags.map((pt) => (
                   <span
                     key={pt.tag.id}
                     className="bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700"

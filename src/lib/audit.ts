@@ -13,7 +13,7 @@ export async function logAudit({
   action: string;
   entityType: string;
   entityId?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }) {
   try {
     // 1. Ghi log vào cơ sở dữ liệu
@@ -58,17 +58,23 @@ export async function logAudit({
     msg += `📦 <b>Đối tượng:</b> ${entityType} (ID: <code>${entityId || "N/A"}</code>)\n`;
     
     if (details) {
+      const detailName =
+        typeof details.name === "string" || typeof details.name === "number"
+          ? details.name
+          : typeof details.title === "string" || typeof details.title === "number"
+            ? details.title
+            : null;
       msg += `📝 <b>Chi tiết:</b>\n`;
-      if (details.name || details.title) {
-        msg += `  • Tên/Tiêu đề: <i>${details.name || details.title}</i>\n`;
+      if (detailName !== null) {
+        msg += `  • Tên/Tiêu đề: <i>${detailName}</i>\n`;
       }
-      if (details.slug) {
+      if (typeof details.slug === "string") {
         msg += `  • Slug: <code>${details.slug}</code>\n`;
       }
-      if (details.email) {
+      if (typeof details.email === "string") {
         msg += `  • Email: <code>${details.email}</code>\n`;
       }
-      if (details.role) {
+      if (typeof details.role === "string") {
         msg += `  • Vai trò: <b>${details.role}</b>\n`;
       }
     }

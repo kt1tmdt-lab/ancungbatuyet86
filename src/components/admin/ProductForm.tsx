@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Loader, AlertCircle, Save, ArrowLeft, Plus, Trash } from "lucide-react";
@@ -8,8 +8,9 @@ import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
-interface ProductData {
+export interface ProductData {
   id?: string;
   name: string;
   slug: string;
@@ -32,6 +33,32 @@ interface ProductData {
   status?: string;
   sortOrder?: number;
   shortDescription?: string;
+}
+
+type ProductFieldErrors = Partial<
+  Record<"name" | "slug" | "tagline" | "description" | "image", string>
+>;
+
+function createProductSlug(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
+function getCategoryLabel(value: string) {
+  const labels: Record<string, string> = {
+    "chan-ga": "Chân Gà",
+    "tam-cay": "Tăm Cay",
+    "banh-trang": "Bánh Tráng",
+    khac: "Ăn Vặt Khác",
+  };
+  return labels[value] || "Ăn Vặt Khác";
 }
 
 export function ProductForm({ initialData }: { initialData?: ProductData }) {
@@ -88,6 +115,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<ProductFieldErrors>({});
 
   const router = useRouter();
   const { token } = useAuth();
@@ -108,6 +136,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       });
       if (data.url) {
         setImage(data.url);
+        setFieldErrors((current) => ({ ...current, image: undefined }));
       }
     } catch (err) {
       console.error(err);
@@ -117,30 +146,6 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       setUploadProgress(0);
     }
   };
-
-  // Auto-generate slug from name
-  useEffect(() => {
-    if (!initialData && name) {
-      const generated = name
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[đĐ]/g, "d")
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
-      setSlug(generated);
-    }
-  }, [name, initialData]);
-
-  // Sync categoryLabel when category changes
-  useEffect(() => {
-    if (category === "chan-ga") setCategoryLabel("Chân Gà");
-    else if (category === "tam-cay") setCategoryLabel("Tăm Cay");
-    else if (category === "banh-trang") setCategoryLabel("Bánh Tráng");
-    else if (category === "khac") setCategoryLabel("Ăn Vặt Khác");
-  }, [category]);
 
   const handleAddIngredient = (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,6 +162,21 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const validationErrors: ProductFieldErrors = {};
+    if (!name.trim()) validationErrors.name = "Vui lòng nhập tên sản phẩm.";
+    if (!slug.trim()) {
+      validationErrors.slug = "Vui lòng nhập đường dẫn sản phẩm.";
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      validationErrors.slug =
+        "Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.";
+    }
+    if (!tagline.trim()) validationErrors.tagline = "Vui lòng nhập tagline.";
+    if (!description.trim()) {
+      validationErrors.description = "Vui lòng nhập mô tả sản phẩm.";
+    }
+    if (!image.trim()) validationErrors.image = "Vui lòng chọn ảnh sản phẩm.";
+    setFieldErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
     setLoading(true);
 
     const payload = {
@@ -191,20 +211,25 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
         method,
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
+        toast.success(initialData?.id ? "Đã cập nhật sản phẩm." : "Đã tạo sản phẩm.");
         router.push("/admin/products");
         router.refresh();
       } else {
         const data = await res.json();
-        setError(data.error || "Có lỗi xảy ra khi lưu sản phẩm");
+        const message = data.error || "Có lỗi xảy ra khi lưu sản phẩm";
+        setError(message);
+        toast.error(message);
       }
     } catch (err) {
       console.error(err);
       setError("Không thể kết nối đến máy chủ");
+      toast.error("Không thể kết nối đến máy chủ");
     } finally {
       setLoading(false);
     }
@@ -251,10 +276,16 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   type="text"
                   required
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    const nextName = e.target.value;
+                    setName(nextName);
+                    if (!initialData) setSlug(createProductSlug(nextName));
+                    setFieldErrors((current) => ({ ...current, name: undefined }));
+                  }}
                   placeholder="Ví dụ: Chân Gà Rút Xương"
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
+                {fieldErrors.name && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.name}</p>}
               </div>
 
               <div>
@@ -263,10 +294,14 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   type="text"
                   required
                   value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
+                  onChange={(e) => {
+                    setSlug(e.target.value);
+                    setFieldErrors((current) => ({ ...current, slug: undefined }));
+                  }}
                   placeholder="Ví dụ: chan-ga-rut-xuong"
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                 />
+                {fieldErrors.slug && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.slug}</p>}
               </div>
             </div>
 
@@ -276,10 +311,14 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 type="text"
                 required
                 value={tagline}
-                onChange={(e) => setTagline(e.target.value)}
+                onChange={(e) => {
+                  setTagline(e.target.value);
+                  setFieldErrors((current) => ({ ...current, tagline: undefined }));
+                }}
                 placeholder="Ví dụ: Giòn ngon sần sật, đậm vị ớt hiểm Việt Nam."
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
+              {fieldErrors.tagline && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.tagline}</p>}
             </div>
 
             <div>
@@ -299,10 +338,14 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                 rows={4}
                 required
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  setFieldErrors((current) => ({ ...current, description: undefined }));
+                }}
                 placeholder="Nhập giới thiệu chi tiết về sản phẩm..."
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               />
+              {fieldErrors.description && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.description}</p>}
             </div>
 
             <div className="border border-orange-100 bg-orange-50/60 p-4 text-sm leading-6 text-orange-900">
@@ -588,7 +631,11 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Danh mục</label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  const nextCategory = e.target.value;
+                  setCategory(nextCategory);
+                  setCategoryLabel(getCategoryLabel(nextCategory));
+                }}
                 className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
               >
                 <option value="chan-ga">Chân Gà</option>
@@ -700,10 +747,14 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                     type="text"
                     required
                     value={image}
-                    onChange={(e) => setImage(e.target.value)}
+                    onChange={(e) => {
+                      setImage(e.target.value);
+                      setFieldErrors((current) => ({ ...current, image: undefined }));
+                    }}
                     placeholder="https://cdn.example.com/product-image.png"
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
                   />
+                  {fieldErrors.image && <p className="mt-1.5 text-xs font-semibold text-red-600">{fieldErrors.image}</p>}
                 </div>
               </div>
             </div>
@@ -760,6 +811,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       onSelect={(url) => {
         setImage(url);
         setHeroImage(url);
+        setFieldErrors((current) => ({ ...current, image: undefined }));
         setMediaPickerOpen(false);
       }}
     />

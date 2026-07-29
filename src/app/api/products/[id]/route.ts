@@ -19,7 +19,7 @@ export async function GET(
     }
 
     if (product.status !== ProductStatus.PUBLISHED) {
-      requireRole(req, ["ADMIN", "EDITOR"]);
+      requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     }
 
     return jsonOk(product);
@@ -41,7 +41,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const viewer = requireRole(req, ["ADMIN", "EDITOR"]);
+    const viewer = requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     const product = await updateProduct(id, await req.json());
 
     await logAudit({
@@ -79,7 +79,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const viewer = requireRole(req, ["ADMIN", "EDITOR"]);
+    const viewer = requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     const product = await getProductById(id);
     if (!product) {
       return jsonError("Product not found", 404);

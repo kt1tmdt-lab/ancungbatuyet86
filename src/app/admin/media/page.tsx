@@ -107,7 +107,8 @@ export default function MediaLibraryPage() {
   }, [token, page, search]);
 
   useEffect(() => {
-    fetchMedia();
+    const timer = window.setTimeout(() => void fetchMedia(), 0);
+    return () => window.clearTimeout(timer);
   }, [fetchMedia]);
 
   const handleUploadFiles = async (files: FileList | File[]) => {
@@ -212,7 +213,7 @@ export default function MediaLibraryPage() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

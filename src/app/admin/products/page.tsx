@@ -1,13 +1,43 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Download,
+  Edit3,
+  ExternalLink,
+  Heart,
+  Plus,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth-context";
+import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { DataTable } from "@/components/admin/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
-import { Loader, Plus, AlertCircle, Trash, Edit3, Heart, ExternalLink, Search, Download, Upload } from "lucide-react";
-import Link from "next/link";
-import toast from "react-hot-toast";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel } from "@/components/admin/CmsPanel";
+import CmsStatusBadge from "@/components/admin/CmsStatusBadge";
+import {
+  AdminErrorState,
+  AdminLoadingState,
+  AdminSearchInput,
+  AdminSelect,
+  AdminToolbar,
+  ConfirmDialog,
+} from "@/components/admin/AdminPrimitives";
+import Button from "@/components/ui/Button";
+
+type ProductStatus = "DRAFT" | "PUBLISHED" | "OUT_OF_STOCK" | "ARCHIVED";
 
 interface Product {
   id: string;
@@ -16,278 +46,377 @@ interface Product {
   categoryLabel: string;
   image: string;
   featured: boolean;
-  status: string;
+  status: ProductStatus;
   sortOrder: number;
 }
 
+type ImportResult = {
+  successCount: number;
+  errorCount: number;
+  errors?: unknown[];
+};
+
 export default function AdminProductsPage() {
+  const { token } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [isImporting, setIsImporting] = useState(false);
-  const { token } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (token) fetchProducts();
+  const fetchProducts = useCallback(async () => {
+    if (!token) return;
+
+    setLoading(true);
+    setLoadError("");
+    try {
+      setProducts(
+        await adminRequest<Product[]>("/api/products?status=ALL", { token }),
+      );
+    } catch (error) {
+      setLoadError(
+        getAdminErrorMessage(error, "Không thể tải danh sách sản phẩm."),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
-  const fetchProducts = async () => {
-    if (!token) return;
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchProducts(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchProducts]);
 
-    try {
-      const res = await fetch("/api/products?status=ALL", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) setProducts(await res.json());
-    } catch (err) {} 
-    finally { setLoading(false); }
-  };
-
-  const handleExport = () => {
-    if (!token) return;
-    // Download via direct link with token
-    window.open(`/api/admin/products/export?token=${token}`, "_blank");
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !token) return;
 
     setIsImporting(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    const body = new FormData();
+    body.append("file", file);
 
     try {
-      const res = await fetch("/api/admin/products/import", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(`Nhập dữ liệu thành công! Đã tạo/cập nhật ${data.successCount} sản phẩm.`);
-        if (data.errorCount > 0) {
-          toast.error(`Có ${data.errorCount} lỗi xảy ra. Xem chi tiết trong console.`);
-          console.warn("Import errors details:", data.errors);
-        }
-        fetchProducts();
-      } else {
-        toast.error(data.error || "Nhập dữ liệu thất bại");
+      const result = await adminRequest<ImportResult>(
+        "/api/admin/products/import",
+        { method: "POST", token, body },
+      );
+      toast.success(
+        `Đã tạo hoặc cập nhật ${result.successCount} sản phẩm.`,
+      );
+      if (result.errorCount > 0) {
+        console.warn("Product import errors:", result.errors);
+        toast.error(`${result.errorCount} dòng không thể nhập.`);
       }
-    } catch (err) {
-      console.error("Failed to import products:", err);
-      toast.error("Đã xảy ra lỗi khi kết nối máy chủ");
+      await fetchProducts();
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Nhập dữ liệu thất bại."));
     } finally {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleToggleFeatured = async (product: Product) => {
-    setActionLoading(product.id);
-    try {
-      const res = await fetch(`/api/products/${product.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ featured: !product.featured }),
-      });
-      if (res.ok) {
-        setProducts(products.map((p) => (p.id === product.id ? { ...p, featured: !p.featured } : p)));
-        toast.success(!product.featured ? "Đã đưa sản phẩm lên 2 cụm trang chủ" : "Đã ẩn sản phẩm khỏi 2 cụm trang chủ");
-      } else alert("Không thể thay đổi trạng thái hiển thị trang chủ");
-    } finally { setActionLoading(null); }
-  };
+  const handleToggleFeatured = useCallback(
+    async (product: Product) => {
+      if (!token) return;
+      setActionLoading(product.id);
 
-  const handleDelete = async (productId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) return;
-    setActionLoading(productId);
+      try {
+        await adminRequest<Product>(`/api/products/${product.id}`, {
+          method: "PUT",
+          token,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ featured: !product.featured }),
+        });
+        setProducts((current) =>
+          current.map((item) =>
+            item.id === product.id
+              ? { ...item, featured: !product.featured }
+              : item,
+          ),
+        );
+        toast.success(
+          product.featured
+            ? "Đã gỡ sản phẩm khỏi khu vực nổi bật."
+            : "Đã đưa sản phẩm vào khu vực nổi bật.",
+        );
+      } catch (error) {
+        toast.error(
+          getAdminErrorMessage(error, "Không thể cập nhật sản phẩm."),
+        );
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [token],
+  );
+
+  const handleDelete = async () => {
+    if (!deleteTarget || !token) return;
+    setActionLoading(deleteTarget.id);
+
     try {
-      const res = await fetch(`/api/products/${productId}`, {
+      await adminRequest(`/api/products/${deleteTarget.id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        token,
       });
-      if (res.ok) {
-        setProducts(products.filter((p) => p.id !== productId));
-      } else alert("Không thể xóa sản phẩm");
-    } finally { setActionLoading(null); }
+      setProducts((current) =>
+        current.filter((item) => item.id !== deleteTarget.id),
+      );
+      toast.success("Đã xóa sản phẩm.");
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xóa sản phẩm."));
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const filteredProducts = useMemo(() => {
-    let result = products;
-
-    if (statusFilter !== "ALL") {
-      result = result.filter((p) => p.status === statusFilter);
-    }
-
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(p => p.name.toLowerCase().includes(lowerQuery) || p.slug.includes(lowerQuery));
-    }
-
-    return result;
+    const normalizedSearch = searchQuery.trim().toLocaleLowerCase("vi");
+    return products.filter((product) => {
+      const matchesStatus =
+        statusFilter === "ALL" || product.status === statusFilter;
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name.toLocaleLowerCase("vi").includes(normalizedSearch) ||
+        product.slug.toLocaleLowerCase("vi").includes(normalizedSearch) ||
+        product.categoryLabel
+          .toLocaleLowerCase("vi")
+          .includes(normalizedSearch);
+      return matchesStatus && matchesSearch;
+    });
   }, [products, searchQuery, statusFilter]);
 
-  const columns = useMemo<ColumnDef<Product>[]>(() => [
-    {
-      accessorKey: "name",
-      header: "Sản phẩm",
-      cell: ({ row }) => {
-        const prod = row.original;
-        return (
-          <div className="flex items-center gap-3">
-            <img src={prod.image} alt={prod.name} className="w-12 h-12 object-cover border border-slate-100" />
-            <div className="flex flex-col">
-              <span className="font-bold text-slate-900 leading-tight">{prod.name}</span>
-              <span className="text-[10px] text-slate-400">Slug: {prod.slug}</span>
+  const columns = useMemo<ColumnDef<Product>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Sản phẩm",
+        cell: ({ row }) => {
+          const product = row.original;
+          return (
+            <div className="flex min-w-64 items-center gap-3">
+              <span className="relative h-12 w-12 shrink-0 overflow-hidden border border-slate-200 bg-slate-50">
+                <Image
+                  src={product.image || "/placeholder-product.jpg"}
+                  alt=""
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-black leading-5 text-slate-950">
+                  {product.name}
+                </span>
+                <span className="mt-0.5 block truncate font-mono text-[10px] text-slate-400">
+                  {product.slug}
+                </span>
+              </span>
             </div>
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: "categoryLabel",
-      header: "Danh mục",
-      cell: ({ row }) => (
-        <span className="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-0.5">
-          {row.original.categoryLabel}
-        </span>
-      )
-    },
-    {
-      accessorKey: "status",
-      header: "Trạng thái",
-      cell: ({ row }) => (
-        <span className={`px-2 py-0.5 text-[11px] font-bold ${row.original.status === "PUBLISHED" ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-600"}`}>
-          {row.original.status === "PUBLISHED" ? "HIỂN THỊ" : "ẨN"}
-        </span>
-      )
-    },
-    {
-      accessorKey: "sortOrder",
-      header: "Thứ tự trang chủ",
-      cell: ({ row }) => <span className="font-semibold text-slate-900">{row.original.sortOrder || 0}</span>
-    },
-    {
-      accessorKey: "featured",
-      header: "Hiện ở 2 cụm trang chủ",
-      cell: ({ row }) => {
-        const prod = row.original;
-        return (
-          <button
-            onClick={() => handleToggleFeatured(prod)}
-            disabled={actionLoading === prod.id}
-            className={`acbt-btn acbt-btn--sm ${prod.featured ? "acbt-btn--admin" : "acbt-btn--admin-secondary"}`}
-            title={prod.featured ? "Ẩn khỏi hero và sản phẩm nổi bật" : "Hiện ở hero và sản phẩm nổi bật"}
-          >
-            <Heart size={12} fill={prod.featured ? "currentColor" : "none"} />
-            <span>{prod.featured ? "Đang hiện" : "Cho hiện"}</span>
-          </button>
-        );
-      }
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      cell: ({ row }) => {
-        const prod = row.original;
-        return (
-          <div className="flex items-center justify-end gap-2">
-            <a href={`/san-pham/${prod.slug}`} target="_blank" className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-slate-100 hover:text-primary-dark">
-              <ExternalLink size={15} />
-            </a>
-            <Link href={`/admin/products/${prod.id}/edit`} className="acbt-icon-btn p-1.5 text-slate-600 hover:bg-slate-100 hover:text-primary-dark">
-              <Edit3 size={15} />
-            </Link>
-            <button onClick={() => handleDelete(prod.id)} disabled={actionLoading === prod.id} className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50">
-              <Trash size={15} />
+          );
+        },
+      },
+      {
+        accessorKey: "categoryLabel",
+        header: "Nhóm",
+        cell: ({ row }) => (
+          <span className="inline-flex border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600">
+            {row.original.categoryLabel || "Chưa phân nhóm"}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        cell: ({ row }) => <CmsStatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "sortOrder",
+        header: "Thứ tự",
+        cell: ({ row }) => (
+          <span className="font-bold text-slate-700">
+            {row.original.sortOrder}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "featured",
+        header: "Nổi bật",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const product = row.original;
+          return (
+            <button
+              type="button"
+              onClick={() => void handleToggleFeatured(product)}
+              disabled={actionLoading === product.id}
+              className={`inline-flex min-h-9 items-center gap-1.5 border px-3 text-xs font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 disabled:cursor-wait disabled:opacity-50 ${
+                product.featured
+                  ? "border-orange-600 bg-orange-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
+              }`}
+            >
+              <Heart
+                size={13}
+                fill={product.featured ? "currentColor" : "none"}
+              />
+              {product.featured ? "Đang hiện" : "Cho hiện"}
             </button>
-          </div>
-        );
-      }
-    }
-  ], [actionLoading]);
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const product = row.original;
+          return (
+            <div className="flex items-center justify-end gap-1">
+              <Link
+                href={`/san-pham/${product.slug}`}
+                target="_blank"
+                className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                aria-label={`Xem ${product.name}`}
+                title="Xem trên website"
+              >
+                <ExternalLink size={16} />
+              </Link>
+              <Link
+                href={`/admin/products/${product.id}/edit`}
+                className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+                aria-label={`Sửa ${product.name}`}
+                title="Chỉnh sửa"
+              >
+                <Edit3 size={16} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(product)}
+                disabled={actionLoading === product.id}
+                className="acbt-icon-btn grid h-9 w-9 place-items-center text-red-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                aria-label={`Xóa ${product.name}`}
+                title="Xóa"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          );
+        },
+      },
+    ],
+    [actionLoading, handleToggleFeatured],
+  );
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Quản lý sản phẩm</h1>
-            <p className="text-slate-500 text-sm mt-1">Danh sách sản phẩm giới thiệu hiển thị công khai trên website.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={handleExport}
-              className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition shadow-sm cursor-pointer"
-            >
-              <Download size={14} />
-              <span>Xuất Excel/CSV</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleImportClick}
-              disabled={isImporting}
-              className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition shadow-sm cursor-pointer disabled:opacity-50"
-            >
-              <Upload size={14} />
-              <span>{isImporting ? "Đang nhập..." : "Nhập từ file"}</span>
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImport}
-              accept=".csv"
-              className="hidden"
-            />
-            <Link href="/admin/products/new" className="flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs shadow-md transition">
-              <Plus size={14} />
-              <span>Thêm sản phẩm mới</span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-100 p-6 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
+      <div className="space-y-5">
+        <CmsPageHeader
+          eyebrow="Sản phẩm & phân phối"
+          title="Quản lý sản phẩm"
+          description="Cập nhật nội dung showcase, trạng thái hiển thị và thứ tự sản phẩm trên website."
+          actions={
+            <>
               <input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                ref={fileInputRef}
+                type="file"
+                onChange={handleImport}
+                accept=".csv"
+                className="hidden"
               />
-            </div>
+              <Button
+                variant="adminSecondary"
+                leftIcon={<Download size={16} />}
+                onClick={() =>
+                  window.open("/api/admin/products/export", "_blank")
+                }
+              >
+                Xuất CSV
+              </Button>
+              <Button
+                variant="adminSecondary"
+                leftIcon={<Upload size={16} />}
+                loading={isImporting}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Nhập CSV
+              </Button>
+              <Button
+                href="/admin/products/new"
+                variant="admin"
+                leftIcon={<Plus size={16} />}
+              >
+                Thêm sản phẩm
+              </Button>
+            </>
+          }
+        />
 
-            <select
+        <CmsPanel>
+          <AdminToolbar>
+            <AdminSearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Tìm tên, đường dẫn hoặc nhóm sản phẩm..."
+            />
+            <AdminSelect
+              label="Lọc theo trạng thái"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-800"
+              onChange={(event) => setStatusFilter(event.target.value)}
             >
               <option value="ALL">Tất cả trạng thái</option>
               <option value="PUBLISHED">Đang hiển thị</option>
-              <option value="DRAFT">Đang ẩn (Nháp)</option>
-            </select>
-          </div>
+              <option value="DRAFT">Bản nháp</option>
+              <option value="OUT_OF_STOCK">Tạm hết hàng</option>
+              <option value="ARCHIVED">Lưu trữ</option>
+            </AdminSelect>
+          </AdminToolbar>
 
           {loading ? (
-            <div className="py-20 text-center"><Loader className="animate-spin text-primary mx-auto mb-2" size={30} /></div>
+            <AdminLoadingState title="Đang tải sản phẩm" />
+          ) : loadError ? (
+            <AdminErrorState
+              description={loadError}
+              action={
+                <Button
+                  variant="adminSecondary"
+                  onClick={() => void fetchProducts()}
+                >
+                  Thử lại
+                </Button>
+              }
+            />
           ) : (
-            <DataTable columns={columns} data={filteredProducts} />
+            <DataTable
+              columns={columns}
+              data={filteredProducts}
+              emptyTitle="Không tìm thấy sản phẩm"
+              emptyDescription={
+                searchQuery || statusFilter !== "ALL"
+                  ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
+                  : "Bấm “Thêm sản phẩm” để tạo sản phẩm đầu tiên."
+              }
+            />
           )}
-        </div>
+        </CmsPanel>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Xóa sản phẩm?"
+        description={`Sản phẩm “${deleteTarget?.name || ""}” sẽ bị xóa vĩnh viễn khỏi hệ thống.`}
+        loading={Boolean(
+          deleteTarget && actionLoading === deleteTarget.id,
+        )}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </ProtectedRoute>
   );
 }

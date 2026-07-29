@@ -1,6 +1,16 @@
 import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
+import type { Prisma } from "@prisma/client";
+
+const ADMIN_STATS_ROLES = new Set([
+  "SUPER_ADMIN",
+  "ADMIN",
+  "EDITOR",
+  "AUTHOR",
+  "MARKETING",
+  "SUPPORT",
+]);
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,9 +19,12 @@ export async function GET(req: NextRequest) {
 
     const payload = verifyToken(token);
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!ADMIN_STATS_ROLES.has(payload.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const isAuthor = payload.role === "AUTHOR";
-    const where: any = { NOT: { status: "DELETED" } };
+    const where: Prisma.PostWhereInput = { NOT: { status: "DELETED" } };
 
     // If author, restrict counts to their own posts
     if (isAuthor) {
@@ -42,11 +55,11 @@ export async function GET(req: NextRequest) {
     let uniqueVisitors = 0;
     let totalProducts = 0;
     let newContacts = 0;
-    let viewsByDay: any[] = [];
-    let mostViewedPosts: any[] = [];
-    let mostClickedProducts: any[] = [];
-    let contactsOverTime: any[] = [];
-    let trafficSources: any[] = [];
+    let viewsByDay: Array<{ date: string; count: number }> = [];
+    let mostViewedPosts: Array<{ id: string; title: string; viewCount: number }> = [];
+    let mostClickedProducts: Array<{ name: string; clicks: number }> = [];
+    let contactsOverTime: Array<{ date: string; count: number }> = [];
+    let trafficSources: Array<{ source: string; percentage: number }> = [];
 
     // Helper for last 7 days
     const last7Days = Array.from({ length: 7 }, (_, i) => {
@@ -77,7 +90,7 @@ export async function GET(req: NextRequest) {
         prisma.visit.groupBy({ by: ["ipHash"] }).then((groups) => groups.length),
         prisma.visit.findMany({
           where: { createdAt: { gte: startDate } },
-          select: { createdAt: true, referrer: true } as any
+          select: { createdAt: true, referrer: true }
         }),
         prisma.post.findMany({
           where: { status: "PUBLISHED" },
@@ -113,7 +126,7 @@ export async function GET(req: NextRequest) {
       let gg = 0;
       let direct = 0;
 
-      recentVisits.forEach((v: any) => {
+      recentVisits.forEach((v) => {
         const day = v.createdAt.toISOString().split("T")[0];
         if (viewsMap[day] !== undefined) {
           viewsMap[day]++;

@@ -12,12 +12,35 @@ import {
   Loader,
   ShoppingBag,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
+
+interface FeatureItem {
+  icon?: string;
+  title?: string;
+  description?: string;
+}
+
+interface BlockData {
+  label?: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  content?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  imageUrl?: string;
+  imagePosition?: "left" | "right";
+  items?: FeatureItem[];
+  productIds?: string[];
+}
 
 interface Block {
   id: string;
   type: "hero" | "text" | "features" | "split" | "products";
-  data: any;
+  data: BlockData;
 }
 
 interface PageData {
@@ -41,7 +64,7 @@ interface Product {
 }
 
 const DynIcon = ({ name, className }: { name: string; className?: string }) => {
-  const Icon = (Icons as any)[name];
+  const Icon = (Icons as unknown as Record<string, LucideIcon>)[name];
   if (!Icon) return <HelpCircle className={className} />;
   return <Icon className={className} />;
 };
@@ -69,38 +92,50 @@ export default function CustomDynamicPage({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchPageAndProducts();
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      async function loadPageAndProducts() {
+        setLoading(true);
+        setError("");
+
+        try {
+          const prodRes = await fetch("/api/products", { signal: controller.signal });
+          if (prodRes.ok) {
+            const prods = await prodRes.json();
+            setProductsList(Array.isArray(prods) ? prods : []);
+          }
+
+          const headers: Record<string, string> = {};
+          if (token) headers.Authorization = `Bearer ${token}`;
+
+          const pageRes = await fetch(`/api/pages/slug/${slug}`, {
+            headers,
+            signal: controller.signal,
+          });
+          if (pageRes.ok) {
+            const pageData = (await pageRes.json()) as PageData;
+            setPage(pageData);
+          } else {
+            const errorData = (await pageRes.json().catch(() => ({}))) as { error?: string };
+            setError(errorData.error || "Không thể tải trang này");
+          }
+        } catch (loadError) {
+          if (loadError instanceof Error && loadError.name === "AbortError") return;
+          console.error("Error loading dynamic page:", loadError);
+          setError("Có lỗi kết nối hệ thống xảy ra");
+        } finally {
+          if (!controller.signal.aborted) setLoading(false);
+        }
+      }
+
+      void loadPageAndProducts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
   }, [slug, token]);
-
-  const fetchPageAndProducts = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const prodRes = await fetch("/api/products");
-      if (prodRes.ok) {
-        const prods = await prodRes.json();
-        setProductsList(Array.isArray(prods) ? prods : []);
-      }
-
-      const headers: Record<string, string> = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
-
-      const pageRes = await fetch(`/api/pages/slug/${slug}`, { headers });
-      if (pageRes.ok) {
-        const pageData = await pageRes.json();
-        setPage(pageData);
-      } else {
-        const errorData = await pageRes.json().catch(() => ({}));
-        setError(errorData.error || "Không thể tải trang này");
-      }
-    } catch (err) {
-      console.error("Error loading dynamic page:", err);
-      setError("Có lỗi kết nối hệ thống xảy ra");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -218,7 +253,7 @@ export default function CustomDynamicPage({
                 </div>
 
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {(data.items || []).map((item: any, fIdx: number) => (
+                  {(data.items || []).map((item, fIdx) => (
                     <motion.div
                       key={fIdx}
                       initial={{ opacity: 0, y: 22 }}
@@ -311,7 +346,7 @@ export default function CustomDynamicPage({
 
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                   {(Array.isArray(data.productIds) && data.productIds.length > 0
-                    ? productsList.filter((product) => data.productIds.includes(product.id))
+                    ? productsList.filter((product) => (data.productIds || []).includes(product.id))
                     : productsList.slice(0, 6)
                   ).map((product, pIdx) => (
                     <motion.div

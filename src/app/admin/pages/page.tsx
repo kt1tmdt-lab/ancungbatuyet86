@@ -7,17 +7,25 @@ import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
   Plus,
   Loader,
-  AlertCircle,
-  Search,
   Edit3,
   Trash2,
   ExternalLink,
-  Globe,
   Wand2
 } from "lucide-react";
 import Link from "next/link";
 import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
 import { getSystemPageSeedContent as getCleanSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
+import toast from "react-hot-toast";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel } from "@/components/admin/CmsPanel";
+import {
+  AdminErrorState,
+  AdminLoadingState,
+  AdminSearchInput,
+  AdminToolbar,
+  ConfirmDialog,
+} from "@/components/admin/AdminPrimitives";
+import Button from "@/components/ui/Button";
 
 interface PageData {
   id: string;
@@ -27,103 +35,13 @@ interface PageData {
   updatedAt: string;
 }
 
-function getSystemPageSeedContent(fallback: (typeof DEFAULT_INFO_PAGES)[string]) {
-  if (fallback.routePath !== "/chat-luong") return fallback.blocks;
-
-  return [
-    {
-      id: "chat-luong-hero",
-      type: "hero",
-      data: {
-        label: "Chất lượng",
-        title: "Chất lượng kiểm chứng được",
-        subtitle: "Nguyên liệu, nhà máy, chứng nhận và bảo hiểm — mọi thứ đều có hồ sơ. Nội dung nào chưa có file public sẽ ghi rõ [cần bổ sung].",
-        backgroundImage: "/bento/bento-factory.png",
-        ctaText: "Xem hồ sơ pháp lý",
-        ctaLink: "#ho-so-phap-ly"
-      }
-    },
-    {
-      id: "chat-luong-nguyen-lieu",
-      type: "split",
-      data: {
-        title: "Nguyên liệu nhập khẩu từ châu Âu — có truy xuất",
-        description: "Nguyên liệu chính như chân gà được định hướng công khai theo hồ sơ nhập khẩu từ Ba Lan, Hungary và các nước châu Âu khác. Cần bổ sung C/O, phiếu kiểm dịch và hồ sơ lô hàng tương ứng trước khi public claim đầy đủ.",
-        imageUrl: "/bento/bento-ingredients.png",
-        imagePosition: "right",
-        ctaText: "Cần bổ sung video truy xuất",
-        ctaLink: "#"
-      }
-    },
-    {
-      id: "chat-luong-facts",
-      type: "features",
-      data: {
-        title: "Các điểm cần có bằng chứng đi kèm",
-        subtitle: "Bên thứ ba nói thay, thương hiệu không tự tuyên bố.",
-        items: [
-          { icon: "Wheat", title: "Nhập khẩu từ Ba Lan, Hungary", description: "[cần bổ sung hồ sơ lô hàng public]" },
-          { icon: "FileCheck2", title: "Có C/O và phiếu kiểm dịch", description: "[cần bổ sung ảnh scan]" },
-          { icon: "Snowflake", title: "Lưu kho lạnh theo quy chuẩn", description: "[cần bổ sung ảnh kho lạnh]" }
-        ]
-      }
-    },
-    {
-      id: "chat-luong-factory",
-      type: "split",
-      data: {
-        title: "Nhà máy sản xuất NMV Food — Thái Nguyên",
-        description: "NMV Food đạt chứng nhận ISO 22000:2018. Quy trình nên được mô tả là quy trình 6 bước có kiểm soát: nguyên liệu → sơ chế → chế biến → QC → đóng gói → giao hàng. Không dùng các cụm như an toàn tuyệt đối hoặc vô trùng.",
-        imageUrl: "/bento/bento-factory.png",
-        imagePosition: "left",
-        ctaText: "Xem quy trình",
-        ctaLink: "/chat-luong/nha-may-quy-trinh-san-xuat"
-      }
-    },
-    {
-      id: "chat-luong-documents",
-      type: "features",
-      data: {
-        title: "Hồ sơ pháp lý & chứng nhận",
-        subtitle: "Mỗi card nên có ảnh scan hoặc PDF để khách hàng, đối tác và báo chí kiểm chứng.",
-        items: [
-          { icon: "BadgeCheck", title: "ISO 22000:2018", description: "Ghi rõ: Cấp cho NMV Food. [cần bổ sung scan]" },
-          { icon: "ClipboardCheck", title: "HACCP", description: "Chương trình đào tạo, NMV Food. [cần bổ sung hồ sơ]" },
-          { icon: "FileCheck2", title: "Giấy phép ATTP", description: "Giấy đủ điều kiện ATTP. [cần bổ sung ảnh/PDF]" },
-          { icon: "FileSearch", title: "Phiếu kiểm nghiệm", description: "VNTEST — kiểm nghiệm định kỳ hàng tháng (NMV Food). [cần bổ sung phiếu mới nhất]" }
-        ]
-      }
-    },
-    {
-      id: "chat-luong-pvi",
-      type: "text",
-      data: {
-        backgroundColor: "white",
-        content: "<h2>Bảo hiểm trách nhiệm sản phẩm — PVI</h2><p>ACBT mua bảo hiểm trách nhiệm sản phẩm từ PVI. Đây là cam kết trách nhiệm nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, không phải chứng nhận chất lượng và không được trình bày như PVI xác nhận chất lượng sản phẩm.</p><p><strong>[cần xác nhận]</strong> Pháp nhân trên hợp đồng PVI và phạm vi bảo hiểm cụ thể.</p>"
-      }
-    },
-    {
-      id: "chat-luong-policy",
-      type: "features",
-      data: {
-        title: "Chính sách bảo vệ quyền lợi khách hàng",
-        subtitle: "Tóm tắt các điểm chính, bản đầy đủ nên dẫn sang trang hoặc PDF riêng.",
-        items: [
-          { icon: "Info", title: "Quyền được thông tin", description: "Sản phẩm ghi rõ thành phần, NSX, HSD." },
-          { icon: "RefreshCw", title: "Quyền đổi trả", description: "Quy trình đổi trả khi sản phẩm lỗi. [cần bổ sung chi tiết]" },
-          { icon: "MessageCircle", title: "Quyền khiếu nại", description: "Kênh tiếp nhận và thời gian xử lý. [cần bổ sung SLA]" },
-          { icon: "Headphones", title: "Kênh hỗ trợ", description: "Hotline, email, thời gian làm việc. [cần bổ sung thông tin chính thức]" }
-        ]
-      }
-    }
-  ];
-}
-
 export default function AdminPagesList() {
   const router = useRouter();
   const [pages, setPages] = useState<PageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<PageData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { token } = useAuth();
 
@@ -131,8 +49,9 @@ export default function AdminPagesList() {
     if (!token) return;
 
     let cancelled = false;
-
-    fetch("/api/pages", {
+    const timer = window.setTimeout(() => {
+      setLoadError("");
+      fetch("/api/pages", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -145,37 +64,43 @@ export default function AdminPagesList() {
         if (!cancelled) setPages(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
-        if (!cancelled) console.error("Failed to fetch pages:", err);
+        if (!cancelled) {
+          console.error("Failed to fetch pages:", err);
+          setLoadError("Không thể tải danh sách trang.");
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    }, 0);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [token]);
 
-  const handleDelete = async (pageId: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa trang này không? Bố cục thiết kế sẽ bị mất vĩnh viễn.")) return;
-    
-    setActionLoading(pageId);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setActionLoading(deleteTarget.id);
     try {
-      const res = await fetch(`/api/pages/${pageId}`, {
+      const res = await fetch(`/api/pages/${deleteTarget.id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       if (res.ok) {
-        setPages((currentPages) => currentPages.filter((p) => p.id !== pageId));
+        setPages((currentPages) => currentPages.filter((p) => p.id !== deleteTarget.id));
+        toast.success("Đã xóa trang.");
+        setDeleteTarget(null);
       } else {
         const errData = await res.json();
-        alert(errData.error || "Không thể xóa trang");
+        toast.error(errData.error || "Không thể xóa trang");
       }
     } catch (err) {
       console.error(err);
-      alert("Đã xảy ra lỗi khi xóa trang");
+      toast.error("Đã xảy ra lỗi khi xóa trang");
     } finally {
       setActionLoading(null);
     }
@@ -214,10 +139,10 @@ export default function AdminPagesList() {
       }
 
       const errData = await res.json();
-      alert(errData.error || "Khong the tao trang cau hinh");
+      toast.error(errData.error || "Không thể tạo trang cấu hình");
     } catch (err) {
       console.error(err);
-      alert("Da xay ra loi khi tao trang cau hinh");
+      toast.error("Đã xảy ra lỗi khi tạo trang cấu hình");
     } finally {
       setActionLoading(null);
     }
@@ -234,38 +159,37 @@ export default function AdminPagesList() {
   return (
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              <Globe className="text-primary-dark" size={28} />
-              Quản lý Trang động
-            </h1>
-            <p className="text-slate-500 text-sm mt-1">Dựng Landing Page, trang sự kiện, hoặc các trang phụ tùy biến với Block Builder.</p>
-          </div>
-          <Link
+        <CmsPageHeader
+          eyebrow="Nội dung"
+          title="Quản lý trang tùy biến"
+          description="Tạo landing page, trang sự kiện và các trang phụ bằng trình dựng nội dung theo khối."
+          actions={
+          <Button
             href="/admin/pages/new"
-            className="acbt-btn acbt-btn--admin acbt-btn--md self-start sm:self-auto"
+            variant="admin"
+            leftIcon={<Plus size={16} />}
           >
-            <Plus size={16} />
-            <span>Thêm Trang Mới</span>
-          </Link>
-        </div>
+            Thêm trang
+          </Button>
+          }
+        />
 
-        <div className="bg-white  border border-slate-100 p-6 shadow-sm space-y-4">
+        <CmsPanel className="space-y-4 p-4 sm:p-6">
           <div className="border border-primary/20 bg-orange-50/50 p-5">
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-lg font-extrabold text-slate-950 flex items-center gap-2">
                   <Wand2 size={19} className="text-primary-dark" />
-                  Trang menu can cau hinh
+                  Trang hệ thống có thể cấu hình
                 </h2>
                 <p className="text-xs text-slate-600 mt-1 max-w-3xl">
-                  Cac trang nay da co route that tren header. Neu chua tao ban CMS, website se dung noi dung mac dinh.
-                  Bam Tao & sua de cau hinh tung chu, tung anh va them/sua/xoa cac khoi lap lai.
+                  Các trang này đã có đường dẫn công khai. Khi chưa tạo bản CMS,
+                  website sử dụng nội dung mặc định; khi tạo, quản trị viên có thể
+                  sửa từng khối nội dung và hình ảnh.
                 </p>
               </div>
               <span className="text-[11px] font-bold uppercase tracking-widest text-primary-dark bg-white border border-primary/20 px-3 py-1">
-                {systemPages.filter((page) => page.cmsPage).length}/{systemPages.length} da co CMS
+                {systemPages.filter((page) => page.cmsPage).length}/{systemPages.length} đã có CMS
               </span>
             </div>
 
@@ -283,7 +207,7 @@ export default function AdminPagesList() {
                       <span className={`shrink-0 border px-2 py-0.5 text-[10px] font-extrabold uppercase ${
                         cmsPage ? "bg-green-50 text-green-700 border-green-200" : "bg-slate-50 text-slate-500 border-slate-200"
                       }`}>
-                        {cmsPage ? "Co CMS" : "Mac dinh"}
+                        {cmsPage ? "Có CMS" : "Mặc định"}
                       </span>
                     </div>
 
@@ -294,7 +218,7 @@ export default function AdminPagesList() {
                           className="acbt-btn acbt-btn--admin acbt-btn--sm"
                         >
                           <Edit3 size={14} />
-                          Sua noi dung
+                          Sửa nội dung
                         </Link>
                       ) : (
                         <button
@@ -303,7 +227,7 @@ export default function AdminPagesList() {
                           className="acbt-btn acbt-btn--admin acbt-btn--sm disabled:opacity-60"
                         >
                           {actionLoading === page.cmsSlug ? <Loader size={14} className="animate-spin" /> : <Plus size={14} />}
-                          Tao & sua
+                          Tạo và sửa
                         </button>
                       )}
                       <Link
@@ -321,32 +245,23 @@ export default function AdminPagesList() {
             </div>
           </div>
 
-          {/* Toolbar */}
-          <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between pb-2">
-            <div className="flex-1 max-w-md relative">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <input
-                type="text"
-                placeholder="Tìm tên trang, slug..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-800"
-              />
-            </div>
-          </div>
+          <AdminToolbar className="-mx-4 border-y sm:-mx-6">
+            <AdminSearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Tìm tên trang hoặc đường dẫn..."
+            />
+          </AdminToolbar>
 
-          {/* Listing */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3">
-              <Loader className="animate-spin text-primary-dark" size={36} />
-              <p className="text-xs font-semibold text-slate-400">Đang tải danh sách trang...</p>
-            </div>
+            <AdminLoadingState title="Đang tải danh sách trang" />
+          ) : loadError ? (
+            <AdminErrorState description={loadError} />
           ) : filteredPages.length === 0 ? (
-            <div className="text-center py-20 text-slate-400 space-y-2">
-              <AlertCircle size={40} className="mx-auto text-slate-300" />
-              <p className="text-sm font-bold text-slate-600">Không tìm thấy trang nào</p>
-              <p className="text-xs text-slate-400">Nhấp nút &quot;Thêm Trang Mới&quot; để tạo trang tùy biến đầu tiên.</p>
-            </div>
+            <AdminErrorState
+              title="Không tìm thấy trang"
+              description="Hãy đổi từ khóa hoặc thêm một trang mới."
+            />
           ) : (
             <div className="overflow-x-auto  border border-slate-100">
               <table className="w-full text-sm text-left text-slate-700">
@@ -388,7 +303,6 @@ export default function AdminPagesList() {
                         </td>
                         <td className="px-5 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            {/* Public Link */}
                             <Link
                               href={`/trang/${page.slug}`}
                               target="_blank"
@@ -398,7 +312,6 @@ export default function AdminPagesList() {
                               <ExternalLink size={15} />
                             </Link>
 
-                            {/* Edit */}
                             <Link
                               href={`/admin/pages/${page.id}/edit`}
                               className="acbt-icon-btn p-1.5 text-slate-600 hover:bg-slate-100 hover:text-primary-dark"
@@ -407,9 +320,8 @@ export default function AdminPagesList() {
                               <Edit3 size={15} />
                             </Link>
 
-                            {/* Delete */}
                             <button
-                              onClick={() => handleDelete(page.id)}
+                              onClick={() => setDeleteTarget(page)}
                               disabled={actionLoading === page.id}
                               className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
                               title="Xóa trang"
@@ -425,8 +337,16 @@ export default function AdminPagesList() {
               </table>
             </div>
           )}
-        </div>
+        </CmsPanel>
       </div>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Xóa trang?"
+        description={`Trang “${deleteTarget?.title || ""}” và toàn bộ bố cục đã thiết kế sẽ bị xóa vĩnh viễn.`}
+        loading={Boolean(deleteTarget && actionLoading === deleteTarget.id)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </ProtectedRoute>
   );
 }

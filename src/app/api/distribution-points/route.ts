@@ -1,18 +1,8 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
-
-type DistributionPoint = [latitude: number, longitude: number, name: string, typeIndex: number];
-
-type DistributionData = {
-  count: number;
-  skipped: number;
-  types: Array<{ name: string; count: number }>;
-  points: DistributionPoint[];
-};
-
-const PAGE_SIZE = 12;
-let distributionDataPromise: Promise<DistributionData> | null = null;
+import {
+  DISTRIBUTION_PAGE_SIZE,
+  loadDistributionData,
+} from "@/lib/distribution-data";
 
 function normalizeSearch(value: string) {
   return value
@@ -20,20 +10,6 @@ function normalizeSearch(value: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
-}
-
-function loadDistributionData() {
-  if (!distributionDataPromise) {
-    const dataPath = path.join(process.cwd(), "public", "data", "distribution-points.json");
-    distributionDataPromise = readFile(dataPath, "utf8")
-      .then((content) => JSON.parse(content) as DistributionData)
-      .catch((error) => {
-        distributionDataPromise = null;
-        throw error;
-      });
-  }
-
-  return distributionDataPromise;
 }
 
 export async function GET(request: NextRequest) {
@@ -55,19 +31,19 @@ export async function GET(request: NextRequest) {
           });
 
     const total = filteredPoints.length;
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(total / DISTRIBUTION_PAGE_SIZE));
     const safePage = Math.min(page, totalPages);
-    const offset = (safePage - 1) * PAGE_SIZE;
+    const offset = (safePage - 1) * DISTRIBUTION_PAGE_SIZE;
 
     return NextResponse.json(
       {
         count: data.count,
         skipped: data.skipped,
         types: data.types,
-        points: filteredPoints.slice(offset, offset + PAGE_SIZE),
+        points: filteredPoints.slice(offset, offset + DISTRIBUTION_PAGE_SIZE),
         total,
         page: safePage,
-        pageSize: PAGE_SIZE,
+        pageSize: DISTRIBUTION_PAGE_SIZE,
         totalPages,
       },
       {

@@ -9,24 +9,6 @@ import Button from "@/components/ui/Button";
 import { DEFAULT_SITE_CONFIG, REQUIRED_NAV_LINKS, type SiteConfigData } from "@/lib/site-config-defaults";
 
 const DEFAULT_NAV_LINKS = REQUIRED_NAV_LINKS;
-const HEADER_NAV_LINKS = [
-  { href: "/", label: "Trang chủ" },
-  { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/chat-luong", label: "Chất lượng" },
-  { href: "/san-pham", label: "Sản phẩm" },
-  { href: "/diem-ban", label: "Điểm bán" },
-  { href: "/hop-tac", label: "Hợp tác" },
-  { href: "/lien-he", label: "Liên hệ" },
-];
-export const LEGACY_NAV_LINKS = [
-  { href: "/", label: "Trang chủ" },
-  { href: "/san-pham", label: "Sản phẩm" },
-  { href: "/chat-luong", label: "Chất lượng" },
-  { href: "/diem-ban", label: "Điểm bán" },
-  { href: "/gioi-thieu", label: "Giới thiệu" },
-  { href: "/hop-tac", label: "Hợp tác" },
-  { href: "/lien-he", label: "Liên hệ" },
-];
 
 type SearchResult = {
   title: string;
@@ -390,10 +372,12 @@ export default function Navbar({
   initialLinks,
   initialContact,
   initialProductMenuLinks,
+  initialBrand,
 }: {
   initialLinks?: { href: string; label: string }[];
   initialContact?: SiteConfigData["footerContact"];
   initialProductMenuLinks?: SiteConfigData["productMenuLinks"];
+  initialBrand?: SiteConfigData["brand"];
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -421,7 +405,7 @@ export default function Navbar({
 
     return () => window.clearTimeout(timer);
   }, []);
-  const navLinks = HEADER_NAV_LINKS;
+  const navLinks = useMemo(() => mergeRequiredNavLinks(initialLinks), [initialLinks]);
   const productMenuLinks = currentProductMenuLinks.length
     ? currentProductMenuLinks
     : productMenuLoaded
@@ -430,6 +414,7 @@ export default function Navbar({
       ? initialProductMenuLinks
       : PRODUCT_MENU_LINKS;
   const phone = initialContact?.phone || DEFAULT_SITE_CONFIG.footerContact.phone;
+  const brand = initialBrand || DEFAULT_SITE_CONFIG.brand;
   const phoneHref = `tel:${phone.replace(/\s+/g, "")}`;
   const trimmedSearchQuery = useMemo(() => searchQuery.trim(), [searchQuery]);
 
@@ -580,10 +565,10 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16 lg:h-18">
           <Link href="/" className="flex min-w-[176px] shrink-0 flex-nowrap items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-visible sm:h-14 sm:w-14">
-              <img src="/logo-acbt.png" alt="Ăn Cùng Bà Tuyết Logo" className="h-full w-full object-contain" />
+              <img src={brand.logoUrl} alt={brand.logoAlt} className="h-full w-full object-contain" />
             </div>
             <span className="shrink-0 whitespace-nowrap text-sm font-black leading-tight text-primary sm:text-base">
-              Ăn Cùng Bà Tuyết
+              {brand.name}
             </span>
           </Link>
 

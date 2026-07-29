@@ -52,7 +52,7 @@ function normalizeProductCreate(input: ProductPayload): ProductWriteData {
     description: input.description || "",
     category: input.category,
     categoryLabel: input.categoryLabel || input.category,
-    price: input.price || "0Ä‘",
+    price: input.price || "0đ",
     priceRange: input.priceRange || input.price || null,
     image: input.image,
     heroImage: input.heroImage || null,

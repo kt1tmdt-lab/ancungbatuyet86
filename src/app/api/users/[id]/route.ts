@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken, hashPassword } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { Prisma, Role } from "@prisma/client";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,18 +14,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Only ADMIN can modify users
-    if (payload.role !== "ADMIN") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const body = await req.json();
     const { role, name, email, password } = body;
 
-    const updateData: any = {};
+    const updateData: Prisma.UserUpdateInput = {};
 
     if (role) {
-      const validRoles = ["ADMIN", "EDITOR", "AUTHOR", "USER", "SUPER_ADMIN", "MARKETING", "SUPPORT"];
-      if (!validRoles.includes(role)) {
+      const validRoles = Object.values(Role);
+      if (typeof role !== "string" || !validRoles.includes(role as Role)) {
         return NextResponse.json({ error: "Vai trò không hợp lệ" }, { status: 400 });
       }
 
@@ -32,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       if (payload.id === id && role !== payload.role) {
         return NextResponse.json({ error: "Bạn không thể tự thay đổi vai trò của chính mình" }, { status: 400 });
       }
-      updateData.role = role;
+      updateData.role = role as Role;
     }
 
     if (name !== undefined) {
@@ -100,7 +101,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Only ADMIN can delete users
-    if (payload.role !== "ADMIN") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

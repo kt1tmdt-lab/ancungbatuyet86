@@ -40,9 +40,14 @@ export default function MainLayoutWrapper({
         initialLinks={config?.navbarLinks}
         initialContact={config?.footerContact}
         initialProductMenuLinks={config?.productMenuLinks}
+        initialBrand={config?.brand}
       />
       <main className="flex-1 pt-16 lg:pt-18">{children}</main>
-      <Footer initialLinks={config?.footerLinks} initialContact={config?.footerContact} />
+      <Footer
+        initialLinks={config?.footerLinks}
+        initialContact={config?.footerContact}
+        initialBrand={config?.brand}
+      />
     </>
   );
 }

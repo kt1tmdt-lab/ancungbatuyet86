@@ -2,6 +2,15 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 
+type AdminNotification = {
+  id: string;
+  type: "CONTACT" | "AUDIT";
+  title: string;
+  description: string;
+  link: string;
+  createdAt: string;
+};
+
 export async function GET(req: NextRequest) {
   try {
     const token = getTokenFromReq(req);
@@ -55,7 +64,7 @@ export async function GET(req: NextRequest) {
     });
     const userMap = new Map(users.map((u) => [u.id, u]));
 
-    const notifications: any[] = [];
+    const notifications: AdminNotification[] = [];
 
     // Format contact messages
     contacts.forEach((c) => {
@@ -78,9 +87,13 @@ export async function GET(req: NextRequest) {
       let description = `${actor} đã thực hiện hành động trên ${l.entityType}.`;
       let link = "/admin/activity-logs";
 
-      let detailsObj: any = {};
-      if (l.details && typeof l.details === "object") {
-        detailsObj = l.details;
+      let detailsObj: Record<string, unknown> = {};
+      if (
+        l.details &&
+        typeof l.details === "object" &&
+        !Array.isArray(l.details)
+      ) {
+        detailsObj = l.details as Record<string, unknown>;
       }
 
       if (l.action === "CREATE_PRODUCT") {

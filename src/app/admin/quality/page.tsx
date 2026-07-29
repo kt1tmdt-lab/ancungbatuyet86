@@ -134,16 +134,6 @@ export default function AdminQualityPage() {
     setConfig((current) => ({ ...current, ...next }));
   };
 
-  const updateList = (section: "source" | "factory" | "documents" | "policy" | "faq", key: "facts" | "gallery" | "steps" | "items", items: QualitySimpleItem[]) => {
-    setConfig((current) => ({
-      ...current,
-      [section]: {
-        ...current[section],
-        [key]: items,
-      },
-    }));
-  };
-
   const moveItem = (items: QualitySimpleItem[], index: number, direction: -1 | 1) => {
     const nextIndex = index + direction;
     if (nextIndex < 0 || nextIndex >= items.length) return items;

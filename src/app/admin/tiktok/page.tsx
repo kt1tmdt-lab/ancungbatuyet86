@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
@@ -9,7 +9,6 @@ import {
   AlertCircle,
   Check,
   Tv,
-  ArrowLeft,
   Sparkles,
   ExternalLink,
   PlayCircle
@@ -51,13 +50,7 @@ export default function AdminTikTokSettings() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    if (token) {
-      fetchOrInitSettings();
-    }
-  }, [token]);
-
-  const fetchOrInitSettings = async () => {
+  const fetchOrInitSettings = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -69,12 +62,12 @@ export default function AdminTikTokSettings() {
       });
 
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as PageData;
         setPageData(data);
         if (Array.isArray(data.content) && data.content.length > 0) {
           // Merge to ensure 3 videos
           const merged = createEmptyVideos();
-          data.content.forEach((v: any, index: number) => {
+          data.content.forEach((v: TikTokVideo, index: number) => {
             if (index < 3 && v && typeof v === "object") {
               merged[index] = {
                 id: v.id || "",
@@ -98,7 +91,13 @@ export default function AdminTikTokSettings() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    const timer = window.setTimeout(() => void fetchOrInitSettings(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchOrInitSettings, token]);
 
   const handleVideoChange = (index: number, field: keyof TikTokVideo, value: string) => {
     const newVideos = [...videos];
@@ -160,7 +159,7 @@ export default function AdminTikTokSettings() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
         {/* Top bar navigation */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

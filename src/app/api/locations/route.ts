@@ -6,7 +6,7 @@ function canManage(req: NextRequest) {
   const token = getTokenFromReq(req);
   if (!token) return false;
   const payload = verifyToken(token);
-  return Boolean(payload && (payload.role === "ADMIN" || payload.role === "EDITOR"));
+  return Boolean(payload && (payload.role === "SUPER_ADMIN" || payload.role === "ADMIN" || payload.role === "EDITOR"));
 }
 
 export async function GET(req: NextRequest) {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const payload = verifyToken(token);
-    if (!payload || (payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
+    if (!payload || (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

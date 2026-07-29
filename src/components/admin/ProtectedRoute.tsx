@@ -4,6 +4,10 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AuthRole } from "@/lib/auth";
+import Link from "next/link";
+import { ShieldAlert } from "lucide-react";
+import { AdminLoadingState } from "./AdminPrimitives";
+import Button from "@/components/ui/Button";
 
 export function ProtectedRoute({
   children,
@@ -18,31 +22,13 @@ export function ProtectedRoute({
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push("/admin/login");
-      } else {
-        const hasRequiredRole = !requiredRole || user.role === requiredRole;
-        const hasAllowedRole = !allowedRoles || allowedRoles.includes(user.role);
-        
-        if (!hasRequiredRole || !hasAllowedRole) {
-          router.push("/admin");
-        }
-      }
+    if (!loading && !user) {
+      router.replace("/admin/login");
     }
-  }, [user, loading, requiredRole, allowedRoles, router]);
+  }, [user, loading, router]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-12 h-12  bg-primary flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-white font-bold">BT</span>
-          </div>
-          <p className="text-gray-600">Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <AdminLoadingState title="Đang xác thực phiên làm việc" />;
   }
 
   if (!user) {
@@ -54,8 +40,31 @@ export function ProtectedRoute({
 
   if (!hasRequiredRole || !hasAllowedRole) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-red-600 font-semibold">Bạn không có quyền truy cập trang này</p>
+      <div className="flex min-h-[70vh] items-center justify-center p-4">
+        <div className="w-full max-w-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <span className="mx-auto grid h-14 w-14 place-items-center border border-red-200 bg-red-50 text-red-600">
+            <ShieldAlert size={26} />
+          </span>
+          <h1 className="mt-5 text-xl font-black text-slate-950">
+            Không có quyền truy cập
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Tài khoản hiện tại không được cấp quyền sử dụng khu vực này.
+          </p>
+          <Button
+            href="/admin"
+            variant="adminSecondary"
+            className="mt-6"
+          >
+            Về bảng điều khiển
+          </Button>
+          <Link
+            href="/"
+            className="mt-3 block text-xs font-bold text-slate-500 hover:text-orange-600"
+          >
+            Trở về website
+          </Link>
+        </div>
       </div>
     );
   }

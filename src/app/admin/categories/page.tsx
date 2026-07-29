@@ -1,334 +1,425 @@
 "use client";
 
-import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Edit3, FileText, Plus, Trash2, X } from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuth } from "@/lib/auth-context";
-import { 
-  FolderPlus, 
-  Edit3, 
-  Trash2, 
-  Loader, 
-  AlertCircle, 
-  Check, 
-  Plus, 
-  X,
-  FileText
-} from "lucide-react";
+import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
+import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { DataTable } from "@/components/admin/DataTable";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel, CmsPanelBody } from "@/components/admin/CmsPanel";
+import {
+  AdminErrorState,
+  AdminFormField,
+  AdminLoadingState,
+  AdminSearchInput,
+  AdminToolbar,
+  ConfirmDialog,
+} from "@/components/admin/AdminPrimitives";
+import Button from "@/components/ui/Button";
 
 interface Category {
   id: string;
   name: string;
   slug: string;
   description: string | null;
-  _count?: {
-    posts: number;
-  };
+  _count?: { posts: number };
+}
+
+type CategoryForm = {
+  name: string;
+  slug: string;
+  description: string;
+};
+
+type CategoryFormErrors = Partial<Record<keyof CategoryForm, string>>;
+
+const EMPTY_FORM: CategoryForm = {
+  name: "",
+  slug: "",
+  description: "",
+};
+
+function toSlug(value: string) {
+  return value
+    .toLocaleLowerCase("vi")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 export default function CategoriesPage() {
   const { token } = useAuth();
-  
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  // Edit Mode state
+  const [loadError, setLoadError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [form, setForm] = useState<CategoryForm>(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState<CategoryFormErrors>({});
 
-  // Form Fields
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-
-  useEffect(() => {
-    if (token) {
-      fetchCategories();
-    }
-  }, [token]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
+    setLoadError("");
     try {
-      const res = await fetch("/api/categories");
-      if (res.ok) {
-        const data = await res.json();
-        setCategories(data);
-      }
-    } catch (err) {
-      console.error("Error fetching categories:", err);
+      setCategories(await adminRequest<Category[]>("/api/categories"));
+    } catch (error) {
+      setLoadError(
+        getAdminErrorMessage(error, "Không thể tải danh sách danh mục."),
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleNameChange = (e: string) => {
-    setName(e);
-    if (!editingId) {
-      const generatedSlug = e
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Remove Vietnamese accents
-        .replace(/đ/g, "d")
-        .replace(/Đ/g, "d")
-        .replace(/[^a-z0-9\s-]/g, "") // Remove spec chars
-        .trim()
-        .replace(/\s+/g, "-") // Replace spaces with hyphens
-        .replace(/-+/g, "-");
-      setSlug(generatedSlug);
-    }
-  };
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchCategories(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchCategories]);
 
-  const startEdit = (cat: Category) => {
-    setEditingId(cat.id);
-    setName(cat.name);
-    setSlug(cat.slug);
-    setDescription(cat.description || "");
-    setError("");
-    setSuccess("");
-  };
-
-  const cancelEdit = () => {
+  const resetForm = () => {
     setEditingId(null);
-    setName("");
-    setSlug("");
-    setDescription("");
-    setError("");
-    setSuccess("");
+    setForm(EMPTY_FORM);
+    setFormErrors({});
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !slug.trim()) {
-      setError("Tên và slug không được để trống");
-      return;
+  const startEdit = (category: Category) => {
+    setEditingId(category.id);
+    setForm({
+      name: category.name,
+      slug: category.slug,
+      description: category.description || "",
+    });
+    setFormErrors({});
+  };
+
+  const validateForm = () => {
+    const errors: CategoryFormErrors = {};
+    if (!form.name.trim()) errors.name = "Vui lòng nhập tên danh mục.";
+    if (!form.slug.trim()) errors.slug = "Vui lòng nhập đường dẫn.";
+    if (form.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) {
+      errors.slug = "Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.";
     }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
-    setError("");
-    setSuccess("");
-    setSubmitLoading(true);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!token || !validateForm()) return;
 
+    setSubmitting(true);
     try {
-      const url = editingId ? `/api/categories/${editingId}` : "/api/categories";
-      const method = editingId ? "PUT" : "POST";
-      
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+      const saved = await adminRequest<Category>(
+        editingId ? `/api/categories/${editingId}` : "/api/categories",
+        {
+          method: editingId ? "PUT" : "POST",
+          token,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            slug: form.slug.trim(),
+            description: form.description.trim(),
+          }),
         },
-        body: JSON.stringify({ name, slug, description }),
-      });
+      );
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Gặp lỗi khi lưu danh mục");
+      setCategories((current) =>
+        editingId
+          ? current.map((item) =>
+              item.id === editingId
+                ? { ...item, ...saved, _count: item._count }
+                : item,
+            )
+          : [{ ...saved, _count: { posts: 0 } }, ...current],
+      );
+      toast.success(
+        editingId ? "Đã cập nhật danh mục." : "Đã tạo danh mục mới.",
+      );
+      resetForm();
+    } catch (error) {
+      const message = getAdminErrorMessage(error, "Không thể lưu danh mục.");
+      if (message.toLowerCase().includes("slug")) {
+        setFormErrors((current) => ({ ...current, slug: message }));
+      } else {
+        toast.error(message);
       }
-
-      setSuccess(editingId ? "Cập nhật danh mục thành công!" : "Tạo danh mục mới thành công!");
-      setName("");
-      setSlug("");
-      setDescription("");
-      setEditingId(null);
-      fetchCategories();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
     } finally {
-      setSubmitLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa danh mục này? Các bài viết thuộc danh mục này sẽ chuyển sang không có danh mục.")) return;
-    
-    setError("");
-    setSuccess("");
-    
+  const handleDelete = async () => {
+    if (!deleteTarget || !token) return;
+    setSubmitting(true);
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      await adminRequest(`/api/categories/${deleteTarget.id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        token,
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Không thể xóa danh mục");
-      }
-
-      setSuccess("Xóa danh mục thành công!");
-      fetchCategories();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
+      setCategories((current) =>
+        current.filter((item) => item.id !== deleteTarget.id),
+      );
+      if (editingId === deleteTarget.id) resetForm();
+      toast.success("Đã xóa danh mục.");
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xóa danh mục."));
+    } finally {
+      setSubmitting(false);
     }
   };
+
+  const filteredCategories = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase("vi");
+    if (!query) return categories;
+    return categories.filter(
+      (category) =>
+        category.name.toLocaleLowerCase("vi").includes(query) ||
+        category.slug.toLocaleLowerCase("vi").includes(query) ||
+        category.description?.toLocaleLowerCase("vi").includes(query),
+    );
+  }, [categories, searchQuery]);
+
+  const columns = useMemo<ColumnDef<Category>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Danh mục",
+        cell: ({ row }) => (
+          <div className="min-w-44">
+            <p className="font-black text-slate-950">{row.original.name}</p>
+            <p className="mt-1 font-mono text-[10px] text-slate-400">
+              {row.original.slug}
+            </p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "description",
+        header: "Mô tả",
+        cell: ({ row }) => (
+          <p className="max-w-md text-xs leading-5 text-slate-500">
+            {row.original.description || "Chưa có mô tả"}
+          </p>
+        ),
+      },
+      {
+        id: "posts",
+        accessorFn: (category) => category._count?.posts || 0,
+        header: "Bài viết",
+        cell: ({ row }) => (
+          <span className="inline-flex items-center gap-1.5 border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600">
+            <FileText size={13} />
+            {row.original._count?.posts || 0}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-1">
+            <button
+              type="button"
+              onClick={() => startEdit(row.original)}
+              className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+              title="Chỉnh sửa"
+              aria-label={`Sửa ${row.original.name}`}
+            >
+              <Edit3 size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeleteTarget(row.original)}
+              className="acbt-icon-btn grid h-9 w-9 place-items-center text-red-500 hover:bg-red-50 hover:text-red-700"
+              title="Xóa"
+              aria-label={`Xóa ${row.original.name}`}
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Quản lý danh mục</h1>
-          <p className="text-slate-500 text-sm mt-1">Phân chia chuyên mục bài viết của trang blog tin tức.</p>
-        </div>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
+      <div className="space-y-5">
+        <CmsPageHeader
+          eyebrow="Nội dung"
+          title="Quản lý danh mục"
+          description="Tổ chức bài viết theo chuyên mục rõ ràng để người đọc và biên tập viên dễ tìm kiếm."
+        />
 
-        <div className="grid lg:grid-cols-3 gap-8 items-start">
-          {/* List Categories (Col-span 2) */}
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
-            <h2 className="text-lg font-bold text-slate-900">Danh sách chuyên mục</h2>
-            
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <CmsPanel>
+            <AdminToolbar>
+              <AdminSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Tìm tên, đường dẫn hoặc mô tả..."
+              />
+            </AdminToolbar>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-2">
-                <Loader className="animate-spin text-orange-500" size={32} />
-                <p className="text-xs text-slate-400 font-medium">Đang tải danh mục...</p>
-              </div>
-            ) : categories.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
-                <AlertCircle className="mx-auto text-slate-300 mb-2" size={32} />
-                <p className="text-sm font-semibold">Chưa có danh mục nào được tạo</p>
-              </div>
+              <AdminLoadingState title="Đang tải danh mục" />
+            ) : loadError ? (
+              <AdminErrorState
+                description={loadError}
+                action={
+                  <Button
+                    variant="adminSecondary"
+                    onClick={() => void fetchCategories()}
+                  >
+                    Thử lại
+                  </Button>
+                }
+              />
             ) : (
-              <div className="overflow-x-auto rounded-2xl border border-slate-100">
-                <table className="w-full text-sm text-left text-slate-700">
-                  <thead className="text-xs text-slate-450 uppercase bg-slate-50 font-bold border-b border-slate-100">
-                    <tr>
-                      <th className="px-5 py-4">Tên danh mục</th>
-                      <th className="px-5 py-4">Đường dẫn (Slug)</th>
-                      <th className="px-5 py-4">Mô tả</th>
-                      <th className="px-5 py-4 text-center">Số bài viết</th>
-                      <th className="px-5 py-4 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {categories.map((cat) => (
-                      <tr key={cat.id} className="hover:bg-slate-50/50 transition">
-                        <td className="px-5 py-4 font-bold text-slate-900">{cat.name}</td>
-                        <td className="px-5 py-4 text-slate-500 font-mono text-xs">{cat.slug}</td>
-                        <td className="px-5 py-4 text-slate-500 max-w-xs truncate">{cat.description || "-"}</td>
-                        <td className="px-5 py-4 text-center">
-                          <div className="inline-flex items-center gap-1 text-slate-600 font-semibold text-xs bg-slate-100 px-2.5 py-0.5 rounded-full">
-                            <FileText size={11} />
-                            <span>{cat._count?.posts || 0}</span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => startEdit(cat)}
-                              className="p-1.5 text-slate-600 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition"
-                              title="Sửa danh mục"
-                            >
-                              <Edit3 size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(cat.id)}
-                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                              title="Xóa danh mục"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                columns={columns}
+                data={filteredCategories}
+                emptyTitle="Không tìm thấy danh mục"
+                emptyDescription={
+                  searchQuery
+                    ? "Hãy thử một từ khóa khác."
+                    : "Tạo danh mục đầu tiên bằng biểu mẫu bên cạnh."
+                }
+              />
             )}
-          </div>
+          </CmsPanel>
 
-          {/* Form Create/Edit (Col-span 1) */}
-          <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900">
-                {editingId ? "Cập nhật danh mục" : "Tạo chuyên mục mới"}
-              </h2>
-              {editingId && (
-                <button
-                  onClick={cancelEdit}
-                  className="p-1 text-slate-400 hover:bg-slate-100 rounded transition"
-                  title="Hủy cập nhật"
+          <CmsPanel className="xl:sticky xl:top-20">
+            <CmsPanelBody>
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black text-slate-950">
+                    {editingId ? "Chỉnh sửa danh mục" : "Thêm danh mục"}
+                  </h2>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    Đường dẫn được tạo tự động và vẫn có thể chỉnh lại.
+                  </p>
+                </div>
+                {editingId ? (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100"
+                    aria-label="Hủy chỉnh sửa"
+                    title="Hủy chỉnh sửa"
+                  >
+                    <X size={17} />
+                  </button>
+                ) : null}
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                <AdminFormField
+                  label="Tên danh mục"
+                  error={formErrors.name}
+                  required
                 >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
+                  <input
+                    value={form.name}
+                    onChange={(event) => {
+                      const name = event.target.value;
+                      setForm((current) => ({
+                        ...current,
+                        name,
+                        slug: editingId ? current.slug : toSlug(name),
+                      }));
+                      setFormErrors((current) => ({
+                        ...current,
+                        name: undefined,
+                      }));
+                    }}
+                    className="min-h-11 w-full border border-slate-200 px-3 py-2.5 text-sm font-semibold outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                    placeholder="Ví dụ: Công thức món ngon"
+                  />
+                </AdminFormField>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name field */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700">Tên chuyên mục</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => handleNameChange(e.target.value)}
-                  placeholder="Ví dụ: Công thức món ngon"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                <AdminFormField
+                  label="Đường dẫn"
+                  error={formErrors.slug}
+                  hint={`URL dự kiến: /tin-tuc?category=${form.slug || "duong-dan"}`}
                   required
-                />
-              </div>
+                >
+                  <input
+                    value={form.slug}
+                    onChange={(event) => {
+                      setForm((current) => ({
+                        ...current,
+                        slug: toSlug(event.target.value),
+                      }));
+                      setFormErrors((current) => ({
+                        ...current,
+                        slug: undefined,
+                      }));
+                    }}
+                    className="min-h-11 w-full border border-slate-200 px-3 py-2.5 font-mono text-sm outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                    placeholder="cong-thuc-mon-ngon"
+                  />
+                </AdminFormField>
 
-              {/* Slug field */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700">Đường dẫn (Slug)</label>
-                <input
-                  type="text"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="cong-thuc-mon-ngon"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
-                  required
-                />
-              </div>
+                <AdminFormField label="Mô tả">
+                  <textarea
+                    value={form.description}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        description: event.target.value,
+                      }))
+                    }
+                    rows={4}
+                    className="w-full border border-slate-200 px-3 py-2.5 text-sm leading-6 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                    placeholder="Mô tả ngắn về nội dung của chuyên mục..."
+                  />
+                </AdminFormField>
 
-              {/* Description field */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700">Mô tả danh mục</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Mô tả tóm tắt ý nghĩa chuyên mục bài viết..."
-                  rows={3}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
-                />
-              </div>
-
-              {/* Message responses */}
-              {error && (
-                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
-                  <AlertCircle className="text-red-600 mt-0.5 shrink-0" size={16} />
-                  <p className="text-xs text-red-700 font-semibold leading-normal">{error}</p>
+                <div className="flex flex-wrap justify-end gap-2 pt-2">
+                  {editingId ? (
+                    <Button
+                      variant="adminSecondary"
+                      onClick={resetForm}
+                      disabled={submitting}
+                    >
+                      Hủy
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="submit"
+                    variant="admin"
+                    loading={submitting}
+                    leftIcon={<Plus size={15} />}
+                  >
+                    {editingId ? "Lưu thay đổi" : "Thêm danh mục"}
+                  </Button>
                 </div>
-              )}
-
-              {success && (
-                <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-xl">
-                  <Check className="text-green-600 mt-0.5 shrink-0" size={16} />
-                  <p className="text-xs text-green-700 font-semibold leading-normal">{success}</p>
-                </div>
-              )}
-
-              {/* Submit CTA */}
-              <button
-                type="submit"
-                disabled={submitLoading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm shadow-orange-500/10"
-              >
-                {submitLoading ? (
-                  <Loader className="animate-spin" size={14} />
-                ) : editingId ? (
-                  <Check size={14} />
-                ) : (
-                  <Plus size={14} />
-                )}
-                <span>{editingId ? "Cập nhật danh mục" : "Tạo danh mục"}</span>
-              </button>
-            </form>
-          </div>
+              </form>
+            </CmsPanelBody>
+          </CmsPanel>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Xóa danh mục?"
+        description={`Danh mục “${deleteTarget?.name || ""}” sẽ bị xóa. Các bài viết hiện có sẽ chuyển sang trạng thái chưa phân loại.`}
+        loading={submitting}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </ProtectedRoute>
   );
 }

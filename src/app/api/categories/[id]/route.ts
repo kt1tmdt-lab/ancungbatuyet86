@@ -9,7 +9,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    requireRole(req, ["ADMIN", "EDITOR"]);
+    requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     const category = await updateCategory(id, await req.json());
 
     return jsonOk(category);
@@ -39,7 +39,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    requireRole(req, ["ADMIN", "EDITOR"]);
+    requireRole(req, ["SUPER_ADMIN", "ADMIN", "EDITOR"]);
     await deleteCategory(id);
 
     return jsonOk({ message: "Category deleted successfully" });

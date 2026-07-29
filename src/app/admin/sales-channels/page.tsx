@@ -16,6 +16,11 @@ import {
   Trash,
   X,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { ConfirmDialog } from "@/components/admin/AdminPrimitives";
+import Button from "@/components/ui/Button";
+import { getAdminErrorMessage } from "@/lib/admin-client";
 
 type Location = {
   id: string;
@@ -263,6 +268,9 @@ export default function AdminSalesChannelsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<
+    { kind: "location"; item: Location } | { kind: "channel"; item: OnlineChannel } | null
+  >(null);
 
   const headers = useMemo(
     () => ({
@@ -330,12 +338,18 @@ export default function AdminSalesChannelsPage() {
         body: JSON.stringify(locationForm),
       });
 
-      if (!res.ok) throw new Error("Không thể lưu điểm bán");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Không thể lưu điểm bán");
+      }
       resetLocationForm();
       await fetchAll();
+      toast.success(editingLocationId ? "Đã cập nhật điểm bán." : "Đã thêm điểm bán.");
     } catch (err) {
       console.error(err);
-      setError("Không thể lưu điểm bán. Kiểm tra lại các trường bắt buộc.");
+      const message = getAdminErrorMessage(err, "Không thể lưu điểm bán.");
+      setError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -352,66 +366,108 @@ export default function AdminSalesChannelsPage() {
         body: JSON.stringify(channelForm),
       });
 
-      if (!res.ok) throw new Error("Không thể lưu kênh online");
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Không thể lưu kênh online");
+      }
       resetChannelForm();
       await fetchAll();
+      toast.success(editingChannelId ? "Đã cập nhật kênh online." : "Đã thêm kênh online.");
     } catch (err) {
       console.error(err);
-      setError("Không thể lưu kênh online. Tên kênh có thể đã tồn tại.");
+      const message = getAdminErrorMessage(err, "Không thể lưu kênh online.");
+      setError(message);
+      toast.error(message);
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteLocation = async (id: string) => {
-    if (!confirm("Xóa điểm bán này?")) return;
-    await fetch(`/api/locations/${id}`, { method: "DELETE", headers });
-    await fetchAll();
-  };
-
-  const deleteChannel = async (id: string) => {
-    if (!confirm("Xóa kênh online này?")) return;
-    await fetch(`/api/online-channels/${id}`, { method: "DELETE", headers });
-    await fetchAll();
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setSaving(true);
+    const isLocation = deleteTarget.kind === "location";
+    const endpoint = isLocation
+      ? `/api/locations/${deleteTarget.item.id}`
+      : `/api/online-channels/${deleteTarget.item.id}`;
+    try {
+      const res = await fetch(endpoint, { method: "DELETE", headers });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Không thể xóa dữ liệu");
+      }
+      if (isLocation) {
+        setLocations((current) =>
+          current.filter((item) => item.id !== deleteTarget.item.id),
+        );
+      } else {
+        setChannels((current) =>
+          current.filter((item) => item.id !== deleteTarget.item.id),
+        );
+      }
+      toast.success(isLocation ? "Đã xóa điểm bán." : "Đã xóa kênh online.");
+      setDeleteTarget(null);
+    } catch (deleteError) {
+      toast.error(getAdminErrorMessage(deleteError, "Không thể xóa dữ liệu."));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleLocation = async (location: Location) => {
-    await fetch(`/api/locations/${location.id}`, {
+    const res = await fetch(`/api/locations/${location.id}`, {
       method: "PUT",
       headers,
       body: JSON.stringify({ isActive: !location.isActive }),
     });
-    await fetchAll();
+    if (res.ok) {
+      setLocations((current) =>
+        current.map((item) =>
+          item.id === location.id ? { ...item, isActive: !item.isActive } : item,
+        ),
+      );
+      toast.success("Đã cập nhật trạng thái điểm bán.");
+    } else {
+      toast.error("Không thể cập nhật trạng thái điểm bán.");
+    }
   };
 
   const toggleChannel = async (channel: OnlineChannel) => {
-    await fetch(`/api/online-channels/${channel.id}`, {
+    const res = await fetch(`/api/online-channels/${channel.id}`, {
       method: "PUT",
       headers,
       body: JSON.stringify({ isActive: !channel.isActive }),
     });
-    await fetchAll();
+    if (res.ok) {
+      setChannels((current) =>
+        current.map((item) =>
+          item.id === channel.id ? { ...item, isActive: !item.isActive } : item,
+        ),
+      );
+      toast.success("Đã cập nhật trạng thái kênh online.");
+    } else {
+      toast.error("Không thể cập nhật trạng thái kênh online.");
+    }
   };
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Quản lý hệ thống bán</h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Cập nhật điểm bán offline và kênh online đang hiển thị ở trang Điểm bán / Liên hệ.
-            </p>
-          </div>
-          <a
+        <CmsPageHeader
+          eyebrow="Sản phẩm & phân phối"
+          title="Quản lý điểm bán"
+          description="Cập nhật điểm phân phối offline, tọa độ bản đồ và các kênh mua hàng online."
+          actions={
+          <Button
             href="/diem-ban"
             target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800"
+            variant="adminSecondary"
+            rightIcon={<ExternalLink size={14} />}
           >
-            Xem trang public <ExternalLink size={14} />
-          </a>
-        </div>
+            Xem trang điểm bán
+          </Button>
+          }
+        />
 
         <div className="flex gap-2 border-b border-slate-200">
           <button
@@ -513,7 +569,7 @@ export default function AdminSalesChannelsPage() {
                       <button onClick={() => { setEditingLocationId(location.id); setLocationForm(location); }} className="p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-dark">
                         <Edit3 size={15} />
                       </button>
-                      <button onClick={() => deleteLocation(location.id)} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600">
+                      <button onClick={() => setDeleteTarget({ kind: "location", item: location })} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600">
                         <Trash size={15} />
                       </button>
                     </div>
@@ -580,7 +636,7 @@ export default function AdminSalesChannelsPage() {
                       <button onClick={() => { setEditingChannelId(channel.id); setChannelForm(channel); }} className="p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-dark">
                         <Edit3 size={15} />
                       </button>
-                      <button onClick={() => deleteChannel(channel.id)} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600">
+                      <button onClick={() => setDeleteTarget({ kind: "channel", item: channel })} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-600">
                         <Trash size={15} />
                       </button>
                     </div>
@@ -591,6 +647,14 @@ export default function AdminSalesChannelsPage() {
           </div>
         )}
       </div>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title={deleteTarget?.kind === "location" ? "Xóa điểm bán?" : "Xóa kênh online?"}
+        description={`“${deleteTarget?.item.name || ""}” sẽ bị xóa khỏi trang Điểm bán.`}
+        loading={saving}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </ProtectedRoute>
   );
 }

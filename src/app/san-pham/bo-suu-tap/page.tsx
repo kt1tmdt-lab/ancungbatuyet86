@@ -6,8 +6,16 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader, AlertCircle } from "lucide-react";
 import SectionHeader from "@/components/shared/SectionHeader";
 
+type CollectionProduct = {
+  id: string;
+  slug: string;
+  name: string;
+  image: string;
+  tagline?: string | null;
+};
+
 export default function CollectionPage() {
-  const [otherProducts, setOtherProducts] = useState<any[]>([]);
+  const [otherProducts, setOtherProducts] = useState<CollectionProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

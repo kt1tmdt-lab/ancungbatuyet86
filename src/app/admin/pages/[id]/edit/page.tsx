@@ -3,6 +3,7 @@
 import { PageForm } from "@/components/admin/PageForm";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { useParams } from "next/navigation";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
 
 export default function EditPagePage() {
   const params = useParams();
@@ -11,10 +12,11 @@ export default function EditPagePage() {
   return (
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Chỉnh sửa trang</h1>
-          <p className="text-slate-500 text-sm mt-1">Cập nhật và sắp xếp lại các khối nội dung của Landing Page.</p>
-        </div>
+        <CmsPageHeader
+          eyebrow="Nội dung"
+          title="Chỉnh sửa trang"
+          description="Cập nhật và sắp xếp các khối nội dung của landing page."
+        />
 
         <PageForm pageId={id} />
       </div>

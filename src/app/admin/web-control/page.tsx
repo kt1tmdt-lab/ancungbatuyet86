@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
   ArrowRight,
+  FileText,
   Home,
   Megaphone,
   Menu,
@@ -30,7 +31,7 @@ const pageGroups = [
     description: "Các thành phần dùng chung trên toàn bộ website.",
     items: [
       { title: "Menu website", description: "Tên mục menu, thứ tự và đường dẫn khi khách bấm vào.", href: "/admin/settings?tab=navigation", icon: Menu },
-      { title: "Chân trang & liên hệ", description: "Link footer, hotline, email, địa chỉ và mạng xã hội.", href: "/admin/settings?tab=navigation", icon: ShoppingBag },
+      { title: "Chân trang & liên hệ", description: "Logo, thông tin pháp lý, link hỗ trợ, hotline, mạng xã hội và huy hiệu Bộ Công Thương.", href: "/admin/settings?tab=navigation", icon: ShoppingBag },
       { title: "SEO website", description: "Tiêu đề và mô tả hiển thị trên Google.", href: "/admin/settings?tab=seo", icon: Search },
     ],
   },
@@ -38,7 +39,7 @@ const pageGroups = [
     title: "Giới thiệu thương hiệu",
     description: "Một trang tổng gồm câu chuyện, thông tin doanh nghiệp, hành trình phát triển và cộng đồng.",
     items: [
-      { title: "Trang Giới thiệu", description: "Sửa video, gallery, quy trình, câu chuyện, thành tựu, lịch sử phát triển và cộng đồng.", href: "/admin/about", icon: ShieldCheck },
+      { title: "Trang Giới thiệu", description: "Sửa câu chuyện, số liệu, video, sứ mệnh, tầm nhìn, giá trị cốt lõi và CTA đang hiển thị.", href: "/admin/about", icon: ShieldCheck },
     ],
   },
   {
@@ -52,7 +53,8 @@ const pageGroups = [
     title: "Điểm bán & kênh phân phối",
     description: "Một trang tổng gồm điểm bán offline, kênh online và nhận diện hàng chính hãng.",
     items: [
-      { title: "Trang Điểm bán", description: "Thêm/sửa điểm bán, kênh online, trạng thái hiển thị và thứ tự trên trang /diem-ban.", href: "/admin/sales-channels", icon: Store },
+      { title: "Nội dung trang Điểm bán", description: "Sửa tiêu đề, mô tả, hướng dẫn nhận diện hàng chính hãng và CTA cuối trang.", href: "/admin/site-content?tab=homeTexts&scope=sales", icon: FileText },
+      { title: "Dữ liệu điểm bán", description: "Quản lý kênh online, trạng thái hiển thị và dữ liệu phân phối trên trang /diem-ban.", href: "/admin/sales-channels", icon: Store },
     ],
   },
   {

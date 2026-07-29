@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       const payload = verifyToken(token);
       if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-      if (payload.role !== "ADMIN" && payload.role !== "EDITOR" && post.authorId !== payload.id) {
+      if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR" && post.authorId !== payload.id) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
@@ -65,7 +65,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           error: "Forbidden: Cannot edit a post that is published or pending review"
         }, { status: 403 });
       }
-    } else if (payload.role !== "ADMIN" && payload.role !== "EDITOR") {
+    } else if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR") {
       // USER or other roles cannot edit posts
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -84,12 +84,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       });
 
       return NextResponse.json(post);
-    } catch (err: any) {
-      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
-      if (err.message === "Forbidden: Not your post" || err.message === "Authors cannot publish posts directly") {
-        return NextResponse.json({ error: err.message }, { status: 403 });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unable to update post";
+      if (message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      if (message === "Forbidden: Not your post" || message === "Authors cannot publish posts directly") {
+        return NextResponse.json({ error: message }, { status: 403 });
       }
-      return NextResponse.json({ error: err.message }, { status: 400 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
   } catch (error) {
     console.error("PUT Post Error:", error);
@@ -119,7 +120,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       if (existingPost.status !== "DRAFT" && existingPost.status !== "REJECTED") {
         return NextResponse.json({ error: "Cannot delete a published/pending post" }, { status: 403 });
       }
-    } else if (payload.role !== "ADMIN" && payload.role !== "EDITOR") {
+    } else if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

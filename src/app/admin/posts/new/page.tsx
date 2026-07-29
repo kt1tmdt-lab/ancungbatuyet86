@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function NewPostPage() {
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR", "AUTHOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "AUTHOR"]}>
       <CreatePostForm />
     </ProtectedRoute>
   );

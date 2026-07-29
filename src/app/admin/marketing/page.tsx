@@ -157,7 +157,7 @@ function getPageAssetScope(item: PageAssetItem) {
   return "other";
 }
 
-type HomeTextScope = "all" | "home" | "about" | "quality";
+type HomeTextScope = "all" | "home" | "about" | "quality" | "sales";
 
 function normalizeAdminSearch(value: unknown) {
   return String(value || "")
@@ -212,6 +212,9 @@ function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; n
   if (group.includes("Giới thiệu")) {
     return { page: "Giới thiệu", section: group.replace("Giới thiệu - ", ""), note: "Nội dung trang Giới thiệu.", previewPath: "/gioi-thieu", scope: "about" };
   }
+  if (group.includes("Điểm bán") || key.startsWith("sales_")) {
+    return { page: "Điểm bán", section: group.replace("Điểm bán - ", ""), note: "Nội dung chữ trên trang hệ thống điểm bán.", previewPath: "/diem-ban", scope: "sales" };
+  }
 
   return { page: "Trang chủ", section: group || "Khác", note: "Nội dung chữ hiển thị trên website.", previewPath: "/", scope: "home" };
 }
@@ -245,7 +248,12 @@ function MarketingPageContent() {
   const [previewAsset, setPreviewAsset] = useState<PageAssetItem | null>(null);
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
   const [homeTextSearch, setHomeTextSearch] = useState("");
-  const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>("all");
+  const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>(() => {
+    const scope = searchParams.get("scope");
+    return scope === "home" || scope === "about" || scope === "quality" || scope === "sales"
+      ? scope
+      : "all";
+  });
 
   // State for assets lists
   const [pressList, setPressList] = useState<PressItem[]>([]);
@@ -697,6 +705,13 @@ function MarketingPageContent() {
   };
 
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
+  const visibleAssetList = assetList.filter((item) => {
+    if (homeTextScope === "all") return true;
+    const assetScope = getPageAssetScope(item);
+    if (homeTextScope === "quality") return assetScope === "process";
+    if (homeTextScope === "sales") return false;
+    return assetScope === homeTextScope;
+  });
   const homeTextByKey = homeTextList.reduce<Record<string, HomeTextItem>>((acc, item) => {
     acc[item.key] = item;
     return acc;
@@ -735,7 +750,7 @@ function MarketingPageContent() {
         .sort((a, b) => a.sortOrder - b.sortOrder),
     }))
     .filter(({ items }) => items.length > 0);
-  const looseHomeAssets = homeAssetList.filter((item) => (
+  const looseHomeAssets = visibleAssetList.filter((item) => (
     item.key !== "home_factory_proof_image" && !FACTORY_PROOF_ASSET_KEYS.has(item.key)
   ));
   const showFactoryProofSection = (homeTextScope === "all" || homeTextScope === "home")
@@ -1806,6 +1821,7 @@ function MarketingPageContent() {
                         ["home", "Trang chủ"],
                         ["about", "Giới thiệu"],
                         ["quality", "Chất lượng"],
+                        ["sales", "Điểm bán"],
                       ].map(([value, label]) => (
                         <button
                           key={value}
@@ -2034,7 +2050,7 @@ function MarketingPageContent() {
                 {looseHomeAssets.length > 0 && (
                   <section className="border border-slate-200 bg-slate-50">
                     <div className="border-b border-slate-200 bg-white px-4 py-3">
-                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Hình ảnh khác trên trang chủ</h3>
+                      <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Hình ảnh và liên kết của trang đang chọn</h3>
                     </div>
                     <div className="grid gap-4 p-4">
                       {looseHomeAssets.map((item) => renderAssetEditor(item))}

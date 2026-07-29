@@ -18,7 +18,11 @@ export function buildPostWhere(filters: PostListFilters = {}) {
   const viewer = filters.viewer;
 
   if (viewer) {
-    if (viewer.role === "ADMIN" || viewer.role === "EDITOR") {
+    if (
+      viewer.role === "SUPER_ADMIN" ||
+      viewer.role === "ADMIN" ||
+      viewer.role === "EDITOR"
+    ) {
       if (filters.status) where.status = filters.status as Prisma.EnumPostStatusFilter["equals"];
     } else if (viewer.role === "AUTHOR") {
       if (filters.status) {

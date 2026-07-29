@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import type { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getAuthErrorStatus, requireRole } from "@/lib/authz";
+import type { AuthRole } from "@/lib/auth";
 import { getErrorMessage, jsonError, jsonOk } from "@/lib/api-response";
 import {
   MEDIA_INTELLIGENCE_CONFIG_ID,
@@ -9,11 +10,11 @@ import {
   normalizeMediaIntelligence,
 } from "@/lib/media-intelligence";
 
-const ALLOWED_ROLES = ["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"] as const;
+const ALLOWED_ROLES: AuthRole[] = ["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"];
 
 export async function GET(req: NextRequest) {
   try {
-    requireRole(req, ALLOWED_ROLES as any);
+    requireRole(req, ALLOWED_ROLES);
 
     const config = await prisma.siteConfig.findUnique({
       where: { id: MEDIA_INTELLIGENCE_CONFIG_ID },
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    requireRole(req, ALLOWED_ROLES as any);
+    requireRole(req, ALLOWED_ROLES);
 
     const body = await req.json();
     const current = await prisma.siteConfig.findUnique({

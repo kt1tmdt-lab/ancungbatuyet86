@@ -5,8 +5,53 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
 import { ArrowRight, FileSearch, HelpCircle, Loader } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import type { DefaultInfoPage, InfoPageBlock } from "@/lib/default-info-pages";
+
+type ProductCard = {
+  id: string;
+  slug: string;
+  name: string;
+  image: string;
+  categoryLabel?: string | null;
+  price?: string | null;
+};
+
+type RenderItem = {
+  icon?: string;
+  title?: string;
+  description?: string;
+  name?: string;
+  role?: string;
+  review?: string;
+  rating?: number;
+  avatarUrl?: string;
+  price?: string;
+  originalPrice?: string;
+  benefits?: string[];
+  tag?: string;
+  ctaLink?: string;
+  question?: string;
+  answer?: string;
+};
+
+type RenderBlockData = {
+  label?: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  content?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  imageUrl?: string;
+  imagePosition?: "left" | "right";
+  productIds?: string[];
+  items?: RenderItem[];
+  images?: string[];
+};
 
 type CmsPage = {
   id: string;
@@ -17,7 +62,7 @@ type CmsPage = {
 };
 
 function DynIcon({ name, className }: { name: string; className?: string }) {
-  const Icon = (Icons as Record<string, any>)[name];
+  const Icon = (Icons as unknown as Record<string, LucideIcon>)[name];
   if (!Icon) return <HelpCircle className={className} />;
   return <Icon className={className} />;
 }
@@ -45,14 +90,14 @@ function BrandStoryPosterPage({
   title: string;
   blocks: InfoPageBlock[];
   fallbackBlocks: InfoPageBlock[];
-  products: any[];
+  products: ProductCard[];
 }) {
   const findBlock = (type: InfoPageBlock["type"]) =>
     blocks.find((block) => block.type === type) || fallbackBlocks.find((block) => block.type === type);
-  const heroData = (findBlock("hero")?.data || {}) as any;
-  const splitData = (findBlock("split")?.data || {}) as any;
-  const featuresData = (findBlock("features")?.data || {}) as any;
-  const textData = (findBlock("text")?.data || {}) as any;
+  const heroData = (findBlock("hero")?.data || {}) as RenderBlockData;
+  const splitData = (findBlock("split")?.data || {}) as RenderBlockData;
+  const featuresData = (findBlock("features")?.data || {}) as RenderBlockData;
+  const textData = (findBlock("text")?.data || {}) as RenderBlockData;
   const storyImage = splitData.imageUrl || heroData.backgroundImage || "/hero/ba-tuyet-character.png";
   const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
   const safeStoryHtml = DOMPurify.sanitize(textData.content || "");
@@ -118,7 +163,7 @@ function BrandStoryPosterPage({
                   { icon: "Heart", title: "Nỗi sợ rất thật", description: "Sợ chân gà không rõ nguồn gốc." },
                   { icon: "Factory", title: "Trả lời bằng việc làm", description: "Nhà máy, nguyên liệu, quy trình và sản phẩm mỗi ngày." },
                   { icon: "MapPin", title: "Tự hào Thái Nguyên", description: "Một sản phẩm được làm nên từ trách nhiệm." },
-                ]).map((item: any, idx: number) => (
+                ]).map((item, idx) => (
                   <div key={`${item.title}-${idx}`} className="grid grid-cols-[42px_1fr] gap-3 border border-orange-200 bg-white/90 p-4">
                     <div className="flex h-10 w-10 items-center justify-center bg-orange-600 text-white">
                       <DynIcon name={item.icon || "CheckCircle2"} className="h-5 w-5" />
@@ -223,7 +268,7 @@ function BrandStoryPosterPage({
       {remainingBlocks.length > 0 && (
         <div className="mt-16 pb-24 space-y-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {remainingBlocks.map((block, index) => {
-            const data = (block.data || {}) as any;
+            const data = (block.data || {}) as RenderBlockData;
 
             if (block.type === "products") {
               return (
@@ -274,7 +319,7 @@ function BrandStoryPosterPage({
                       )}
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {(data.items || []).map((item: any, tIdx: number) => (
+                      {(data.items || []).map((item, tIdx) => (
                         <div key={tIdx} className="bg-white border border-orange-100 p-6 shadow-sm hover:shadow transition relative flex flex-col justify-between rounded-2xl">
                           <div className="space-y-4">
                             <div className="flex gap-1 text-amber-500">
@@ -282,14 +327,14 @@ function BrandStoryPosterPage({
                                 <Icons.Star key={i} size={14} fill="currentColor" />
                               ))}
                             </div>
-                            <p className="text-xs text-slate-650 italic leading-relaxed">"{item.review}"</p>
+                            <p className="text-xs text-slate-650 italic leading-relaxed">“{item.review}”</p>
                           </div>
                           <div className="flex items-center gap-3 pt-6 border-t border-slate-55 border-slate-100 mt-6">
                             {item.avatarUrl ? (
                               <img src={item.avatarUrl} alt={item.name} className="w-9 h-9 rounded-full object-cover border border-orange-150" />
                             ) : (
                               <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
-                                {item.name.charAt(0)}
+                                {(item.name || "?").charAt(0)}
                               </div>
                             )}
                             <div>
@@ -338,7 +383,7 @@ function BrandStoryPosterPage({
                       )}
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 justify-center">
-                      {(data.items || []).map((combo: any, cIdx: number) => (
+                      {(data.items || []).map((combo, cIdx) => (
                         <div key={cIdx} className="bg-white border-2 border-orange-100 hover:border-orange-505 transition p-6 flex flex-col justify-between relative shadow-sm hover:shadow-lg rounded-2xl">
                           {combo.tag && (
                             <span className="absolute -top-3 right-4 bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 uppercase tracking-wider rounded">
@@ -381,7 +426,7 @@ function BrandStoryPosterPage({
                       <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
                     </div>
                     <div className="space-y-4">
-                      {(data.items || []).map((faqItem: any, fIdx: number) => (
+                      {(data.items || []).map((faqItem, fIdx) => (
                         <div key={fIdx} className="border border-orange-100 bg-[#fffbf5] rounded-xl overflow-hidden">
                           <details className="group">
                             <summary className="flex items-center justify-between p-4 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer select-none">
@@ -423,10 +468,10 @@ function QualityDetailPage({
 }) {
   const findBlock = (type: InfoPageBlock["type"]) =>
     blocks.find((block) => block.type === type) || fallbackBlocks.find((block) => block.type === type);
-  const heroData = (findBlock("hero")?.data || {}) as any;
-  const splitData = (findBlock("split")?.data || {}) as any;
-  const featuresData = (findBlock("features")?.data || {}) as any;
-  const textData = (findBlock("text")?.data || {}) as any;
+  const heroData = (findBlock("hero")?.data || {}) as RenderBlockData;
+  const splitData = (findBlock("split")?.data || {}) as RenderBlockData;
+  const featuresData = (findBlock("features")?.data || {}) as RenderBlockData;
+  const textData = (findBlock("text")?.data || {}) as RenderBlockData;
   const featureItems = Array.isArray(featuresData.items) ? featuresData.items : [];
   const imageUrl = splitData.imageUrl || heroData.backgroundImage || "/bento/bento-factory.png";
   const safeTextHtml = DOMPurify.sanitize(textData.content || "");
@@ -788,7 +833,7 @@ function QualityDetailPage({
 
           <div>
             <div className={isProcess ? "grid gap-0" : "grid gap-4 md:grid-cols-2"}>
-              {featureItems.map((item: any, index: number) => {
+              {featureItems.map((item, index) => {
                 const isStep = isProcess || /^\s*\d+[.)]/.test(item.title || "");
                 return (
                   <article
@@ -897,13 +942,17 @@ function QualityDetailPage({
 export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultInfoPage }) {
   const [page, setPage] = useState<CmsPage | null>(null);
   const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<ProductCard[]>([]);
 
   // Form states for partnership contact submission
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
-  const [formType, setFormType] = useState("Hợp tác Đại lý / NPP");
+  const [formType, setFormType] = useState(() =>
+    fallback.routePath === "/hop-tac/truyen-thong"
+      ? "Hợp tác truyền thông / KOL / KOC"
+      : "Hợp tác Đại lý / NPP",
+  );
   const [formContent, setFormContent] = useState("");
 
   // Specific partnership fields
@@ -917,15 +966,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
-  // Initialize and sync formType based on current route
-  useEffect(() => {
-    if (fallback.routePath === "/hop-tac/dai-ly-nha-phan-phoi") {
-      setFormType("Hợp tác Đại lý / NPP");
-    } else if (fallback.routePath === "/hop-tac/truyen-thong") {
-      setFormType("Hợp tác truyền thông / KOL / KOC");
-    }
-  }, [fallback.routePath]);
 
   const handlePartnershipSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -984,8 +1024,12 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       setFormFollowers("");
       setFormSubject("");
       setFormContent("");
-    } catch (err: any) {
-      setSubmitError(err.message || "Đã xảy ra lỗi khi gửi. Vui lòng thử lại.");
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Đã xảy ra lỗi khi gửi. Vui lòng thử lại.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -1042,7 +1086,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-slate-950">
       {blocks.map((block, index) => {
-        const data = (block.data || {}) as any;
+        const data = (block.data || {}) as RenderBlockData;
 
         if (block.type === "hero") {
           return (
@@ -1118,7 +1162,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         if (block.type === "features") {
           const items = data.items || [];
           const titleIdentity = normalizeText(`${data.title || ""} ${data.subtitle || ""}`);
-          const isProcess = titleIdentity.includes("quy trinh") || items.some((item: any) => /^\s*\d+[.)]/.test(item.title || ""));
+            const isProcess = titleIdentity.includes("quy trinh") || items.some((item) => /^\s*\d+[.)]/.test(item.title || ""));
           const featureGridClass = items.length === 4
             ? "md:grid-cols-2 xl:grid-cols-4"
             : items.length > 4
@@ -1144,13 +1188,13 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
                   <div className="relative grid gap-5 lg:grid-cols-6">
                     <div className="absolute left-0 right-0 top-12 hidden h-px bg-gradient-to-r from-orange-500/0 via-orange-400/60 to-orange-500/0 lg:block" />
-                    {items.map((item: any, itemIndex: number) => (
+                    {items.map((item, itemIndex) => (
                       <div key={`${item.title}-${itemIndex}`} className={`relative bg-white/[0.06] p-6 backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.10] ${itemIndex % 2 ? "lg:mt-12" : ""}`}>
                         <div className="mb-6 flex h-14 w-14 items-center justify-center bg-orange-600 text-sm font-black text-white shadow-[8px_8px_0_rgba(255,255,255,0.10)]">
                           {String(itemIndex + 1).padStart(2, "0")}
                         </div>
                         <DynIcon name={item.icon || "Check"} className="mb-4 h-7 w-7 text-orange-300" />
-                        <h3 className="text-lg font-black leading-tight tracking-[-0.03em] text-white">{item.title.replace(/^\s*\d+[.)]\s*/, "")}</h3>
+                        <h3 className="text-lg font-black leading-tight tracking-[-0.03em] text-white">{(item.title || "").replace(/^\s*\d+[.)]\s*/, "")}</h3>
                         <p className="mt-3 text-sm font-medium leading-7 text-slate-300">{item.description}</p>
                       </div>
                     ))}
@@ -1175,7 +1219,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                 {data.subtitle && <p className="text-sm font-semibold leading-7 text-slate-500">{data.subtitle}</p>}
               </div>
               <div className={`grid auto-rows-fr gap-4 ${featureGridClass}`}>
-                {items.map((item: any, itemIndex: number) => (
+                {items.map((item, itemIndex) => (
                   <div key={`${item.title}-${itemIndex}`} className={`group relative overflow-hidden bg-white p-7 shadow-[0_18px_45px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] ${itemIndex === 0 && items.length >= 4 ? "md:col-span-2 xl:row-span-2 xl:p-10" : ""}`}>
                     <div className="absolute inset-x-0 top-0 h-1 bg-orange-500 opacity-0 transition group-hover:opacity-100" />
                     <span className="absolute right-4 top-4 text-4xl font-black tracking-[-0.08em] text-orange-100 transition group-hover:text-orange-200">
@@ -1364,7 +1408,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                   )}
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {(data.items || []).map((item: any, tIdx: number) => (
+                  {(data.items || []).map((item, tIdx) => (
                     <div key={tIdx} className="bg-white border border-orange-100 p-6 shadow-sm hover:shadow transition relative flex flex-col justify-between rounded">
                       <div className="space-y-4">
                         <div className="flex gap-1 text-amber-500">
@@ -1372,14 +1416,14 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                             <Icons.Star key={i} size={14} fill="currentColor" />
                           ))}
                         </div>
-                        <p className="text-xs text-slate-600 italic leading-relaxed">"{item.review}"</p>
+                        <p className="text-xs text-slate-600 italic leading-relaxed">“{item.review}”</p>
                       </div>
                       <div className="flex items-center gap-3 pt-6 border-t border-slate-50 mt-6">
                         {item.avatarUrl ? (
                           <img src={item.avatarUrl} alt={item.name} className="w-9 h-9 rounded-full object-cover border border-orange-150" />
                         ) : (
                           <div className="w-9 h-9 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
-                            {item.name.charAt(0)}
+                            {(item.name || "?").charAt(0)}
                           </div>
                         )}
                         <div>
@@ -1428,7 +1472,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                   )}
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 justify-center">
-                  {(data.items || []).map((combo: any, cIdx: number) => (
+                  {(data.items || []).map((combo, cIdx) => (
                     <div key={cIdx} className="bg-white border-2 border-orange-100 hover:border-orange-505 transition p-6 flex flex-col justify-between relative shadow-sm hover:shadow-lg rounded">
                       {combo.tag && (
                         <span className="absolute -top-3 right-4 bg-orange-600 text-white text-[9px] font-black px-2.5 py-1 uppercase tracking-wider rounded">
@@ -1471,7 +1515,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                   <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">{data.title}</h2>
                 </div>
                 <div className="space-y-4">
-                  {(data.items || []).map((faqItem: any, fIdx: number) => (
+                  {(data.items || []).map((faqItem, fIdx) => (
                     <div key={fIdx} className="border border-orange-100 bg-[#fffbf5] rounded overflow-hidden">
                       <details className="group">
                         <summary className="flex items-center justify-between p-4 font-bold text-xs sm:text-sm text-slate-900 cursor-pointer select-none">
@@ -1589,10 +1633,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                       ))}
                     </ul>
                   </div>
-                  <a href="/hop-tac/dai-ly-nha-phan-phoi" className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl transition shadow-md shadow-orange-500/10">
+                  <Link href="/hop-tac/dai-ly-nha-phan-phoi" className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl transition shadow-md shadow-orange-500/10">
                     Xem chính sách & Đăng ký
                     <Icons.ArrowRight size={14} />
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Media/KOL Portal Card */}
@@ -1612,10 +1656,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                       ))}
                     </ul>
                   </div>
-                  <a href="/hop-tac/truyen-thong" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl transition">
+                  <Link href="/hop-tac/truyen-thong" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-950 font-black text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl transition">
                     Liên hệ KOL / KOC hợp tác
                     <Icons.ArrowRight size={14} />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

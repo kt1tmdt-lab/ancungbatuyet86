@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { reviewPost } from "@/features/posts/mutations";
 import { logAudit } from "@/lib/audit";
 
 export async function POST(req: Request) {
   try {
-    const token = getTokenFromReq(req as any);
+    const token = getTokenFromReq(req);
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     
     const payload = verifyToken(token);
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Allow both ADMIN and EDITOR to approve/reject posts
-    if (payload.role !== "ADMIN" && payload.role !== "EDITOR") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN" && payload.role !== "EDITOR") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -33,9 +32,10 @@ export async function POST(req: Request) {
       });
 
       return NextResponse.json(post);
-    } catch (err: any) {
-      if (err.message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
-      return NextResponse.json({ error: err.message }, { status: 400 });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unable to review post";
+      if (message === "Post not found") return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      return NextResponse.json({ error: message }, { status: 400 });
     }
   } catch (error) {
     console.error("Approve API Error:", error);

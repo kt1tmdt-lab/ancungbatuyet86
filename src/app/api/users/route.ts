@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken, hashPassword } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { Role } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Only ADMIN can list users
-    if (payload.role !== "ADMIN") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Only ADMIN can create users
-    if (payload.role !== "ADMIN") {
+    if (payload.role !== "SUPER_ADMIN" && payload.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -58,8 +59,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Thiếu thông tin bắt buộc" }, { status: 400 });
     }
 
-    const validRoles = ["ADMIN", "EDITOR", "AUTHOR", "USER", "SUPER_ADMIN", "MARKETING", "SUPPORT"];
-    if (!validRoles.includes(role)) {
+    const validRoles = Object.values(Role);
+    if (typeof role !== "string" || !validRoles.includes(role as Role)) {
       return NextResponse.json({ error: "Vai trò không hợp lệ" }, { status: 400 });
     }
 
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
         email,
         password: hashedPassword,
         name,
-        role: role as any,
+        role: role as Role,
       },
       select: {
         id: true,

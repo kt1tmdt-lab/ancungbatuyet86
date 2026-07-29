@@ -1,13 +1,37 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
-import { useAuth } from "@/lib/auth-context";
-import { DataTable } from "@/components/admin/DataTable";
-import { ColumnDef } from "@tanstack/react-table";
-import { Search, Loader, Trash, Phone, Mail, User, Eye, X, Check, ClipboardCheck, MessageSquare } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Check,
+  ClipboardCheck,
+  Eye,
+  Mail,
+  MessageSquare,
+  Phone,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "@/lib/auth-context";
+import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
+import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
+import { DataTable } from "@/components/admin/DataTable";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
+import { CmsPanel } from "@/components/admin/CmsPanel";
+import {
+  AdminErrorState,
+  AdminLoadingState,
+  AdminModal,
+  AdminSearchInput,
+  AdminSelect,
+  AdminToolbar,
+  ConfirmDialog,
+} from "@/components/admin/AdminPrimitives";
 import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+
+type ContactStatus = "NEW" | "READ" | "RESPONDED";
 
 interface ContactMessage {
   id: string;
@@ -16,420 +40,444 @@ interface ContactMessage {
   email: string | null;
   content: string;
   source: string | null;
-  status: string; // NEW, READ, RESPONDED
+  status: ContactStatus;
   createdAt: string;
 }
+
+const STATUS_LABELS: Record<ContactStatus, string> = {
+  NEW: "Mới nhận",
+  READ: "Đã xem",
+  RESPONDED: "Đã phản hồi",
+};
 
 export default function ContactsPage() {
   const { token, user } = useAuth();
   const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState<ContactStatus | "ALL">(
+    "ALL",
+  );
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  
-  // Modal State for Viewing Detail
-  const [viewingContact, setViewingContact] = useState<ContactMessage | null>(null);
+  const [viewingContact, setViewingContact] =
+    useState<ContactMessage | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ContactMessage | null>(
+    null,
+  );
 
-  useEffect(() => {
+  const fetchContacts = useCallback(async () => {
     if (!token) return;
-
-    let cancelled = false;
-
-    fetch("/api/contacts", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load"))))
-      .then((data) => {
-        if (!cancelled) setContacts(data);
-      })
-      .catch((error) => {
-        if (!cancelled) console.error("Failed to fetch contacts", error);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
+    setLoading(true);
+    setLoadError("");
+    try {
+      setContacts(
+        await adminRequest<ContactMessage[]>("/api/contacts", { token }),
+      );
+    } catch (error) {
+      setLoadError(
+        getAdminErrorMessage(error, "Không thể tải danh sách liên hệ."),
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
-    setActionLoading(id);
-    try {
-      const res = await fetch(`/api/contacts/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (res.ok) {
-        const updated = contacts.map(c => c.id === id ? { ...c, status: newStatus } : c);
-        setContacts(updated);
-        
-        // Update currently viewing contact state if open
-        if (viewingContact && viewingContact.id === id) {
-          setViewingContact({ ...viewingContact, status: newStatus });
-        }
-        
-        toast.success("Cập nhật trạng thái thành công");
-      } else {
-        toast.error("Không thể cập nhật trạng thái");
+  useEffect(() => {
+    const timer = window.setTimeout(() => void fetchContacts(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchContacts]);
+
+  const handleUpdateStatus = useCallback(
+    async (contact: ContactMessage, nextStatus: ContactStatus) => {
+      if (!token || contact.status === nextStatus) return;
+      setActionLoading(contact.id);
+
+      try {
+        const updated = await adminRequest<ContactMessage>(
+          `/api/contacts/${contact.id}`,
+          {
+            method: "PUT",
+            token,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: nextStatus }),
+          },
+        );
+        setContacts((current) =>
+          current.map((item) => (item.id === contact.id ? updated : item)),
+        );
+        setViewingContact((current) =>
+          current?.id === contact.id ? updated : current,
+        );
+        toast.success("Đã cập nhật trạng thái liên hệ.");
+      } catch (error) {
+        toast.error(
+          getAdminErrorMessage(error, "Không thể cập nhật trạng thái."),
+        );
+      } finally {
+        setActionLoading(null);
       }
-    } catch {
-      toast.error("Lỗi kết nối");
+    },
+    [token],
+  );
+
+  const openContact = useCallback(
+    (contact: ContactMessage) => {
+      setViewingContact(contact);
+      if (contact.status === "NEW") {
+        void handleUpdateStatus(contact, "READ");
+      }
+    },
+    [handleUpdateStatus],
+  );
+
+  const handleDelete = async () => {
+    if (!deleteTarget || !token) return;
+    setActionLoading(deleteTarget.id);
+    try {
+      await adminRequest(`/api/contacts/${deleteTarget.id}`, {
+        method: "DELETE",
+        token,
+      });
+      setContacts((current) =>
+        current.filter((contact) => contact.id !== deleteTarget.id),
+      );
+      setViewingContact((current) =>
+        current?.id === deleteTarget.id ? null : current,
+      );
+      toast.success("Đã xóa thư liên hệ.");
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xóa thư liên hệ."));
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa tin nhắn này không?")) return;
-    setActionLoading(id);
-    try {
-      const res = await fetch(`/api/contacts/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setContacts(contacts.filter(c => c.id !== id));
-        if (viewingContact && viewingContact.id === id) {
-          setViewingContact(null);
-        }
-        toast.success("Đã xóa tin nhắn");
-      } else {
-        toast.error("Không thể xóa tin nhắn");
-      }
-    } catch {
-      toast.error("Lỗi kết nối");
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  const canDelete =
+    user?.role === "SUPER_ADMIN" || user?.role === "ADMIN";
 
   const filteredContacts = useMemo(() => {
-    let result = contacts;
-    
-    if (statusFilter !== "ALL") {
-      result = result.filter(c => c.status === statusFilter);
-    }
-
-    if (searchQuery) {
-      const lower = searchQuery.toLowerCase();
-      result = result.filter(c => 
-        c.name.toLowerCase().includes(lower) || 
-        (c.phone && c.phone.includes(lower)) ||
-        (c.email && c.email.toLowerCase().includes(lower)) ||
-        c.content.toLowerCase().includes(lower)
-      );
-    }
-
-    return result;
+    const query = searchQuery.trim().toLocaleLowerCase("vi");
+    return contacts.filter((contact) => {
+      const matchesStatus =
+        statusFilter === "ALL" || contact.status === statusFilter;
+      const matchesSearch =
+        !query ||
+        contact.name.toLocaleLowerCase("vi").includes(query) ||
+        contact.phone?.includes(query) ||
+        contact.email?.toLocaleLowerCase("vi").includes(query) ||
+        contact.content.toLocaleLowerCase("vi").includes(query);
+      return matchesStatus && matchesSearch;
+    });
   }, [contacts, searchQuery, statusFilter]);
 
-  const columns = useMemo<ColumnDef<ContactMessage>[]>(() => [
-    {
-      accessorKey: "name",
-      header: "Người gửi",
-      cell: ({ row }) => {
-        const c = row.original;
-        return (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <User size={14} className="text-slate-400" />
-              <span className="font-bold text-slate-900">{c.name}</span>
-            </div>
-            {c.phone && (
-              <div className="flex items-center gap-2 text-xs text-slate-650">
-                <Phone size={12} className="text-slate-400" />
-                <span>{c.phone}</span>
-              </div>
-            )}
-            {c.email && (
-              <div className="flex items-center gap-2 text-xs text-slate-650">
-                <Mail size={12} className="text-slate-400" />
-                <span>{c.email}</span>
-              </div>
-            )}
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: "content",
-      header: "Nội dung tin nhắn",
-      cell: ({ row }) => {
-        const c = row.original;
-        return (
-          <div className="max-w-xs xl:max-w-md">
-            <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap line-clamp-2">
-              {c.content}
+  const columns = useMemo<ColumnDef<ContactMessage>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Người gửi",
+        cell: ({ row }) => (
+          <div className="min-w-52 space-y-1">
+            <p className="flex items-center gap-2 font-black text-slate-950">
+              <UserRound size={14} className="text-slate-400" />
+              {row.original.name}
             </p>
-            {c.source && (
-              <span className="inline-block mt-2 text-[10px] uppercase font-bold tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5">
-                Nguồn: {c.source}
-              </span>
-            )}
+            {row.original.phone ? (
+              <p className="flex items-center gap-2 text-xs text-slate-500">
+                <Phone size={12} />
+                {row.original.phone}
+              </p>
+            ) : null}
+            {row.original.email ? (
+              <p className="flex items-center gap-2 text-xs text-slate-500">
+                <Mail size={12} />
+                {row.original.email}
+              </p>
+            ) : null}
           </div>
-        );
-      }
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Thời gian",
-      cell: ({ row }) => {
-        const date = new Date(row.original.createdAt);
-        return (
-          <div className="flex flex-col gap-1 text-xs text-slate-600">
-            <span className="font-bold text-slate-800">{date.toLocaleDateString("vi-VN")}</span>
-            <span>{date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+        ),
+      },
+      {
+        accessorKey: "content",
+        header: "Nội dung",
+        cell: ({ row }) => (
+          <div className="max-w-md">
+            <p className="line-clamp-2 text-sm leading-6 text-slate-700">
+              {row.original.content}
+            </p>
+            {row.original.source ? (
+              <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                Nguồn: {row.original.source}
+              </p>
+            ) : null}
           </div>
-        );
-      }
-    },
-    {
-      accessorKey: "status",
-      header: "Trạng thái",
-      cell: ({ row }) => {
-        const c = row.original;
-        return (
-          <select
-            value={c.status}
-            onChange={(e) => handleUpdateStatus(c.id, e.target.value)}
-            disabled={actionLoading === c.id}
-            className={`text-xs font-bold px-2 py-1.5 outline-none border-b-2 bg-transparent ${
-              c.status === "NEW" ? "text-orange-600 border-orange-500" :
-              c.status === "READ" ? "text-blue-600 border-blue-500" :
-              "text-green-600 border-green-500"
-            }`}
+        ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Thời gian",
+        cell: ({ row }) => (
+          <span className="block min-w-24 text-xs font-medium leading-5 text-slate-500">
+            {new Date(row.original.createdAt).toLocaleString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Trạng thái",
+        cell: ({ row }) => (
+          <AdminSelect
+            label={`Trạng thái của ${row.original.name}`}
+            value={row.original.status}
+            disabled={actionLoading === row.original.id}
+            onChange={(event) =>
+              void handleUpdateStatus(
+                row.original,
+                event.target.value as ContactStatus,
+              )
+            }
+            className="min-w-36"
           >
-            <option value="NEW" className="text-slate-900">Mới</option>
-            <option value="READ" className="text-slate-900">Đã xem</option>
-            <option value="RESPONDED" className="text-slate-900">Đã phản hồi</option>
-          </select>
-        );
-      }
-    },
-    {
-      id: "actions",
-      header: "Thao tác",
-      cell: ({ row }) => {
-        const c = row.original;
-        const canDelete = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
-        return (
-          <div className="flex items-center justify-end gap-1.5">
+            <option value="NEW">Mới nhận</option>
+            <option value="READ">Đã xem</option>
+            <option value="RESPONDED">Đã phản hồi</option>
+          </AdminSelect>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Thao tác",
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-end gap-1">
             <button
-              onClick={() => {
-                setViewingContact(c);
-                if (c.status === "NEW") {
-                  handleUpdateStatus(c.id, "READ");
-                }
-              }}
-              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition rounded"
-              title="Xem chi tiết tin nhắn"
+              type="button"
+              onClick={() => openContact(row.original)}
+              className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600"
+              aria-label={`Xem thư của ${row.original.name}`}
+              title="Xem chi tiết"
             >
-              <Eye size={15} />
+              <Eye size={16} />
             </button>
-            {canDelete && (
+            {canDelete ? (
               <button
-                onClick={() => handleDelete(c.id)}
-                disabled={actionLoading === c.id}
-                className="p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 transition rounded disabled:opacity-50"
-                title="Xóa tin nhắn"
+                type="button"
+                onClick={() => setDeleteTarget(row.original)}
+                disabled={actionLoading === row.original.id}
+                className="acbt-icon-btn grid h-9 w-9 place-items-center text-red-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+                aria-label={`Xóa thư của ${row.original.name}`}
+                title="Xóa"
               >
-                <Trash size={15} />
+                <Trash2 size={16} />
               </button>
-            )}
+            ) : null}
           </div>
-        );
-      }
-    }
-  ], [actionLoading, user?.role, viewingContact]);
+        ),
+      },
+    ],
+    [
+      actionLoading,
+      canDelete,
+      handleUpdateStatus,
+      openContact,
+    ],
+  );
 
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "EDITOR", "MARKETING"]}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Liên hệ & Phản hồi</h1>
-          <p className="text-slate-500 text-sm mt-1">Quản lý tin nhắn, yêu cầu tư vấn và phản hồi từ khách hàng.</p>
-        </div>
+    <ProtectedRoute
+      allowedRoles={[
+        "SUPER_ADMIN",
+        "ADMIN",
+        "EDITOR",
+        "MARKETING",
+        "SUPPORT",
+      ]}
+    >
+      <div className="space-y-5">
+        <CmsPageHeader
+          eyebrow="Khách hàng"
+          title="Liên hệ & phản hồi"
+          description="Theo dõi yêu cầu tư vấn, cập nhật tiến độ xử lý và xem đầy đủ nội dung khách hàng gửi."
+        />
 
-        <div className="bg-white border border-slate-100 p-6 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <input
-                type="text"
-                placeholder="Tìm tên, SĐT, Email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-
-            <select
+        <CmsPanel>
+          <AdminToolbar>
+            <AdminSearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Tìm tên, số điện thoại, email hoặc nội dung..."
+            />
+            <AdminSelect
+              label="Lọc theo trạng thái"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-800 text-xs font-bold cursor-pointer"
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target.value as ContactStatus | "ALL",
+                )
+              }
             >
               <option value="ALL">Tất cả trạng thái</option>
               <option value="NEW">Mới nhận</option>
               <option value="READ">Đã xem</option>
               <option value="RESPONDED">Đã phản hồi</option>
-            </select>
-          </div>
+            </AdminSelect>
+          </AdminToolbar>
 
           {loading ? (
-            <div className="py-20 text-center"><Loader className="animate-spin text-primary mx-auto mb-2" size={30} /></div>
+            <AdminLoadingState title="Đang tải thư liên hệ" />
+          ) : loadError ? (
+            <AdminErrorState
+              description={loadError}
+              action={
+                <Button
+                  variant="adminSecondary"
+                  onClick={() => void fetchContacts()}
+                >
+                  Thử lại
+                </Button>
+              }
+            />
           ) : (
-            <DataTable columns={columns} data={filteredContacts} />
+            <DataTable
+              columns={columns}
+              data={filteredContacts}
+              emptyTitle="Không tìm thấy liên hệ"
+              emptyDescription={
+                searchQuery || statusFilter !== "ALL"
+                  ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
+                  : "Các yêu cầu mới từ website sẽ xuất hiện tại đây."
+              }
+            />
           )}
-        </div>
+        </CmsPanel>
       </div>
 
-      {/* Message Details Modal */}
-      {viewingContact && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white border border-slate-250 shadow-2xl w-full max-w-2xl overflow-hidden animate-scale-up">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-primary/10 text-primary">
-                  <MessageSquare size={16} />
-                </div>
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Chi tiết thư liên hệ
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setViewingContact(null)}
-                className="p-1 text-slate-400 hover:text-slate-650 hover:bg-slate-100 rounded transition"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="grid md:grid-cols-[1fr_1.3fr] divide-y md:divide-y-0 md:divide-x divide-slate-100 h-full">
-              {/* Left Column: Sender Metadata */}
-              <div className="p-6 space-y-4 text-sm">
-                <div>
-                  <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Người gửi</label>
-                  <p className="font-extrabold text-slate-900 mt-1">{viewingContact.name}</p>
-                </div>
-                
-                {viewingContact.phone && (
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Số điện thoại</label>
-                    <p className="font-semibold text-slate-700 mt-1 flex items-center gap-1.5">
-                      <Phone size={13} className="text-slate-400" />
-                      {viewingContact.phone}
-                    </p>
-                  </div>
-                )}
-
-                {viewingContact.email && (
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Email liên hệ</label>
-                    <p className="font-semibold text-slate-700 mt-1 flex items-center gap-1.5">
-                      <Mail size={13} className="text-slate-400" />
-                      {viewingContact.email}
-                    </p>
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Thời gian gửi</label>
-                  <p className="font-semibold text-slate-700 mt-1">
-                    {new Date(viewingContact.createdAt).toLocaleString("vi-VN")}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Trạng thái hiện tại</label>
-                  <div className="mt-1">
-                    <span className={`inline-block px-2.5 py-1 text-xs font-bold ${
-                      viewingContact.status === "NEW" ? "bg-orange-50 text-orange-600 border border-orange-200" :
-                      viewingContact.status === "READ" ? "bg-blue-50 text-blue-600 border border-blue-200" :
-                      "bg-green-50 text-green-600 border border-green-200"
-                    }`}>
-                      {viewingContact.status === "NEW" ? "Mới nhận" :
-                       viewingContact.status === "READ" ? "Đã xem" :
-                       "Đã phản hồi"}
-                    </span>
-                  </div>
-                </div>
-
-                {viewingContact.source && (
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Nguồn thu thập</label>
-                    <p className="font-semibold text-slate-700 mt-0.5">{viewingContact.source}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: Message Content */}
-              <div className="p-6 bg-slate-50/50 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <label className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">Nội dung tin nhắn</label>
-                  <div className="bg-white border border-slate-200/60 p-4 min-h-[160px] text-sm text-slate-800 leading-relaxed whitespace-pre-wrap select-text overflow-y-auto max-h-[250px]">
-                    {viewingContact.content}
-                  </div>
-                </div>
-
-                {/* Actions inside Modal */}
-                <div className="mt-6 flex flex-wrap gap-2 justify-end border-t border-slate-100 pt-4">
-                  {viewingContact.status !== "RESPONDED" && (
-                    <Button
-                      variant="adminSecondary"
-                      onClick={() => handleUpdateStatus(viewingContact.id, "RESPONDED")}
-                      leftIcon={<ClipboardCheck size={14} />}
-                      className="px-3.5 py-1.5 text-xs text-green-700 hover:text-green-800"
-                    >
-                      Đã phản hồi
-                    </Button>
-                  )}
-                  {viewingContact.status === "NEW" && (
-                    <Button
-                      variant="adminSecondary"
-                      onClick={() => handleUpdateStatus(viewingContact.id, "READ")}
-                      leftIcon={<Check size={14} />}
-                      className="px-3.5 py-1.5 text-xs text-blue-700 hover:text-blue-800"
-                    >
-                      Đã đọc
-                    </Button>
-                  )}
-                  {(user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
-                    <Button
-                      variant="adminDanger"
-                      onClick={() => handleDelete(viewingContact.id)}
-                      leftIcon={<Trash size={14} />}
-                      className="px-3.5 py-1.5 text-xs"
-                    >
-                      Xóa thư
-                    </Button>
-                  )}
-                </div>
+      <AdminModal
+        open={Boolean(viewingContact)}
+        title="Chi tiết thư liên hệ"
+        description={
+          viewingContact
+            ? `Gửi lúc ${new Date(viewingContact.createdAt).toLocaleString("vi-VN")}`
+            : undefined
+        }
+        onClose={() => setViewingContact(null)}
+        size="lg"
+        footer={
+          viewingContact ? (
+            <>
+              {viewingContact.status !== "RESPONDED" ? (
+                <Button
+                  variant="adminSecondary"
+                  leftIcon={<ClipboardCheck size={15} />}
+                  loading={actionLoading === viewingContact.id}
+                  onClick={() =>
+                    void handleUpdateStatus(viewingContact, "RESPONDED")
+                  }
+                >
+                  Đánh dấu đã phản hồi
+                </Button>
+              ) : null}
+              {viewingContact.status === "NEW" ? (
+                <Button
+                  variant="adminSecondary"
+                  leftIcon={<Check size={15} />}
+                  onClick={() =>
+                    void handleUpdateStatus(viewingContact, "READ")
+                  }
+                >
+                  Đánh dấu đã đọc
+                </Button>
+              ) : null}
+              {canDelete ? (
+                <Button
+                  variant="adminDanger"
+                  leftIcon={<Trash2 size={15} />}
+                  onClick={() => setDeleteTarget(viewingContact)}
+                >
+                  Xóa thư
+                </Button>
+              ) : null}
+            </>
+          ) : null
+        }
+      >
+        {viewingContact ? (
+          <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+            <div className="space-y-5 border-b border-slate-100 pb-6 md:border-b-0 md:border-r md:pb-0 md:pr-6">
+              <ContactDetail label="Người gửi" value={viewingContact.name} />
+              <ContactDetail
+                label="Số điện thoại"
+                value={viewingContact.phone || "Không cung cấp"}
+              />
+              <ContactDetail
+                label="Email"
+                value={viewingContact.email || "Không cung cấp"}
+              />
+              <ContactDetail
+                label="Nguồn"
+                value={viewingContact.source || "Website"}
+              />
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                  Trạng thái
+                </p>
+                <Badge
+                  variant={
+                    viewingContact.status === "NEW"
+                      ? "warning"
+                      : viewingContact.status === "RESPONDED"
+                        ? "success"
+                        : "default"
+                  }
+                  className="mt-2"
+                >
+                  {STATUS_LABELS[viewingContact.status]}
+                </Badge>
               </div>
             </div>
-
-            {/* Modal Footer */}
-            <div className="flex items-center justify-end px-6 py-4 border-t border-slate-100 bg-slate-50">
-              <Button
-                variant="adminSecondary"
-                onClick={() => setViewingContact(null)}
-                className="px-4 py-2 text-xs"
-              >
-                Đóng lại
-              </Button>
+            <div>
+              <p className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+                <MessageSquare size={14} />
+                Nội dung khách hàng gửi
+              </p>
+              <div className="mt-3 min-h-52 whitespace-pre-wrap border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-800">
+                {viewingContact.content}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : null}
+      </AdminModal>
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Xóa thư liên hệ?"
+        description={`Thư của “${deleteTarget?.name || ""}” sẽ bị xóa vĩnh viễn.`}
+        loading={Boolean(
+          deleteTarget && actionLoading === deleteTarget.id,
+        )}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => void handleDelete()}
+      />
     </ProtectedRoute>
+  );
+}
+
+function ContactDetail({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </p>
+      <p className="mt-1 break-words text-sm font-bold leading-6 text-slate-800">
+        {value}
+      </p>
+    </div>
   );
 }

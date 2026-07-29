@@ -1,5 +1,6 @@
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { ProductForm } from "@/components/admin/ProductForm";
+import CmsPageHeader from "@/components/admin/CmsPageHeader";
 
 export const metadata = {
   title: "Thêm sản phẩm mới | Admin",
@@ -7,12 +8,13 @@ export const metadata = {
 
 export default function NewProductPage() {
   return (
-    <ProtectedRoute allowedRoles={["ADMIN", "EDITOR"]}>
+    <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR"]}>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Thêm sản phẩm</h1>
-          <p className="text-slate-500 text-sm mt-1">Tạo một sản phẩm giới thiệu mới trên hệ thống.</p>
-        </div>
+        <CmsPageHeader
+          eyebrow="Sản phẩm"
+          title="Thêm sản phẩm"
+          description="Tạo hồ sơ sản phẩm mới để sử dụng trong khu vực showcase của website."
+        />
         <ProductForm />
       </div>
     </ProtectedRoute>
