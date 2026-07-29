@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState, useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
@@ -115,14 +115,14 @@ const PAGE_ASSET_META: Record<string, { page: string; position: string; note: st
   about_process_factory: { page: "Giới thiệu", position: "Thẻ quy trình: Nhà máy", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
   about_process_packaging: { page: "Giới thiệu", position: "Thẻ quy trình: Đóng gói", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
   about_process_distribution: { page: "Giới thiệu", position: "Thẻ quy trình: Phân phối", note: "Ảnh/link của thẻ quy trình.", previewPath: "/gioi-thieu#about-process" },
-  process_farm: { page: "Chất lượng", position: "Nguyên liệu đầu vào", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_inspect: { page: "Chất lượng", position: "Kiểm định nguyên liệu", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_cooking: { page: "Chất lượng", position: "Sơ chế và chế biến", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_qc: { page: "Chất lượng", position: "Kiểm soát chất lượng", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_packaging: { page: "Chất lượng", position: "Đóng gói", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_delivery: { page: "Chất lượng", position: "Giao hàng và phân phối", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-steps" },
-  process_factory: { page: "Chất lượng", position: "Khu vực nhà máy", note: "Ảnh/link phần nhà máy trong trang Chất lượng.", previewPath: "/chat-luong/nha-may-quy-trinh-san-xuat#process-factory" },
-  process_documents: { page: "Chất lượng", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ trong trang Chất lượng.", previewPath: "/chat-luong/ho-so-phap-ly-chung-nhan" },
+  process_farm: { page: "Chất lượng", position: "Nguyên liệu đầu vào", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_inspect: { page: "Chất lượng", position: "Kiểm định nguyên liệu", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_cooking: { page: "Chất lượng", position: "Sơ chế và chế biến", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_qc: { page: "Chất lượng", position: "Kiểm soát chất lượng", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_packaging: { page: "Chất lượng", position: "Đóng gói", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_delivery: { page: "Chất lượng", position: "Giao hàng và phân phối", note: "Ảnh/link bước quy trình trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_factory: { page: "Chất lượng", position: "Khu vực nhà máy", note: "Ảnh/link phần nhà máy trong trang Chất lượng.", previewPath: "/chat-luong#nha-may-quy-trinh" },
+  process_documents: { page: "Chất lượng", position: "Hồ sơ và chứng từ", note: "Ảnh/link phần chứng từ trong trang Chất lượng.", previewPath: "/chat-luong#ho-so-phap-ly" },
 };
 
 const FACTORY_PROOF_ASSET_KEYS = new Set([
@@ -157,7 +157,8 @@ function getPageAssetScope(item: PageAssetItem) {
   return "other";
 }
 
-type HomeTextScope = "all" | "home" | "about" | "quality" | "sales";
+type HomeTextScope = "home" | "about" | "sales";
+type MarketingTextScope = HomeTextScope | "quality";
 
 function normalizeAdminSearch(value: unknown) {
   return String(value || "")
@@ -172,7 +173,14 @@ function isFactoryProofText(item: HomeTextItem) {
   return item.key.startsWith("factory_proof");
 }
 
-function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; note: string; previewPath: string; scope: HomeTextScope } {
+function isLiveAboutText(item: HomeTextItem) {
+  return (
+    item.key.startsWith("about_current_") ||
+    item.key.startsWith("about_hero_stat_")
+  );
+}
+
+function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; note: string; previewPath: string; scope: MarketingTextScope } {
   const key = item.key || "";
   const group = item.group || "";
 
@@ -223,9 +231,9 @@ type ContentTab = "press" | "feedback" | "videos" | "home" | "trust" | "history"
 
 function MarketingPageContent() {
   const { token } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const isWebsiteContent = pathname.startsWith("/admin/site-content");
+  const isWebsiteContent = searchParams.get("mode") === "website";
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<ContentTab>(
@@ -250,9 +258,9 @@ function MarketingPageContent() {
   const [homeTextSearch, setHomeTextSearch] = useState("");
   const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>(() => {
     const scope = searchParams.get("scope");
-    return scope === "home" || scope === "about" || scope === "quality" || scope === "sales"
+    return scope === "home" || scope === "about" || scope === "sales"
       ? scope
-      : "all";
+      : "home";
   });
 
   // State for assets lists
@@ -279,10 +287,41 @@ function MarketingPageContent() {
       : tab && communicationTabs.includes(tab)
         ? tab
         : "press";
+    const requestedScope = searchParams.get("scope");
+    const normalizedScope: HomeTextScope =
+      requestedScope === "about" || requestedScope === "sales"
+        ? requestedScope
+        : "home";
 
-    const timer = window.setTimeout(() => setActiveTab(normalizedTab as ContentTab), 0);
+    const timer = window.setTimeout(() => {
+      setActiveTab(normalizedTab as ContentTab);
+      if (isWebsiteContent) setHomeTextScope(normalizedScope);
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [isWebsiteContent, searchParams]);
+
+  const selectTab = (tab: ContentTab) => {
+    setActiveTab(tab);
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("tab", tab);
+    if (isWebsiteContent) {
+      nextParams.set("mode", "website");
+    }
+    router.replace(`/admin/marketing?${nextParams.toString()}`, {
+      scroll: false,
+    });
+  };
+
+  const selectHomeTextScope = (scope: HomeTextScope) => {
+    setHomeTextScope(scope);
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("mode", "website");
+    nextParams.set("tab", "home");
+    nextParams.set("scope", scope);
+    router.replace(`/admin/marketing?${nextParams.toString()}`, {
+      scroll: false,
+    });
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -706,10 +745,9 @@ function MarketingPageContent() {
 
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
   const visibleAssetList = assetList.filter((item) => {
-    if (homeTextScope === "all") return true;
     const assetScope = getPageAssetScope(item);
-    if (homeTextScope === "quality") return assetScope === "process";
     if (homeTextScope === "sales") return false;
+    if (homeTextScope === "about") return item.key === "about_video";
     return assetScope === homeTextScope;
   });
   const homeTextByKey = homeTextList.reduce<Record<string, HomeTextItem>>((acc, item) => {
@@ -723,8 +761,9 @@ function MarketingPageContent() {
   const normalizedHomeTextSearch = normalizeAdminSearch(homeTextSearch.trim());
   const visibleHomeTextList = useMemo(() => homeTextList.filter((item) => {
     const meta = getHomeTextMeta(item);
-    const scopeMatches = homeTextScope === "all" || meta.scope === homeTextScope;
+    const scopeMatches = meta.scope === homeTextScope;
     if (!scopeMatches) return false;
+    if (homeTextScope === "about" && !isLiveAboutText(item)) return false;
     if (!normalizedHomeTextSearch) return true;
 
     return [
@@ -753,7 +792,7 @@ function MarketingPageContent() {
   const looseHomeAssets = visibleAssetList.filter((item) => (
     item.key !== "home_factory_proof_image" && !FACTORY_PROOF_ASSET_KEYS.has(item.key)
   ));
-  const showFactoryProofSection = (homeTextScope === "all" || homeTextScope === "home")
+  const showFactoryProofSection = homeTextScope === "home"
     && (!normalizedHomeTextSearch || factoryHomeTextItems.length > 0);
 
   const renderHomeTextField = (item: HomeTextItem) => {
@@ -979,7 +1018,7 @@ function MarketingPageContent() {
                     <button
                       key={tab.id}
                       type="button"
-                      onClick={() => setActiveTab(tab.id)}
+                      onClick={() => selectTab(tab.id)}
                       className={`flex items-center gap-2 border px-3 py-2.5 text-left text-sm font-bold transition ${
                         activeTab === tab.id
                           ? "border-orange-500 bg-orange-50 text-orange-700"
@@ -1817,16 +1856,16 @@ function MarketingPageContent() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        ["all", "Tất cả"],
                         ["home", "Trang chủ"],
                         ["about", "Giới thiệu"],
-                        ["quality", "Chất lượng"],
                         ["sales", "Điểm bán"],
                       ].map(([value, label]) => (
                         <button
                           key={value}
                           type="button"
-                          onClick={() => setHomeTextScope(value as HomeTextScope)}
+                          onClick={() =>
+                            selectHomeTextScope(value as HomeTextScope)
+                          }
                           className={`border px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
                             homeTextScope === value
                               ? "border-orange-600 bg-orange-600 text-white"

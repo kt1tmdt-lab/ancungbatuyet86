@@ -6,6 +6,10 @@ import { logAudit } from "@/lib/audit";
 import { canManagePages, normalizePageContent, normalizePageSlug } from "@/lib/pages";
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import {
+  LEGACY_UNUSED_PAGE_SLUGS,
+  isLegacyUnusedPageSlug,
+} from "@/lib/custom-pages";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,6 +22,11 @@ export async function GET(req: NextRequest) {
     }
 
     const pages = await prisma.page.findMany({
+      where: {
+        slug: {
+          notIn: [...LEGACY_UNUSED_PAGE_SLUGS],
+        },
+      },
       orderBy: { updatedAt: "desc" },
     });
     return NextResponse.json(pages);
@@ -57,6 +66,13 @@ export async function POST(req: NextRequest) {
 
     if (!cleanSlug) {
       return NextResponse.json({ error: "Slug không hợp lệ" }, { status: 400 });
+    }
+
+    if (isLegacyUnusedPageSlug(cleanSlug)) {
+      return NextResponse.json(
+        { error: "Đường dẫn này thuộc trang chính và không thể tạo lại trong Trang tạo thêm" },
+        { status: 400 },
+      );
     }
 
     // Check slug uniqueness

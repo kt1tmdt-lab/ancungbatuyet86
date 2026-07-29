@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { canManagePages, normalizePageSlug } from "@/lib/pages";
+import { isLegacyUnusedPageSlug } from "@/lib/custom-pages";
 
 export async function GET(
   req: NextRequest,
@@ -11,7 +12,7 @@ export async function GET(
     const { slug } = await params;
     const cleanSlug = normalizePageSlug(slug);
 
-    if (!cleanSlug) {
+    if (!cleanSlug || isLegacyUnusedPageSlug(cleanSlug)) {
       return NextResponse.json({ error: "Trang không tồn tại" }, { status: 404 });
     }
 

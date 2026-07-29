@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
@@ -117,22 +118,43 @@ type ProductOption = {
   category?: string | null;
 };
 
+type SettingsTab = "hero" | "seo" | "navigation" | "stats";
+
 export default function SettingsPage() {
   const { token } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"hero" | "seo" | "navigation" | "stats">("hero");
+  const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
+    const tab = searchParams.get("tab");
+    return tab === "seo" || tab === "navigation" || tab === "stats"
+      ? tab
+      : "hero";
+  });
   const [heroMediaOpen, setHeroMediaOpen] = useState(false);
   const [brandMediaOpen, setBrandMediaOpen] = useState(false);
   const [commerceMediaOpen, setCommerceMediaOpen] = useState(false);
   const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
 
   useEffect(() => {
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    if (tab === "hero" || tab === "seo" || tab === "navigation" || tab === "stats") {
-      setActiveTab(tab);
-    }
-  }, []);
+    const tab = searchParams.get("tab");
+    const nextTab: SettingsTab =
+      tab === "seo" || tab === "navigation" || tab === "stats"
+        ? tab
+        : "hero";
+    const timer = window.setTimeout(() => setActiveTab(nextTab), 0);
+    return () => window.clearTimeout(timer);
+  }, [searchParams]);
+
+  const selectSettingsTab = (tab: SettingsTab) => {
+    setActiveTab(tab);
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("tab", tab);
+    router.replace(`/admin/settings?${nextParams.toString()}`, {
+      scroll: false,
+    });
+  };
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -142,7 +164,11 @@ export default function SettingsPage() {
   const { control, register, handleSubmit, reset, setValue, getValues, formState: { errors } } = form;
 
   // Field arrays for menus
-  const { fields: navbarFields, move: moveNavbar } = useFieldArray({
+  const {
+    fields: navbarFields,
+    move: moveNavbar,
+    remove: removeNavbar,
+  } = useFieldArray({
     control,
     name: "navbarLinks",
   });
@@ -152,6 +178,7 @@ export default function SettingsPage() {
     name: "productMenuLinks",
   });
   const watchedProductMenuLinks = useWatch({ control, name: "productMenuLinks" });
+  const watchedNavbarLinks = useWatch({ control, name: "navbarLinks" });
   const watchedHeroImage = useWatch({ control, name: "heroBanner.characterImage" });
 
   const { fields: footerSupportFields, append: appendFooterSupport, remove: removeFooterSupport } = useFieldArray({
@@ -294,7 +321,7 @@ export default function SettingsPage() {
         {/* Navigation Tabs */}
         <div className="flex overflow-x-auto border-b border-slate-200">
           <button
-            onClick={() => setActiveTab("hero")}
+            onClick={() => selectSettingsTab("hero")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
               activeTab === "hero"
                 ? "border-orange-500 text-orange-600 bg-white"
@@ -304,7 +331,7 @@ export default function SettingsPage() {
             Hero trang chủ
           </button>
           <button
-            onClick={() => setActiveTab("seo")}
+            onClick={() => selectSettingsTab("seo")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
               activeTab === "seo"
                 ? "border-orange-500 text-orange-600 bg-white"
@@ -314,7 +341,7 @@ export default function SettingsPage() {
             SEO
           </button>
           <button
-            onClick={() => setActiveTab("stats")}
+            onClick={() => selectSettingsTab("stats")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
               activeTab === "stats"
                 ? "border-orange-500 text-orange-600 bg-white"
@@ -324,7 +351,7 @@ export default function SettingsPage() {
             Số liệu tiêu biểu
           </button>
           <button
-            onClick={() => setActiveTab("navigation")}
+            onClick={() => selectSettingsTab("navigation")}
             className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
               activeTab === "navigation"
                 ? "border-orange-500 text-orange-600 bg-white"
@@ -385,14 +412,6 @@ export default function SettingsPage() {
                           <label className="block text-sm font-bold text-slate-700 mb-1">Mô tả ảnh (alt)</label>
                           <input {...register("heroBanner.characterAlt")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" />
                         </div>
-                        <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-1">Câu trích dẫn bên cạnh ảnh</label>
-                          <textarea {...register("heroBanner.quote")} className="min-h-24 w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div><label className="block text-sm font-bold text-slate-700 mb-1">Số liệu nổi bật</label><input {...register("heroBanner.statValue")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" /></div>
-                          <div><label className="block text-sm font-bold text-slate-700 mb-1">Nhãn số liệu</label><input {...register("heroBanner.statLabel")} className="w-full border border-slate-300 p-2.5 outline-none focus:border-orange-500 text-sm" /></div>
-                        </div>
                       </div>
                     </div>
 
@@ -444,18 +463,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-100 pt-5">
-                      <h3 className="mb-3 font-bold text-slate-900">Ba ô thông tin dưới Hero</h3>
-                      <div className="grid gap-4 md:grid-cols-3">
-                        {[0, 1, 2].map((index) => (
-                          <div key={index} className="space-y-3 border border-slate-200 bg-slate-50 p-4">
-                            <div className="text-xs font-black uppercase text-orange-600">Ô {index + 1}</div>
-                            <input {...register(`heroBanner.highlights.${index}.value` as const)} className="w-full border border-slate-300 p-2.5 text-sm font-bold outline-none focus:border-orange-500" placeholder="Giá trị lớn" />
-                            <input {...register(`heroBanner.highlights.${index}.label` as const)} className="w-full border border-slate-300 p-2.5 text-sm outline-none focus:border-orange-500" placeholder="Dòng mô tả" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -727,7 +734,10 @@ export default function SettingsPage() {
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="border border-orange-100 bg-orange-50 px-4 py-3 text-xs font-semibold leading-6 text-orange-900">
-                      Menu chỉ gồm các trang đang tồn tại. Dùng hai nút mũi tên để đổi thứ tự; nếu dữ liệu cũ bị lệch, bấm <span className="font-black">Reset menu chuẩn</span> rồi lưu lại.
+                      Các trang chính luôn được giữ lại. Trang tạo thêm được đưa
+                      lên menu ngay tại mục <span className="font-black">Trang tạo thêm</span>;
+                      tại đây có thể đổi thứ tự hoặc gỡ khỏi menu. Nếu dữ liệu cũ
+                      bị lệch, bấm <span className="font-black">Reset menu chuẩn</span> rồi lưu lại.
                     </div>
                     {navbarFields.length === 0 ? (
                       <p className="text-center py-6 text-xs text-slate-400 font-semibold italic">Chưa có liên kết nào, hệ thống sẽ sử dụng danh sách tĩnh mặc định.</p>
@@ -770,6 +780,21 @@ export default function SettingsPage() {
                                 <ArrowDown size={14} />
                               </button>
                             </div>
+                            {watchedNavbarLinks?.[idx]?.href?.startsWith(
+                              "/trang/",
+                            ) ? (
+                              <button
+                                type="button"
+                                onClick={() => removeNavbar(idx)}
+                                className="grid h-9 w-9 shrink-0 place-items-center border border-red-200 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+                                aria-label="Gỡ trang tùy biến khỏi menu"
+                                title="Gỡ khỏi menu"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            ) : (
+                              <span className="w-9 shrink-0" />
+                            )}
                           </div>
                         ))}
                       </div>

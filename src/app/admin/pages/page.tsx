@@ -1,20 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import {
   Plus,
-  Loader,
   Edit3,
   Trash2,
   ExternalLink,
-  Wand2
+  Link2,
+  Unlink,
 } from "lucide-react";
 import Link from "next/link";
-import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
-import { getSystemPageSeedContent as getCleanSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
 import toast from "react-hot-toast";
 import CmsPageHeader from "@/components/admin/CmsPageHeader";
 import { CmsPanel } from "@/components/admin/CmsPanel";
@@ -26,6 +23,11 @@ import {
   ConfirmDialog,
 } from "@/components/admin/AdminPrimitives";
 import Button from "@/components/ui/Button";
+import {
+  normalizeSiteConfig,
+  type SiteConfigData,
+} from "@/lib/site-config-defaults";
+import { customPageHref } from "@/lib/custom-pages";
 
 interface PageData {
   id: string;
@@ -36,42 +38,65 @@ interface PageData {
 }
 
 export default function AdminPagesList() {
-  const router = useRouter();
   const [pages, setPages] = useState<PageData[]>([]);
+  const [siteConfig, setSiteConfig] = useState<SiteConfigData | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [menuLoading, setMenuLoading] = useState<string | null>(null);
   const [loadError, setLoadError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<PageData | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  const canManageWebsiteMenu = Boolean(
+    user &&
+      ["SUPER_ADMIN", "ADMIN", "MARKETING"].includes(user.role),
+  );
 
   useEffect(() => {
     if (!token) return;
 
     let cancelled = false;
-    const timer = window.setTimeout(() => {
+    const timer = window.setTimeout(async () => {
       setLoadError("");
-      fetch("/api/pages", {
-        headers: {
-          Authorization: `Bearer ${token}`
+      try {
+        const [pagesResult, settingsResult] = await Promise.allSettled([
+          fetch("/api/pages", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch("/api/settings"),
+        ]);
+
+        if (
+          pagesResult.status !== "fulfilled" ||
+          !pagesResult.value.ok
+        ) {
+          throw new Error("Failed to fetch pages");
         }
-      })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch pages");
-        return res.json();
-      })
-      .then((data) => {
-        if (!cancelled) setPages(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => {
+
+        const pageData = await pagesResult.value.json();
+        if (!cancelled) {
+          setPages(Array.isArray(pageData) ? pageData : []);
+        }
+
+        if (
+          settingsResult.status === "fulfilled" &&
+          settingsResult.value.ok
+        ) {
+          const settingsData = await settingsResult.value.json();
+          if (!cancelled) {
+            setSiteConfig(normalizeSiteConfig(settingsData?.data));
+          }
+        }
+      } catch (err) {
         if (!cancelled) {
           console.error("Failed to fetch pages:", err);
           setLoadError("Không thể tải danh sách trang.");
         }
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
     }, 0);
 
     return () => {
@@ -79,6 +104,51 @@ export default function AdminPagesList() {
       window.clearTimeout(timer);
     };
   }, [token]);
+
+  const persistSiteConfig = async (nextConfig: SiteConfigData) => {
+    const response = await fetch("/api/settings", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(nextConfig),
+    });
+
+    if (!response.ok) {
+      throw new Error("Không thể cập nhật menu website");
+    }
+
+    setSiteConfig(nextConfig);
+  };
+
+  const togglePageInMenu = async (page: PageData) => {
+    if (!siteConfig || !token) {
+      toast.error("Chưa tải được cấu hình menu website.");
+      return;
+    }
+
+    const href = customPageHref(page.slug);
+    const isInMenu = siteConfig.navbarLinks.some((item) => item.href === href);
+    const navbarLinks = isInMenu
+      ? siteConfig.navbarLinks.filter((item) => item.href !== href)
+      : [...siteConfig.navbarLinks, { href, label: page.title }];
+
+    setMenuLoading(page.id);
+    try {
+      await persistSiteConfig({ ...siteConfig, navbarLinks });
+      toast.success(
+        isInMenu
+          ? "Đã gỡ trang khỏi menu website."
+          : "Đã đưa trang lên menu website.",
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể cập nhật menu website.");
+    } finally {
+      setMenuLoading(null);
+    }
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -106,51 +176,8 @@ export default function AdminPagesList() {
     }
   };
 
-  const systemPages = Object.values(DEFAULT_INFO_PAGES).filter(isVisibleSystemPage).map((page) => ({
-    ...page,
-    cmsPage: pages.find((existing) => existing.slug === page.cmsSlug)
-  }));
-
-  const handleCreateSystemPage = async (cmsSlug: string) => {
-    const fallback = Object.values(DEFAULT_INFO_PAGES).find((page) => page.cmsSlug === cmsSlug);
-    if (!fallback || !token) return;
-
-    setActionLoading(cmsSlug);
-    try {
-      const res = await fetch("/api/pages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title: fallback.title,
-          slug: fallback.cmsSlug,
-          status: "PUBLISHED",
-          content: getCleanSystemPageSeedContent(fallback)
-        })
-      });
-
-      if (res.ok) {
-        const created = await res.json();
-        setPages((currentPages) => [created, ...currentPages]);
-        router.push(`/admin/pages/${created.id}/edit`);
-        return;
-      }
-
-      const errData = await res.json();
-      toast.error(errData.error || "Không thể tạo trang cấu hình");
-    } catch (err) {
-      console.error(err);
-      toast.error("Đã xảy ra lỗi khi tạo trang cấu hình");
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   // Filter search
   const filteredPages = pages
-    .filter((page) => page.slug === "chat-luong" || !page.slug.startsWith("chat-luong-"))
     .filter((page) =>
       page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       page.slug.toLowerCase().includes(searchQuery.toLowerCase())
@@ -161,8 +188,8 @@ export default function AdminPagesList() {
       <div className="space-y-6">
         <CmsPageHeader
           eyebrow="Nội dung"
-          title="Quản lý trang tùy biến"
-          description="Tạo landing page, trang sự kiện và các trang phụ bằng trình dựng nội dung theo khối."
+          title="Trang tạo thêm"
+          description="Tạo landing page, trang sự kiện hoặc trang thông tin mới rồi chủ động đưa lên menu website."
           actions={
           <Button
             href="/admin/pages/new"
@@ -175,74 +202,10 @@ export default function AdminPagesList() {
         />
 
         <CmsPanel className="space-y-4 p-4 sm:p-6">
-          <div className="border border-primary/20 bg-orange-50/50 p-5">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 mb-4">
-              <div>
-                <h2 className="text-lg font-extrabold text-slate-950 flex items-center gap-2">
-                  <Wand2 size={19} className="text-primary-dark" />
-                  Trang hệ thống có thể cấu hình
-                </h2>
-                <p className="text-xs text-slate-600 mt-1 max-w-3xl">
-                  Các trang này đã có đường dẫn công khai. Khi chưa tạo bản CMS,
-                  website sử dụng nội dung mặc định; khi tạo, quản trị viên có thể
-                  sửa từng khối nội dung và hình ảnh.
-                </p>
-              </div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-primary-dark bg-white border border-primary/20 px-3 py-1">
-                {systemPages.filter((page) => page.cmsPage).length}/{systemPages.length} đã có CMS
-              </span>
-            </div>
-
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {systemPages.map((page) => {
-                const cmsPage = page.cmsPage;
-                return (
-                  <div key={page.routePath} className="bg-white border border-slate-200 p-4 shadow-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-extrabold text-slate-950 leading-tight line-clamp-2">{page.title}</p>
-                        <p className="text-[11px] font-mono text-slate-500 mt-1 break-all">{page.routePath}</p>
-                        <p className="text-[11px] text-slate-400 mt-1 break-all">CMS slug: {page.cmsSlug}</p>
-                      </div>
-                      <span className={`shrink-0 border px-2 py-0.5 text-[10px] font-extrabold uppercase ${
-                        cmsPage ? "bg-green-50 text-green-700 border-green-200" : "bg-slate-50 text-slate-500 border-slate-200"
-                      }`}>
-                        {cmsPage ? "Có CMS" : "Mặc định"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 mt-4">
-                      {cmsPage ? (
-                        <Link
-                          href={`/admin/pages/${cmsPage.id}/edit`}
-                          className="acbt-btn acbt-btn--admin acbt-btn--sm"
-                        >
-                          <Edit3 size={14} />
-                          Sửa nội dung
-                        </Link>
-                      ) : (
-                        <button
-                          onClick={() => handleCreateSystemPage(page.cmsSlug)}
-                          disabled={actionLoading === page.cmsSlug}
-                          className="acbt-btn acbt-btn--admin acbt-btn--sm disabled:opacity-60"
-                        >
-                          {actionLoading === page.cmsSlug ? <Loader size={14} className="animate-spin" /> : <Plus size={14} />}
-                          Tạo và sửa
-                        </button>
-                      )}
-                      <Link
-                        href={page.routePath}
-                        target="_blank"
-                        className="acbt-icon-btn p-2 text-slate-500 hover:bg-slate-100 hover:text-primary-dark"
-                        title="Xem route public"
-                      >
-                        <ExternalLink size={15} />
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="border border-orange-200 bg-orange-50/60 p-4 text-sm font-semibold leading-6 text-orange-950">
+            Khu vực này chỉ quản lý những trang mới do Admin tự tạo. Trang chủ,
+            Giới thiệu, Chất lượng, Sản phẩm và Điểm bán đã có màn quản lý riêng,
+            nên không xuất hiện lặp lại tại đây.
           </div>
 
           <AdminToolbar className="-mx-4 border-y sm:-mx-6">
@@ -270,6 +233,7 @@ export default function AdminPagesList() {
                     <th className="px-5 py-4">Tên trang</th>
                     <th className="px-5 py-4">Đường dẫn tĩnh (Slug)</th>
                     <th className="px-5 py-4 text-center">Trạng thái</th>
+                    <th className="px-5 py-4 text-center">Menu website</th>
                     <th className="px-5 py-4 text-center">Cập nhật lúc</th>
                     <th className="px-5 py-4 text-right">Thao tác</th>
                   </tr>
@@ -277,6 +241,12 @@ export default function AdminPagesList() {
                 <tbody className="divide-y divide-slate-50">
                   {filteredPages.map((page) => {
                     const isDraft = page.status === "DRAFT";
+                    const pageHref = customPageHref(page.slug);
+                    const isInMenu = Boolean(
+                      siteConfig?.navbarLinks.some(
+                        (item) => item.href === pageHref,
+                      ),
+                    );
                     return (
                       <tr key={page.id} className="hover:bg-slate-50/50 transition">
                         <td className="px-5 py-4">
@@ -286,7 +256,7 @@ export default function AdminPagesList() {
                         </td>
                         <td className="px-5 py-4 font-mono text-xs text-slate-500">
                           <span className="bg-slate-50 border border-slate-100 px-2 py-0.5 ">
-                            /trang/{page.slug}
+                            {pageHref}
                           </span>
                         </td>
                         <td className="px-5 py-4 text-center">
@@ -298,13 +268,50 @@ export default function AdminPagesList() {
                             {isDraft ? "Nháp" : "Xuất bản"}
                           </span>
                         </td>
+                        <td className="px-5 py-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => void togglePageInMenu(page)}
+                            disabled={
+                              isDraft ||
+                              !siteConfig ||
+                              !canManageWebsiteMenu ||
+                              menuLoading === page.id
+                            }
+                            className={`inline-flex min-h-9 items-center gap-2 border px-3 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                              isInMenu
+                                ? "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-700"
+                            }`}
+                            title={
+                              isDraft
+                                ? "Xuất bản trang trước khi đưa lên menu"
+                                : !canManageWebsiteMenu
+                                  ? "Tài khoản này không có quyền sửa menu website"
+                                : isInMenu
+                                  ? "Gỡ khỏi menu website"
+                                  : "Đưa lên menu website"
+                            }
+                          >
+                            {isInMenu ? (
+                              <Unlink size={14} />
+                            ) : (
+                              <Link2 size={14} />
+                            )}
+                            {menuLoading === page.id
+                              ? "Đang lưu"
+                              : isInMenu
+                                ? "Đang hiển thị"
+                                : "Đưa lên menu"}
+                          </button>
+                        </td>
                         <td className="px-5 py-4 text-center text-xs text-slate-450 font-semibold">
                           {new Date(page.updatedAt).toLocaleString("vi-VN")}
                         </td>
                         <td className="px-5 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Link
-                              href={`/trang/${page.slug}`}
+                              href={pageHref}
                               target="_blank"
                               className="acbt-icon-btn p-1.5 text-slate-400 hover:bg-slate-100 hover:text-primary-dark"
                               title="Xem trang thực tế"

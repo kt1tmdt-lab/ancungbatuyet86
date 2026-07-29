@@ -98,7 +98,7 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
       },
       {
         href: "/admin/pages",
-        label: "Trang tùy biến",
+        label: "Trang tạo thêm",
         icon: Globe2,
         roles: PAGE_ROLES,
       },

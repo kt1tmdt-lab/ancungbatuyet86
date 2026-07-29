@@ -36,8 +36,6 @@ import Link from "next/link";
 import { UploadProgressCircle } from "@/components/admin/UploadProgressCircle";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
-import { DEFAULT_INFO_PAGES } from "@/lib/default-info-pages";
-import { getSystemPageSeedContent, isVisibleSystemPage } from "@/lib/system-page-seeds";
 import toast from "react-hot-toast";
 import { ConfirmDialog } from "@/components/admin/AdminPrimitives";
 
@@ -270,7 +268,7 @@ export function PageForm({ pageId }: { pageId?: string }) {
           imageUrl: "/uploads/process-preview.jpg",
           imagePosition: "right",
           ctaText: "Xem quy trình chi tiết",
-          ctaLink: "/chat-luong/nha-may-quy-trinh-san-xuat"
+          ctaLink: "/chat-luong"
         };
         break;
       case "products":
@@ -403,31 +401,71 @@ export function PageForm({ pageId }: { pageId?: string }) {
     setMediaPickerTarget(null);
   };
 
-  const loadDefaultTemplate = () => {
-    const normalizedSlug = normalizePageSlug(slug || title);
-    const template = Object.values(DEFAULT_INFO_PAGES).filter(isVisibleSystemPage).find(
-      (item) => item.cmsSlug === normalizedSlug || item.routePath.replace(/^\//, "").replace(/\//g, "-") === normalizedSlug,
-    );
-
-    if (!template) {
-      setError("Không tìm thấy mẫu có sẵn cho slug trang này. Kiểm tra lại đường dẫn tĩnh hoặc tạo nội dung thủ công.");
-      setSuccess("");
-      return;
-    }
+  const loadStarterTemplate = () => {
+    const starterTitle = title.trim() || "Trang nội dung mới";
+    const starterSlug = normalizePageSlug(slug || starterTitle);
+    const starterBlocks: Block[] = [
+      {
+        id: `hero-${Date.now()}`,
+        type: "hero",
+        data: {
+          label: "Ăn Cùng Bà Tuyết",
+          title: starterTitle,
+          subtitle:
+            "Viết mô tả ngắn giúp người đọc hiểu nội dung chính của trang.",
+          backgroundImage: "",
+          ctaText: "Liên hệ",
+          ctaLink: "/lien-he",
+        },
+      },
+      {
+        id: `text-${Date.now() + 1}`,
+        type: "text",
+        data: {
+          backgroundColor: "white",
+          content:
+            "<h2>Nội dung chính</h2><p>Thay phần này bằng thông tin chính thức cần công bố trên website.</p>",
+        },
+      },
+      {
+        id: `features-${Date.now() + 2}`,
+        type: "features",
+        data: {
+          title: "Thông tin nổi bật",
+          subtitle: "Có thể sửa, thêm hoặc xóa từng mục.",
+          items: [
+            {
+              icon: "Check",
+              title: "Nội dung thứ nhất",
+              description: "Mô tả ngắn cho thông tin thứ nhất.",
+            },
+            {
+              icon: "Check",
+              title: "Nội dung thứ hai",
+              description: "Mô tả ngắn cho thông tin thứ hai.",
+            },
+            {
+              icon: "Check",
+              title: "Nội dung thứ ba",
+              description: "Mô tả ngắn cho thông tin thứ ba.",
+            },
+          ],
+        },
+      },
+    ];
 
     setConfirmation({
-      title: "Nạp nội dung mẫu?",
+      title: "Tạo bố cục khởi đầu?",
       description:
-        "Toàn bộ khối nội dung đang chỉnh sửa sẽ được thay bằng mẫu tương ứng với đường dẫn trang.",
+        "Toàn bộ khối đang chỉnh sửa sẽ được thay bằng một bố cục mới gồm Hero, nội dung chính và các thông tin nổi bật.",
       action: () => {
-        setTitle(template.title);
-        setSlug(template.cmsSlug);
-        const templateBlocks = getSystemPageSeedContent(template);
-        setBlocks(JSON.parse(JSON.stringify(templateBlocks)) as Block[]);
-        setExpandedBlockId(templateBlocks[0]?.id || null);
+        if (!title.trim()) setTitle(starterTitle);
+        if (!slug.trim()) setSlug(starterSlug);
+        setBlocks(starterBlocks);
+        setExpandedBlockId(starterBlocks[0]?.id || null);
         setError("");
         setSuccess(
-          "Đã nạp mẫu vào trình sửa. Bấm Lưu thiết kế để cập nhật lên website.",
+          "Đã tạo bố cục khởi đầu. Hãy thay nội dung rồi bấm Lưu thiết kế.",
         );
       },
     });
@@ -514,11 +552,11 @@ export function PageForm({ pageId }: { pageId?: string }) {
           <button
             type="button"
             disabled={loading}
-            onClick={loadDefaultTemplate}
+            onClick={loadStarterTemplate}
             className="inline-flex items-center gap-2 border border-orange-200 bg-white px-5 py-2.5 text-xs font-bold text-orange-700 transition-all hover:border-orange-500 hover:bg-orange-50 disabled:opacity-50"
           >
             <Upload size={14} />
-            <span>Nạp mẫu theo slug</span>
+            <span>Tạo bố cục khởi đầu</span>
           </button>
           <button
             type="button"

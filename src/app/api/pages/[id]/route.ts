@@ -6,6 +6,11 @@ import { logAudit } from "@/lib/audit";
 import { canManagePages, normalizePageContent, normalizePageSlug } from "@/lib/pages";
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import {
+  customPageHref,
+  isLegacyUnusedPageSlug,
+} from "@/lib/custom-pages";
+import { normalizeSiteConfig } from "@/lib/site-config-defaults";
 
 export async function GET(
   req: NextRequest,
@@ -28,6 +33,10 @@ export async function GET(
     });
 
     if (!page) {
+      return NextResponse.json({ error: "Trang không tồn tại" }, { status: 404 });
+    }
+
+    if (isLegacyUnusedPageSlug(page.slug)) {
       return NextResponse.json({ error: "Trang không tồn tại" }, { status: 404 });
     }
 
@@ -80,6 +89,13 @@ export async function PUT(
       return NextResponse.json({ error: "Slug không hợp lệ" }, { status: 400 });
     }
 
+    if (isLegacyUnusedPageSlug(cleanSlug)) {
+      return NextResponse.json(
+        { error: "Đường dẫn này thuộc trang chính và không thể dùng cho Trang tạo thêm" },
+        { status: 400 },
+      );
+    }
+
     // Check slug uniqueness (excluding current page)
     const duplicate = await prisma.page.findFirst({
       where: {
@@ -92,16 +108,53 @@ export async function PUT(
       return NextResponse.json({ error: "Đường dẫn slug này đã được sử dụng" }, { status: 400 });
     }
 
-    // 3. Update page
-    const updatedPage = await prisma.page.update({
-      where: { id },
-      data: {
-        title: cleanTitle,
-        slug: cleanSlug,
-        content: cleanContent as unknown as Prisma.InputJsonValue,
-        status: status === PageStatus.PUBLISHED ? PageStatus.PUBLISHED : PageStatus.DRAFT,
-      },
+    const globalConfig = await prisma.siteConfig.findUnique({
+      where: { id: "global" },
     });
+    const normalizedConfig = globalConfig
+      ? normalizeSiteConfig(globalConfig.data)
+      : null;
+    const previousHref = customPageHref(existingPage.slug);
+    const nextHref = customPageHref(cleanSlug);
+    const willBePublished = status === PageStatus.PUBLISHED;
+    const isInNavbar = Boolean(
+      normalizedConfig?.navbarLinks.some((item) => item.href === previousHref),
+    );
+    const nextConfig =
+      normalizedConfig && isInNavbar
+        ? {
+            ...normalizedConfig,
+            navbarLinks: willBePublished
+              ? normalizedConfig.navbarLinks.map((item) =>
+                  item.href === previousHref
+                    ? { href: nextHref, label: cleanTitle }
+                    : item,
+                )
+              : normalizedConfig.navbarLinks.filter(
+                  (item) => item.href !== previousHref,
+                ),
+          }
+        : null;
+
+    const [updatedPage] = await prisma.$transaction([
+      prisma.page.update({
+        where: { id },
+        data: {
+          title: cleanTitle,
+          slug: cleanSlug,
+          content: cleanContent as unknown as Prisma.InputJsonValue,
+          status: willBePublished ? PageStatus.PUBLISHED : PageStatus.DRAFT,
+        },
+      }),
+      ...(globalConfig && nextConfig
+        ? [
+            prisma.siteConfig.update({
+              where: { id: "global" },
+              data: { data: nextConfig as Prisma.InputJsonValue },
+            }),
+          ]
+        : []),
+    ]);
 
     await logAudit({
       userId: payload.id,
@@ -113,6 +166,7 @@ export async function PUT(
 
     revalidatePath(`/trang/${existingPage.slug}`);
     revalidatePath(`/trang/${updatedPage.slug}`);
+    if (isInNavbar) revalidatePath("/", "layout");
 
     return NextResponse.json(updatedPage);
   } catch (error) {
@@ -146,8 +200,36 @@ export async function DELETE(
       return NextResponse.json({ error: "Trang không tồn tại" }, { status: 404 });
     }
 
-    // 2. Delete page
-    await prisma.page.delete({ where: { id } });
+    const globalConfig = await prisma.siteConfig.findUnique({
+      where: { id: "global" },
+    });
+    const normalizedConfig = globalConfig
+      ? normalizeSiteConfig(globalConfig.data)
+      : null;
+    const deletedHref = customPageHref(existingPage.slug);
+    const nextNavbarLinks =
+      normalizedConfig?.navbarLinks.filter((item) => item.href !== deletedHref) ||
+      [];
+    const navbarChanged =
+      Boolean(normalizedConfig) &&
+      nextNavbarLinks.length !== normalizedConfig?.navbarLinks.length;
+
+    await prisma.$transaction([
+      prisma.page.delete({ where: { id } }),
+      ...(globalConfig && normalizedConfig && navbarChanged
+        ? [
+            prisma.siteConfig.update({
+              where: { id: "global" },
+              data: {
+                data: {
+                  ...normalizedConfig,
+                  navbarLinks: nextNavbarLinks,
+                } as Prisma.InputJsonValue,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     await logAudit({
       userId: payload.id,
@@ -158,6 +240,7 @@ export async function DELETE(
     });
 
     revalidatePath(`/trang/${existingPage.slug}`);
+    if (navbarChanged) revalidatePath("/", "layout");
 
     return NextResponse.json({ message: "Xóa trang thành công" });
   } catch (error) {

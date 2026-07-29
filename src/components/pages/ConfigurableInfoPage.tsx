@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
-import { ArrowRight, FileSearch, HelpCircle, Loader } from "lucide-react";
+import { ArrowRight, FileSearch, HelpCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import type { DefaultInfoPage, InfoPageBlock } from "@/lib/default-info-pages";
@@ -51,14 +51,6 @@ type RenderBlockData = {
   productIds?: string[];
   items?: RenderItem[];
   images?: string[];
-};
-
-type CmsPage = {
-  id: string;
-  title: string;
-  slug: string;
-  status: "DRAFT" | "PUBLISHED";
-  content: InfoPageBlock[];
 };
 
 function DynIcon({ name, className }: { name: string; className?: string }) {
@@ -484,8 +476,8 @@ function QualityDetailPage({
   const navItems = [
     ["Tổng quan", "/chat-luong"],
     ["Nguồn nguyên liệu", "/chat-luong/minh-bach-nguon-nguyen-lieu"],
-    ["Nhà máy & Quy trình", "/chat-luong/nha-may-quy-trinh-san-xuat"],
-    ["Hồ sơ pháp lý", "/chat-luong/ho-so-phap-ly-chung-nhan"],
+    ["Nhà máy & Quy trình", "/chat-luong#nha-may-quy-trinh"],
+    ["Hồ sơ pháp lý", "/chat-luong#ho-so-phap-ly"],
     ["PVI", "/chat-luong/bao-hiem-trach-nhiem-san-pham-pvi"],
     ["Chính sách khách hàng", "/chat-luong/chinh-sach-bao-ve-quyen-loi-khach-hang"],
   ];
@@ -607,7 +599,7 @@ function QualityDetailPage({
               {heroData.subtitle || splitData.description || "Mọi thông tin chất lượng cần được trình bày bằng hồ sơ, hình ảnh và dữ liệu có thể kiểm chứng."}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/chat-luong/ho-so-phap-ly-chung-nhan" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
+              <Link href="/chat-luong#ho-so-phap-ly" className="inline-flex items-center gap-2 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950">
                 Xem hồ sơ <ArrowRight size={15} />
               </Link>
               <Link href="/san-pham" className="inline-flex items-center gap-2 border border-slate-950 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:bg-slate-950 hover:text-white">
@@ -940,8 +932,6 @@ function QualityDetailPage({
 }
 
 export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultInfoPage }) {
-  const [page, setPage] = useState<CmsPage | null>(null);
-  const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<ProductCard[]>([]);
 
   // Form states for partnership contact submission
@@ -1044,36 +1034,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch(`/api/pages/slug/${fallback.cmsSlug}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.content) setPage(data);
-      })
-      .catch(() => {
-        if (!cancelled) setPage(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fallback.cmsSlug]);
-
-  const title = page?.title || fallback.title;
-  const blocks = page?.content?.length ? page.content : fallback.blocks;
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[55vh] items-center justify-center bg-[#fbfaf7]">
-        <Loader className="animate-spin text-orange-500" size={34} />
-      </div>
-    );
-  }
+  const title = fallback.title;
+  const blocks = fallback.blocks;
 
   if (fallback.routePath === "/gioi-thieu/cau-chuyen-thuong-hieu") {
     return <BrandStoryPosterPage title={title} blocks={blocks} fallbackBlocks={fallback.blocks} products={products} />;

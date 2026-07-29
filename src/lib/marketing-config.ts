@@ -116,6 +116,18 @@ export type MarketingConfigData = {
 const TRUST_DOCUMENT_KEYS = new Set(["food_safety_certificate", "pvi_insurance"]);
 const TRUST_DOCUMENT_PLACEHOLDER_IMAGES = new Set(["/bento/bento-insurance.png"]);
 
+function isUnusedAboutAssetKey(key: string) {
+  return key.startsWith("about_") && key !== "about_video";
+}
+
+function isUnusedAboutTextKey(key: string) {
+  return (
+    key.startsWith("about_") &&
+    !key.startsWith("about_current_") &&
+    !key.startsWith("about_hero_stat_")
+  );
+}
+
 export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   {
     id: "default-about-video",
@@ -143,14 +155,14 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     key: "home_factory_proof_1",
     label: "Nguyên liệu được chọn lọc theo nguồn rõ ràng, ghi nhận thông tin và kiểm tra trước khi đưa vào sản xuất.",
     imageUrl: "/hero/chan-ga-plate.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-home-factory-proof-2",
     key: "home_factory_proof_2",
     label: "Khu sơ chế, chế biến và đóng gói được trình bày bằng hình ảnh thực tế để khách hàng hiểu cách sản phẩm được làm ra.",
     imageUrl: "/bento/bento-factory.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-home-factory-proof-3",
@@ -178,7 +190,7 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     key: "about_process_background",
     label: "Ảnh nền khu sản xuất phần giới thiệu",
     imageUrl: "/bento/bento-factory.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-about-gallery-1",
@@ -234,21 +246,21 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     key: "about_process_ingredient",
     label: "Nguyên liệu",
     imageUrl: "/bento/bento-ingredients.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-about-process-factory",
     key: "about_process_factory",
     label: "Nhà máy",
     imageUrl: "/bento/bento-factory.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-about-process-packaging",
     key: "about_process_packaging",
     label: "Đóng gói",
     imageUrl: "/bento/bento-tiktok.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-about-process-distribution",
@@ -262,35 +274,35 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     key: "process_farm",
     label: "Nguyên liệu đầu vào",
     imageUrl: "/bento/bento-ingredients.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-inspect",
     key: "process_inspect",
     label: "Kiểm định nguyên liệu",
     imageUrl: "/bento/bento-insurance.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-cooking",
     key: "process_cooking",
     label: "Sơ chế và chế biến",
     imageUrl: "/hero/chan-ga-plate.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-qc",
     key: "process_qc",
     label: "Kiểm soát chất lượng",
     imageUrl: "/bento/bento-insurance.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-packaging",
     key: "process_packaging",
     label: "Đóng gói",
     imageUrl: "/bento/bento-tiktok.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-delivery",
@@ -304,7 +316,7 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     key: "process_factory",
     label: "Khu vực nhà máy",
     imageUrl: "/bento/bento-factory.png",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
   },
   {
     id: "default-process-documents",
@@ -313,7 +325,7 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     imageUrl: "/bento/bento-insurance.png",
     linkUrl: "/gioi-thieu",
   },
-];
+].filter((item) => !isUnusedAboutAssetKey(item.key));
 
 export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
   { id: "home-text-factory-proof-1-title", key: "factory_proof_1_title", group: "Trang chủ - Bằng chứng nhà máy", label: "Bằng chứng 1 - tên mục", value: "Nguyên liệu đầu vào", multiline: false, sortOrder: 70 },
@@ -498,7 +510,7 @@ export const DEFAULT_HOME_TEXTS: HomeTextItem[] = [
   { id: "sales-cta-title", key: "sales_cta_title", group: "Điểm bán - CTA", label: "Tiêu đề", value: "Không chắc kênh mua có chính hãng?", multiline: true, sortOrder: 941 },
   { id: "sales-cta-text", key: "sales_cta_text", group: "Điểm bán - CTA", label: "Nút - chữ", value: "Liên hệ kiểm tra", multiline: false, sortOrder: 942 },
   { id: "sales-cta-link", key: "sales_cta_link", group: "Điểm bán - CTA", label: "Nút - link", value: "/lien-he", multiline: false, sortOrder: 943 },
-];
+].filter((item) => !isUnusedAboutTextKey(item.key));
 
 export const DEFAULT_HOME_SECTIONS: HomeSectionItem[] = [
   {
@@ -557,7 +569,7 @@ export const DEFAULT_HOME_NEWS_ITEMS: HomeNewsItem[] = [
     label: "Hậu trường",
     imageUrl: "/hero/chan-ga-poster.png",
     logoUrl: "",
-    linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
     enabled: true,
     sortOrder: 30,
   },
@@ -626,7 +638,7 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       description: "Thương hiệu đẩy mạnh tiêu chuẩn hóa quy trình, hình ảnh nhà xưởng và hồ sơ uy tín.",
       detailContent: "Các nội dung về nguyên liệu, kiểm soát chất lượng, đóng gói và phân phối được trình bày rõ hơn để tạo niềm tin với khách hàng.",
       imageUrl: "/bento/bento-factory.png",
-      linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+    linkUrl: "/chat-luong#nha-may-quy-trinh",
       type: "milestone",
       enabled: true,
       sortOrder: 40,
@@ -731,7 +743,7 @@ export const DEFAULT_MARKETING_CONFIG: MarketingConfigData = {
       detailTitle: "Từ nguyên liệu đến đóng gói",
       detailContent: "Mô tả ngắn từng bước: chọn nguyên liệu, sơ chế, tẩm ướp, kiểm soát chất lượng, đóng gói, lưu kho và vận chuyển. Có thể thêm ảnh xưởng hoặc ảnh từng công đoạn để khách hàng thấy quy trình thật.",
       imageUrl: "/bento/bento-factory.png",
-      linkUrl: "/chat-luong/nha-may-quy-trinh-san-xuat",
+      linkUrl: "/chat-luong#nha-may-quy-trinh",
       enabled: true,
     },
     {
@@ -1129,7 +1141,11 @@ function withDefaultPageAssets(items: PageAssetItem[]) {
     ...defaultItem,
     ...(byKey.get(defaultItem.key) || {}),
     id: byKey.get(defaultItem.key)?.id || defaultItem.id,
-  })).concat(items.filter((item) => item.key && !DEFAULT_PAGE_ASSETS.some((defaultItem) => defaultItem.key === item.key)));
+  })).concat(items.filter((item) =>
+    item.key &&
+    !isUnusedAboutAssetKey(item.key) &&
+    !DEFAULT_PAGE_ASSETS.some((defaultItem) => defaultItem.key === item.key),
+  ));
 }
 
 function withDefaultHomeTexts(items: HomeTextItem[]) {
@@ -1143,7 +1159,11 @@ function withDefaultHomeTexts(items: HomeTextItem[]) {
     label: byKey.get(defaultItem.key)?.label || defaultItem.label,
     multiline: byKey.get(defaultItem.key)?.multiline ?? defaultItem.multiline,
     sortOrder: byKey.get(defaultItem.key)?.sortOrder ?? defaultItem.sortOrder,
-  })).concat(items.filter((item) => item.key && !DEFAULT_HOME_TEXTS.some((defaultItem) => defaultItem.key === item.key)));
+  })).concat(items.filter((item) =>
+    item.key &&
+    !isUnusedAboutTextKey(item.key) &&
+    !DEFAULT_HOME_TEXTS.some((defaultItem) => defaultItem.key === item.key),
+  ));
 }
 
 function withDefaultHomeSections(items: HomeSectionItem[]) {

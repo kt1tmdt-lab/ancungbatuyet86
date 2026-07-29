@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell,
@@ -66,6 +66,7 @@ export function AdminHeader({
 }: AdminHeaderProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const notificationRef = useRef<HTMLDivElement>(null);
   const latestNotificationTimeRef = useRef<string | null>(null);
@@ -85,8 +86,12 @@ export function AdminHeader({
     [user?.role],
   );
   const activePath = useMemo(
-    () => getActiveAdminPath(pathname, visibleGroups),
-    [pathname, visibleGroups],
+    () =>
+      pathname === "/admin/marketing" &&
+      searchParams.get("mode") === "website"
+        ? "/admin/web-control"
+        : getActiveAdminPath(pathname, visibleGroups),
+    [pathname, searchParams, visibleGroups],
   );
 
   useEffect(() => {

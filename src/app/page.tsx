@@ -560,7 +560,7 @@ function HeroSection() {
               variant="orange"
               className="h-12 w-full px-3 shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:h-14 sm:w-56 sm:px-6"
             >
-              Sản phẩm
+              {heroBanner.ctaText}
             </CurtainAction>
           </motion.div>
 

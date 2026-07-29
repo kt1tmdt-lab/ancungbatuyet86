@@ -1,3 +1,5 @@
+import { isCustomPageHref } from "@/lib/custom-pages";
+
 export type LinkItem = {
   href: string;
   label: string;
@@ -145,18 +147,13 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
       { href: "/lien-he", label: "Liên hệ" },
     ],
     support: [
-      { href: "/trang/huong-dan-mua-hang", label: "Hướng dẫn mua hàng" },
-      { href: "/trang/tra-cuu-don-hang", label: "Tra cứu đơn hàng" },
-      { href: "/trang/chinh-sach-giao-hang", label: "Chính sách giao hàng" },
-      { href: "/trang/chinh-sach-doi-tra-va-hoan-tien", label: "Chính sách đổi trả và hoàn tiền" },
-      { href: "/trang/tiep-nhan-phan-anh-khieu-nai", label: "Tiếp nhận phản ánh, khiếu nại" },
+      { href: "/diem-ban", label: "Tìm điểm bán chính thức" },
+      { href: "/san-pham", label: "Xem sản phẩm" },
+      { href: "/lien-he", label: "Liên hệ hỗ trợ" },
     ],
     policies: [
-      { href: "/trang/chinh-sach-thanh-toan", label: "Chính sách thanh toán" },
-      { href: "/trang/chinh-sach-kiem-hang", label: "Chính sách kiểm hàng" },
-      { href: "/trang/chinh-sach-bao-mat-thong-tin", label: "Chính sách bảo mật thông tin" },
-      { href: "/trang/dieu-khoan-su-dung", label: "Điều khoản sử dụng" },
-      { href: "/gioi-thieu/thong-tin-doanh-nghiep", label: "Thông tin doanh nghiệp" },
+      { href: "/chat-luong", label: "Chất lượng & quyền lợi khách hàng" },
+      { href: "/gioi-thieu#about-history", label: "Thông tin thương hiệu" },
     ],
   },
   footerContact: {
@@ -238,9 +235,16 @@ function normalizeNavbarLinks(value: unknown) {
         : item.href;
 
       if (!mappedHref) return null;
-      return canonicalByHref.get(mappedHref) || item;
+      if (canonicalByHref.has(mappedHref)) {
+        return canonicalByHref.get(mappedHref) || item;
+      }
+      return isCustomPageHref(mappedHref) ? { ...item, href: mappedHref } : null;
     })
-    .filter((item): item is LinkItem => item !== null && canonicalByHref.has(item.href));
+    .filter((item): item is LinkItem => item !== null)
+    .filter(
+      (item, index, items) =>
+        items.findIndex((candidate) => candidate.href === item.href) === index,
+    );
 
   const configuredHrefs = new Set(configuredLinks.map((item) => item.href));
   const missingRequiredLinks = REQUIRED_NAV_LINKS.filter((item) => !configuredHrefs.has(item.href));
