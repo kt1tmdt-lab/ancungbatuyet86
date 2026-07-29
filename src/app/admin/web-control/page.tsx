@@ -22,7 +22,7 @@ const pageGroups = [
     description: "Các phần đang xuất hiện ngay khi khách truy cập website.",
     items: [
       { title: "Hero đầu trang", description: "Ảnh Bà Tuyết, tiêu đề, mô tả, số liệu và hai nút bấm.", href: "/admin/settings?tab=hero", icon: Home },
-      { title: "Nội dung trang chủ", description: "Tiêu đề, mô tả, bật/tắt section, ảnh và link đang dùng trên trang chủ.", href: "/admin/marketing?mode=website&tab=home&scope=home", icon: Home },
+      { title: "Nội dung trang chủ", description: "Tiêu đề, mô tả, bật/tắt section, ảnh và link đang dùng trên trang chủ.", href: "/admin/website/home", icon: Home },
       { title: "Sản phẩm nổi bật", description: "Chọn sản phẩm, ảnh, mô tả và liên kết mua hàng.", href: "/admin/products", icon: Package },
     ],
   },
@@ -53,7 +53,10 @@ const pageGroups = [
     title: "Giới thiệu thương hiệu",
     description: "Một trang tổng gồm câu chuyện, thông tin doanh nghiệp, hành trình phát triển và cộng đồng.",
     items: [
-      { title: "Trang Giới thiệu", description: "Sửa trực tiếp câu chuyện, số liệu, video, sứ mệnh, tầm nhìn, giá trị cốt lõi và CTA đang hiển thị.", href: "/admin/marketing?mode=website&tab=home&scope=about", icon: ShieldCheck },
+      { title: "Trang Giới thiệu", description: "Sửa trực tiếp câu chuyện, số liệu, video, sứ mệnh, tầm nhìn, giá trị cốt lõi và CTA đang hiển thị.", href: "/admin/website/about", icon: ShieldCheck },
+      { title: "Lịch sử phát triển", description: "Quản lý các cột mốc và nội dung hành trình phát triển thương hiệu.", href: "/admin/website/about/history", icon: ShieldCheck },
+      { title: "Thành tựu & uy tín", description: "Quản lý chứng nhận, bảo hiểm và các bằng chứng uy tín.", href: "/admin/website/about/trust", icon: ShieldCheck },
+      { title: "Hoạt động cộng đồng", description: "Quản lý riêng các hoạt động cộng đồng đang công bố.", href: "/admin/website/about/community", icon: ShieldCheck },
     ],
   },
   {
@@ -67,7 +70,7 @@ const pageGroups = [
     title: "Điểm bán & kênh phân phối",
     description: "Một trang tổng gồm điểm bán offline, kênh online và nhận diện hàng chính hãng.",
     items: [
-      { title: "Nội dung trang Điểm bán", description: "Sửa tiêu đề, mô tả, hướng dẫn nhận diện hàng chính hãng và CTA cuối trang.", href: "/admin/marketing?mode=website&tab=home&scope=sales", icon: FileText },
+      { title: "Nội dung trang Điểm bán", description: "Sửa tiêu đề, mô tả, hướng dẫn nhận diện hàng chính hãng và CTA cuối trang.", href: "/admin/website/sales", icon: FileText },
       { title: "Dữ liệu điểm bán", description: "Quản lý kênh online, trạng thái hiển thị và dữ liệu phân phối trên trang /diem-ban.", href: "/admin/sales-channels", icon: Store },
     ],
   },

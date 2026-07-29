@@ -159,6 +159,47 @@ function getPageAssetScope(item: PageAssetItem) {
 
 type HomeTextScope = "home" | "about" | "sales";
 type MarketingTextScope = HomeTextScope | "quality";
+export type WebsiteContentScope = HomeTextScope;
+export type WebsiteContentTab = "history" | "trust" | "community";
+
+const WEBSITE_SCOPE_META: Record<
+  WebsiteContentScope,
+  { title: string; description: string; previewPath: string }
+> = {
+  home: {
+    title: "Trang chủ",
+    description: "Quản lý riêng chữ, hình ảnh và các khu vực đang hiển thị trên trang chủ.",
+    previewPath: "/",
+  },
+  about: {
+    title: "Trang Giới thiệu",
+    description: "Quản lý riêng câu chuyện, số liệu, video, sứ mệnh, tầm nhìn và giá trị cốt lõi.",
+    previewPath: "/gioi-thieu",
+  },
+  sales: {
+    title: "Trang Điểm bán",
+    description: "Quản lý riêng tiêu đề, hướng dẫn mua hàng, nhận diện chính hãng và CTA của trang Điểm bán.",
+    previewPath: "/diem-ban",
+  },
+};
+
+const WEBSITE_TAB_META: Record<
+  WebsiteContentTab,
+  { title: string; description: string }
+> = {
+  history: {
+    title: "Lịch sử phát triển",
+    description: "Quản lý riêng các cột mốc trong hành trình phát triển thương hiệu.",
+  },
+  trust: {
+    title: "Thành tựu & uy tín",
+    description: "Quản lý riêng chứng nhận, bảo hiểm và các bằng chứng uy tín.",
+  },
+  community: {
+    title: "Hoạt động cộng đồng",
+    description: "Quản lý riêng các hoạt động cộng đồng đang công bố trên website.",
+  },
+};
 
 function normalizeAdminSearch(value: unknown) {
   return String(value || "")
@@ -229,15 +270,32 @@ function getHomeTextMeta(item: HomeTextItem): { page: string; section: string; n
 
 type ContentTab = "press" | "feedback" | "videos" | "home" | "trust" | "history" | "community";
 
-function MarketingPageContent() {
+function MarketingPageContent({
+  websiteScope,
+  websiteTab,
+}: {
+  websiteScope?: WebsiteContentScope;
+  websiteTab?: WebsiteContentTab;
+} = {}) {
   const { token } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isWebsiteContent = searchParams.get("mode") === "website";
+  const isStandaloneWebsitePage = Boolean(websiteScope || websiteTab);
+  const isWebsiteContent =
+    isStandaloneWebsitePage || searchParams.get("mode") === "website";
+  const standaloneMeta = websiteScope
+    ? WEBSITE_SCOPE_META[websiteScope]
+    : websiteTab
+      ? WEBSITE_TAB_META[websiteTab]
+      : null;
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<ContentTab>(
-    isWebsiteContent
+    websiteTab
+      ? websiteTab
+      : websiteScope
+        ? "home"
+        : isWebsiteContent
       ? searchParams.get("tab") === "assets" || searchParams.get("tab") === "homeTexts"
         ? "home"
         : searchParams.get("tab") === "history"
@@ -257,6 +315,7 @@ function MarketingPageContent() {
   const [mediaPickerAssetId, setMediaPickerAssetId] = useState<string | null>(null);
   const [homeTextSearch, setHomeTextSearch] = useState("");
   const [homeTextScope, setHomeTextScope] = useState<HomeTextScope>(() => {
+    if (websiteScope) return websiteScope;
     const scope = searchParams.get("scope");
     return scope === "home" || scope === "about" || scope === "sales"
       ? scope
@@ -280,7 +339,11 @@ function MarketingPageContent() {
     const websiteTabs = ["home", "assets", "homeTexts", "history", "trust", "community"];
     const communicationTabs = ["press", "feedback", "videos"];
 
-    const normalizedTab = isWebsiteContent
+    const normalizedTab = websiteTab
+      ? websiteTab
+      : websiteScope
+        ? "home"
+        : isWebsiteContent
       ? tab && websiteTabs.includes(tab)
         ? tab === "assets" || tab === "homeTexts" ? "home" : tab
         : "home"
@@ -289,16 +352,17 @@ function MarketingPageContent() {
         : "press";
     const requestedScope = searchParams.get("scope");
     const normalizedScope: HomeTextScope =
-      requestedScope === "about" || requestedScope === "sales"
+      websiteScope ||
+      (requestedScope === "about" || requestedScope === "sales"
         ? requestedScope
-        : "home";
+        : "home");
 
     const timer = window.setTimeout(() => {
       setActiveTab(normalizedTab as ContentTab);
       if (isWebsiteContent) setHomeTextScope(normalizedScope);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [isWebsiteContent, searchParams]);
+  }, [isWebsiteContent, searchParams, websiteScope, websiteTab]);
 
   const selectTab = (tab: ContentTab) => {
     setActiveTab(tab);
@@ -312,16 +376,28 @@ function MarketingPageContent() {
     });
   };
 
-  const selectHomeTextScope = (scope: HomeTextScope) => {
-    setHomeTextScope(scope);
-    const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.set("mode", "website");
-    nextParams.set("tab", "home");
-    nextParams.set("scope", scope);
-    router.replace(`/admin/marketing?${nextParams.toString()}`, {
-      scroll: false,
-    });
-  };
+  useEffect(() => {
+    if (isStandaloneWebsitePage || searchParams.get("mode") !== "website") {
+      return;
+    }
+
+    const tab = searchParams.get("tab");
+    const scope = searchParams.get("scope");
+    const destination =
+      tab === "history"
+        ? "/admin/website/about/history"
+        : tab === "trust"
+          ? "/admin/website/about/trust"
+          : tab === "community"
+            ? "/admin/website/about/community"
+            : scope === "about"
+              ? "/admin/website/about"
+              : scope === "sales"
+                ? "/admin/website/sales"
+                : "/admin/website/home";
+
+    router.replace(destination);
+  }, [isStandaloneWebsitePage, router, searchParams]);
 
   useEffect(() => {
     if (!token) return;
@@ -759,11 +835,16 @@ function MarketingPageContent() {
     .map((key) => homeAssetList.find((item) => item.key === key))
     .filter((item): item is PageAssetItem => Boolean(item));
   const normalizedHomeTextSearch = normalizeAdminSearch(homeTextSearch.trim());
-  const visibleHomeTextList = useMemo(() => homeTextList.filter((item) => {
+  const scopedHomeTextList = useMemo(() => homeTextList.filter((item) => {
     const meta = getHomeTextMeta(item);
     const scopeMatches = meta.scope === homeTextScope;
     if (!scopeMatches) return false;
     if (homeTextScope === "about" && !isLiveAboutText(item)) return false;
+    return true;
+  }), [homeTextList, homeTextScope]);
+
+  const visibleHomeTextList = useMemo(() => scopedHomeTextList.filter((item) => {
+    const meta = getHomeTextMeta(item);
     if (!normalizedHomeTextSearch) return true;
 
     return [
@@ -775,7 +856,7 @@ function MarketingPageContent() {
       meta.section,
       meta.note,
     ].some((value) => normalizeAdminSearch(value).includes(normalizedHomeTextSearch));
-  }), [homeTextList, homeTextScope, normalizedHomeTextSearch]);
+  }), [normalizedHomeTextSearch, scopedHomeTextList]);
   const factoryHomeTextItems = visibleHomeTextList
     .filter(isFactoryProofText)
     .filter((item) => !/^factory_proof_\d_title$/.test(item.key))
@@ -963,12 +1044,16 @@ function MarketingPageContent() {
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
               <Settings className="text-orange-500" size={28} />
-              {isWebsiteContent ? "Nội dung website" : "Truyền thông thương hiệu"}
+              {standaloneMeta?.title ||
+                (isWebsiteContent
+                  ? "Nội dung website"
+                  : "Truyền thông thương hiệu")}
             </h1>
             <p className="text-slate-500 mt-1">
-              {isWebsiteContent
+              {standaloneMeta?.description ||
+              (isWebsiteContent
                 ? "Chỉnh nội dung trang chủ, hình ảnh, lịch sử và thông tin uy tín của thương hiệu."
-                : "Quản lý báo chí, đánh giá khách hàng và video truyền thông."}
+                : "Quản lý báo chí, đánh giá khách hàng và video truyền thông.")}
             </p>
           </div>
           <button
@@ -981,6 +1066,7 @@ function MarketingPageContent() {
           </button>
         </div>
 
+        {!isStandaloneWebsitePage && (
         <div className="grid gap-4 lg:grid-cols-3">
           {(isWebsiteContent ? [
             {
@@ -1034,6 +1120,7 @@ function MarketingPageContent() {
             </section>
           ))}
         </div>
+        )}
 
         {loading ? (
           <div className="h-96 bg-slate-100 animate-pulse border border-slate-200"></div>
@@ -1805,22 +1892,33 @@ function MarketingPageContent() {
               <div className="bg-white border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6 animate-fade-in">
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h2 className="text-base font-black uppercase text-slate-900">Trang chủ</h2>
+                    <h2 className="text-base font-black uppercase text-slate-900">
+                      {websiteScope
+                        ? WEBSITE_SCOPE_META[websiteScope].title
+                        : "Trang chủ"}
+                    </h2>
                     <p className="mt-1 text-xs font-medium leading-5 text-slate-500">
-                      Mỗi khu vực gom chung chữ, ảnh và link đang hiển thị ngoài trang chủ.
+                      {websiteScope
+                        ? WEBSITE_SCOPE_META[websiteScope].description
+                        : "Mỗi khu vực gom chung chữ, ảnh và link đang hiển thị ngoài trang chủ."}
                     </p>
                   </div>
                   <a
-                    href="/"
+                    href={
+                      websiteScope
+                        ? WEBSITE_SCOPE_META[websiteScope].previewPath
+                        : "/"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                   >
                     <ExternalLink size={14} />
-                    Xem trang chủ
+                    Xem {websiteScope ? WEBSITE_SCOPE_META[websiteScope].title : "trang chủ"}
                   </a>
                 </div>
 
+                {homeTextScope === "home" && (
                 <section className="border border-slate-200 bg-slate-50">
                   <div className="border-b border-slate-200 bg-white px-4 py-3">
                     <h3 className="text-sm font-black uppercase tracking-wide text-slate-900">Ẩn/hiện cụm trang chủ</h3>
@@ -1845,36 +1943,15 @@ function MarketingPageContent() {
                       ))}
                   </div>
                 </section>
+                )}
 
                 <section className="border border-orange-200 bg-orange-50 p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                       <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">Tìm nhanh chữ cần sửa</h3>
                       <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                        Gõ tên khu vực, nội dung, key hoặc chọn trang để lọc. Mỗi dòng bên dưới đều có preview và nút mở đúng vị trí ngoài web.
+                        Chỉ hiển thị nội dung thuộc trang này. Gõ tên khu vực, nội dung hoặc key để tìm nhanh trường cần sửa.
                       </p>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        ["home", "Trang chủ"],
-                        ["about", "Giới thiệu"],
-                        ["sales", "Điểm bán"],
-                      ].map(([value, label]) => (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() =>
-                            selectHomeTextScope(value as HomeTextScope)
-                          }
-                          className={`border px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
-                            homeTextScope === value
-                              ? "border-orange-600 bg-orange-600 text-white"
-                              : "border-orange-200 bg-white text-slate-700 hover:border-orange-500 hover:text-orange-700"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
                     </div>
                   </div>
                   <div className="mt-4 flex items-center gap-2 border border-orange-200 bg-white px-3 py-2">
@@ -1886,7 +1963,9 @@ function MarketingPageContent() {
                       placeholder="Tìm: hero, số liệu, giới thiệu, nút, sản phẩm, nhà máy..."
                       className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
                     />
-                    <span className="text-xs font-black text-slate-400">{visibleHomeTextList.length}/{homeTextList.length}</span>
+                    <span className="text-xs font-black text-slate-400">
+                      {visibleHomeTextList.length}/{scopedHomeTextList.length}
+                    </span>
                   </div>
                 </section>
 
@@ -2477,6 +2556,20 @@ export default function MarketingPage() {
   return (
     <Suspense fallback={null}>
       <MarketingPageContent />
+    </Suspense>
+  );
+}
+
+export function WebsiteContentManager({
+  scope,
+  tab,
+}: {
+  scope?: WebsiteContentScope;
+  tab?: WebsiteContentTab;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <MarketingPageContent websiteScope={scope} websiteTab={tab} />
     </Suspense>
   );
 }

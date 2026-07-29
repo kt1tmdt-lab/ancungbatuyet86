@@ -10,7 +10,6 @@ import {
   MonitorCog,
   Radar,
   ServerCog,
-  Settings2,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -78,12 +77,12 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         roles: PAGE_ROLES,
         children: [
           {
-            href: "/admin/marketing?mode=website&tab=home&scope=home",
+            href: "/admin/website/home",
             label: "Trang chủ",
             roles: PAGE_ROLES,
           },
           {
-            href: "/admin/marketing?mode=website&tab=home&scope=about",
+            href: "/admin/website/about",
             label: "Giới thiệu",
             roles: PAGE_ROLES,
           },
@@ -113,8 +112,8 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
             roles: PAGE_ROLES,
           },
           {
-            href: "/admin/settings?tab=navigation",
-            label: "Cấu hình Header & Footer",
+            href: "/admin/settings",
+            label: "Cấu hình website",
             roles: ["SUPER_ADMIN", "ADMIN", "MARKETING"],
           },
           {
@@ -186,12 +185,6 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         label: "Trạng thái hệ thống",
         icon: ServerCog,
         roles: SYSTEM_ROLES,
-      },
-      {
-        href: "/admin/settings",
-        label: "Cấu hình website",
-        icon: Settings2,
-        roles: ["SUPER_ADMIN", "ADMIN", "MARKETING"],
       },
       {
         href: "/admin/activity-logs",
