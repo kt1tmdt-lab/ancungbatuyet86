@@ -62,6 +62,20 @@ type ImportResult = {
 };
 
 const HERO_PRODUCTS_ASSET_KEY = "products_landing_hero_products";
+const SHOWCASE_PRODUCTS_ASSET_KEY = "products_landing_showcase_products";
+
+function parseProductIds(value: string) {
+  if (!value.trim() || value.trim().toLowerCase() === "none") return [];
+
+  return Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean),
+    ),
+  );
+}
 
 function getHeroProductIds(config: MarketingConfigData | null) {
   if (!config) return [];
@@ -69,10 +83,7 @@ function getHeroProductIds(config: MarketingConfigData | null) {
   const listAsset = config.pageAssets.find(
     (item) => item.key === HERO_PRODUCTS_ASSET_KEY,
   );
-  const savedIds = (listAsset?.linkUrl || "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean);
+  const savedIds = parseProductIds(listAsset?.linkUrl || "");
 
   if (savedIds.length > 0) return Array.from(new Set(savedIds));
 
@@ -85,6 +96,15 @@ function getHeroProductIds(config: MarketingConfigData | null) {
         : "",
     )
     .filter(Boolean);
+}
+
+function getShowcaseProductIds(config: MarketingConfigData | null) {
+  if (!config) return [];
+
+  const listAsset = config.pageAssets.find(
+    (item) => item.key === SHOWCASE_PRODUCTS_ASSET_KEY,
+  );
+  return parseProductIds(listAsset?.linkUrl || "");
 }
 
 export default function AdminProductsPage() {
@@ -131,6 +151,61 @@ export default function AdminProductsPage() {
     }
   }, [token]);
 
+  const persistProductSelection = useCallback(
+    async (
+      currentConfig: MarketingConfigData,
+      assetKey: typeof HERO_PRODUCTS_ASSET_KEY | typeof SHOWCASE_PRODUCTS_ASSET_KEY,
+      nextIds: string[],
+    ) => {
+      if (!token) throw new Error("Phiên đăng nhập đã hết hạn.");
+
+      const isShowcase = assetKey === SHOWCASE_PRODUCTS_ASSET_KEY;
+      const storedValue =
+        isShowcase && nextIds.length === 0 ? "none" : nextIds.join(",");
+      const label = isShowcase
+        ? `Danh sách showcase (${nextIds.length} sản phẩm)`
+        : `Danh sách hero (${nextIds.length} sản phẩm)`;
+      let hasSelectionAsset = false;
+
+      const nextAssets = currentConfig.pageAssets.map((item) => {
+        if (item.key === assetKey) {
+          hasSelectionAsset = true;
+          return { ...item, label, linkUrl: storedValue };
+        }
+
+        if (
+          assetKey === HERO_PRODUCTS_ASSET_KEY &&
+          /^products_landing_hero_image_[1-3]$/.test(item.key) &&
+          item.linkUrl.startsWith("product:")
+        ) {
+          return { ...item, linkUrl: "" };
+        }
+
+        return item;
+      });
+
+      if (!hasSelectionAsset) {
+        nextAssets.push({
+          id: `admin-${assetKey}`,
+          key: assetKey,
+          label,
+          imageUrl: "",
+          linkUrl: storedValue,
+        });
+      }
+
+      const nextConfig = { ...currentConfig, pageAssets: nextAssets };
+      await adminRequest("/api/settings/marketing", {
+        method: "PUT",
+        token,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nextConfig),
+      });
+      setMarketingConfig(nextConfig);
+    },
+    [token],
+  );
+
   const handleToggleHero = useCallback(
     async (product: Product) => {
       if (!token) return;
@@ -152,28 +227,11 @@ export default function AdminProductsPage() {
         const nextIds = isActive
           ? currentIds.filter((id) => id !== String(product.id))
           : [...currentIds, String(product.id)];
-        const nextAssets = currentConfig.pageAssets.map((item) =>
-          item.key === HERO_PRODUCTS_ASSET_KEY
-            ? {
-                ...item,
-                label: `Danh sách hero (${nextIds.length} sản phẩm)`,
-                linkUrl: nextIds.join(","),
-              }
-            : /^products_landing_hero_image_[1-3]$/.test(item.key) &&
-                item.linkUrl.startsWith("product:")
-              ? { ...item, linkUrl: "" }
-              : item,
+        await persistProductSelection(
+          currentConfig,
+          HERO_PRODUCTS_ASSET_KEY,
+          nextIds,
         );
-        const nextConfig = { ...currentConfig, pageAssets: nextAssets };
-
-        await adminRequest("/api/settings/marketing", {
-          method: "PUT",
-          token,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(nextConfig),
-        });
-
-        setMarketingConfig(nextConfig);
         toast.success(
           isActive
             ? `Đã bỏ “${product.name}” khỏi hero.`
@@ -187,7 +245,95 @@ export default function AdminProductsPage() {
         setActionLoading(null);
       }
     },
-    [marketingConfig, token],
+    [marketingConfig, persistProductSelection, token],
+  );
+
+  const handleToggleShowcase = useCallback(
+    async (product: Product) => {
+      if (!token) return;
+      const actionKey = `showcase:${product.id}`;
+      setActionLoading(actionKey);
+
+      try {
+        let currentConfig = marketingConfig;
+        if (!currentConfig) {
+          const settings = await adminRequest<{ data?: unknown }>(
+            "/api/settings/marketing",
+            { token },
+          );
+          currentConfig = normalizeMarketingConfig(settings.data);
+        }
+
+        const currentIds = getShowcaseProductIds(currentConfig);
+        const productId = String(product.id);
+        const isActive = currentIds.includes(productId);
+        const nextIds = isActive
+          ? currentIds.filter((id) => id !== productId)
+          : [...currentIds, productId];
+
+        await persistProductSelection(
+          currentConfig,
+          SHOWCASE_PRODUCTS_ASSET_KEY,
+          nextIds,
+        );
+        toast.success(
+          isActive
+            ? `Đã bỏ “${product.name}” khỏi showcase.`
+            : `Đã thêm “${product.name}” vào showcase.`,
+        );
+      } catch (error) {
+        toast.error(
+          getAdminErrorMessage(
+            error,
+            "Không thể cập nhật danh sách showcase sản phẩm.",
+          ),
+        );
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [marketingConfig, persistProductSelection, token],
+  );
+
+  const handleMoveShowcase = useCallback(
+    async (product: Product, direction: -1 | 1) => {
+      if (!token || !marketingConfig) return;
+
+      const currentIds = getShowcaseProductIds(marketingConfig);
+      const currentIndex = currentIds.indexOf(String(product.id));
+      const nextIndex = currentIndex + direction;
+      if (
+        currentIndex < 0 ||
+        nextIndex < 0 ||
+        nextIndex >= currentIds.length
+      ) {
+        return;
+      }
+
+      const actionKey = `showcase-order:${product.id}`;
+      setActionLoading(actionKey);
+      const nextIds = [...currentIds];
+      [nextIds[currentIndex], nextIds[nextIndex]] = [
+        nextIds[nextIndex],
+        nextIds[currentIndex],
+      ];
+
+      try {
+        await persistProductSelection(
+          marketingConfig,
+          SHOWCASE_PRODUCTS_ASSET_KEY,
+          nextIds,
+        );
+        toast.success("Đã cập nhật thứ tự showcase.");
+      } catch (error) {
+        toast.error(
+          getAdminErrorMessage(error, "Không thể đổi thứ tự showcase."),
+        );
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [marketingConfig, persistProductSelection, token],
   );
 
   useEffect(() => {
@@ -408,6 +554,73 @@ export default function AdminProductsPage() {
         },
       },
       {
+        id: "showcasePlacement",
+        header: "Showcase phía dưới",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const product = row.original;
+          const showcaseIds = getShowcaseProductIds(marketingConfig);
+          const showcaseIndex = showcaseIds.indexOf(String(product.id));
+          const active = showcaseIndex >= 0;
+          const toggleLoadingKey = `showcase:${product.id}`;
+          const orderLoadingKey = `showcase-order:${product.id}`;
+          const isBusy =
+            actionLoading === toggleLoadingKey ||
+            actionLoading === orderLoadingKey;
+
+          return (
+            <div className="flex min-w-52 items-center gap-1">
+              <button
+                type="button"
+                onClick={() => void handleToggleShowcase(product)}
+                disabled={isBusy}
+                className={`inline-flex min-h-9 min-w-32 items-center justify-center border px-3 text-xs font-black transition disabled:cursor-wait disabled:opacity-50 ${
+                  active
+                    ? "border-orange-600 bg-orange-600 text-white"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
+                }`}
+                title={
+                  active
+                    ? `Bỏ ${product.name} khỏi showcase`
+                    : `Thêm ${product.name} vào showcase`
+                }
+              >
+                {active
+                  ? `✓ Showcase #${showcaseIndex + 1}`
+                  : "+ Thêm showcase"}
+              </button>
+
+              {active && showcaseIds.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void handleMoveShowcase(product, -1)}
+                    disabled={isBusy || showcaseIndex === 0}
+                    className="grid h-9 w-9 place-items-center border border-slate-200 bg-white text-sm font-black text-slate-600 transition hover:border-orange-300 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label={`Đưa ${product.name} lên trước`}
+                    title="Đưa lên trước"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleMoveShowcase(product, 1)}
+                    disabled={
+                      isBusy || showcaseIndex === showcaseIds.length - 1
+                    }
+                    className="grid h-9 w-9 place-items-center border border-slate-200 bg-white text-sm font-black text-slate-600 transition hover:border-orange-300 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label={`Đưa ${product.name} xuống sau`}
+                    title="Đưa xuống sau"
+                  >
+                    ↓
+                  </button>
+                </>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         id: "actions",
         header: "Thao tác",
         enableSorting: false,
@@ -447,7 +660,14 @@ export default function AdminProductsPage() {
         },
       },
     ],
-    [actionLoading, handleToggleFeatured, handleToggleHero, marketingConfig],
+    [
+      actionLoading,
+      handleMoveShowcase,
+      handleToggleFeatured,
+      handleToggleHero,
+      handleToggleShowcase,
+      marketingConfig,
+    ],
   );
 
   return (
@@ -498,9 +718,9 @@ export default function AdminProductsPage() {
           <div>
             <p className="text-sm font-black text-slate-950">Cần sửa phần mở đầu của trang tổng Sản phẩm?</p>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-              Bấm “Thêm vào hero” ở bất kỳ sản phẩm nào; không giới hạn số lượng. Ngoài website hiển thị ba sản phẩm mỗi lượt và có nút chuyển tiếp.
+              “Thêm vào hero” điều khiển cụm ảnh mở đầu. “Thêm showcase” điều khiển các section sản phẩm phía dưới; dùng hai nút ↑ ↓ để đổi thứ tự.
               {marketingConfig
-                ? ` Hiện đang chọn ${getHeroProductIds(marketingConfig).length} sản phẩm.`
+                ? ` Hiện có ${getHeroProductIds(marketingConfig).length} sản phẩm trong hero và ${getShowcaseProductIds(marketingConfig).length} sản phẩm trong showcase.`
                 : ""}
             </p>
           </div>

@@ -137,6 +137,13 @@ export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
     linkUrl: "",
   },
   {
+    id: "default-products-landing-showcase-products",
+    key: "products_landing_showcase_products",
+    label: "Danh sách sản phẩm trong showcase",
+    imageUrl: "",
+    linkUrl: "",
+  },
+  {
     id: "default-products-landing-hero-image-1",
     key: "products_landing_hero_image_1",
     label: "Ảnh chính giữa",

@@ -44,6 +44,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   khac: "Sản phẩm khác",
 };
 
+const SHOWCASE_PRODUCTS_ASSET_KEY = "products_landing_showcase_products";
+
+function parseProductIds(value: string) {
+  if (!value.trim() || value.trim().toLowerCase() === "none") return [];
+
+  return Array.from(
+    new Set(
+      value
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
 const PRODUCT_THEMES = [
   {
     section: "bg-[#fff4df]",
@@ -261,7 +276,7 @@ export default function ProductsPage() {
       });
   }, []);
 
-  const coreProducts = useMemo(() => {
+  const automaticCoreProducts = useMemo(() => {
     const sorted = [...products]
       .filter((product) => product.category !== "khac")
       .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
@@ -276,6 +291,28 @@ export default function ProductsPage() {
     });
     return Array.from(firstByCategory.values()).slice(0, 6);
   }, [products]);
+
+  const showcaseSelection = useMemo(() => {
+    const listAsset = pageAssets.find(
+      (item) => item.key === SHOWCASE_PRODUCTS_ASSET_KEY,
+    );
+    const storedValue = listAsset?.linkUrl?.trim() || "";
+
+    return {
+      configured: Boolean(storedValue),
+      ids: parseProductIds(storedValue),
+    };
+  }, [pageAssets]);
+
+  const coreProducts = useMemo(() => {
+    if (!showcaseSelection.configured) return automaticCoreProducts;
+
+    return showcaseSelection.ids
+      .map((id) =>
+        products.find((product) => String(product.id) === String(id)),
+      )
+      .filter((product): product is Product => Boolean(product));
+  }, [automaticCoreProducts, products, showcaseSelection]);
 
   const scrollToProducts = () => {
     document.getElementById("product-showcase")?.scrollIntoView({ behavior: "smooth" });

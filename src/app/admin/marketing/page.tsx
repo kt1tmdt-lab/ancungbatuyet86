@@ -859,7 +859,10 @@ function MarketingPageContent({
 
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
   const visibleAssetList = assetList.filter((item) => {
-    if (item.key === "products_landing_hero_products") return false;
+    if (
+      item.key === "products_landing_hero_products" ||
+      item.key === "products_landing_showcase_products"
+    ) return false;
     const assetScope = getPageAssetScope(item);
     if (homeTextScope === "sales") return false;
     if (homeTextScope === "about") return item.key === "about_video";
