@@ -36,6 +36,10 @@ import {
   ConfirmDialog,
 } from "@/components/admin/AdminPrimitives";
 import Button from "@/components/ui/Button";
+import {
+  normalizeMarketingConfig,
+  type MarketingConfigData,
+} from "@/lib/marketing-config";
 
 type ProductStatus = "DRAFT" | "PUBLISHED" | "OUT_OF_STOCK" | "ARCHIVED";
 
@@ -45,6 +49,7 @@ interface Product {
   slug: string;
   categoryLabel: string;
   image: string;
+  heroImage?: string | null;
   featured: boolean;
   status: ProductStatus;
   sortOrder: number;
@@ -67,6 +72,8 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [isImporting, setIsImporting] = useState(false);
+  const [marketingConfig, setMarketingConfig] =
+    useState<MarketingConfigData | null>(null);
 
   const fetchProducts = useCallback(async () => {
     if (!token) return;
@@ -74,9 +81,21 @@ export default function AdminProductsPage() {
     setLoading(true);
     setLoadError("");
     try {
-      setProducts(
-        await adminRequest<Product[]>("/api/products?status=ALL", { token }),
+      const productList = await adminRequest<Product[]>(
+        "/api/products?status=ALL",
+        { token },
       );
+      setProducts(productList);
+
+      try {
+        const settings = await adminRequest<{ data?: unknown }>(
+          "/api/settings/marketing",
+          { token },
+        );
+        setMarketingConfig(normalizeMarketingConfig(settings.data));
+      } catch (settingsError) {
+        console.error("Failed to load product hero settings", settingsError);
+      }
     } catch (error) {
       setLoadError(
         getAdminErrorMessage(error, "Không thể tải danh sách sản phẩm."),
@@ -85,6 +104,56 @@ export default function AdminProductsPage() {
       setLoading(false);
     }
   }, [token]);
+
+  const handlePushToHero = useCallback(
+    async (product: Product, slot: 1 | 2 | 3) => {
+      if (!token) return;
+      const actionKey = `hero:${product.id}:${slot}`;
+      setActionLoading(actionKey);
+
+      try {
+        let currentConfig = marketingConfig;
+        if (!currentConfig) {
+          const settings = await adminRequest<{ data?: unknown }>(
+            "/api/settings/marketing",
+            { token },
+          );
+          currentConfig = normalizeMarketingConfig(settings.data);
+        }
+
+        const assetKey = `products_landing_hero_image_${slot}`;
+        const nextAssets = currentConfig.pageAssets.map((item) =>
+          item.key === assetKey
+            ? {
+                ...item,
+                label: product.name,
+                imageUrl: product.heroImage || product.image || "",
+                linkUrl: `product:${product.id}`,
+              }
+            : item,
+        );
+        const nextConfig = { ...currentConfig, pageAssets: nextAssets };
+
+        await adminRequest("/api/settings/marketing", {
+          method: "PUT",
+          token,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(nextConfig),
+        });
+
+        setMarketingConfig(nextConfig);
+        const slotLabel = slot === 1 ? "chính giữa" : slot === 2 ? "bên trái" : "bên phải";
+        toast.success(`Đã đưa “${product.name}” lên hero ${slotLabel}.`);
+      } catch (error) {
+        toast.error(
+          getAdminErrorMessage(error, "Không thể đưa sản phẩm lên hero."),
+        );
+      } finally {
+        setActionLoading(null);
+      }
+    },
+    [marketingConfig, token],
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => void fetchProducts(), 0);
@@ -272,6 +341,49 @@ export default function AdminProductsPage() {
         },
       },
       {
+        id: "heroPlacement",
+        header: "Đưa lên hero",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const product = row.original;
+          const slots = [
+            { value: 1 as const, label: "Giữa" },
+            { value: 2 as const, label: "Trái" },
+            { value: 3 as const, label: "Phải" },
+          ];
+
+          return (
+            <div className="flex min-w-48 items-center gap-1">
+              {slots.map((slot) => {
+                const asset = marketingConfig?.pageAssets.find(
+                  (item) =>
+                    item.key === `products_landing_hero_image_${slot.value}`,
+                );
+                const active = asset?.linkUrl === `product:${product.id}`;
+                const loadingKey = `hero:${product.id}:${slot.value}`;
+
+                return (
+                  <button
+                    key={slot.value}
+                    type="button"
+                    onClick={() => void handlePushToHero(product, slot.value)}
+                    disabled={actionLoading === loadingKey}
+                    className={`min-h-9 border px-2.5 text-[11px] font-black transition disabled:cursor-wait disabled:opacity-50 ${
+                      active
+                        ? "border-orange-600 bg-orange-600 text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
+                    }`}
+                    title={`Đưa ${product.name} lên vị trí ${slot.label.toLowerCase()} của hero`}
+                  >
+                    {active ? `✓ ${slot.label}` : slot.label}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        },
+      },
+      {
         id: "actions",
         header: "Thao tác",
         enableSorting: false,
@@ -311,7 +423,7 @@ export default function AdminProductsPage() {
         },
       },
     ],
-    [actionLoading, handleToggleFeatured],
+    [actionLoading, handlePushToHero, handleToggleFeatured, marketingConfig],
   );
 
   return (
@@ -362,7 +474,7 @@ export default function AdminProductsPage() {
           <div>
             <p className="text-sm font-black text-slate-950">Cần sửa phần mở đầu của trang tổng Sản phẩm?</p>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-              Tiêu đề “Mỗi vị ngon, một cá tính”, mô tả, dải chữ chạy và lời kết được quản lý ở màn riêng.
+              Dùng ba nút Giữa / Trái / Phải trong bảng để đẩy ảnh sản phẩm lên hero. Tiêu đề, mô tả và dải chữ chạy được quản lý ở màn trang tổng.
             </p>
           </div>
           <Link

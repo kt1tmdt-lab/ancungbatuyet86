@@ -45,6 +45,24 @@ import {
 } from "@/lib/marketing-config";
 
 const PAGE_ASSET_META: Record<string, { page: string; position: string; note: string; previewPath: string }> = {
+  products_landing_hero_image_1: {
+    page: "Sản phẩm",
+    position: "Ảnh hero chính giữa",
+    note: "Ảnh lớn nằm chính giữa vòng tròn cam. Nên dùng PNG nền trong suốt.",
+    previewPath: "/san-pham",
+  },
+  products_landing_hero_image_2: {
+    page: "Sản phẩm",
+    position: "Ảnh hero phụ bên trái",
+    note: "Ảnh nhỏ nghiêng phía sau bên trái. Nên dùng PNG nền trong suốt.",
+    previewPath: "/san-pham",
+  },
+  products_landing_hero_image_3: {
+    page: "Sản phẩm",
+    position: "Ảnh hero phụ bên phải",
+    note: "Ảnh nhỏ nghiêng phía sau bên phải. Nên dùng PNG nền trong suốt.",
+    previewPath: "/san-pham",
+  },
   about_video: {
     page: "Giới thiệu",
     position: "Video giới thiệu",
@@ -152,6 +170,7 @@ function getPageAssetScope(item: PageAssetItem) {
 
   if (previewPath.startsWith("/gioi-thieu")) return "about";
   if (previewPath.startsWith("/chat-luong")) return "process";
+  if (previewPath.startsWith("/san-pham")) return "products";
   if (previewPath.startsWith("/#") || previewPath === "/") return "home";
 
   return "other";
@@ -690,7 +709,13 @@ function MarketingPageContent({
   };
 
   const updateAsset = (id: string, field: keyof PageAssetItem, val: string) => {
-    setAssetList(assetList.map((item) => item.id === id ? { ...item, [field]: val } : item));
+    setAssetList(assetList.map((item) => {
+      if (item.id !== id) return item;
+      const nextItem = { ...item, [field]: val };
+      return field === "imageUrl" && item.key.startsWith("products_landing_hero_image_")
+        ? { ...nextItem, linkUrl: "" }
+        : nextItem;
+    }));
   };
 
   const updateHomeText = (id: string, value: string) => {
@@ -821,9 +846,12 @@ function MarketingPageContent({
       return;
     }
 
-    const nextAssetList = assetList.map((item) =>
-      item.id === mediaPickerAssetId ? { ...item, imageUrl: url } : item,
-    );
+    const nextAssetList = assetList.map((item) => {
+      if (item.id !== mediaPickerAssetId) return item;
+      return item.key.startsWith("products_landing_hero_image_")
+        ? { ...item, imageUrl: url, linkUrl: "" }
+        : { ...item, imageUrl: url };
+    });
     setAssetList(nextAssetList);
     setMediaPickerAssetId(null);
     await saveMarketingConfig({ pageAssets: nextAssetList });
@@ -832,7 +860,7 @@ function MarketingPageContent({
   const homeAssetList = assetList.filter((item) => getPageAssetScope(item) === "home");
   const visibleAssetList = assetList.filter((item) => {
     const assetScope = getPageAssetScope(item);
-    if (homeTextScope === "sales" || homeTextScope === "products") return false;
+    if (homeTextScope === "sales") return false;
     if (homeTextScope === "about") return item.key === "about_video";
     return assetScope === homeTextScope;
   });
@@ -940,6 +968,7 @@ function MarketingPageContent({
   const renderAssetEditor = (item: PageAssetItem, compact = false) => {
     const meta = getPageAssetMeta(item);
     const isFixedSlot = Boolean(PAGE_ASSET_META[item.key]);
+    const isProductHeroImage = item.key.startsWith("products_landing_hero_image_");
     const factoryProofTitleKey = getFactoryProofTitleKey(item.key);
     const factoryProofTitle = factoryProofTitleKey ? homeTextByKey[factoryProofTitleKey]?.value || "" : "";
 
@@ -959,6 +988,11 @@ function MarketingPageContent({
           <div>
             <h3 className="text-base font-black text-slate-950">{meta.position}</h3>
             <p className="mt-1 text-xs font-medium leading-5 text-slate-500">{meta.note}</p>
+            {isProductHeroImage && item.linkUrl.startsWith("product:") && (
+              <p className="mt-2 inline-flex border border-orange-200 bg-orange-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-orange-700">
+                Đang đồng bộ từ sản phẩm: {item.label}
+              </p>
+            )}
           </div>
 
           {factoryProofTitleKey && (
@@ -974,7 +1008,7 @@ function MarketingPageContent({
             </div>
           )}
 
-          <div>
+          {!isProductHeroImage && <div>
             <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Nội dung / mô tả</label>
             <input
               type="text"
@@ -983,9 +1017,9 @@ function MarketingPageContent({
               placeholder="Nội dung hiển thị cho vị trí này"
               className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
             />
-          </div>
+          </div>}
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className={`grid grid-cols-1 gap-4 ${isProductHeroImage ? "" : "xl:grid-cols-2"}`}>
             <div>
               <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-500">
                 <ImageIcon size={11} /> URL ảnh
@@ -1008,7 +1042,7 @@ function MarketingPageContent({
                 </button>
               </div>
             </div>
-            <div>
+            {!isProductHeroImage && <div>
               <label className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase text-slate-500">
                 <Link2 size={11} /> URL link khi bấm
               </label>
@@ -1019,7 +1053,7 @@ function MarketingPageContent({
                 placeholder="/tin-tuc/bai-viet hoặc https://..."
                 className="w-full border border-slate-300 bg-white p-2 text-xs font-semibold outline-none focus:border-orange-500"
               />
-            </div>
+            </div>}
           </div>
         </div>
 
@@ -1959,10 +1993,10 @@ function MarketingPageContent({
                   <section className="grid gap-4 border border-orange-200 bg-orange-50 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
                     <div>
                       <h3 className="text-sm font-black uppercase tracking-wide text-slate-950">
-                        Ảnh hero và các section sản phẩm
+                        Ảnh của từng landing sản phẩm
                       </h3>
                       <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                        Ba ảnh ở đầu trang và các section phía dưới lấy từ sản phẩm được đánh dấu “Chủ lực”. Ảnh, nội dung và thứ tự của từng landing được sửa trong danh sách sản phẩm.
+                        Ba ảnh hero được chọn ngay ở các ô bên dưới. Nếu để trống, website mới tự lấy ảnh của sản phẩm “Chủ lực”. Ảnh và nội dung của các section phía dưới vẫn sửa trong từng landing sản phẩm.
                       </p>
                     </div>
                     <a
@@ -1970,7 +2004,7 @@ function MarketingPageContent({
                       className="inline-flex items-center justify-center gap-2 border border-orange-300 bg-white px-4 py-2.5 text-xs font-black text-orange-700 transition hover:bg-orange-600 hover:text-white"
                     >
                       <ImageIcon size={15} />
-                      Quản lý ảnh và sản phẩm chủ lực
+                      Quản lý từng landing sản phẩm
                     </a>
                   </section>
                 )}

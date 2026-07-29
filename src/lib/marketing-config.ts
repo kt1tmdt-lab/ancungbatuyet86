@@ -130,6 +130,27 @@ function isUnusedAboutTextKey(key: string) {
 
 export const DEFAULT_PAGE_ASSETS: PageAssetItem[] = [
   {
+    id: "default-products-landing-hero-image-1",
+    key: "products_landing_hero_image_1",
+    label: "Ảnh chính giữa",
+    imageUrl: "",
+    linkUrl: "",
+  },
+  {
+    id: "default-products-landing-hero-image-2",
+    key: "products_landing_hero_image_2",
+    label: "Ảnh phụ bên trái",
+    imageUrl: "",
+    linkUrl: "",
+  },
+  {
+    id: "default-products-landing-hero-image-3",
+    key: "products_landing_hero_image_3",
+    label: "Ảnh phụ bên phải",
+    imageUrl: "",
+    linkUrl: "",
+  },
+  {
     id: "default-about-video",
     key: "about_video",
     label: "Video giới thiệu thương hiệu",

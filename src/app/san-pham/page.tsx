@@ -16,6 +16,7 @@ import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
   type HomeTextItem,
+  type PageAssetItem,
 } from "@/lib/marketing-config";
 
 type Product = {
@@ -221,6 +222,9 @@ export default function ProductsPage() {
   const [pageTexts, setPageTexts] = useState<HomeTextItem[]>(
     DEFAULT_MARKETING_CONFIG.homeTexts,
   );
+  const [pageAssets, setPageAssets] = useState<PageAssetItem[]>(
+    DEFAULT_MARKETING_CONFIG.pageAssets,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -245,7 +249,9 @@ export default function ProductsPage() {
         return response.json();
       })
       .then((data) => {
-        setPageTexts(normalizeMarketingConfig(data?.data).homeTexts);
+        const config = normalizeMarketingConfig(data?.data);
+        setPageTexts(config.homeTexts);
+        setPageAssets(config.pageAssets);
       })
       .catch((error) => {
         console.error("Failed to load product landing content", error);
@@ -280,6 +286,30 @@ export default function ProductsPage() {
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter(Boolean);
+
+  const heroVisuals = [0, 1, 2]
+    .map((index) => {
+      const product = coreProducts[index];
+      const configuredAsset = pageAssets.find(
+        (item) => item.key === `products_landing_hero_image_${index + 1}`,
+      );
+      const linkedProductId = configuredAsset?.linkUrl?.startsWith("product:")
+        ? configuredAsset.linkUrl.slice("product:".length)
+        : "";
+      const linkedProduct = linkedProductId
+        ? products.find((item) => String(item.id) === linkedProductId)
+        : undefined;
+      const configuredImage = linkedProduct
+        ? productImage(linkedProduct)
+        : configuredAsset?.imageUrl?.trim();
+
+      return {
+        slot: index,
+        image: configuredImage || (product ? productImage(product) : ""),
+        alt: linkedProduct?.name || product?.name || `Ảnh sản phẩm hero ${index + 1}`,
+      };
+    })
+    .filter((item) => Boolean(item.image));
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff4df] text-slate-950">
@@ -335,9 +365,7 @@ export default function ProductsPage() {
             <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-700">
               {pageText(pageTexts, "products_landing_visual_label", "ACBT / Core lineup")}
             </div>
-            {coreProducts.slice(0, 3).map((product, index) => {
-              const image = productImage(product);
-              if (!image) return null;
+            {heroVisuals.map(({ slot, image, alt }) => {
               const positions = [
                 "left-1/2 top-[48%] z-30 h-[300px] -translate-x-1/2 -translate-y-1/2 sm:h-[430px] xl:h-[540px]",
                 "left-[15%] top-[58%] z-20 h-[180px] -translate-y-1/2 -rotate-6 opacity-85 sm:h-[260px] xl:h-[320px]",
@@ -345,13 +373,13 @@ export default function ProductsPage() {
               ];
               return (
                 <motion.img
-                  key={productKey(product)}
+                  key={`hero-visual-${slot}`}
                   src={image}
-                  alt={product.name || "Sản phẩm chủ lực"}
-                  initial={{ opacity: 0, y: 35, rotate: index === 1 ? -10 : index === 2 ? 10 : 0 }}
-                  animate={{ opacity: index === 0 ? 1 : index === 1 ? 0.85 : 0.75, y: 0 }}
-                  transition={{ duration: 0.75, delay: 0.22 + index * 0.12 }}
-                  className={`absolute w-auto object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)] ${positions[index]}`}
+                  alt={alt}
+                  initial={{ opacity: 0, y: 35, rotate: slot === 1 ? -10 : slot === 2 ? 10 : 0 }}
+                  animate={{ opacity: slot === 0 ? 1 : slot === 1 ? 0.85 : 0.75, y: 0 }}
+                  transition={{ duration: 0.75, delay: 0.22 + slot * 0.12 }}
+                  className={`absolute w-auto object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.35)] ${positions[slot]}`}
                 />
               );
             })}
