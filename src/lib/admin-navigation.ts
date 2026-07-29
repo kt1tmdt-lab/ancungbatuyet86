@@ -4,9 +4,7 @@ import {
   ClipboardList,
   FileText,
   FolderKanban,
-  FolderPlus,
   Gauge,
-  Globe2,
   ImagePlus,
   Megaphone,
   MonitorCog,
@@ -14,7 +12,6 @@ import {
   ServerCog,
   Settings2,
   ShieldCheck,
-  Store,
   Users,
 } from "lucide-react";
 import type { AuthRole } from "@/lib/auth";
@@ -49,6 +46,13 @@ export type AdminNavItem = {
   icon: LucideIcon;
   roles: AuthRole[];
   exact?: boolean;
+  children?: AdminNavChild[];
+};
+
+export type AdminNavChild = {
+  href: string;
+  label: string;
+  roles: AuthRole[];
 };
 
 export type AdminNavGroup = {
@@ -72,6 +76,53 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         label: "Quản lý website",
         icon: MonitorCog,
         roles: PAGE_ROLES,
+        children: [
+          {
+            href: "/admin/marketing?mode=website&tab=home&scope=home",
+            label: "Trang chủ",
+            roles: PAGE_ROLES,
+          },
+          {
+            href: "/admin/marketing?mode=website&tab=home&scope=about",
+            label: "Giới thiệu",
+            roles: PAGE_ROLES,
+          },
+          {
+            href: "/admin/quality",
+            label: "Chất lượng",
+            roles: PAGE_ROLES,
+          },
+          {
+            href: "/admin/products",
+            label: "Sản phẩm",
+            roles: CONTENT_ROLES,
+          },
+          {
+            href: "/admin/sales-channels",
+            label: "Điểm bán",
+            roles: CONTENT_ROLES,
+          },
+          {
+            href: "/admin/contacts?source=partnership",
+            label: "Hợp tác",
+            roles: PAGE_ROLES,
+          },
+          {
+            href: "/admin/contacts",
+            label: "Liên hệ",
+            roles: PAGE_ROLES,
+          },
+          {
+            href: "/admin/settings?tab=navigation",
+            label: "Cấu hình Header & Footer",
+            roles: ["SUPER_ADMIN", "ADMIN", "MARKETING"],
+          },
+          {
+            href: "/admin/pages",
+            label: "Trang tạo thêm",
+            roles: PAGE_ROLES,
+          },
+        ],
       },
     ],
   },
@@ -97,32 +148,9 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         roles: CONTENT_ROLES,
       },
       {
-        href: "/admin/pages",
-        label: "Trang tạo thêm",
-        icon: Globe2,
-        roles: PAGE_ROLES,
-      },
-      {
         href: "/admin/media",
         label: "Thư viện ảnh",
         icon: ImagePlus,
-        roles: CONTENT_ROLES,
-      },
-    ],
-  },
-  {
-    label: "Sản phẩm & phân phối",
-    items: [
-      {
-        href: "/admin/products",
-        label: "Sản phẩm",
-        icon: FolderPlus,
-        roles: CONTENT_ROLES,
-      },
-      {
-        href: "/admin/sales-channels",
-        label: "Điểm bán",
-        icon: Store,
         roles: CONTENT_ROLES,
       },
     ],
@@ -186,7 +214,12 @@ export function getVisibleAdminNavigation(role?: AuthRole | null) {
 
   return ADMIN_NAVIGATION.map((group) => ({
     ...group,
-    items: group.items.filter((item) => item.roles.includes(role)),
+    items: group.items
+      .filter((item) => item.roles.includes(role))
+      .map((item) => ({
+        ...item,
+        children: item.children?.filter((child) => child.roles.includes(role)),
+      })),
   })).filter((group) => group.items.length > 0);
 }
 

@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -60,6 +61,23 @@ function getSafeNotificationLink(link: string) {
   return link.startsWith("/admin") ? link : "/admin/activity-logs";
 }
 
+function isAdminHrefActive(
+  href: string,
+  pathname: string,
+  searchParams: { get(name: string): string | null },
+) {
+  const [targetPath, queryString] = href.split("?");
+  const pathMatches =
+    pathname === targetPath || pathname.startsWith(`${targetPath}/`);
+  if (!pathMatches) return false;
+  if (!queryString) return true;
+
+  const expectedParams = new URLSearchParams(queryString);
+  return Array.from(expectedParams.entries()).every(
+    ([key, value]) => searchParams.get(key) === value,
+  );
+}
+
 export function AdminHeader({
   collapsed,
   onCollapsedChange,
@@ -75,6 +93,9 @@ export function AdminHeader({
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [expandedNavigation, setExpandedNavigation] = useState<
+    Record<string, boolean>
+  >({});
   const [lastViewedTime, setLastViewedTime] = useState<string | null>(() =>
     typeof window === "undefined"
       ? null
@@ -86,11 +107,18 @@ export function AdminHeader({
     [user?.role],
   );
   const activePath = useMemo(
-    () =>
-      pathname === "/admin/marketing" &&
-      searchParams.get("mode") === "website"
+    () => {
+      const websiteControl = visibleGroups
+        .flatMap((group) => group.items)
+        .find((item) => item.href === "/admin/web-control");
+      const isWebsiteChildActive = websiteControl?.children?.some((child) =>
+        isAdminHrefActive(child.href, pathname, searchParams),
+      );
+
+      return isWebsiteChildActive
         ? "/admin/web-control"
-        : getActiveAdminPath(pathname, visibleGroups),
+        : getActiveAdminPath(pathname, visibleGroups);
+    },
     [pathname, searchParams, visibleGroups],
   );
 
@@ -222,27 +250,107 @@ export function AdminHeader({
     router.replace("/admin/login");
   };
 
-  const navigation = (
+  const renderNavigation = (isCollapsed: boolean) => (
     <nav className="space-y-5" aria-label="Điều hướng quản trị">
       {visibleGroups.map((group) => (
         <div key={group.label}>
-          {!collapsed ? (
+          {!isCollapsed ? (
             <p className="mb-1.5 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">
               {group.label}
             </p>
           ) : null}
           <div className="space-y-1">
             {group.items.map((item) => {
-              const isActive = activePath === item.href;
+              const activeChild = item.children?.find((child) =>
+                isAdminHrefActive(child.href, pathname, searchParams),
+              );
+              const isActive =
+                activePath === item.href || Boolean(activeChild);
+              const isExpanded =
+                expandedNavigation[item.href] ?? isActive;
+
+              if (item.children?.length && !isCollapsed) {
+                return (
+                  <div key={item.href}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedNavigation((current) => ({
+                          ...current,
+                          [item.href]: !isExpanded,
+                        }))
+                      }
+                      aria-expanded={isExpanded}
+                      className={cn(
+                        "group relative flex min-h-11 w-full items-center gap-3 px-3 text-left text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400",
+                        isActive
+                          ? "bg-orange-600 text-white shadow-lg shadow-orange-950/20"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                      )}
+                    >
+                      <item.icon
+                        size={18}
+                        className="shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 truncate">
+                        {item.label}
+                      </span>
+                      <ChevronDown
+                        size={15}
+                        className={cn(
+                          "shrink-0 transition-transform duration-200",
+                          isExpanded && "rotate-180",
+                        )}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    <div
+                      className={cn(
+                        "grid overflow-hidden transition-[grid-template-rows,opacity] duration-200",
+                        isExpanded
+                          ? "grid-rows-[1fr] opacity-100"
+                          : "grid-rows-[0fr] opacity-0",
+                      )}
+                    >
+                      <div className="min-h-0">
+                        <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-700 py-1 pl-3">
+                          {item.children.map((child) => {
+                            const isChildActive =
+                              activeChild?.href === child.href;
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                onClick={() => setMobileOpen(false)}
+                                className={cn(
+                                  "flex min-h-9 items-center border-l-2 px-3 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400",
+                                  isChildActive
+                                    ? "border-orange-500 bg-slate-800 text-orange-300"
+                                    : "border-transparent text-slate-400 hover:border-slate-500 hover:bg-slate-800 hover:text-white",
+                                )}
+                              >
+                                <span className="truncate">{child.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
-                  title={collapsed ? item.label : undefined}
+                  title={isCollapsed ? item.label : undefined}
                   className={cn(
                     "group relative flex min-h-11 items-center gap-3 px-3 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-400",
-                    collapsed && "justify-center px-2",
+                    isCollapsed && "justify-center px-2",
                     isActive
                       ? "bg-orange-600 text-white shadow-lg shadow-orange-950/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white",
@@ -253,10 +361,10 @@ export function AdminHeader({
                     className="shrink-0"
                     aria-hidden="true"
                   />
-                  {!collapsed ? (
+                  {!isCollapsed ? (
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>
                   ) : null}
-                  {isActive && !collapsed ? (
+                  {isActive && !isCollapsed ? (
                     <ChevronRight size={14} aria-hidden="true" />
                   ) : null}
                 </Link>
@@ -427,7 +535,7 @@ export function AdminHeader({
         )}
       >
         <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-4">
-          {navigation}
+          {renderNavigation(collapsed)}
         </div>
         <div className="border-t border-slate-800 pt-3">
           <button
@@ -473,7 +581,7 @@ export function AdminHeader({
                 <ChevronLeft size={20} />
               </button>
             </div>
-            {navigation}
+            {renderNavigation(false)}
           </aside>
         </div>
       ) : null}

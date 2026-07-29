@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Check,
@@ -32,6 +33,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 
 type ContactStatus = "NEW" | "READ" | "RESPONDED";
+type ContactSourceFilter = "ALL" | "PARTNERSHIP" | "CONTACT";
 
 interface ContactMessage {
   id: string;
@@ -50,14 +52,35 @@ const STATUS_LABELS: Record<ContactStatus, string> = {
   RESPONDED: "Đã phản hồi",
 };
 
+function normalizeContactSource(value: string | null) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase();
+}
+
+function isPartnershipContact(source: string | null) {
+  const normalized = normalizeContactSource(source);
+  return ["hop tac", "dai ly", "phan phoi", "mua si"].some((keyword) =>
+    normalized.includes(keyword),
+  );
+}
+
 export default function ContactsPage() {
   const { token, user } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ContactStatus | "ALL">(
     "ALL",
+  );
+  const [sourceFilter, setSourceFilter] = useState<ContactSourceFilter>(() =>
+    searchParams.get("source") === "partnership" ? "PARTNERSHIP" : "ALL",
   );
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [viewingContact, setViewingContact] =
@@ -87,6 +110,27 @@ export default function ContactsPage() {
     const timer = window.setTimeout(() => void fetchContacts(), 0);
     return () => window.clearTimeout(timer);
   }, [fetchContacts]);
+
+  useEffect(() => {
+    const nextSource =
+      searchParams.get("source") === "partnership" ? "PARTNERSHIP" : "ALL";
+    const timer = window.setTimeout(() => setSourceFilter(nextSource), 0);
+    return () => window.clearTimeout(timer);
+  }, [searchParams]);
+
+  const changeSourceFilter = (nextFilter: ContactSourceFilter) => {
+    setSourceFilter(nextFilter);
+    const nextParams = new URLSearchParams(searchParams.toString());
+    if (nextFilter === "PARTNERSHIP") {
+      nextParams.set("source", "partnership");
+    } else {
+      nextParams.delete("source");
+    }
+    const query = nextParams.toString();
+    router.replace(query ? `/admin/contacts?${query}` : "/admin/contacts", {
+      scroll: false,
+    });
+  };
 
   const handleUpdateStatus = useCallback(
     async (contact: ContactMessage, nextStatus: ContactStatus) => {
@@ -162,15 +206,21 @@ export default function ContactsPage() {
     return contacts.filter((contact) => {
       const matchesStatus =
         statusFilter === "ALL" || contact.status === statusFilter;
+      const partnershipContact = isPartnershipContact(contact.source);
+      const matchesSource =
+        sourceFilter === "ALL" ||
+        (sourceFilter === "PARTNERSHIP"
+          ? partnershipContact
+          : !partnershipContact);
       const matchesSearch =
         !query ||
         contact.name.toLocaleLowerCase("vi").includes(query) ||
         contact.phone?.includes(query) ||
         contact.email?.toLocaleLowerCase("vi").includes(query) ||
         contact.content.toLocaleLowerCase("vi").includes(query);
-      return matchesStatus && matchesSearch;
+      return matchesStatus && matchesSource && matchesSearch;
     });
-  }, [contacts, searchQuery, statusFilter]);
+  }, [contacts, searchQuery, sourceFilter, statusFilter]);
 
   const columns = useMemo<ColumnDef<ContactMessage>[]>(
     () => [
@@ -303,8 +353,16 @@ export default function ContactsPage() {
       <div className="space-y-5">
         <CmsPageHeader
           eyebrow="Khách hàng"
-          title="Liên hệ & phản hồi"
-          description="Theo dõi yêu cầu tư vấn, cập nhật tiến độ xử lý và xem đầy đủ nội dung khách hàng gửi."
+          title={
+            sourceFilter === "PARTNERSHIP"
+              ? "Yêu cầu hợp tác"
+              : "Liên hệ & phản hồi"
+          }
+          description={
+            sourceFilter === "PARTNERSHIP"
+              ? "Theo dõi đăng ký đại lý, phân phối, mua sỉ và các đề nghị hợp tác gửi từ website."
+              : "Theo dõi yêu cầu tư vấn, cập nhật tiến độ xử lý và xem đầy đủ nội dung khách hàng gửi."
+          }
         />
 
         <CmsPanel>
@@ -314,6 +372,19 @@ export default function ContactsPage() {
               onChange={setSearchQuery}
               placeholder="Tìm tên, số điện thoại, email hoặc nội dung..."
             />
+            <AdminSelect
+              label="Lọc theo nhóm liên hệ"
+              value={sourceFilter}
+              onChange={(event) =>
+                changeSourceFilter(
+                  event.target.value as ContactSourceFilter,
+                )
+              }
+            >
+              <option value="ALL">Tất cả liên hệ</option>
+              <option value="PARTNERSHIP">Yêu cầu hợp tác</option>
+              <option value="CONTACT">Liên hệ thông thường</option>
+            </AdminSelect>
             <AdminSelect
               label="Lọc theo trạng thái"
               value={statusFilter}
@@ -350,7 +421,9 @@ export default function ContactsPage() {
               data={filteredContacts}
               emptyTitle="Không tìm thấy liên hệ"
               emptyDescription={
-                searchQuery || statusFilter !== "ALL"
+                searchQuery ||
+                statusFilter !== "ALL" ||
+                sourceFilter !== "ALL"
                   ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
                   : "Các yêu cầu mới từ website sẽ xuất hiện tại đây."
               }
