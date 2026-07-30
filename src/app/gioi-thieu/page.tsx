@@ -697,7 +697,7 @@ export default function AboutPage() {
               {coreValues.map((val, idx) => (
                 <motion.div
                   key={idx}
-                  className="group relative flex min-w-0 flex-row items-start gap-4 border border-slate-200/60 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.01)] transition-all duration-300 hover:-translate-y-2 hover:border-orange-500/30 hover:shadow-[0_12px_30px_rgba(255,122,26,0.04)] sm:flex-col sm:p-5 sm:pt-8"
+                  className="group relative flex min-w-0 flex-row items-start gap-4 border border-slate-200/60 bg-white p-5 shadow-[0_4px_15px_rgba(0,0,0,0.01)] transition-all duration-300 hover:-translate-y-2 hover:border-orange-500/30 hover:shadow-[0_12px_30px_rgba(255,122,26,0.04)] sm:flex-col sm:p-6 sm:pt-9"
                   variants={fapUp}
                 >
                   {/* Subtle top accent bar */}
@@ -709,10 +709,10 @@ export default function AboutPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className="text-lg font-black tracking-tight text-slate-950 group-hover:text-orange-600 transition-colors duration-300">
+                    <h4 className="text-xl font-black tracking-[-0.035em] text-slate-950 group-hover:text-orange-600 transition-colors duration-300 sm:text-2xl">
                       {val.title}
                     </h4>
-                    <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                    <p className="text-sm text-slate-600 font-semibold leading-6 sm:text-[15px] sm:leading-7">
                       {val.desc}
                     </p>
                   </div>
