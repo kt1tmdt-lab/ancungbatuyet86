@@ -1251,6 +1251,9 @@ function WhyChooseUsFromDb() {
 
           {items.slice(0, 4).map((item, i) => {
             const Icon = item.icon;
+            const logoNeedsDarkSurface = /tuoi|tuổi|brands/i.test(
+              `${item.label || ""} ${item.logo || ""}`,
+            );
             return (
               <motion.div
                 key={item.href}
@@ -1280,7 +1283,7 @@ function WhyChooseUsFromDb() {
                   </div>
                   <div className="relative z-10 flex flex-1 flex-col justify-between p-6">
                     {item.logo ? (
-                      <div className="flex h-16 w-40 items-center justify-center border border-slate-800 bg-slate-950 px-5 py-3 shadow-[4px_4px_0_rgba(15,23,42,0.16)]">
+                      <div className={`flex h-16 w-40 items-center justify-center border px-5 py-3 shadow-[4px_4px_0_rgba(15,23,42,0.10)] ${logoNeedsDarkSurface ? "border-slate-800 bg-slate-950" : "border-slate-200 bg-white"}`}>
                         <img
                           src={item.logo}
                           alt={item.label || "Logo báo chí"}
@@ -1318,7 +1321,7 @@ function WhyChooseUsFromDb() {
 
                   <div className="pointer-events-none absolute inset-0 z-30 flex translate-y-full items-end bg-orange-600/96 p-7 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/news:translate-y-0 group-focus-visible/news:translate-y-0">
                     <div className="w-full translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
-                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border border-slate-800 bg-slate-950 px-5 py-3 shadow-[6px_6px_0_rgba(15,23,42,0.22)]">
+                      <div className={`mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border px-5 py-3 shadow-[6px_6px_0_rgba(15,23,42,0.16)] ${logoNeedsDarkSurface ? "border-slate-800 bg-slate-950" : "border-white/80 bg-white"}`}>
                         {item.logo ? (
                           <img
                             src={item.logo}
