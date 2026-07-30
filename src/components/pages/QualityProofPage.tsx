@@ -205,17 +205,16 @@ export default function QualityProofPage({
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff9ef] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff5e5] lg:min-h-[calc(100svh-5rem)]">
-        <div className="relative h-[48svh] min-h-80 overflow-hidden bg-orange-100 lg:absolute lg:inset-0 lg:h-auto lg:min-h-0">
+      <section className="overflow-hidden border-b border-orange-100 bg-[#fff5e5]">
+        <div className="h-[60svh] min-h-96 overflow-hidden bg-orange-100 lg:h-[calc(100svh-5rem)] lg:min-h-[620px]">
           <ImageBox
             src={heroImage}
             alt="Nhà máy và quy trình chất lượng Ăn Cùng Bà Tuyết"
             className="object-cover"
           />
-          <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(20,14,8,0.62)_0%,rgba(20,14,8,0.24)_46%,rgba(20,14,8,0.08)_100%)] lg:block" />
         </div>
-        <div className="relative mx-auto flex max-w-7xl px-5 py-9 sm:px-8 sm:py-12 lg:min-h-[calc(100svh-5rem)] lg:items-end lg:px-12 lg:py-16">
-          <Reveal direction="up" className="w-full max-w-4xl bg-[#fff9ef] p-6 shadow-[0_18px_55px_rgba(28,18,8,0.18)] sm:p-9 lg:mb-6 lg:bg-[#fff9ef]/95 lg:backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-20">
+          <Reveal direction="up" className="max-w-4xl">
             <h1 className="max-w-3xl text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
               {copy(config.hero.title)}
             </h1>
