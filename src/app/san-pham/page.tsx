@@ -431,9 +431,6 @@ export default function ProductsPage() {
           >
             <div className="absolute left-1/2 top-1/2 h-[330px] w-[330px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500 shadow-[0_45px_120px_rgba(234,88,12,0.2)] sm:h-[460px] sm:w-[460px] xl:h-[560px] xl:w-[560px]" />
             <div className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-orange-400/30 sm:h-[540px] sm:w-[540px] xl:h-[650px] xl:w-[650px]" />
-            <div className="absolute left-[9%] top-[16%] text-[10px] font-black uppercase tracking-[0.22em] text-orange-700">
-              {pageText(pageTexts, "products_landing_visual_label", "ACBT / Core lineup")}
-            </div>
             {heroVisuals.map(({ key, slot, image, alt }) => {
               const positions = [
                 "left-1/2 top-[48%] z-30 h-[300px] -translate-x-1/2 -translate-y-1/2 sm:h-[430px] xl:h-[540px]",
