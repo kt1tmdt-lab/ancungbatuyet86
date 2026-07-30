@@ -238,13 +238,15 @@ export default function QualityProofPage({
               {copy(config.hero.subtitle)}
             </p>
             <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-              <Link
-                href={copy(config.hero.ctaLink, "#ho-so-phap-ly")}
-                className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-white transition hover:bg-slate-950"
-              >
-                {copy(config.hero.ctaText)}
-                <ArrowRight size={16} />
-              </Link>
+              {publishedDocuments.length > 0 && (
+                <Link
+                  href={copy(config.hero.ctaLink, "#ho-so-phap-ly")}
+                  className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-white transition hover:bg-slate-950"
+                >
+                  {copy(config.hero.ctaText)}
+                  <ArrowRight size={16} />
+                </Link>
+              )}
               <Link
                 href={copy(config.hero.secondaryCtaLink, "/diem-ban")}
                 className="inline-flex items-center justify-center gap-3 border border-orange-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
@@ -384,6 +386,7 @@ export default function QualityProofPage({
         </div>
       </section>
 
+      {publishedDocuments.length > 0 && (
       <section
         id="ho-so-phap-ly"
         className="scroll-mt-24 border-b border-orange-100 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
@@ -399,7 +402,6 @@ export default function QualityProofPage({
             </p>
           </Reveal>
 
-          {publishedDocuments.length > 0 && (
             <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
               {publishedDocuments.map((document) => (
                 <Reveal key={document.id} className="h-full">
@@ -425,9 +427,9 @@ export default function QualityProofPage({
                 </Reveal>
               ))}
             </div>
-          )}
         </div>
       </section>
+      )}
 
       <section
         id="bao-hiem-san-pham"
