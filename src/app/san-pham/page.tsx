@@ -135,11 +135,6 @@ function ProductChapter({
       <span className="pointer-events-none absolute inset-x-0 bottom-0 hidden select-none whitespace-nowrap text-center text-[8vw] font-black uppercase leading-none tracking-[-0.07em] text-slate-950/[0.025] lg:block">
         {product.name}
       </span>
-      <div className="absolute left-3 top-1/2 z-20 hidden -translate-y-1/2 -rotate-90 items-center gap-3 text-[9px] font-black uppercase tracking-[0.24em] text-slate-500 xl:flex">
-        <span>Signature product</span>
-        <span className="h-px w-10 bg-orange-400" />
-      </div>
-
       <div className="relative mx-auto grid min-h-[78vh] max-w-[1600px] items-center lg:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, x: imageOnRight ? 34 : -34, scale: 0.97 }}

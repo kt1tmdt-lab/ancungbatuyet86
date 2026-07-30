@@ -141,10 +141,10 @@ function Reveal({
 const sourceIcons = [FileCheck2, BadgeCheck, Snowflake, SearchCheck];
 const policyIcons = [FileSearch, PackageCheck, Headphones, ShieldCheck];
 const policyLinks = [
-  "",
-  "/trang/chinh-sach-doi-tra-va-hoan-tien",
-  "/trang/tiep-nhan-phan-anh-khieu-nai",
-  "#bao-hiem-san-pham",
+  "/quyen-duoc-thong-tin",
+  "/chinh-sach-doi-tra-va-hoan-tien",
+  "/tiep-nhan-phan-anh-khieu-nai",
+  "/bao-hiem-trach-nhiem-san-pham",
 ];
 const placeholderEvidenceImages = new Set([
   "/bento/bento-factory.png",

@@ -678,7 +678,7 @@ export default function AboutPage() {
           {/* Value cards - 5 columns layout */}
           <div className="mb-16 sm:mb-24">
             <motion.h3 
-              className="mb-8 text-center text-2xl font-black tracking-tight text-slate-950 sm:mb-12"
+              className="mb-8 text-center text-4xl font-black tracking-[-0.05em] text-slate-950 sm:mb-12 sm:text-5xl lg:text-6xl"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
@@ -729,7 +729,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             variants={fapUp}
           >
-            <h3 className="break-words text-3xl font-black uppercase italic tracking-tight text-orange-600 select-none sm:text-5xl lg:text-7xl">
+            <h3 className="text-3xl font-black uppercase italic tracking-[-0.04em] text-orange-600 select-none sm:text-4xl lg:whitespace-nowrap lg:text-5xl xl:text-6xl">
               “{marketingTextValue(homeTexts, "about_current_slogan", "Ăn vặt thì phải ăn cùng Bà Tuyết")}”
             </h3>
           </motion.div>

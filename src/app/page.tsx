@@ -1656,9 +1656,7 @@ function FactoryProofSection() {
           </h2>
         </motion.div>
 
-        <div className="relative mt-10 space-y-12 sm:mt-16 sm:space-y-16 lg:mt-24 lg:space-y-28">
-          <div className="pointer-events-none absolute bottom-8 left-1/2 top-8 hidden w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-orange-300 to-transparent lg:block" />
-
+        <div className="mt-10 space-y-8 sm:mt-16 sm:space-y-12 lg:mt-20 lg:space-y-16">
           {proofs.map((proof, index) => {
             const Icon = proof.icon;
             const imageOnRight = index % 2 === 1;
@@ -1670,47 +1668,42 @@ function FactoryProofSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                className={`group relative flex min-w-0 flex-col lg:min-h-[520px] lg:items-center ${
-                  imageOnRight ? "lg:flex-row-reverse" : "lg:flex-row"
-                }`}
+                className="relative grid overflow-hidden border border-orange-100 bg-white shadow-[0_20px_55px_rgba(72,38,12,0.08)] lg:min-h-[430px] lg:grid-cols-[1.12fr_0.88fr]"
               >
                 <div
-                  className="relative order-1 aspect-[4/3] w-full min-w-0 overflow-hidden border border-white/80 bg-[#ece6dd] shadow-[0_28px_80px_rgba(72,38,12,0.14)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] sm:aspect-[16/9] lg:aspect-auto lg:min-h-[520px] lg:w-[68%] lg:shrink-0 lg:group-hover:w-1/2"
+                  className={`relative aspect-[4/3] min-w-0 overflow-hidden bg-[#ece6dd] sm:aspect-[16/9] lg:aspect-auto lg:h-full ${
+                    imageOnRight ? "lg:order-2" : "lg:order-1"
+                  }`}
                 >
                   <img
                     src={proof.imageUrl}
                     alt={proof.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.015] lg:group-hover:object-contain"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent" />
+                  <div className="absolute bottom-5 left-5 grid h-12 w-12 place-items-center bg-orange-600 text-white shadow-lg sm:bottom-7 sm:left-7 sm:h-14 sm:w-14">
+                    <Icon size={23} />
+                  </div>
                 </div>
 
                 <div
-                  className={`relative z-10 order-2 -mt-5 w-full min-w-0 border border-orange-100 bg-white p-5 shadow-[0_24px_65px_rgba(60,31,9,0.13)] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] sm:-mt-10 sm:p-8 lg:mt-0 lg:flex lg:min-h-[440px] lg:w-[44%] lg:shrink-0 lg:flex-col lg:justify-center lg:p-10 lg:group-hover:min-h-[520px] lg:group-hover:w-1/2 xl:p-12 ${
-                    imageOnRight
-                      ? "lg:-mr-[12%] lg:group-hover:mr-0"
-                      : "lg:-ml-[12%] lg:group-hover:ml-0"
+                  className={`relative flex min-w-0 flex-col justify-center p-6 sm:p-9 lg:p-12 ${
+                    imageOnRight ? "lg:order-1" : "lg:order-2"
                   }`}
                 >
                   <span
-                    className={`absolute top-0 h-1 w-full bg-orange-600 ${
-                      imageOnRight ? "left-0 lg:h-full lg:w-1" : "left-0 lg:left-auto lg:right-0 lg:h-full lg:w-1"
+                    className={`absolute top-0 h-1 w-full bg-orange-600 lg:bottom-0 lg:top-auto lg:h-full lg:w-1 ${
+                      imageOnRight ? "lg:right-0" : "lg:left-0"
                     }`}
                   />
-                  <div>
-                    <span className="grid h-12 w-12 place-items-center border border-orange-200 bg-orange-50 text-orange-600 transition duration-300 group-hover:border-orange-600 group-hover:bg-orange-600 group-hover:text-white sm:h-14 sm:w-14">
-                      <Icon size={23} />
-                    </span>
-                  </div>
-                  <h3 className="mt-6 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">Năng lực sản xuất</p>
+                  <h3 className="mt-4 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
                     {proof.title}
                   </h3>
                   <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
                     {proof.text}
                   </p>
                 </div>
-
-                <span className="absolute left-1/2 top-1/2 z-20 hidden h-4 w-4 -translate-x-1/2 -translate-y-1/2 border-4 border-[#f7f0e5] bg-orange-600 lg:block" />
               </motion.article>
             );
           })}

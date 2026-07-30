@@ -31,6 +31,19 @@ const FacebookIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 
+const YouTubeIcon = ({ size = 20 }: { size?: number }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    width={size}
+    height={size}
+    aria-hidden="true"
+  >
+    <path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.1 31.1 0 0 0 0 12a31.1 31.1 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.1 31.1 0 0 0 24 12a31.1 31.1 0 0 0-.5-5.8ZM9.6 15.55V8.45L15.85 12 9.6 15.55Z" />
+  </svg>
+);
+
 const InstagramIcon = ({ size = 20 }: { size?: number }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -76,6 +89,7 @@ export default function Footer({
   ].filter((row) => row.value.trim());
   const socialLinks = [
     { label: "TikTok", url: contact.tiktokUrl, icon: TikTokIcon },
+    { label: "YouTube", url: contact.youtubeUrl, icon: YouTubeIcon },
     { label: "Facebook", url: contact.facebookUrl, icon: FacebookIcon },
     { label: "Instagram", url: contact.instagramUrl, icon: InstagramIcon },
   ].filter((item) => item.url.trim());

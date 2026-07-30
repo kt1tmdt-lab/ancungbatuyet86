@@ -57,6 +57,7 @@ export type SiteConfigData = {
     workingHours: string;
     shopeeUrl: string;
     tiktokUrl: string;
+    youtubeUrl: string;
     facebookUrl: string;
     instagramUrl: string;
     legalName: string;
@@ -162,8 +163,9 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     address: "Xuân Phương, Hà Nội",
     workingHours: "T2 - T7: 8:00 - 17:00",
     shopeeUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
-    tiktokUrl: "https://tiktok.com/@batuyethanhvi",
-    facebookUrl: "https://facebook.com/ancungbatuyet",
+    tiktokUrl: "https://www.tiktok.com/@ancungbatuyet86",
+    youtubeUrl: "https://www.youtube.com/@NMTVlog99",
+    facebookUrl: "https://web.facebook.com/nmtvlog99",
     instagramUrl: "",
     legalName: "",
     taxCode: "",
@@ -341,11 +343,19 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
           : DEFAULT_SITE_CONFIG.footerContact.shopeeUrl,
       tiktokUrl:
         typeof footerContact.tiktokUrl === "string"
-          ? footerContact.tiktokUrl
+          ? footerContact.tiktokUrl === "https://tiktok.com/@batuyethanhvi"
+            ? DEFAULT_SITE_CONFIG.footerContact.tiktokUrl
+            : footerContact.tiktokUrl
           : DEFAULT_SITE_CONFIG.footerContact.tiktokUrl,
+      youtubeUrl:
+        typeof footerContact.youtubeUrl === "string"
+          ? footerContact.youtubeUrl
+          : DEFAULT_SITE_CONFIG.footerContact.youtubeUrl,
       facebookUrl:
         typeof footerContact.facebookUrl === "string"
-          ? footerContact.facebookUrl
+          ? footerContact.facebookUrl === "https://facebook.com/ancungbatuyet"
+            ? DEFAULT_SITE_CONFIG.footerContact.facebookUrl
+            : footerContact.facebookUrl
           : DEFAULT_SITE_CONFIG.footerContact.facebookUrl,
       instagramUrl:
         typeof footerContact.instagramUrl === "string"

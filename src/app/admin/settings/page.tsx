@@ -92,6 +92,7 @@ const settingsSchema = z.object({
     workingHours: z.string().min(1, "Vui lòng nhập giờ làm việc"),
     shopeeUrl: z.string().optional(),
     tiktokUrl: z.string().optional(),
+    youtubeUrl: z.string().optional(),
     facebookUrl: z.string().optional(),
     instagramUrl: z.string().optional(),
     legalName: z.string().optional(),
@@ -1084,6 +1085,14 @@ export default function SettingsPage() {
                             {...register("footerContact.tiktokUrl")}
                             className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none"
                             placeholder="https://tiktok.com/@..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-600 mb-1">YouTube URL</label>
+                          <input
+                            {...register("footerContact.youtubeUrl")}
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none"
+                            placeholder="https://youtube.com/@..."
                           />
                         </div>
                         <div>
