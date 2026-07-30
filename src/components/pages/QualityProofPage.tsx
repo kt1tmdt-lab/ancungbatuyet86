@@ -205,23 +205,17 @@ export default function QualityProofPage({
 
   return (
     <main className="min-h-screen overflow-x-clip bg-[#fff9ef] text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff5e5] px-5 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-24">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full border border-orange-300/40" />
-        <div className="pointer-events-none absolute -bottom-48 right-[12%] h-96 w-96 rounded-full bg-orange-200/25 blur-3xl" />
-        <div className="relative mx-auto grid max-w-7xl gap-9 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
-          <Reveal
-            direction="right"
-            className="order-1 overflow-hidden border border-orange-100 bg-white p-2 shadow-[0_18px_55px_rgba(124,45,18,0.1)] lg:order-2"
-          >
-            <div className="aspect-[4/3] overflow-hidden bg-orange-50 sm:aspect-[16/10]">
-              <ImageBox
-                src={heroImage}
-                alt="Nhà máy và quy trình chất lượng Ăn Cùng Bà Tuyết"
-              />
-            </div>
-          </Reveal>
-
-          <Reveal direction="left" className="order-2 lg:order-1">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff5e5] lg:min-h-[calc(100svh-5rem)]">
+        <div className="relative h-[48svh] min-h-80 overflow-hidden bg-orange-100 lg:absolute lg:inset-0 lg:h-auto lg:min-h-0">
+          <ImageBox
+            src={heroImage}
+            alt="Nhà máy và quy trình chất lượng Ăn Cùng Bà Tuyết"
+            className="object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(90deg,rgba(20,14,8,0.62)_0%,rgba(20,14,8,0.24)_46%,rgba(20,14,8,0.08)_100%)] lg:block" />
+        </div>
+        <div className="relative mx-auto flex max-w-7xl px-5 py-9 sm:px-8 sm:py-12 lg:min-h-[calc(100svh-5rem)] lg:items-end lg:px-12 lg:py-16">
+          <Reveal direction="up" className="w-full max-w-4xl bg-[#fff9ef] p-6 shadow-[0_18px_55px_rgba(28,18,8,0.18)] sm:p-9 lg:mb-6 lg:bg-[#fff9ef]/95 lg:backdrop-blur-sm">
             <h1 className="max-w-3xl text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
               {copy(config.hero.title)}
             </h1>
@@ -344,12 +338,6 @@ export default function QualityProofPage({
             ))}
           </div>
 
-          <Reveal className="mt-12 max-w-4xl lg:mt-16">
-            <p className="text-base font-semibold leading-8 text-slate-700">
-              {copy(config.factory.processIntro)}
-            </p>
-          </Reveal>
-
           <div className="mt-7 grid gap-3 md:grid-cols-2">
             {config.factory.steps.map((step, index) => (
               <Reveal key={step.id} className="h-full">
@@ -382,9 +370,6 @@ export default function QualityProofPage({
             <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
               {copy(config.documents.title)}
             </h2>
-            <p className="mt-5 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
-              {copy(config.documents.subtitle)}
-            </p>
           </Reveal>
 
             <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
