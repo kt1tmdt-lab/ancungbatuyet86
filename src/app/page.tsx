@@ -1280,11 +1280,11 @@ function WhyChooseUsFromDb() {
                   </div>
                   <div className="relative z-10 flex flex-1 flex-col justify-between p-6">
                     {item.logo ? (
-                      <div className="flex h-14 w-36 items-center justify-center border border-orange-700 bg-orange-600 px-4 py-2 shadow-[6px_6px_0_rgba(15,23,42,0.10)]">
+                      <div className="flex h-16 w-40 items-center justify-center border border-slate-200 bg-white px-5 py-3 shadow-[4px_4px_0_rgba(15,23,42,0.08)]">
                         <img
                           src={item.logo}
                           alt={item.label || "Logo báo chí"}
-                          className="max-h-10 max-w-full object-contain drop-shadow-sm"
+                          className="max-h-10 max-w-full object-contain"
                         />
                       </div>
                     ) : (
@@ -1318,12 +1318,12 @@ function WhyChooseUsFromDb() {
 
                   <div className="pointer-events-none absolute inset-0 z-30 flex translate-y-full items-end bg-orange-600/96 p-7 text-white transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/news:translate-y-0 group-focus-visible/news:translate-y-0">
                     <div className="w-full translate-y-6 opacity-0 transition-all delay-100 duration-500 group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-visible/news:translate-y-0 group-focus-visible/news:opacity-100">
-                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border border-orange-200/40 bg-orange-700 px-5 py-3 shadow-[8px_8px_0_rgba(15,23,42,0.20)]">
+                      <div className="mb-5 flex min-h-16 w-fit max-w-[220px] items-center justify-center border border-white/70 bg-white px-5 py-3 shadow-[6px_6px_0_rgba(15,23,42,0.16)]">
                         {item.logo ? (
                           <img
                             src={item.logo}
                             alt={item.label || "Logo báo chí"}
-                            className="max-h-10 max-w-[170px] object-contain drop-shadow-sm"
+                            className="max-h-10 max-w-[170px] object-contain"
                           />
                         ) : (
                           <span className="text-xs font-black uppercase tracking-[0.18em] text-white">
