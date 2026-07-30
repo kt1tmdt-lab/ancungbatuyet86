@@ -85,6 +85,7 @@ const pageGroups = [
     title: "Bán hàng & truyền thông",
     description: "Những dữ liệu được cập nhật thường xuyên.",
     items: [
+      { title: "Trang Hợp tác", description: "Thay ảnh hero đang hiển thị ở đầu trang Hợp tác.", href: "/admin/website/partnership", icon: Megaphone },
       { title: "Tin tức", description: "Viết, sửa và xuất bản bài viết trên website.", href: "/admin/posts", icon: Newspaper },
       { title: "Báo chí & phản hồi", description: "Bài báo, nhận xét khách hàng và video thương hiệu.", href: "/admin/marketing", icon: Megaphone },
     ],

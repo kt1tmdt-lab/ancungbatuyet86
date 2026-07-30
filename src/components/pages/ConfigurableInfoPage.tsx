@@ -43,6 +43,8 @@ type RenderBlockData = {
   description?: string;
   content?: string;
   backgroundImage?: string;
+  imageLabel?: string;
+  imageCaption?: string;
   backgroundColor?: string;
   ctaText?: string;
   ctaLink?: string;
@@ -1083,11 +1085,14 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                 {data.backgroundImage && (
                   <div className="relative min-h-[430px] overflow-hidden bg-white shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
                     <div className="absolute left-5 top-5 z-10 bg-slate-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                      Trang nội dung
+                      {data.imageLabel || "Trang nội dung"}
                     </div>
                     <div className="absolute bottom-6 left-6 z-10 max-w-xs bg-white/90 p-5 backdrop-blur">
                       <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
-                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">Nội dung được cập nhật theo từng giai đoạn</p>
+                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">
+                        {data.imageCaption ||
+                          "Nội dung được cập nhật theo từng giai đoạn"}
+                      </p>
                     </div>
                     <img
                       src={data.backgroundImage}
@@ -1122,6 +1127,13 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         }
 
         if (block.type === "features") {
+          if (
+            fallback.routePath === "/hop-tac" &&
+            block.id === "partner-overview-features"
+          ) {
+            return null;
+          }
+
           const items = data.items || [];
           const titleIdentity = normalizeText(`${data.title || ""} ${data.subtitle || ""}`);
             const isProcess = titleIdentity.includes("quy trinh") || items.some((item) => /^\s*\d+[.)]/.test(item.title || ""));
@@ -1202,7 +1214,99 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
         if (block.type === "split") {
           const imageLeft = data.imagePosition === "left";
+          const isPartnerOverviewIntro = fallback.routePath === "/hop-tac";
           const isMediaPartnerIntro = fallback.routePath === "/hop-tac/truyen-thong";
+
+          if (isPartnerOverviewIntro) {
+            const partnerPaths = [
+              {
+                icon: "Store",
+                title: "Đại lý / Nhà phân phối",
+                description:
+                  "Dành cho đối tác muốn phân phối sản phẩm, mở điểm bán hoặc phát triển kênh bán chính thức.",
+                href: "/hop-tac/dai-ly-nha-phan-phoi",
+              },
+              {
+                icon: "Megaphone",
+                title: "Báo chí / KOL / KOC",
+                description:
+                  "Dành cho báo chí, cộng đồng và đơn vị sáng tạo nội dung muốn làm việc cùng thương hiệu.",
+                href: "/hop-tac/truyen-thong",
+              },
+              {
+                icon: "Headphones",
+                title: "Liên hệ & hỗ trợ",
+                description:
+                  "Dành cho yêu cầu khác cần được chuyển đến đúng bộ phận phụ trách.",
+                href: "/lien-he",
+              },
+            ];
+
+            return (
+              <section
+                key={block.id || index}
+                className="relative overflow-hidden border-b border-orange-100 bg-white px-5 py-16 sm:px-8 sm:py-20 lg:px-16 lg:py-24"
+              >
+                <div className="pointer-events-none absolute -left-28 bottom-[-12rem] h-96 w-96 rounded-full bg-orange-100/60 blur-3xl" />
+                <div className="relative mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:items-start lg:gap-16">
+                  <motion.div
+                    initial={{ opacity: 0, x: -28 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{
+                      duration: 0.65,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="lg:sticky lg:top-28"
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-600">
+                      Bắt đầu từ nhu cầu của bạn
+                    </p>
+                    <h2 className="mt-4 max-w-xl text-3xl font-black leading-[1.04] tracking-[-0.05em] text-slate-950 sm:text-5xl">
+                      {data.title}
+                    </h2>
+                    <p className="mt-5 max-w-xl text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
+                      {data.description}
+                    </p>
+                  </motion.div>
+
+                  <div className="grid gap-3">
+                    {partnerPaths.map((item, itemIndex) => (
+                      <motion.div
+                        key={item.href}
+                        initial={{ opacity: 0, x: 28 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: "-70px" }}
+                        transition={{
+                          duration: 0.55,
+                          delay: itemIndex * 0.08,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                      >
+                        <Link
+                          href={item.href}
+                          className="group grid grid-cols-[48px_minmax(0,1fr)_24px] items-start gap-4 border border-slate-200 bg-[#fffaf3] p-5 transition hover:border-orange-400 hover:bg-white hover:shadow-[0_18px_45px_rgba(15,23,42,0.07)] sm:grid-cols-[58px_minmax(0,1fr)_28px] sm:p-7"
+                        >
+                          <span className="grid h-12 w-12 place-items-center bg-orange-600 text-white transition group-hover:bg-slate-950 sm:h-14 sm:w-14">
+                            <DynIcon name={item.icon} className="h-6 w-6" />
+                          </span>
+                          <span>
+                            <span className="block text-lg font-black tracking-[-0.035em] text-slate-950 sm:text-xl">
+                              {item.title}
+                            </span>
+                            <span className="mt-2 block text-sm font-semibold leading-6 text-slate-600 sm:leading-7">
+                              {item.description}
+                            </span>
+                          </span>
+                          <ArrowRight className="mt-1 h-5 w-5 text-orange-500 transition group-hover:translate-x-1" />
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }
 
           if (isMediaPartnerIntro) {
             const mediaPrinciples = [

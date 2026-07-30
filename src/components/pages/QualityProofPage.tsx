@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+
+import { useEffect, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  ClipboardCheck,
+  BadgeCheck,
+  Box,
   FileCheck2,
   FileSearch,
   Headphones,
@@ -13,23 +16,14 @@ import {
   SearchCheck,
   ShieldCheck,
   Snowflake,
-  Truck,
   X,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import type { QualityPageConfig, QualitySimpleItem } from "@/lib/quality-config";
-
-type EvidenceDocument = {
-  id: string;
-  title: string;
-  entity: string;
-  date: string;
-  scope: string;
-  description: string;
-  imageUrl?: string;
-  note?: string;
-};
+import type {
+  QualityPageConfig,
+  QualitySimpleItem,
+} from "@/lib/quality-config";
 
 const CP1252_REVERSE: Record<number, number> = {
   0x20ac: 0x80,
@@ -62,667 +56,578 @@ const CP1252_REVERSE: Record<number, number> = {
 };
 
 function repairText(value: string) {
-  if (!/[ÃÄÆ]|áº|á»|â€|�/.test(value)) return value;
+  if (!/[ÃƒÃ„Ã†]|Ã¡Âº|Ã¡Â»|Ã¢â‚¬|ï¿½/.test(value)) return value;
   try {
-    const bytes = new Uint8Array([...value].map((char) => {
-      const code = char.charCodeAt(0);
-      if (code <= 0xff) return code;
-      return CP1252_REVERSE[code] ?? code;
-    }));
+    const bytes = new Uint8Array(
+      [...value].map((character) => {
+        const code = character.charCodeAt(0);
+        if (code <= 0xff) return code;
+        return CP1252_REVERSE[code] ?? code;
+      }),
+    );
     return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
   } catch {
     return value;
   }
 }
 
-function text(value: string | undefined, fallback: string) {
-  const fixed = repairText(value || "").trim();
-  return fixed || fallback;
+function copy(value: string | undefined, fallback = "") {
+  return repairText(value || "").trim() || fallback;
 }
 
-const bannedPublicPhrases = [
-  "bảo chứng",
-  "an toàn tuyệt đối",
-  "vô trùng",
-  "sạch 100%",
-  "chất lượng số một",
-  "tốt nhất thị trường",
-  "PVI xác nhận chất lượng",
-  "PVI bảo chứng",
-];
-
-function safeText(value: string | undefined, fallback: string) {
-  const fixed = text(value, fallback);
-  const lower = fixed.toLowerCase();
-  return bannedPublicPhrases.some((phrase) => lower.includes(phrase.toLowerCase())) ? fallback : fixed;
+function optionalCopy(value: string | undefined) {
+  const normalized = copy(value);
+  if (
+    !normalized ||
+    /\[\s*cần\s+(xác nhận|bổ sung|cập nhật)[^\]]*\]/i.test(normalized)
+  ) {
+    return "";
+  }
+  return normalized;
 }
 
 function qualityImage(value: string | undefined, fallback: string) {
-  return value && value.trim() ? value : fallback;
+  return value?.trim() || fallback;
 }
 
-function optionalPublicText(value: string | undefined) {
-  const fixed = repairText(value || "").trim();
-  if (!fixed || /\[\s*cần\s+(xác nhận|bổ sung|cập nhật)[^\]]*\]/i.test(fixed)) return "";
-  return fixed;
+function ImageBox({
+  src,
+  alt,
+  className = "",
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className={`h-full w-full object-cover ${className}`}
+    />
+  );
 }
 
-function ImageBox({ src, alt, className = "" }: { src: string; alt: string; className?: string }) {
-  return <img src={src} alt={alt} loading="lazy" className={`h-full w-full object-cover ${className}`} />;
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-600 sm:text-xs">
+      {children}
+    </p>
+  );
 }
 
-const sourceFacts = [
-  {
-    icon: FileSearch,
-    title: "Nhập khẩu từ châu Âu theo hồ sơ từng lô",
-    desc: "Nguồn nguyên liệu được thể hiện theo hồ sơ từng lô, bao gồm Ba Lan, Hungary và các quốc gia liên quan khi có tài liệu đối chiếu.",
-  },
-  {
-    icon: FileCheck2,
-    title: "Có hồ sơ xuất xứ và kiểm dịch",
-    desc: "Chứng nhận xuất xứ, phiếu kiểm dịch và hồ sơ nhập khẩu được lưu trữ để phục vụ việc truy xuất.",
-  },
-  {
-    icon: Snowflake,
-    title: "Bảo quản trong hệ thống kho lạnh",
-    desc: "Nguyên liệu được lưu trữ trong điều kiện nhiệt độ phù hợp theo quy trình của đơn vị sản xuất.",
-  },
-  {
-    icon: SearchCheck,
-    title: "Truy xuất theo lô",
-    desc: "Thông tin nguồn nguyên liệu cần được đối chiếu với từng lô hàng và hồ sơ tương ứng.",
-  },
-];
+function Reveal({
+  children,
+  className = "",
+  direction = "up",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  direction?: "up" | "left" | "right";
+}) {
+  const initial =
+    direction === "left"
+      ? { opacity: 0, x: -28 }
+      : direction === "right"
+        ? { opacity: 0, x: 28 }
+        : { opacity: 0, y: 24 };
 
-const factoryStats = [
-  ["3.300 m²", "Quy mô nhà máy"],
-  ["ISO 22000:2018", "Chứng nhận được cấp cho NMV Food"],
-  ["HACCP", "Chương trình đào tạo hoặc hồ sơ HACCP của NMV Food"],
-];
+  return (
+    <motion.div
+      initial={initial}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: "-70px" }}
+      transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
-const processSteps = [
-  ["Tiếp nhận nguyên liệu", "Nguyên liệu được tiếp nhận cùng các thông tin và hồ sơ liên quan đến lô hàng. Tình trạng bao bì, điều kiện bảo quản và các tiêu chí đầu vào được kiểm tra theo quy trình của đơn vị sản xuất."],
-  ["Sơ chế", "Nguyên liệu được đưa vào khu vực sơ chế và xử lý theo quy trình sản xuất tương ứng với từng sản phẩm. Các công đoạn cần được thực hiện trong khu vực và bằng thiết bị phù hợp."],
-  ["Chế biến", "Nguyên liệu được chế biến theo công thức và thông số kỹ thuật đã được thiết lập cho từng dòng sản phẩm. Thời gian, nhiệt độ và các yếu tố liên quan được theo dõi trong quá trình thực hiện."],
-  ["Kiểm soát chất lượng", "Sản phẩm được kiểm tra tại các điểm kiểm soát trong quá trình sản xuất. Những tiêu chí cụ thể chỉ được công bố khi có quy trình hoặc tài liệu nội bộ được phép công khai."],
-  ["Đóng gói và ghi nhãn", "Sản phẩm được đóng gói, ghi nhãn và thể hiện các thông tin cần thiết như thành phần, ngày sản xuất, hạn sử dụng, hướng dẫn bảo quản và thông tin đơn vị chịu trách nhiệm."],
-  ["Lưu kho và phân phối", "Sản phẩm hoàn thiện được lưu kho theo điều kiện phù hợp trước khi đưa đến các kênh phân phối và giao đến người tiêu dùng."],
+const sourceIcons = [FileCheck2, BadgeCheck, Snowflake, SearchCheck];
+const policyIcons = [FileSearch, PackageCheck, Headphones, ShieldCheck];
+const policyLinks = [
+  "",
+  "/trang/chinh-sach-doi-tra-va-hoan-tien",
+  "/trang/tiep-nhan-phan-anh-khieu-nai",
+  "#bao-hiem-san-pham",
 ];
+const placeholderEvidenceImages = new Set([
+  "/bento/bento-factory.png",
+  "/bento/bento-insurance.png",
+  "/bento/bento-ingredients.png",
+  "/bento/bento-tiktok.png",
+  "/hero/chan-ga-plate.png",
+]);
 
-const defaultDocuments: EvidenceDocument[] = [
-  {
-    id: "iso-22000",
-    title: "ISO 22000:2018",
-    entity: "Cấp cho NMV Food",
-    date: "",
-    scope: "Hệ thống quản lý an toàn thực phẩm theo phạm vi ghi trên chứng nhận.",
-    description: "Chỉ hiển thị thông tin ISO khi có scan chứng nhận và phạm vi áp dụng rõ ràng.",
-    note: "Không ghi chứng nhận này là cấp trực tiếp cho ACBT nếu hồ sơ đứng tên NMV Food.",
-  },
-  {
-    id: "haccp",
-    title: "HACCP",
-    entity: "NMV Food",
-    date: "",
-    scope: "Loại hồ sơ HACCP: chứng nhận, chương trình đào tạo hoặc hồ sơ nội bộ.",
-    description: "Nếu hiện tại chỉ có chương trình đào tạo HACCP, cần ghi rõ bản chất tài liệu.",
-    note: "Không rút gọn thành “NMV Food đạt HACCP” nếu giấy tờ hiện có không chứng minh điều đó.",
-  },
-  {
-    id: "attp",
-    title: "Giấy đủ điều kiện ATTP",
-    entity: "",
-    date: "",
-    scope: "Phạm vi hoạt động và địa điểm áp dụng theo nội dung giấy phép.",
-    description: "Cần bổ sung ảnh/PDF giấy phép được phép công khai.",
-  },
-  {
-    id: "vntest",
-    title: "Phiếu kiểm nghiệm",
-    entity: "",
-    date: "",
-    scope: "Kết quả kiểm nghiệm gắn với đúng mẫu, sản phẩm và thời điểm kiểm nghiệm.",
-    description: "Không dùng một phiếu kiểm nghiệm để suy diễn cho mọi sản phẩm hoặc mọi lô hàng.",
-  },
-];
+function isPublishedDocument(item: QualitySimpleItem) {
+  const image = item.imageUrl?.trim() || "";
+  return Boolean(image && !placeholderEvidenceImages.has(image));
+}
 
-const policyItems = [
-  ["Quyền được cung cấp thông tin", "Khách hàng có quyền được tiếp cận các thông tin cơ bản của sản phẩm như tên sản phẩm, thành phần, khối lượng, ngày sản xuất, hạn sử dụng, hướng dẫn bảo quản và thông tin của đơn vị chịu trách nhiệm."],
-  ["Quyền yêu cầu đổi trả", "Khách hàng có thể gửi yêu cầu hỗ trợ khi sản phẩm có dấu hiệu lỗi, hư hỏng, sai sản phẩm hoặc không đúng với thông tin đặt hàng. Điều kiện, thời hạn và hồ sơ đổi trả cần đối chiếu theo chính sách chính thức."],
-  ["Quyền khiếu nại", "Khách hàng có thể gửi phản ánh hoặc khiếu nại qua các kênh tiếp nhận chính thức. Mỗi yêu cầu cần được ghi nhận, phân loại và phản hồi theo thời gian xử lý đã công bố."],
-  ["Bảo hiểm trách nhiệm sản phẩm", "Một số sản phẩm hoặc phạm vi hoạt động có thể thuộc hợp đồng bảo hiểm trách nhiệm sản phẩm với PVI. Quyền lợi bảo hiểm được xem xét theo pháp nhân, sản phẩm, thời hạn và điều kiện cụ thể của hợp đồng."],
-  ["Kênh hỗ trợ khách hàng", "Hotline, email, fanpage, thời gian làm việc và địa chỉ tiếp nhận văn bản cần được bổ sung sau khi doanh nghiệp xác nhận thông tin chính thức."],
-];
-
-export default function QualityProofPage({ config }: { config: QualityPageConfig }) {
-  const [activeDoc, setActiveDoc] = useState<EvidenceDocument | null>(null);
-  const [isZoomed, setIsZoomed] = useState(false);
+export default function QualityProofPage({
+  config,
+}: {
+  config: QualityPageConfig;
+}) {
+  const [activeDocument, setActiveDocument] =
+    useState<QualitySimpleItem | null>(null);
+  const [documentZoomed, setDocumentZoomed] = useState(false);
 
   useEffect(() => {
-    if (!activeDoc) return;
+    if (!activeDocument) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveDoc(null);
+      if (event.key === "Escape") setActiveDocument(null);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeDoc]);
+  }, [activeDocument]);
 
-  const heroImage = qualityImage(config.hero.imageUrl, "/bento/bento-factory.png");
-  const sourceImage = qualityImage(config.source.imageUrl, "/bento/bento-ingredients.png");
-  const factoryImage = qualityImage(config.factory.imageUrl, "/bento/bento-factory.png");
-  const pviImage = qualityImage(config.pvi.imageUrl, "/bento/bento-insurance.png");
-  const heroTitle = safeText(config.hero.title, "Chất lượng kiểm chứng được");
-  const heroSubtitle = safeText(
-    config.hero.subtitle,
-    "Nguyên liệu, nhà máy, chứng nhận, kiểm nghiệm và bảo hiểm trách nhiệm sản phẩm — các thông tin quan trọng đều cần được thể hiện bằng hồ sơ có thể kiểm chứng.",
+  const heroImage = qualityImage(
+    config.hero.imageUrl,
+    "/bento/bento-factory.png",
   );
-  const heroCtaText = safeText(config.hero.ctaText, "Xem hồ sơ pháp lý");
-  const heroCtaLink = text(config.hero.ctaLink, "#ho-so-phap-ly");
-  const heroSecondaryCtaText = safeText(config.hero.secondaryCtaText, "Xem sản phẩm");
-  const heroSecondaryCtaLink = text(config.hero.secondaryCtaLink, "/san-pham");
-  const sourceTitle = safeText(config.source.title, "Nguyên liệu nhập khẩu từ châu Âu — có hồ sơ truy xuất");
-  const sourceDescription = safeText(
-    config.source.description,
-    "Nguyên liệu chính được sử dụng cho một số sản phẩm chân gà của Ăn Cùng Bà Tuyết được nhập khẩu từ Ba Lan, Hungary và các quốc gia châu Âu khác theo từng lô hàng thực tế. Hồ sơ liên quan có thể bao gồm chứng nhận xuất xứ, hồ sơ nhập khẩu, phiếu kiểm dịch và các tài liệu truy xuất đi kèm.",
+  const sourceImage = qualityImage(
+    config.source.imageUrl,
+    "/bento/bento-ingredients.png",
   );
-  const displayedSourceFacts = sourceFacts.map((item, index) => {
-    const configured = config.source.facts[index];
-    return {
-      ...item,
-      title: safeText(configured?.title, item.title),
-      desc: safeText(configured?.description, item.desc),
-    };
-  });
-  const factoryTitle = safeText(config.factory.title, "Nhà máy sản xuất NMV Food — Thái Nguyên");
-  const factoryDescription = safeText(
-    config.factory.description,
-    "Các sản phẩm của Ăn Cùng Bà Tuyết được tổ chức sản xuất tại nhà máy của NMV Food ở Thái Nguyên. Nhà máy có quy mô khoảng 3.300 m² và được bố trí các khu vực phục vụ việc tiếp nhận nguyên liệu, sơ chế, chế biến, kiểm soát, đóng gói và lưu kho.",
+  const factoryImage = qualityImage(
+    config.factory.imageUrl,
+    "/bento/bento-factory.png",
   );
-  const displayedProcessSteps = processSteps.map(([title, description], index) => {
-    const configured = config.factory.steps[index];
-    return [
-      safeText(configured?.title, title),
-      safeText(configured?.description, description),
-    ] as const;
-  });
-  const documentsTitle = safeText(config.documents.title, "Hồ sơ pháp lý & chứng nhận");
-  const pviTitle = safeText(config.pvi.title, "Bảo hiểm trách nhiệm sản phẩm — PVI");
-  const pviDescription = safeText(
-    config.pvi.description,
-    "Ăn Cùng Bà Tuyết mua bảo hiểm trách nhiệm sản phẩm từ PVI. Nếu sản phẩm gây thiệt hại cho người tiêu dùng theo phạm vi hợp đồng, đơn vị bảo hiểm tham gia trách nhiệm bồi thường. Không trình bày như PVI xác nhận chất lượng sản phẩm.",
+  const pviImage = qualityImage(
+    config.pvi.imageUrl,
+    "/bento/bento-insurance.png",
   );
-  const sourceVideoTitle = optionalPublicText(config.source.videoTitle);
-  const sourceVideoUrl = optionalPublicText(config.source.videoUrl);
-  const factoryDetails = [
-    ["Năm đưa vào vận hành", optionalPublicText(config.factory.launchedAt)],
-    ["Địa chỉ nhà máy", optionalPublicText(config.factory.address)],
-  ].filter((item): item is [string, string] => Boolean(item[1]));
+  const publishedDocuments = config.documents.items.filter(
+    isPublishedDocument,
+  );
   const pviDetails = [
-    ["Pháp nhân được bảo hiểm", optionalPublicText(config.pvi.insuredEntity)],
-    ["Phạm vi bảo hiểm", optionalPublicText(config.pvi.coverageScope)],
-    ["Thời hạn bảo hiểm", optionalPublicText(config.pvi.coveragePeriod)],
-    ["Hồ sơ/giấy chứng nhận", optionalPublicText(config.pvi.documentLabel)],
+    ["Pháp nhân được bảo hiểm", optionalCopy(config.pvi.insuredEntity)],
+    ["Phạm vi bảo hiểm", optionalCopy(config.pvi.coverageScope)],
+    ["Thời hạn hợp đồng", optionalCopy(config.pvi.coveragePeriod)],
+    ["Hồ sơ đính kèm", optionalCopy(config.pvi.documentLabel)],
   ].filter((item): item is [string, string] => Boolean(item[1]));
-  const policyTitle = safeText(config.policy.title, "Chính sách bảo vệ quyền lợi khách hàng");
-  const displayedPolicyItems = policyItems.map(([title, description], index) => {
-    const configured = config.policy.items[index];
-    return [
-      safeText(configured?.title, title),
-      safeText(configured?.description, description),
-    ] as const;
-  });
-  const gallery = useMemo(() => {
-    const configured = config.factory.gallery.filter((item) => item.imageUrl);
-    const fallback: QualitySimpleItem[] = [
-      { id: "gallery-1", title: "Khu vực tiếp nhận nguyên liệu", description: "", imageUrl: sourceImage },
-      { id: "gallery-2", title: "Không gian nhà máy", description: "Ảnh minh họa khu vực sản xuất đang dùng tạm.", imageUrl: factoryImage },
-      { id: "gallery-3", title: "Khu vực đóng gói", description: "", imageUrl: "/bento/bento-tiktok.png" },
-      { id: "gallery-4", title: "Hồ sơ liên quan", description: "", imageUrl: "/bento/bento-insurance.png" },
-    ];
-    const seenImages = new Set([heroImage, factoryImage]);
-    return (configured.length ? configured : fallback)
-      .filter((item) => {
-        const image = item.imageUrl || "";
-        if (!image || seenImages.has(image)) return false;
-        seenImages.add(image);
-        return true;
-      })
-      .slice(0, 6);
-  }, [config.factory.gallery, factoryImage, heroImage, sourceImage]);
-  const showFactoryImage = factoryImage !== heroImage;
-  const documents = defaultDocuments.map((item, index) => {
-    const configured = config.documents.items[index];
-    return {
-      ...item,
-      title: safeText(configured?.title, item.title),
-      description: safeText(configured?.description, item.description),
-      imageUrl: configured?.imageUrl || item.imageUrl,
-    };
-  });
-  const activeDocumentDetails = activeDoc
-    ? [
-        ["Pháp nhân/đơn vị đứng tên", optionalPublicText(activeDoc.entity)],
-        ["Ngày cấp/ngày kiểm nghiệm", optionalPublicText(activeDoc.date)],
-        ["Phạm vi áp dụng", optionalPublicText(activeDoc.scope)],
-        ["Ghi chú", optionalPublicText(activeDoc.note)],
-      ].filter((item): item is [string, string] => Boolean(item[1]))
-    : [];
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-[#FAF7F2] font-sans text-slate-950 selection:bg-orange-500 selection:text-white">
-      <section className="relative overflow-hidden border-b border-slate-200 bg-white px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <div className="absolute inset-0 bg-[linear-gradient(112deg,#ffffff_0%,#ffffff_52%,#fffaf2_52%,#fffaf2_100%)]" />
-        <div className="absolute -right-28 top-10 h-96 w-96 rounded-full bg-orange-400/15 blur-3xl" />
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="relative mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-12"
-        >
-          <div className="order-2 lg:order-1">
-            <h1 className="max-w-5xl break-words text-[1.75rem] font-black leading-[1.1] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-              {heroTitle}
-            </h1>
-            <p className="mt-5 max-w-3xl text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-7 sm:text-lg sm:leading-8">
-              {heroSubtitle}
-            </p>
-            <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-7 sm:flex sm:flex-wrap">
-              <Link href={heroCtaLink} className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
-                {heroCtaText} <ArrowRight size={16} />
-              </Link>
-              <Link href={heroSecondaryCtaLink} className="inline-flex items-center justify-center gap-3 border border-slate-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-400 hover:text-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600">
-                {heroSecondaryCtaText} <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-
-          <div className="order-1 border border-slate-200 bg-white p-2 shadow-[0_12px_30px_rgba(15,23,42,0.08)] sm:p-4 lg:order-2">
-            <div className="relative aspect-[4/3] overflow-hidden bg-orange-50 sm:h-[420px] sm:aspect-auto">
-              <ImageBox src={heroImage} alt="Hình ảnh nhà máy hoặc hồ sơ kiểm chứng của Ăn Cùng Bà Tuyết" />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-950/85 to-transparent p-4 text-white sm:p-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-200 sm:text-xs">Nguyên tắc trình bày</p>
-                <p className="mt-1.5 text-lg font-black leading-tight sm:mt-2 sm:text-2xl">Bên thứ ba và hồ sơ pháp lý nói thay cho thương hiệu.</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-      <section id="nguon-nguyen-lieu" className="scroll-mt-28 border-b border-slate-200 bg-[#FAF7F2] px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, x: -28, scale: 0.99 }}
-          whileInView={{ opacity: 1, x: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.65 }}
-          className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-x-14 lg:gap-y-12"
-        >
-          <div className="order-2">
-            <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-              {sourceTitle}
-            </h2>
-            <p className="mt-5 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-6 sm:text-base sm:leading-8">
-              {sourceDescription}
-            </p>
-            <p className="mt-4 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
-              Các thông tin được công khai trên trang cần đối chiếu với hồ sơ của từng lô nguyên liệu. Không sử dụng tuyên bố chung cho toàn bộ sản phẩm nếu tài liệu hiện có chỉ áp dụng cho một số sản phẩm hoặc một số thời điểm nhất định.
-            </p>
-            <div className="mt-7 border border-l-4 border-slate-200 border-l-orange-600 bg-[#FAF7F2] p-4 sm:p-5">
-              <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-700">Cách kiểm chứng nguồn gốc</p>
-              <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
-                Mỗi thông tin về xuất xứ cần được đối chiếu với hồ sơ của từng lô hàng: chứng nhận xuất xứ, phiếu kiểm dịch, hồ sơ nhập khẩu và điều kiện lưu kho tương ứng.
-              </p>
-            </div>
-          </div>
-
-          <div className="contents">
-            <div className="relative order-1 aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-950 sm:aspect-[21/8] lg:col-span-2 lg:h-[460px] lg:aspect-auto">
+    <main className="min-h-screen overflow-x-clip bg-[#fff9ef] text-slate-950 selection:bg-orange-500 selection:text-white">
+      <section className="relative overflow-hidden border-b border-orange-100 bg-[#fff5e5] px-5 py-12 sm:px-8 sm:py-16 lg:px-12 lg:py-24">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full border border-orange-300/40" />
+        <div className="pointer-events-none absolute -bottom-48 right-[12%] h-96 w-96 rounded-full bg-orange-200/25 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl gap-9 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
+          <Reveal
+            direction="right"
+            className="order-1 overflow-hidden border border-orange-100 bg-white p-2 shadow-[0_18px_55px_rgba(124,45,18,0.1)] lg:order-2"
+          >
+            <div className="aspect-[4/3] overflow-hidden bg-orange-50 sm:aspect-[16/10]">
               <ImageBox
-                src={sourceImage}
-                alt="Hồ sơ hoặc hình ảnh minh họa nguồn nguyên liệu"
-                className={sourceVideoTitle ? "opacity-80" : ""}
+                src={heroImage}
+                alt="Nhà máy và quy trình chất lượng Ăn Cùng Bà Tuyết"
               />
-              {sourceVideoTitle ? <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" /> : null}
-              {sourceVideoTitle ? (
-                <div className="absolute bottom-0 left-0 p-4 text-white sm:p-6">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-200 sm:text-xs">Video truy xuất nguồn nguyên liệu</p>
-                  {sourceVideoUrl ? (
-                    <a
-                      href={sourceVideoUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-1.5 inline-flex items-center gap-2 text-lg font-black leading-tight transition hover:text-orange-200 sm:mt-2 sm:text-2xl"
-                    >
-                      {sourceVideoTitle} <ArrowRight size={18} />
-                    </a>
-                  ) : (
-                    <p className="mt-1.5 text-lg font-black leading-tight sm:mt-2 sm:text-2xl">{sourceVideoTitle}</p>
-                  )}
-                </div>
-              ) : null}
             </div>
-            <div className="order-3 grid gap-4 sm:grid-cols-2">
-              {displayedSourceFacts.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <motion.article
-                    key={item.title}
-                    initial={{ opacity: 0, y: 24, scale: 0.98 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.5, delay: index * 0.07 }}
-                    className="grid grid-cols-[40px_minmax(0,1fr)] gap-x-3 border border-slate-200 bg-[#FAF7F2] p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md sm:block sm:p-5"
-                  >
-                    <Icon className="h-6 w-6 text-orange-600 sm:h-7 sm:w-7" />
-                    <h3 className="text-base font-black tracking-[-0.035em] sm:mt-4 sm:text-lg">{item.title}</h3>
-                    <p className="col-start-2 mt-1.5 text-sm font-semibold leading-6 text-slate-600 sm:col-auto sm:mt-2 sm:leading-7">{item.desc}</p>
-                  </motion.article>
-                );
-              })}
+          </Reveal>
+
+          <Reveal direction="left" className="order-2 lg:order-1">
+            <SectionLabel>{copy(config.hero.eyebrow)}</SectionLabel>
+            <h1 className="mt-4 max-w-3xl text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+              {copy(config.hero.title)}
+            </h1>
+            <p className="mt-6 max-w-2xl text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-lg sm:leading-8">
+              {copy(config.hero.subtitle)}
+            </p>
+            <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+              <Link
+                href={copy(config.hero.ctaLink, "#ho-so-phap-ly")}
+                className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-white transition hover:bg-slate-950"
+              >
+                {copy(config.hero.ctaText)}
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                href={copy(config.hero.secondaryCtaLink, "/diem-ban")}
+                className="inline-flex items-center justify-center gap-3 border border-orange-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
+              >
+                {copy(config.hero.secondaryCtaText)}
+                <ArrowRight size={16} />
+              </Link>
             </div>
-          </div>
-        </motion.div>
+          </Reveal>
+        </div>
       </section>
 
-      <section id="nha-may-quy-trinh" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, x: 28, scale: 0.99 }}
-          whileInView={{ opacity: 1, x: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto max-w-7xl"
-        >
-          <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:gap-10">
-            <div className="order-2 lg:order-1">
-              <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-                {factoryTitle}
-              </h2>
-              <p className="mt-5 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-6 sm:text-base sm:leading-8">
-                {factoryDescription}
-              </p>
-              <p className="mt-4 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
-                NMV Food là đơn vị sản xuất và là pháp nhân đứng tên trên các chứng nhận, giấy phép hoặc hồ sơ chuyên môn tương ứng. Năm đưa nhà máy vào vận hành và địa chỉ chi tiết chỉ hiển thị sau khi doanh nghiệp xác nhận.
-              </p>
-              {factoryDetails.length > 0 ? (
-                <div className="mt-6 grid gap-3 text-sm font-bold text-slate-700">
-                  {factoryDetails.map(([label, value]) => (
-                    <p key={label} className="border border-orange-200 bg-orange-50 px-3 py-2">
-                      <span className="font-black">{label}:</span> {value}
-                    </p>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
-            <div className="order-1 grid gap-4 lg:order-2">
-              <div className="grid border border-slate-200 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.02)] sm:grid-cols-3">
-                {factoryStats.map(([value, label]) => (
-                  <div key={value} className="border-b border-orange-100 p-4 last:border-b-0 sm:border-b-0 sm:border-r sm:p-5 last:sm:border-r-0">
-                    <p className="break-words text-2xl font-black tracking-[-0.05em] text-orange-600 sm:text-3xl">{value}</p>
-                    <p className="mt-2 text-[10px] font-black uppercase leading-4 tracking-[0.1em] text-slate-500 sm:text-xs">{label}</p>
-                  </div>
-                ))}
+      <section
+        id="nguon-nguyen-lieu"
+        className="scroll-mt-24 border-b border-orange-100 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-9 lg:grid-cols-2 lg:items-center lg:gap-16">
+            <Reveal
+              direction="left"
+              className="order-1 overflow-hidden border border-orange-100 bg-[#fff8ed] p-2"
+            >
+              <div className="aspect-[4/3] overflow-hidden sm:aspect-[16/11]">
+                <ImageBox
+                  src={sourceImage}
+                  alt="Nguồn nguyên liệu chân gà nhập khẩu từ châu Âu"
+                />
               </div>
-              {showFactoryImage && (
-                <div className="aspect-[4/3] overflow-hidden border border-orange-100 bg-white sm:h-72 sm:aspect-auto">
-                  <ImageBox src={factoryImage} alt="Hình ảnh nhà máy sản xuất NMV Food" />
-                </div>
-              )}
-            </div>
+            </Reveal>
+            <Reveal direction="right" className="order-2">
+              <SectionLabel>{copy(config.source.eyebrow)}</SectionLabel>
+              <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+                {copy(config.source.title)}
+              </h2>
+              <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+                {copy(config.source.description)}
+              </p>
+              <p className="mt-4 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+                {copy(config.source.secondaryDescription)}
+              </p>
+            </Reveal>
           </div>
 
-          <div className="mt-10 sm:mt-14">
-            <div className="grid gap-3 sm:mt-8 sm:gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {displayedProcessSteps.map(([title, desc], index) => (
-                <motion.article
-                  key={title}
-                  initial={{ opacity: 0, y: 28, scale: 0.98 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: "-70px" }}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
-                  className="grid grid-cols-[44px_minmax(0,1fr)] gap-x-3 border border-slate-200 bg-white p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md sm:block sm:p-6"
-                >
-                  <p className="text-2xl font-black tracking-[-0.06em] text-orange-600 sm:text-4xl">{String(index + 1).padStart(2, "0")}</p>
-                  <h3 className="text-lg font-black tracking-[-0.04em] sm:mt-5 sm:text-xl">{title}</h3>
-                  <p className="col-start-2 mt-2 text-sm font-semibold leading-6 text-slate-600 sm:col-auto sm:mt-3 sm:leading-7">{desc}</p>
-                </motion.article>
+          <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
+            {config.source.facts.map((fact, index) => {
+              const Icon = sourceIcons[index % sourceIcons.length];
+              return (
+                <Reveal key={fact.id} className="h-full">
+                  <article className="h-full border border-orange-100 bg-[#fff9ef] p-5 transition hover:-translate-y-1 hover:border-orange-300 sm:p-6">
+                    <Icon size={24} className="text-orange-600" />
+                    <h3 className="mt-5 text-lg font-black tracking-[-0.035em]">
+                      {copy(fact.title)}
+                    </h3>
+                    <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+                      {copy(fact.description)}
+                    </p>
+                  </article>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="nha-may-quy-trinh"
+        className="scroll-mt-24 border-b border-orange-100 bg-[#fff5e5] px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-9 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-16">
+            <Reveal
+              direction="right"
+              className="order-1 overflow-hidden border border-orange-100 bg-white p-2 lg:order-2"
+            >
+              <div className="aspect-[4/3] overflow-hidden sm:aspect-[16/11]">
+                <ImageBox
+                  src={factoryImage}
+                  alt="Nhà máy sản xuất tại KCN Sông Công II, Thái Nguyên"
+                />
+              </div>
+            </Reveal>
+            <Reveal direction="left" className="order-2 lg:order-1">
+              <SectionLabel>{copy(config.factory.eyebrow)}</SectionLabel>
+              <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+                {copy(config.factory.title)}
+              </h2>
+              <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+                {copy(config.factory.description)}
+              </p>
+              <p className="mt-4 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+                {copy(config.factory.secondaryDescription)}
+              </p>
+            </Reveal>
+          </div>
+
+          <div className="mt-9 grid border border-orange-100 bg-white sm:grid-cols-3 lg:mt-12">
+            {config.factory.stats.map((stat) => (
+              <div
+                key={stat.id}
+                className="border-b border-orange-100 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:p-6 sm:last:border-r-0"
+              >
+                <p className="text-2xl font-black tracking-[-0.05em] text-orange-600 sm:text-3xl">
+                  {copy(stat.title)}
+                </p>
+                <p className="mt-2 text-xs font-black uppercase leading-5 tracking-[0.09em] text-slate-500">
+                  {copy(stat.description)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <Reveal className="mt-12 max-w-4xl lg:mt-16">
+            <p className="text-base font-semibold leading-8 text-slate-700">
+              {copy(config.factory.processIntro)}
+            </p>
+          </Reveal>
+
+          <div className="mt-7 grid gap-3 md:grid-cols-2">
+            {config.factory.steps.map((step, index) => (
+              <Reveal key={step.id} className="h-full">
+                <article className="grid h-full grid-cols-[42px_minmax(0,1fr)] gap-4 border border-orange-100 bg-white p-5 sm:grid-cols-[52px_minmax(0,1fr)] sm:p-6">
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-orange-600 text-sm font-black text-white sm:h-12 sm:w-12">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-black leading-tight tracking-[-0.035em] sm:text-xl">
+                      {copy(step.title)}
+                    </h3>
+                    <p className="mt-3 text-sm font-semibold leading-6 text-slate-600 sm:leading-7">
+                      {copy(step.description)}
+                    </p>
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="ho-so-phap-ly"
+        className="scroll-mt-24 border-b border-orange-100 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
+      >
+        <div className="mx-auto max-w-7xl">
+          <Reveal className="max-w-3xl">
+            <SectionLabel>{copy(config.documents.eyebrow)}</SectionLabel>
+            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+              {copy(config.documents.title)}
+            </h2>
+            <p className="mt-5 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+              {copy(config.documents.subtitle)}
+            </p>
+          </Reveal>
+
+          {publishedDocuments.length > 0 && (
+            <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
+              {publishedDocuments.map((document) => (
+                <Reveal key={document.id} className="h-full">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveDocument(document);
+                      setDocumentZoomed(false);
+                    }}
+                    className="group flex h-full min-h-64 w-full flex-col border border-orange-100 bg-[#fff9ef] p-5 text-left transition hover:-translate-y-1 hover:border-orange-400 sm:p-6"
+                  >
+                    <FileSearch size={25} className="text-orange-600" />
+                    <h3 className="mt-6 text-lg font-black tracking-[-0.035em]">
+                      {copy(document.title)}
+                    </h3>
+                    <p className="mt-3 flex-1 text-sm font-semibold leading-6 text-slate-600">
+                      {copy(document.description)}
+                    </p>
+                    <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-orange-700">
+                      Xem bản scan <ArrowRight size={15} />
+                    </span>
+                  </button>
+                </Reveal>
               ))}
             </div>
-          </div>
-
-          {gallery.length > 0 && (
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {gallery.map((item) => (
-              <article key={item.id} className="group overflow-hidden border border-slate-200 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md">
-                <div className="aspect-[4/3] overflow-hidden bg-orange-50 sm:h-52 sm:aspect-auto">
-                  <ImageBox src={qualityImage(item.imageUrl, "/bento/bento-factory.png")} alt={text(item.title, "Ảnh nhà máy NMV Food")} className="transition duration-500 group-hover:scale-105" />
-                </div>
-                <div className="p-3 sm:p-5">
-                  <h3 className="text-sm font-black tracking-[-0.03em] sm:text-base">{text(item.title, "Gallery nhà máy")}</h3>
-                  {optionalPublicText(item.description) ? (
-                    <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-6">
-                      {optionalPublicText(item.description)}
-                    </p>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
           )}
-        </motion.div>
+        </div>
       </section>
 
-      <section id="ho-so-phap-ly" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, x: -28, scale: 0.99 }}
-          whileInView={{ opacity: 1, x: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto max-w-7xl"
-        >
-          <div>
-            <div>
-              <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-                {documentsTitle}
-              </h2>
+      <section
+        id="bao-hiem-san-pham"
+        className="scroll-mt-24 border-b border-orange-100 bg-[#fff5e5] px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
+      >
+        <div className="mx-auto grid max-w-7xl gap-9 lg:grid-cols-2 lg:items-center lg:gap-16">
+          <Reveal
+            direction="left"
+            className="order-1 overflow-hidden border border-orange-100 bg-white p-2"
+          >
+            <div className="aspect-[4/3] overflow-hidden sm:aspect-[16/11]">
+              <ImageBox
+                src={pviImage}
+                alt="Bảo hiểm trách nhiệm sản phẩm PVI"
+              />
             </div>
-          </div>
-
-          <div className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {documents.map((item, index) => (
-              <motion.button
-                key={item.id}
-                type="button"
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-70px" }}
-                transition={{ duration: 0.5, delay: index * 0.07 }}
-                onClick={() => {
-                  setActiveDoc(item);
-                  setIsZoomed(false);
-                }}
-                className="group border border-slate-200 bg-[#FAF7F2] p-4 text-left shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:bg-white hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:min-h-80 sm:p-6"
-              >
-                <FileSearch className="h-7 w-7 text-orange-600 sm:h-8 sm:w-8" />
-                <h3 className="mt-4 text-lg font-black tracking-[-0.04em] sm:mt-6 sm:text-xl">{item.title}</h3>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 sm:mt-3 sm:leading-7">{item.description}</p>
-                {optionalPublicText(item.entity) || optionalPublicText(item.date) ? (
-                  <div className="mt-4 space-y-1.5 text-[11px] font-bold leading-5 text-slate-500 sm:mt-6 sm:space-y-2 sm:text-xs">
-                    {optionalPublicText(item.entity) ? <p>Pháp nhân: {optionalPublicText(item.entity)}</p> : null}
-                    {optionalPublicText(item.date) ? <p>Ngày cấp/kiểm nghiệm: {optionalPublicText(item.date)}</p> : null}
-                  </div>
-                ) : null}
-                <span className="mt-4 inline-flex items-center gap-2 border border-orange-200 bg-white px-3 py-2.5 text-[10px] font-black uppercase tracking-wide text-orange-700 sm:mt-6 sm:px-4 sm:py-3 sm:text-xs">
-                  Xem chi tiết <ArrowRight size={14} />
-                </span>
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      <section id="bao-hiem-san-pham" className="scroll-mt-28 border-b border-orange-200/40 bg-[#F6EFE5] px-4 py-10 text-slate-950 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, x: 28, scale: 0.99 }}
-          whileInView={{ opacity: 1, x: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center"
-        >
-          <div className="order-2 lg:order-1">
-            <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-              {pviTitle}
+          </Reveal>
+          <Reveal direction="right" className="order-2">
+            <SectionLabel>{copy(config.pvi.eyebrow)}</SectionLabel>
+            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+              {copy(config.pvi.title)}
             </h2>
-            <p className="mt-5 text-[0.9375rem] font-semibold leading-7 text-slate-700 sm:mt-6 sm:text-base sm:leading-8">
-              {pviDescription}
+            <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+              {copy(config.pvi.description)}
             </p>
-            <div className="mt-7 border border-l-4 border-orange-200 border-l-orange-600 bg-white p-5">
-              <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-700">Lưu ý</p>
-              <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
-                Bảo hiểm trách nhiệm sản phẩm không thay thế chứng nhận chất lượng, phiếu kiểm nghiệm hoặc trách nhiệm trực tiếp của đơn vị sản xuất và kinh doanh.
+            <div className="mt-6 border-l-4 border-orange-600 bg-white p-5">
+              <p className="text-sm font-semibold leading-7 text-slate-700">
+                {copy(config.pvi.note)}
               </p>
             </div>
-          </div>
-
-          <div className="order-1 border border-slate-200 bg-white p-2 shadow-[0_4px_15px_rgba(0,0,0,0.03)] sm:p-4 lg:order-2">
-            <div className="aspect-[4/3] overflow-hidden bg-slate-100 sm:h-80 sm:aspect-auto">
-              <ImageBox src={pviImage} alt="Hồ sơ bảo hiểm trách nhiệm sản phẩm PVI" />
-            </div>
-            {pviDetails.length > 0 ? (
-              <div className="grid gap-2 p-3 text-xs font-bold text-slate-700 sm:gap-3 sm:p-5 sm:text-sm">
+            {pviDetails.length > 0 && (
+              <dl className="mt-6 divide-y divide-orange-100 border-y border-orange-100">
                 {pviDetails.map(([label, value]) => (
-                  <p key={label} className="border border-orange-200 bg-orange-50 px-3 py-2">
-                    <span className="font-black">{label}:</span> {value}
-                  </p>
+                  <div
+                    key={label}
+                    className="grid gap-1 py-3 text-sm sm:grid-cols-[170px_1fr]"
+                  >
+                    <dt className="font-black text-slate-950">{label}</dt>
+                    <dd className="font-semibold text-slate-600">{value}</dd>
+                  </div>
                 ))}
-              </div>
-            ) : null}
-          </div>
-        </motion.div>
+              </dl>
+            )}
+          </Reveal>
+        </div>
       </section>
 
-      <section id="bao-ve-khach-hang" className="scroll-mt-28 border-b border-slate-200 bg-white px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, x: -28, scale: 0.99 }}
-          whileInView={{ opacity: 1, x: 0, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto max-w-7xl"
-        >
-          <div>
-            <div>
-              <h2 className="break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-                {policyTitle}
-              </h2>
-            </div>
-          </div>
+      <section
+        id="bao-ve-khach-hang"
+        className="scroll-mt-24 bg-white px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28"
+      >
+        <div className="mx-auto max-w-7xl">
+          <Reveal className="max-w-3xl">
+            <SectionLabel>{copy(config.policy.eyebrow)}</SectionLabel>
+            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+              {copy(config.policy.title)}
+            </h2>
+            <p className="mt-5 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+              {copy(config.policy.description)}
+            </p>
+          </Reveal>
 
-          <div className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {displayedPolicyItems.map(([title, desc], index) => {
-              const icons = [FileCheck2, PackageCheck, Headphones, ShieldCheck, ClipboardCheck];
-              const Icon = icons[index] || FileCheck2;
+          <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
+            {config.policy.items.map((item, index) => {
+              const Icon: ComponentType<{ size?: number; className?: string }> =
+                policyIcons[index % policyIcons.length];
+              const content = (
+                <>
+                  <Icon size={25} className="text-orange-600" />
+                  <h3 className="mt-6 text-lg font-black tracking-[-0.035em]">
+                    {copy(item.title)}
+                  </h3>
+                  <p className="mt-3 flex-1 text-sm font-semibold leading-6 text-slate-600">
+                    {copy(item.description)}
+                  </p>
+                  {policyLinks[index] && (
+                    <span className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.1em] text-orange-700">
+                      Xem chi tiết <ArrowRight size={15} />
+                    </span>
+                  )}
+                </>
+              );
+              const className =
+                "flex h-full min-h-64 flex-col border border-orange-100 bg-[#fff9ef] p-5 transition hover:-translate-y-1 hover:border-orange-400 sm:p-6";
+
               return (
-                <motion.article
-                  key={title}
-                  initial={{ opacity: 0, y: 26, scale: 0.98 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: "-70px" }}
-                  transition={{ duration: 0.5, delay: index * 0.06 }}
-                  className="grid grid-cols-[40px_minmax(0,1fr)] gap-x-3 border border-slate-200 bg-[#FAF7F2] p-4 shadow-[0_4px_15px_rgba(0,0,0,0.02)] transition hover:border-orange-300 hover:shadow-md sm:block sm:p-6"
-                >
-                  <Icon className="h-7 w-7 text-orange-600 sm:h-8 sm:w-8" />
-                  <h3 className="text-base font-black tracking-[-0.03em] sm:mt-6 sm:text-lg">{title}</h3>
-                  <p className="col-start-2 mt-1.5 text-sm font-semibold leading-6 text-slate-600 sm:col-auto sm:mt-3 sm:leading-7">{desc}</p>
-                </motion.article>
+                <Reveal key={item.id} className="h-full">
+                  {policyLinks[index] ? (
+                    <Link href={policyLinks[index]} className={className}>
+                      {content}
+                    </Link>
+                  ) : (
+                    <article className={className}>{content}</article>
+                  )}
+                </Reveal>
               );
             })}
           </div>
 
-        </motion.div>
-      </section>
-
-      <section className="bg-[#FAF7F2] px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
-        <div className="mx-auto grid max-w-7xl gap-6 border border-slate-200 bg-white p-5 text-slate-950 shadow-[0_4px_15px_rgba(0,0,0,0.03)] sm:gap-8 sm:p-8 lg:grid-cols-[1fr_auto] lg:items-center lg:p-10">
-          <div>
-            <h2 className="max-w-4xl break-words text-[1.75rem] font-black leading-[1.12] tracking-[-0.04em] sm:text-4xl lg:text-5xl">
-              Khám phá sản phẩm và điểm bán chính thức
-            </h2>
-            <p className="mt-5 max-w-3xl text-base font-semibold leading-8 text-slate-700">
-              Xem danh mục sản phẩm của Ăn Cùng Bà Tuyết hoặc tìm các kênh phân phối phù hợp tại khu vực của bạn.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:flex sm:flex-wrap">
-            <Link href="/san-pham" className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white transition hover:bg-slate-950 sm:py-4">
-              Xem sản phẩm <ArrowRight size={16} />
+          <Reveal className="mt-6 border border-orange-200 bg-orange-600 p-6 text-white sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-8">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-orange-100">
+                {copy(config.policy.supportTitle)}
+              </p>
+              <p className="mt-3 text-base font-black leading-7">
+                {copy(config.policy.supportDetails)}
+              </p>
+            </div>
+            <Link
+              href="/lien-he"
+              className="mt-5 inline-flex shrink-0 items-center gap-3 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.1em] text-slate-950 transition hover:bg-slate-950 hover:text-white sm:mt-0"
+            >
+              Liên hệ hỗ trợ <ArrowRight size={15} />
             </Link>
-            <Link href="/diem-ban" className="inline-flex items-center justify-center gap-3 border border-slate-300 bg-white px-6 py-3.5 text-xs font-black uppercase tracking-wider text-slate-950 transition hover:border-orange-400 hover:text-orange-700 sm:py-4">
-              Tìm điểm bán gần nhất <Truck size={16} />
-            </Link>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {activeDoc ? (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-2 sm:p-4">
-          <button
-            type="button"
-            aria-label="Đóng hồ sơ"
-            onClick={() => setActiveDoc(null)}
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-          />
-          <article className="relative max-h-[96vh] w-full max-w-6xl overflow-hidden border border-orange-200 bg-[#fff8ed] shadow-[0_30px_100px_rgba(0,0,0,0.45)] sm:max-h-[92vh]">
-            <div className="flex items-center justify-between gap-3 border-b border-orange-100 bg-white p-3 sm:p-4">
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">Chi tiết hồ sơ</p>
-                <h3 className="mt-1 truncate text-lg font-black tracking-[-0.04em] sm:text-2xl">{activeDoc.title}</h3>
+      <section className="border-t border-orange-100 bg-[#fff5e5] px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+        <Reveal className="mx-auto max-w-5xl text-center">
+          <Box size={28} className="mx-auto text-orange-600" />
+          <h2 className="mx-auto mt-5 max-w-3xl text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+            {copy(config.closing.title)}
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
+            {copy(config.closing.description)}
+          </p>
+          <div className="mt-7 grid gap-3 sm:flex sm:justify-center">
+            <Link
+              href={copy(config.closing.primaryLink, "/diem-ban")}
+              className="inline-flex items-center justify-center gap-3 bg-orange-600 px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-white transition hover:bg-slate-950"
+            >
+              {copy(config.closing.primaryText)}
+              <ArrowRight size={16} />
+            </Link>
+            <Link
+              href={copy(config.closing.secondaryLink, "/san-pham")}
+              className="inline-flex items-center justify-center gap-3 border border-orange-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-[0.1em] text-slate-950 transition hover:border-orange-500 hover:text-orange-700"
+            >
+              {copy(config.closing.secondaryText)}
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </Reveal>
+      </section>
+
+      {activeDocument && activeDocument.imageUrl && (
+        <div
+          className="fixed inset-0 z-[120] grid place-items-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Bản scan ${copy(activeDocument.title)}`}
+        >
+          <div className="flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden bg-white shadow-2xl">
+            <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 sm:px-5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-orange-600">
+                  Hồ sơ kiểm chứng
+                </p>
+                <h3 className="mt-1 font-black text-slate-950">
+                  {copy(activeDocument.title)}
+                </h3>
               </div>
               <div className="flex items-center gap-2">
-                {activeDoc.imageUrl ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsZoomed((current) => !current)}
-                    className="grid h-9 w-9 place-items-center border border-slate-200 bg-white text-slate-700 hover:border-orange-300 hover:text-orange-600 sm:h-11 sm:w-11"
-                    aria-label={isZoomed ? "Thu nhỏ hồ sơ" : "Phóng to hồ sơ"}
-                  >
-                    {isZoomed ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-                  </button>
-                ) : null}
                 <button
                   type="button"
-                  onClick={() => setActiveDoc(null)}
-                  className="grid h-9 w-9 place-items-center bg-slate-950 text-white hover:bg-orange-600 sm:h-11 sm:w-11"
-                  aria-label="Đóng"
+                  onClick={() => setDocumentZoomed((current) => !current)}
+                  className="grid h-10 w-10 place-items-center border border-slate-200 text-slate-600 transition hover:border-orange-400 hover:text-orange-600"
+                  aria-label={documentZoomed ? "Thu nhỏ" : "Phóng to"}
                 >
-                  <X size={18} />
+                  {documentZoomed ? (
+                    <ZoomOut size={18} />
+                  ) : (
+                    <ZoomIn size={18} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveDocument(null)}
+                  className="grid h-10 w-10 place-items-center border border-slate-200 text-slate-600 transition hover:border-red-300 hover:text-red-600"
+                  aria-label="Đóng hồ sơ"
+                >
+                  <X size={19} />
                 </button>
               </div>
             </div>
-            <div className={`grid max-h-[78vh] overflow-y-auto ${activeDoc.imageUrl ? "lg:grid-cols-[1.15fr_0.85fr]" : ""}`}>
-              {activeDoc.imageUrl ? (
-                <div className="bg-slate-100 p-2 sm:p-4">
-                  <img
-                    src={activeDoc.imageUrl}
-                    alt={`Ảnh scan hoặc hình minh họa ${activeDoc.title}`}
-                    className={`mx-auto bg-white object-contain transition ${isZoomed ? "max-h-none w-auto max-w-none" : "max-h-[72vh] w-full"}`}
-                  />
-                </div>
-              ) : null}
-              <div className="p-4 sm:p-7">
-                <p className="text-sm font-semibold leading-7 text-slate-700">{activeDoc.description}</p>
-                {activeDocumentDetails.length > 0 ? (
-                  <div className="mt-6 space-y-4">
-                    {activeDocumentDetails.map(([label, value]) => (
-                      <div key={label} className="border border-orange-100 bg-white p-4">
-                        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
-                        <p className="mt-2 text-sm font-bold leading-7 text-slate-800">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+            <div className="min-h-0 flex-1 overflow-auto bg-slate-100 p-4 text-center">
+              <img
+                src={activeDocument.imageUrl}
+                alt={`Bản scan ${copy(activeDocument.title)}`}
+                className={`mx-auto bg-white object-contain shadow-lg transition ${
+                  documentZoomed
+                    ? "max-w-none"
+                    : "max-h-[72vh] max-w-full"
+                }`}
+              />
             </div>
-          </article>
+          </div>
         </div>
-      ) : null}
+      )}
     </main>
   );
 }

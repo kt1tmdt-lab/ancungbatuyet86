@@ -7,6 +7,8 @@ export type InfoPageBlock =
         title: string;
         subtitle?: string;
         backgroundImage?: string;
+        imageLabel?: string;
+        imageCaption?: string;
         ctaText?: string;
         ctaLink?: string;
       };

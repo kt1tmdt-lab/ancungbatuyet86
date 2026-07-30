@@ -107,7 +107,7 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
             roles: CONTENT_ROLES,
           },
           {
-            href: "/admin/contacts?source=partnership",
+            href: "/admin/website/partnership",
             label: "Hợp tác",
             roles: PAGE_ROLES,
           },

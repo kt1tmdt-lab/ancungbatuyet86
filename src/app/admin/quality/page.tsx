@@ -7,21 +7,33 @@ import { ArrowDown, ArrowUp, Eye, ImagePlus, Plus, Save, Trash2 } from "lucide-r
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { useAuth } from "@/lib/auth-context";
-import { DEFAULT_QUALITY_CONFIG, type QualityPageConfig, type QualitySimpleItem } from "@/lib/quality-config";
+import {
+  DEFAULT_QUALITY_CONFIG,
+  normalizeQualityConfig,
+  type QualityPageConfig,
+  type QualitySimpleItem,
+} from "@/lib/quality-config";
 
-type SectionKey = "hero" | "source" | "factory" | "documents" | "pvi" | "policy";
+type SectionKey =
+  | "hero"
+  | "source"
+  | "factory"
+  | "documents"
+  | "pvi"
+  | "policy"
+  | "closing";
 type PickerTarget =
   | { kind: "hero" | "source" | "factory" | "pvi" }
-  | { kind: "factoryGallery"; index: number }
   | { kind: "document"; index: number };
 
 const tabs: Array<{ key: SectionKey; label: string; note: string }> = [
   { key: "hero", label: "Hero", note: "Tiêu đề, mô tả, ảnh đầu trang" },
   { key: "source", label: "Nguồn nguyên liệu", note: "Ảnh + các điểm chứng minh" },
-  { key: "factory", label: "Nhà máy & quy trình", note: "Gallery + 6 bước" },
+  { key: "factory", label: "Nhà máy & quy trình", note: "Số liệu + quy trình 8 bước" },
   { key: "documents", label: "Hồ sơ pháp lý", note: "Card mở popup ngoài web" },
   { key: "pvi", label: "PVI", note: "Nội dung bảo hiểm" },
   { key: "policy", label: "Chính sách khách hàng", note: "Các card quyền lợi cuối trang" },
+  { key: "closing", label: "CTA cuối trang", note: "Nút Điểm bán và Sản phẩm" },
 ];
 
 function cloneDefault() {
@@ -125,7 +137,7 @@ export default function AdminQualityPage() {
   useEffect(() => {
     fetch("/api/settings/quality")
       .then((res) => res.json())
-      .then((data) => setConfig(data?.data || cloneDefault()))
+      .then((data) => setConfig(normalizeQualityConfig(data?.data)))
       .catch(() => toast.error("Không tải được cấu hình Chất lượng"))
       .finally(() => setLoading(false));
   }, []);
@@ -170,11 +182,6 @@ export default function AdminQualityPage() {
     if (pickerTarget.kind === "source") patch({ source: { ...config.source, imageUrl: url } });
     if (pickerTarget.kind === "factory") patch({ factory: { ...config.factory, imageUrl: url } });
     if (pickerTarget.kind === "pvi") patch({ pvi: { ...config.pvi, imageUrl: url } });
-    if (pickerTarget.kind === "factoryGallery") {
-      const gallery = [...config.factory.gallery];
-      gallery[pickerTarget.index] = { ...gallery[pickerTarget.index], imageUrl: url };
-      patch({ factory: { ...config.factory, gallery } });
-    }
     if (pickerTarget.kind === "document") {
       const items = [...config.documents.items];
       items[pickerTarget.index] = { ...items[pickerTarget.index], imageUrl: url };
@@ -267,8 +274,10 @@ export default function AdminQualityPage() {
 
             {activeTab === "source" ? (
               <div className="grid gap-5">
+                <Field label="Nhãn section"><TextInput value={config.source.eyebrow} onChange={(e) => patch({ source: { ...config.source, eyebrow: e.target.value } })} /></Field>
                 <Field label="Tiêu đề section"><TextArea value={config.source.title} onChange={(e) => patch({ source: { ...config.source, title: e.target.value } })} /></Field>
-                <Field label="Mô tả section"><TextArea value={config.source.description} onChange={(e) => patch({ source: { ...config.source, description: e.target.value } })} /></Field>
+                <Field label="Mô tả chính"><TextArea value={config.source.description} onChange={(e) => patch({ source: { ...config.source, description: e.target.value } })} /></Field>
+                <Field label="Mô tả bổ sung"><TextArea value={config.source.secondaryDescription} onChange={(e) => patch({ source: { ...config.source, secondaryDescription: e.target.value } })} /></Field>
                 <Field label="Ảnh nguồn nguyên liệu"><ImageChooser value={config.source.imageUrl} onPick={() => setPickerTarget({ kind: "source" })} /></Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Tiêu đề video (để trống sẽ ẩn)"><TextInput value={config.source.videoTitle} onChange={(e) => patch({ source: { ...config.source, videoTitle: e.target.value } })} /></Field>
@@ -281,32 +290,41 @@ export default function AdminQualityPage() {
 
             {activeTab === "factory" ? (
               <div className="grid gap-6">
+                <Field label="Nhãn section"><TextInput value={config.factory.eyebrow} onChange={(e) => patch({ factory: { ...config.factory, eyebrow: e.target.value } })} /></Field>
                 <Field label="Tiêu đề nhà máy"><TextArea value={config.factory.title} onChange={(e) => patch({ factory: { ...config.factory, title: e.target.value } })} /></Field>
                 <Field label="Mô tả nhà máy"><TextArea value={config.factory.description} onChange={(e) => patch({ factory: { ...config.factory, description: e.target.value } })} /></Field>
+                <Field label="Thông tin pháp nhân"><TextArea value={config.factory.secondaryDescription} onChange={(e) => patch({ factory: { ...config.factory, secondaryDescription: e.target.value } })} /></Field>
+                <Field label="Lời dẫn trước quy trình"><TextArea value={config.factory.processIntro} onChange={(e) => patch({ factory: { ...config.factory, processIntro: e.target.value } })} /></Field>
                 <Field label="Ảnh chính nhà máy"><ImageChooser value={config.factory.imageUrl} onPick={() => setPickerTarget({ kind: "factory" })} /></Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Năm đưa vào vận hành (để trống sẽ ẩn)"><TextInput value={config.factory.launchedAt} onChange={(e) => patch({ factory: { ...config.factory, launchedAt: e.target.value } })} /></Field>
                   <Field label="Địa chỉ nhà máy (để trống sẽ ẩn)"><TextInput value={config.factory.address} onChange={(e) => patch({ factory: { ...config.factory, address: e.target.value } })} /></Field>
                 </div>
-                <h2 className="text-lg font-black text-slate-950">Gallery ảnh</h2>
-                {renderList(config.factory.gallery, (items) => patch({ factory: { ...config.factory, gallery: items } }), "gallery", true, (index) => ({ kind: "factoryGallery", index }))}
-                <h2 className="text-lg font-black text-slate-950">Quy trình các bước</h2>
+                <h2 className="text-lg font-black text-slate-950">Số liệu nhà máy</h2>
+                {renderList(config.factory.stats, (items) => patch({ factory: { ...config.factory, stats: items } }), "factory-stat")}
+                <h2 className="text-lg font-black text-slate-950">Quy trình 8 bước</h2>
                 {renderList(config.factory.steps, (items) => patch({ factory: { ...config.factory, steps: items } }), "step")}
               </div>
             ) : null}
 
             {activeTab === "documents" ? (
               <div className="grid gap-5">
+                <Field label="Nhãn section"><TextInput value={config.documents.eyebrow} onChange={(e) => patch({ documents: { ...config.documents, eyebrow: e.target.value } })} /></Field>
                 <Field label="Tiêu đề hồ sơ"><TextArea value={config.documents.title} onChange={(e) => patch({ documents: { ...config.documents, title: e.target.value } })} /></Field>
                 <Field label="Mô tả hồ sơ"><TextArea value={config.documents.subtitle} onChange={(e) => patch({ documents: { ...config.documents, subtitle: e.target.value } })} /></Field>
+                <p className="border border-amber-200 bg-amber-50 p-4 text-xs font-bold leading-5 text-amber-800">
+                  Ngoài website chỉ hiển thị hồ sơ đã có ảnh hoặc bản scan thật. Hồ sơ chưa chọn ảnh sẽ tự ẩn.
+                </p>
                 {renderList(config.documents.items, (items) => patch({ documents: { ...config.documents, items } }), "document", true, (index) => ({ kind: "document", index }))}
               </div>
             ) : null}
 
             {activeTab === "pvi" ? (
               <div className="grid gap-5">
+                <Field label="Nhãn section"><TextInput value={config.pvi.eyebrow} onChange={(e) => patch({ pvi: { ...config.pvi, eyebrow: e.target.value } })} /></Field>
                 <Field label="Tiêu đề PVI"><TextArea value={config.pvi.title} onChange={(e) => patch({ pvi: { ...config.pvi, title: e.target.value } })} /></Field>
                 <Field label="Mô tả PVI"><TextArea value={config.pvi.description} onChange={(e) => patch({ pvi: { ...config.pvi, description: e.target.value } })} /></Field>
+                <Field label="Lưu ý cho khách hàng"><TextArea value={config.pvi.note} onChange={(e) => patch({ pvi: { ...config.pvi, note: e.target.value } })} /></Field>
                 <Field label="Ảnh/scan PVI"><ImageChooser value={config.pvi.imageUrl} onPick={() => setPickerTarget({ kind: "pvi" })} /></Field>
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Pháp nhân được bảo hiểm (để trống sẽ ẩn)"><TextInput value={config.pvi.insuredEntity} onChange={(e) => patch({ pvi: { ...config.pvi, insuredEntity: e.target.value } })} /></Field>
@@ -319,9 +337,28 @@ export default function AdminQualityPage() {
 
             {activeTab === "policy" ? (
               <div className="grid gap-6">
+                <Field label="Nhãn section"><TextInput value={config.policy.eyebrow} onChange={(e) => patch({ policy: { ...config.policy, eyebrow: e.target.value } })} /></Field>
                 <Field label="Tiêu đề chính sách"><TextArea value={config.policy.title} onChange={(e) => patch({ policy: { ...config.policy, title: e.target.value } })} /></Field>
+                <Field label="Mô tả chính sách"><TextArea value={config.policy.description} onChange={(e) => patch({ policy: { ...config.policy, description: e.target.value } })} /></Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Tiêu đề kênh hỗ trợ"><TextInput value={config.policy.supportTitle} onChange={(e) => patch({ policy: { ...config.policy, supportTitle: e.target.value } })} /></Field>
+                  <Field label="Hotline · Email · Giờ làm việc"><TextInput value={config.policy.supportDetails} onChange={(e) => patch({ policy: { ...config.policy, supportDetails: e.target.value } })} /></Field>
+                </div>
                 <h2 className="text-lg font-black text-slate-950">Chính sách khách hàng</h2>
                 {renderList(config.policy.items, (items) => patch({ policy: { ...config.policy, items } }), "policy")}
+              </div>
+            ) : null}
+
+            {activeTab === "closing" ? (
+              <div className="grid gap-5">
+                <Field label="Tiêu đề CTA"><TextArea value={config.closing.title} onChange={(e) => patch({ closing: { ...config.closing, title: e.target.value } })} /></Field>
+                <Field label="Mô tả CTA"><TextArea value={config.closing.description} onChange={(e) => patch({ closing: { ...config.closing, description: e.target.value } })} /></Field>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Field label="Nút chính"><TextInput value={config.closing.primaryText} onChange={(e) => patch({ closing: { ...config.closing, primaryText: e.target.value } })} /></Field>
+                  <Field label="Link nút chính"><TextInput value={config.closing.primaryLink} onChange={(e) => patch({ closing: { ...config.closing, primaryLink: e.target.value } })} /></Field>
+                  <Field label="Nút phụ"><TextInput value={config.closing.secondaryText} onChange={(e) => patch({ closing: { ...config.closing, secondaryText: e.target.value } })} /></Field>
+                  <Field label="Link nút phụ"><TextInput value={config.closing.secondaryLink} onChange={(e) => patch({ closing: { ...config.closing, secondaryLink: e.target.value } })} /></Field>
+                </div>
               </div>
             ) : null}
           </main>

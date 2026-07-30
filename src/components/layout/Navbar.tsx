@@ -741,7 +741,7 @@ export default function Navbar({
 
             <button
               onClick={() => setOpen(!open)}
-              className="acbt-icon-btn p-2 text-slate-700 hover:bg-primary-light hover:text-primary-dark lg:hidden"
+              className="inline-flex items-center justify-center p-2 text-slate-700 transition hover:bg-primary-light hover:text-primary-dark lg:hidden"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
