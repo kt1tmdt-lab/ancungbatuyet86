@@ -109,14 +109,6 @@ function ImageBox({
   );
 }
 
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-orange-600 sm:text-xs">
-      {children}
-    </p>
-  );
-}
-
 function Reveal({
   children,
   className = "",
@@ -230,8 +222,7 @@ export default function QualityProofPage({
           </Reveal>
 
           <Reveal direction="left" className="order-2 lg:order-1">
-            <SectionLabel>{copy(config.hero.eyebrow)}</SectionLabel>
-            <h1 className="mt-4 max-w-3xl text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-3xl text-[2.45rem] font-black leading-[0.98] tracking-[-0.06em] sm:text-5xl lg:text-6xl">
               {copy(config.hero.title)}
             </h1>
             <p className="mt-6 max-w-2xl text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-lg sm:leading-8">
@@ -277,8 +268,7 @@ export default function QualityProofPage({
               </div>
             </Reveal>
             <Reveal direction="right" className="order-2">
-              <SectionLabel>{copy(config.source.eyebrow)}</SectionLabel>
-              <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+              <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
                 {copy(config.source.title)}
               </h2>
               <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
@@ -329,15 +319,11 @@ export default function QualityProofPage({
               </div>
             </Reveal>
             <Reveal direction="left" className="order-2 lg:order-1">
-              <SectionLabel>{copy(config.factory.eyebrow)}</SectionLabel>
-              <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+              <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
                 {copy(config.factory.title)}
               </h2>
               <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
                 {copy(config.factory.description)}
-              </p>
-              <p className="mt-4 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
-                {copy(config.factory.secondaryDescription)}
               </p>
             </Reveal>
           </div>
@@ -393,8 +379,7 @@ export default function QualityProofPage({
       >
         <div className="mx-auto max-w-7xl">
           <Reveal className="max-w-3xl">
-            <SectionLabel>{copy(config.documents.eyebrow)}</SectionLabel>
-            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+            <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
               {copy(config.documents.title)}
             </h2>
             <p className="mt-5 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
@@ -448,8 +433,7 @@ export default function QualityProofPage({
             </div>
           </Reveal>
           <Reveal direction="right" className="order-2">
-            <SectionLabel>{copy(config.pvi.eyebrow)}</SectionLabel>
-            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+            <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
               {copy(config.pvi.title)}
             </h2>
             <p className="mt-6 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
@@ -483,13 +467,9 @@ export default function QualityProofPage({
       >
         <div className="mx-auto max-w-7xl">
           <Reveal className="max-w-3xl">
-            <SectionLabel>{copy(config.policy.eyebrow)}</SectionLabel>
-            <h2 className="mt-4 text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
+            <h2 className="text-[2rem] font-black leading-[1.05] tracking-[-0.05em] sm:text-4xl lg:text-5xl">
               {copy(config.policy.title)}
             </h2>
-            <p className="mt-5 text-[0.95rem] font-semibold leading-7 text-slate-700 sm:text-base sm:leading-8">
-              {copy(config.policy.description)}
-            </p>
           </Reveal>
 
           <div className="mt-9 grid gap-3 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4">
