@@ -204,7 +204,7 @@ export default function Footer({
             <address className="not-italic">
               <ul className="space-y-3 text-sm text-slate-600">
                 <li className="flex items-start gap-2.5">
-                  <Phone size={16} className="mt-1 w-4 shrink-0 text-[#FF7A1A]" aria-hidden="true" />
+                  <Phone size={16} className="w-4 shrink-0 self-center text-[#FF7A1A]" aria-hidden="true" />
                   <a
                     href={`tel:${contact.phone.replace(/\s+/g, "")}`}
                     className="min-w-0 flex-1 py-1 text-left hover:text-[#FF7A1A] transition-colors duration-200 flex items-center min-h-[44px] md:min-h-0"
@@ -214,7 +214,7 @@ export default function Footer({
                   </a>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Mail size={16} className="mt-1 w-4 shrink-0 text-[#FF7A1A]" aria-hidden="true" />
+                  <Mail size={16} className="w-4 shrink-0 self-center text-[#FF7A1A]" aria-hidden="true" />
                   <a
                     href={`mailto:${contact.email}`}
                     className="min-w-0 flex-1 py-1 text-left hover:text-[#FF7A1A] transition-colors duration-200 flex items-center min-h-[44px] md:min-h-0"
@@ -228,7 +228,7 @@ export default function Footer({
                   <span className="min-w-0 flex-1 leading-6">{contact.address}</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Clock size={16} className="mt-1 w-4 shrink-0 text-[#FF7A1A]" aria-hidden="true" />
+                  <Clock size={16} className="w-4 shrink-0 self-center text-[#FF7A1A]" aria-hidden="true" />
                   <span className="min-w-0 flex-1 leading-6">{contact.workingHours}</span>
                 </li>
               </ul>
