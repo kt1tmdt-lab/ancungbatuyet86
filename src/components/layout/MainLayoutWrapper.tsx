@@ -48,6 +48,7 @@ export default function MainLayoutWrapper({
         initialLinks={config?.footerLinks}
         initialContact={config?.footerContact}
         initialBrand={config?.brand}
+        salesPointsEnabled={config?.visibility.salesPointsEnabled}
       />
     </>
   );

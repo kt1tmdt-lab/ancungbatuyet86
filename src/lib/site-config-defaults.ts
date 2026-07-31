@@ -235,6 +235,19 @@ function normalizeLinks(value: unknown, fallback: LinkItem[]) {
   return links.length > 0 ? links : fallback;
 }
 
+function normalizeFooterLinks(value: unknown, fallback: LinkItem[]) {
+  const legacyHrefMap: Record<string, string> = {
+    "/he-thong-ban": "/diem-ban",
+    "/quy-trinh": "/chat-luong",
+    "/gioi-thieu/lich-su": "/gioi-thieu#about-history",
+  };
+
+  return normalizeLinks(value, fallback).map((link) => ({
+    ...link,
+    href: legacyHrefMap[link.href] || link.href,
+  }));
+}
+
 function normalizeNavbarLinks(value: unknown) {
   const links = normalizeLinks(value, REQUIRED_NAV_LINKS);
   const canonicalByHref = new Map(REQUIRED_NAV_LINKS.map((item) => [item.href, item]));
@@ -345,10 +358,10 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
     navbarLinks: normalizeNavbarLinks(source.navbarLinks),
     productMenuLinks: normalizeProductMenuLinks(source.productMenuLinks),
     footerLinks: {
-      products: normalizeLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
-      explore: normalizeLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),
-      support: normalizeLinks(footerLinks.support, DEFAULT_SITE_CONFIG.footerLinks.support),
-      policies: normalizeLinks(footerLinks.policies, DEFAULT_SITE_CONFIG.footerLinks.policies),
+      products: normalizeFooterLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
+      explore: normalizeFooterLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),
+      support: normalizeFooterLinks(footerLinks.support, DEFAULT_SITE_CONFIG.footerLinks.support),
+      policies: normalizeFooterLinks(footerLinks.policies, DEFAULT_SITE_CONFIG.footerLinks.policies),
     },
     footerContact: {
       phone: stringOrDefault(footerContact.phone, DEFAULT_SITE_CONFIG.footerContact.phone),

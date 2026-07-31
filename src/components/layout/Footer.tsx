@@ -67,10 +67,12 @@ export default function Footer({
   initialLinks,
   initialContact,
   initialBrand,
+  salesPointsEnabled = true,
 }: {
   initialLinks?: SiteConfigData["footerLinks"];
   initialContact?: SiteConfigData["footerContact"];
   initialBrand?: SiteConfigData["brand"];
+  salesPointsEnabled?: boolean;
 }) {
   const [openSection, setOpenSection] = useState<string | null>(null);
 
@@ -80,7 +82,9 @@ export default function Footer({
 
   const brand = initialBrand || DEFAULT_SITE_CONFIG.brand;
   const contact = initialContact || DEFAULT_SITE_CONFIG.footerContact;
-  const supportLinks = initialLinks?.support || DEFAULT_SITE_CONFIG.footerLinks.support;
+  const supportLinks = (initialLinks?.support || DEFAULT_SITE_CONFIG.footerLinks.support).filter(
+    (link) => salesPointsEnabled || link.href !== "/diem-ban",
+  );
   const policyLinks = initialLinks?.policies || DEFAULT_SITE_CONFIG.footerLinks.policies;
   const legalRows = [
     { label: "Đơn vị chủ quản", value: contact.legalName },
