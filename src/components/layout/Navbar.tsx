@@ -373,11 +373,13 @@ export default function Navbar({
   initialContact,
   initialProductMenuLinks,
   initialBrand,
+  salesPointsEnabled = true,
 }: {
   initialLinks?: { href: string; label: string }[];
   initialContact?: SiteConfigData["footerContact"];
   initialProductMenuLinks?: SiteConfigData["productMenuLinks"];
   initialBrand?: SiteConfigData["brand"];
+  salesPointsEnabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -405,7 +407,13 @@ export default function Navbar({
 
     return () => window.clearTimeout(timer);
   }, []);
-  const navLinks = useMemo(() => mergeRequiredNavLinks(initialLinks), [initialLinks]);
+  const navLinks = useMemo(
+    () =>
+      mergeRequiredNavLinks(initialLinks).filter(
+        (link) => salesPointsEnabled || link.href !== "/diem-ban",
+      ),
+    [initialLinks, salesPointsEnabled],
+  );
   const productMenuLinks = currentProductMenuLinks.length
     ? currentProductMenuLinks
     : productMenuLoaded

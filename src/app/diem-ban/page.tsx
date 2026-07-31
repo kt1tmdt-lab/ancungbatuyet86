@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, SearchCheck, ShieldCheck, ShoppingBag, Store, Truck } from "lucide-react";
 import prisma from "@/lib/prisma";
 import DistributionPointExplorer from "@/components/pages/DistributionPointExplorer";
@@ -7,6 +8,7 @@ import {
   normalizeMarketingConfig,
   type HomeTextItem,
 } from "@/lib/marketing-config";
+import { normalizeSiteConfig } from "@/lib/site-config-defaults";
 
 // This page reads live distribution data and must not require a database
 // connection while the production bundle is being compiled.
@@ -18,6 +20,14 @@ function textValue(items: HomeTextItem[], key: string, fallback: string) {
 }
 
 export default async function SalesPointPage() {
+  const siteConfigResult = await prisma.siteConfig
+    .findUnique({ where: { id: "global" } })
+    .catch(() => null);
+  const siteConfig = normalizeSiteConfig(siteConfigResult?.data);
+  if (!siteConfig.visibility.salesPointsEnabled) {
+    redirect("/");
+  }
+
   const [onlineChannelsResult, distributionResult, marketingResult] = await Promise.allSettled([
     prisma.onlineChannel.findMany({
       where: { isActive: true },

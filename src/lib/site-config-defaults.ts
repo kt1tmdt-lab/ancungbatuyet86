@@ -16,6 +16,9 @@ export type StatItem = {
 };
 
 export type SiteConfigData = {
+  visibility: {
+    salesPointsEnabled: boolean;
+  };
   brand: {
     name: string;
     tagline: string;
@@ -89,6 +92,9 @@ export const DEFAULT_PRODUCT_MENU_LINKS: ProductMenuLinkItem[] = [];
 
 
 export const DEFAULT_SITE_CONFIG: SiteConfigData = {
+  visibility: {
+    salesPointsEnabled: true,
+  },
   brand: {
     name: "Ăn Cùng Bà Tuyết",
     tagline: "Ăn vặt thì phải Ăn Cùng Bà Tuyết",
@@ -273,6 +279,7 @@ function normalizeProductMenuLinks(value: unknown) {
 
 export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const source = isRecord(input) ? input : {};
+  const visibility = isRecord(source.visibility) ? source.visibility : {};
   const brand = isRecord(source.brand) ? source.brand : {};
   const heroBanner = isRecord(source.heroBanner) ? source.heroBanner : {};
   const heroHighlights = Array.isArray(heroBanner.highlights) ? heroBanner.highlights : [];
@@ -286,6 +293,12 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
   const insurance = isRecord(stats.insurance) ? stats.insurance : {};
 
   return {
+    visibility: {
+      salesPointsEnabled:
+        typeof visibility.salesPointsEnabled === "boolean"
+          ? visibility.salesPointsEnabled
+          : DEFAULT_SITE_CONFIG.visibility.salesPointsEnabled,
+    },
     brand: {
       name: stringOrDefault(brand.name, DEFAULT_SITE_CONFIG.brand.name),
       tagline: stringOrDefault(brand.tagline, DEFAULT_SITE_CONFIG.brand.tagline),

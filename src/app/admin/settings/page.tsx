@@ -48,6 +48,9 @@ const statItemSchema = z.object({
 });
 
 const settingsSchema = z.object({
+  visibility: z.object({
+    salesPointsEnabled: z.boolean(),
+  }),
   brand: z.object({
     name: z.string().min(1, "Vui lòng nhập tên thương hiệu"),
     tagline: z.string().min(1, "Vui lòng nhập câu giới thiệu"),
@@ -734,6 +737,21 @@ export default function SettingsPage() {
                     </button>
                   </div>
                   <div className="p-6 space-y-4">
+                    <label className="flex cursor-pointer items-center justify-between gap-5 border border-orange-200 bg-[#fff8ed] p-4">
+                      <span>
+                        <span className="block text-sm font-black text-slate-950">
+                          Hiển thị mục Điểm bán
+                        </span>
+                        <span className="mt-1 block text-xs font-semibold leading-5 text-slate-600">
+                          Tắt để ẩn tạm trang Điểm bán khỏi website và toàn bộ menu điều hướng. Dữ liệu điểm bán vẫn được giữ nguyên.
+                        </span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        {...register("visibility.salesPointsEnabled")}
+                        className="h-5 w-5 shrink-0 accent-orange-600"
+                      />
+                    </label>
                     <div className="border border-orange-100 bg-orange-50 px-4 py-3 text-xs font-semibold leading-6 text-orange-900">
                       Các trang chính luôn được giữ lại. Trang tạo thêm được đưa
                       lên menu ngay tại mục <span className="font-black">Trang tạo thêm</span>;

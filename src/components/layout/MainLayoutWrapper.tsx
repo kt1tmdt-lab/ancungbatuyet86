@@ -41,6 +41,7 @@ export default function MainLayoutWrapper({
         initialContact={config?.footerContact}
         initialProductMenuLinks={config?.productMenuLinks}
         initialBrand={config?.brand}
+        salesPointsEnabled={config?.visibility.salesPointsEnabled}
       />
       <main className="flex-1 pt-16 lg:pt-18">{children}</main>
       <Footer

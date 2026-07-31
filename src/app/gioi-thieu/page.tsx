@@ -18,6 +18,8 @@ import {
   Target,
   Compass,
   Lightbulb,
+  MapPin,
+  Building2,
 } from "lucide-react";
 import {
   DEFAULT_MARKETING_CONFIG,
@@ -25,6 +27,11 @@ import {
   type HomeTextItem,
   type PageAssetItem,
 } from "@/lib/marketing-config";
+import {
+  DEFAULT_SITE_CONFIG,
+  normalizeSiteConfig,
+  type SiteConfigData,
+} from "@/lib/site-config-defaults";
 
 // Repair CP1252 to UTF-8 mojibake function if needed
 const CP1252_REVERSE: Record<number, number> = {
@@ -300,6 +307,9 @@ export default function AboutPage() {
   const [homeTexts, setHomeTexts] = useState<HomeTextItem[]>(
     DEFAULT_MARKETING_CONFIG.homeTexts
   );
+  const [siteContact, setSiteContact] = useState<SiteConfigData["footerContact"]>(
+    DEFAULT_SITE_CONFIG.footerContact
+  );
 
   useEffect(() => {
     async function fetchMarketingConfig() {
@@ -326,6 +336,19 @@ export default function AboutPage() {
     }
 
     fetchMarketingConfig();
+
+    async function fetchCompanyContact() {
+      try {
+        const res = await fetch("/api/settings", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        setSiteContact(normalizeSiteConfig(data?.data).footerContact);
+      } catch (error) {
+        console.error("Failed to fetch company addresses:", error);
+      }
+    }
+
+    fetchCompanyContact();
   }, []);
 
   const assetByKey = useMemo(
@@ -407,6 +430,27 @@ export default function AboutPage() {
       desc: marketingTextValue(homeTexts, "about_current_core_5_description", "Ăn Cùng Bà Tuyết ngay từ khi thành lập đến nay luôn là doanh nghiệp do người Việt sáng lập, vận hành và sở hữu, với khát vọng đưa đồ ăn vặt Việt Nam lên bản đồ thế giới."),
     },
   ];
+
+  const companyLocations = [
+    {
+      label: "Địa chỉ liên hệ",
+      address: siteContact.address.trim(),
+      icon: MapPin,
+    },
+    {
+      label: "Địa chỉ đăng ký doanh nghiệp",
+      address: siteContact.registeredAddress.trim(),
+      icon: Building2,
+    },
+  ].filter(
+    (location, index, locations) =>
+      location.address &&
+      locations.findIndex(
+        (candidate) =>
+          candidate.address.toLocaleLowerCase("vi-VN") ===
+          location.address.toLocaleLowerCase("vi-VN"),
+      ) === index,
+  );
 
   return (
     <main className="min-w-0 overflow-x-clip bg-[#FAF7F2] font-sans text-slate-900">
@@ -736,6 +780,67 @@ export default function AboutPage() {
 
         </div>
       </section>
+
+      {companyLocations.length > 0 && (
+        <section className="border-y border-orange-100 bg-white py-16 sm:py-20 lg:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fapUp}
+            >
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">
+                  Thông tin doanh nghiệp
+                </p>
+                <h2 className="mt-4 text-4xl font-black leading-[0.95] tracking-[-0.055em] text-slate-950 sm:text-5xl lg:text-6xl">
+                  Địa chỉ công ty
+                </h2>
+              </div>
+              <p className="max-w-2xl text-base font-semibold leading-8 text-slate-600">
+                Xem vị trí trực tiếp trên bản đồ và sử dụng đúng địa chỉ đã được công bố trong thông tin doanh nghiệp.
+              </p>
+            </motion.div>
+
+            <div className={`mt-10 grid gap-6 ${companyLocations.length > 1 ? "lg:grid-cols-2" : ""}`}>
+              {companyLocations.map(({ label, address, icon: LocationIcon }) => (
+                <motion.article
+                  key={`${label}-${address}`}
+                  className="overflow-hidden border border-orange-100 bg-[#fffaf3]"
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                  variants={fapUp}
+                >
+                  <div className="flex min-h-32 items-start gap-4 p-6 sm:p-8">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center bg-orange-600 text-white">
+                      <LocationIcon size={22} />
+                    </span>
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
+                        {label}
+                      </p>
+                      <address className="mt-3 not-italic text-lg font-black leading-7 text-slate-950">
+                        {address}
+                      </address>
+                    </div>
+                  </div>
+                  <iframe
+                    title={`Bản đồ ${label}`}
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                    className="h-72 w-full border-0 sm:h-80"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                  />
+                </motion.article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SECTION 4: CTA CUỐI TRANG */}
       <section className="py-16 lg:py-20 bg-[#FAF7F2]">
