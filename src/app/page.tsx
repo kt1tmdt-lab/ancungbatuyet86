@@ -1699,8 +1699,7 @@ function FactoryProofSection() {
                       imageOnRight ? "lg:right-0" : "lg:left-0"
                     }`}
                   />
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">Năng lực sản xuất</p>
-                  <h3 className="mt-4 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                  <h3 className="mt-0 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
                     {proof.title}
                   </h3>
                   <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
