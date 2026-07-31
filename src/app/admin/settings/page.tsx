@@ -92,6 +92,8 @@ const settingsSchema = z.object({
     phone: z.string().min(1, "Vui lòng nhập hotline"),
     email: z.string().min(1, "Vui lòng nhập email"),
     address: z.string().min(1, "Vui lòng nhập địa chỉ"),
+    addressLatitude: z.string().optional(),
+    addressLongitude: z.string().optional(),
     workingHours: z.string().min(1, "Vui lòng nhập giờ làm việc"),
     shopeeUrl: z.string().optional(),
     tiktokUrl: z.string().optional(),
@@ -101,6 +103,8 @@ const settingsSchema = z.object({
     legalName: z.string().optional(),
     taxCode: z.string().optional(),
     registeredAddress: z.string().optional(),
+    registeredAddressLatitude: z.string().optional(),
+    registeredAddressLongitude: z.string().optional(),
     boCongThuongUrl: z.string().optional(),
     boCongThuongImageUrl: z.string().optional(),
     copyrightText: z.string().optional(),
@@ -1040,6 +1044,18 @@ export default function SettingsPage() {
                           {...register("footerContact.address")}
                           className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
                         />
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <input
+                            {...register("footerContact.addressLatitude")}
+                            placeholder="Vĩ độ (VD: 21.0285)"
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                          />
+                          <input
+                            {...register("footerContact.addressLongitude")}
+                            placeholder="Kinh độ (VD: 105.8542)"
+                            className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
@@ -1079,6 +1095,18 @@ export default function SettingsPage() {
                             {...register("footerContact.registeredAddress")}
                             className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
                           />
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            <input
+                              {...register("footerContact.registeredAddressLatitude")}
+                              placeholder="Vĩ độ"
+                              className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                            <input
+                              {...register("footerContact.registeredAddressLongitude")}
+                              placeholder="Kinh độ"
+                              className="w-full border border-slate-300 p-2 text-xs font-semibold outline-none focus:border-orange-500"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

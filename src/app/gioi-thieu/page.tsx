@@ -435,11 +435,15 @@ export default function AboutPage() {
     {
       label: "Địa chỉ liên hệ",
       address: siteContact.address.trim(),
+      latitude: siteContact.addressLatitude.trim(),
+      longitude: siteContact.addressLongitude.trim(),
       icon: MapPin,
     },
     {
       label: "Địa chỉ đăng ký doanh nghiệp",
       address: siteContact.registeredAddress.trim(),
+      latitude: siteContact.registeredAddressLatitude.trim(),
+      longitude: siteContact.registeredAddressLongitude.trim(),
       icon: Building2,
     },
   ].filter(
@@ -802,7 +806,7 @@ export default function AboutPage() {
             </motion.div>
 
             <div className={`mt-10 grid gap-6 ${companyLocations.length > 1 ? "lg:grid-cols-2" : ""}`}>
-              {companyLocations.map(({ label, address, icon: LocationIcon }) => (
+              {companyLocations.map(({ label, address, latitude, longitude, icon: LocationIcon }) => (
                 <motion.article
                   key={`${label}-${address}`}
                   className="overflow-hidden border border-orange-100 bg-[#fffaf3]"
@@ -826,7 +830,7 @@ export default function AboutPage() {
                   </div>
                   <iframe
                     title={`Bản đồ ${label}`}
-                    src={`https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
+                    src={`https://www.google.com/maps?q=${latitude && longitude ? `${encodeURIComponent(latitude)},${encodeURIComponent(longitude)}` : encodeURIComponent(address)}&output=embed`}
                     className="h-72 w-full border-0 sm:h-80"
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"

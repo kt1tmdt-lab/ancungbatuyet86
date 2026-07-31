@@ -57,6 +57,8 @@ export type SiteConfigData = {
     phone: string;
     email: string;
     address: string;
+    addressLatitude: string;
+    addressLongitude: string;
     workingHours: string;
     shopeeUrl: string;
     tiktokUrl: string;
@@ -66,6 +68,8 @@ export type SiteConfigData = {
     legalName: string;
     taxCode: string;
     registeredAddress: string;
+    registeredAddressLatitude: string;
+    registeredAddressLongitude: string;
     boCongThuongUrl: string;
     boCongThuongImageUrl: string;
     copyrightText: string;
@@ -167,6 +171,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     phone: "0989 852 948",
     email: "cskh@ancungbatuyet.vn",
     address: "Xuân Phương, Hà Nội",
+    addressLatitude: "",
+    addressLongitude: "",
     workingHours: "T2 - T7: 8:00 - 17:00",
     shopeeUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     tiktokUrl: "https://www.tiktok.com/@ancungbatuyet86",
@@ -176,6 +182,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     legalName: "",
     taxCode: "",
     registeredAddress: "",
+    registeredAddressLatitude: "",
+    registeredAddressLongitude: "",
     boCongThuongUrl: "",
     boCongThuongImageUrl: "",
     copyrightText: "© 2026 Ăn Cùng Bà Tuyết. Bảo lưu mọi quyền.",
@@ -346,6 +354,8 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
       phone: stringOrDefault(footerContact.phone, DEFAULT_SITE_CONFIG.footerContact.phone),
       email: stringOrDefault(footerContact.email, DEFAULT_SITE_CONFIG.footerContact.email),
       address: stringOrDefault(footerContact.address, DEFAULT_SITE_CONFIG.footerContact.address),
+      addressLatitude: typeof footerContact.addressLatitude === "string" ? footerContact.addressLatitude : DEFAULT_SITE_CONFIG.footerContact.addressLatitude,
+      addressLongitude: typeof footerContact.addressLongitude === "string" ? footerContact.addressLongitude : DEFAULT_SITE_CONFIG.footerContact.addressLongitude,
       workingHours: stringOrDefault(
         footerContact.workingHours,
         DEFAULT_SITE_CONFIG.footerContact.workingHours,
@@ -386,6 +396,14 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
         typeof footerContact.registeredAddress === "string"
           ? footerContact.registeredAddress
           : DEFAULT_SITE_CONFIG.footerContact.registeredAddress,
+      registeredAddressLatitude:
+        typeof footerContact.registeredAddressLatitude === "string"
+          ? footerContact.registeredAddressLatitude
+          : DEFAULT_SITE_CONFIG.footerContact.registeredAddressLatitude,
+      registeredAddressLongitude:
+        typeof footerContact.registeredAddressLongitude === "string"
+          ? footerContact.registeredAddressLongitude
+          : DEFAULT_SITE_CONFIG.footerContact.registeredAddressLongitude,
       boCongThuongUrl:
         typeof footerContact.boCongThuongUrl === "string"
           ? footerContact.boCongThuongUrl
