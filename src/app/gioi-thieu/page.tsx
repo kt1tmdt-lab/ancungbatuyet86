@@ -799,9 +799,6 @@ export default function AboutPage() {
                   Địa chỉ công ty
                 </h2>
               </div>
-              <p className="max-w-2xl text-base font-semibold leading-8 text-slate-600">
-                Xem vị trí trực tiếp trên bản đồ và sử dụng đúng địa chỉ đã được công bố trong thông tin doanh nghiệp.
-              </p>
             </motion.div>
 
             <div className={`mt-10 grid gap-6 ${companyLocations.length > 1 ? "lg:grid-cols-2" : ""}`}>
