@@ -453,9 +453,7 @@ function HeroSection() {
   const [activeProduct, setActiveProduct] = useState<HeroProduct>(
     showcaseHeroProductsFallback[0],
   );
-  const [heroBanner, setHeroBanner] = useState<HeroBannerConfig>(
-    DEFAULT_SITE_CONFIG.heroBanner,
-  );
+  const [heroBanner, setHeroBanner] = useState<HeroBannerConfig | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -492,15 +490,20 @@ function HeroSection() {
       });
   }, []);
 
+  // Dùng default nếu API chưa trả về (cho text/buttons), nhưng ẩn ảnh cho đến khi có dữ liệu thật
+  const heroBannerDisplay = heroBanner ?? DEFAULT_SITE_CONFIG.heroBanner;
+
   const displayProducts = useMemo(() => products.slice(0, 5), [products]);
   const activeImage =
     activeProduct?.orbitImage || getProductImage(activeProduct);
   const brandName = "Ăn Cùng Bà Tuyết";
-  const heroTitle = heroBanner.title || DEFAULT_SITE_CONFIG.heroBanner.title;
+  const heroTitle = heroBannerDisplay.title || DEFAULT_SITE_CONFIG.heroBanner.title;
   const heroTitlePrefix = heroTitle.includes(brandName)
     ? heroTitle.replace(brandName, "").trim()
     : "Ăn vặt thì phải";
   const showHeroProducts = homeSectionEnabled(homeSections, "hero_products");
+  // heroBanner === null nghĩa là chưa load xong từ API
+  const heroBannerReady = heroBanner !== null;
 
   return (
     <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
@@ -522,7 +525,7 @@ function HeroSection() {
             className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm sm:mb-8 sm:gap-3 sm:px-5 sm:py-3 sm:text-xs sm:tracking-[0.22em]"
           >
             <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : heroBanner.eyebrow}
+            {loading ? "Đang tải sản phẩm" : heroBannerDisplay.eyebrow}
           </motion.div>
 
           <motion.h1
@@ -539,7 +542,7 @@ function HeroSection() {
             variants={fadeUp}
             className="mt-5 max-w-xl text-sm font-semibold leading-7 text-slate-700 sm:mt-8 sm:text-lg sm:leading-8 xl:max-w-2xl"
           >
-            {heroBanner.subtitle}
+            {heroBannerDisplay.subtitle}
           </motion.p>
 
           <motion.div
@@ -547,20 +550,20 @@ function HeroSection() {
             className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:flex sm:gap-4"
           >
             <CurtainAction
-              href={heroBanner.secondaryCtaLink}
+              href={heroBannerDisplay.secondaryCtaLink}
               variant="white"
               className="h-12 w-full px-3 shadow-[0_14px_36px_rgba(15,23,42,0.08)] sm:h-14 sm:w-56 sm:px-6"
             >
-              {heroBanner.secondaryCtaText}
+              {heroBannerDisplay.secondaryCtaText}
             </CurtainAction>
 
             <CurtainAction
-              href={heroBanner.ctaLink}
+              href={heroBannerDisplay.ctaLink}
               icon={<ArrowRight size={18} />}
               variant="orange"
               className="h-12 w-full px-3 shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:h-14 sm:w-56 sm:px-6"
             >
-              {heroBanner.ctaText}
+              {heroBannerDisplay.ctaText}
             </CurtainAction>
           </motion.div>
 
@@ -583,13 +586,21 @@ function HeroSection() {
           </div>
           <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-orange-300/60 bg-orange-100/30 xl:block" />
 
-          <img
-            src={heroBanner.characterImage}
-            alt={heroBanner.characterAlt}
-            className={`absolute left-1/2 z-20 h-[290px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
-              showHeroProducts ? "top-[5%] lg:top-[8%] xl:top-[7%]" : "top-0 sm:top-[8%] lg:top-[10%] xl:top-[9%]"
-            }`}
-          />
+          <AnimatePresence>
+            {heroBannerReady && (
+              <motion.img
+                key={heroBanner?.characterImage}
+                src={heroBannerDisplay.characterImage}
+                alt={heroBannerDisplay.characterAlt}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className={`absolute left-1/2 z-20 h-[290px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
+                  showHeroProducts ? "top-[5%] lg:top-[8%] xl:top-[7%]" : "top-0 sm:top-[8%] lg:top-[10%] xl:top-[9%]"
+                }`}
+              />
+            )}
+          </AnimatePresence>
 
           {showHeroProducts && (
             <>
