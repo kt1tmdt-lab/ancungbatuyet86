@@ -512,7 +512,7 @@ export default function SettingsPage() {
                       <div className="text-lg text-blue-700 truncate cursor-pointer hover:underline font-semibold leading-snug">
                         {form.watch("seo.title") || "Tiêu đề trang web..."}
                       </div>
-                      <div className="text-xs text-green-700 truncate mb-1">https://ancungbatuyet.vn</div>
+                      <div className="text-xs text-green-700 truncate mb-1">https://acbt.vn</div>
                       <div className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                         {form.watch("seo.description") || "Mô tả của trang web sẽ hiển thị tại đây..."}
                       </div>

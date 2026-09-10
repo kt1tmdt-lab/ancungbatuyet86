@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: PageProps) {
     }
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://acbt.vn";
   const seoTitle = post.seoTitle || `${post.title} | Ăn Cùng Bà Tuyết`;
   const seoDescription = post.seoDescription || post.excerpt || "";
 
@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: PageProps) {
     title: seoTitle,
     description: seoDescription,
     alternates: {
-      canonical: siteUrl ? `${siteUrl}/tin-tuc/${post.slug}` : undefined,
+      canonical: `${siteUrl}/tin-tuc/${post.slug}`,
     },
     openGraph: {
       title: seoTitle,
@@ -84,6 +84,7 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://acbt.vn";
 
   const post = await prisma.post.findUnique({
     where: { slug },
@@ -157,7 +158,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     "@type": "Article",
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://ancungbatuyet.vn/tin-tuc/${post.slug}`,
+      "@id": `${siteUrl}/tin-tuc/${post.slug}`,
     },
     headline: post.title,
     description: post.seoDescription || post.excerpt || "",
@@ -171,7 +172,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       name: "Ăn Cùng Bà Tuyết",
       logo: {
         "@type": "ImageObject",
-        url: "https://ancungbatuyet.vn/logo.png",
+        url: `${siteUrl}/logo.png`,
       },
     },
     datePublished: post.publishedAt?.toISOString() || post.createdAt.toISOString(),

@@ -9,8 +9,10 @@ import { keywordsToArray } from "@/lib/site-config-defaults";
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getSiteConfig();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://acbt.vn";
 
   return {
+    metadataBase: new URL(siteUrl),
     title: {
       default: config.seo.title,
       template: `%s | ${config.seo.title}`,

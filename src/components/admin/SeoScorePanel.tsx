@@ -235,7 +235,7 @@ export function SeoScorePanel({
   // Google Search Preview
   const previewTitle = effectiveTitle || "Tiêu đề bài viết sẽ hiển thị ở đây";
   const previewDesc = effectiveDesc || "Mô tả bài viết sẽ hiển thị ở dòng này trên trang kết quả tìm kiếm Google...";
-  const previewUrl = slug ? `ancungbatuyet.vn/tin-tuc/${slug}` : "ancungbatuyet.vn/tin-tuc/...";
+  const previewUrl = slug ? `acbt.vn/tin-tuc/${slug}` : "acbt.vn/tin-tuc/...";
 
   return (
     <div className="bg-white border border-slate-100 p-6 shadow-sm space-y-5">
