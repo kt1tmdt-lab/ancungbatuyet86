@@ -54,6 +54,17 @@ export type GoogleAnalyticsReport = {
   }>;
 };
 
+export type GoogleAnalyticsRealtimeReport = {
+  activeUsers: number;
+  activeUsersLast5Minutes: number;
+  views: number;
+  events: number;
+  pages: Array<{ name: string; views: number; activeUsers: number }>;
+  eventNames: Array<{ name: string; count: number }>;
+  devices: Array<{ name: string; activeUsers: number }>;
+  cities: Array<{ name: string; activeUsers: number }>;
+};
+
 export function getGoogleAnalyticsConfiguration() {
   const propertyId =
     process.env.GOOGLE_ANALYTICS_PROPERTY_ID?.trim() || "553496232";
@@ -132,6 +143,33 @@ async function runReport(
     throw new Error(payload.error?.message || "Google Analytics không trả về báo cáo.");
   }
 
+  return payload;
+}
+
+async function runRealtimeReport(
+  propertyId: string,
+  accessToken: string,
+  body: Record<string, unknown>,
+) {
+  const response = await fetch(
+    `${DATA_API_URL}/properties/${encodeURIComponent(propertyId)}:runRealtimeReport`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    },
+  );
+  const payload = (await response.json()) as RunReportResponse & {
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    throw new Error(payload.error?.message || "Google Analytics không trả về dữ liệu realtime.");
+  }
   return payload;
 }
 
@@ -223,6 +261,77 @@ export async function getGoogleAnalyticsReport(
       medium: dimension(row, 1, "(none)"),
       sessions: metric(row, 0),
       activeUsers: metric(row, 1),
+    })),
+  };
+}
+
+export async function getGoogleAnalyticsRealtimeReport(
+  credentials: AnalyticsCredentials,
+): Promise<GoogleAnalyticsRealtimeReport> {
+  const accessToken = await getAccessToken(credentials);
+  const byMetric = (metricName: string) => [
+    { metric: { metricName }, desc: true },
+  ];
+
+  const [totals, last5Minutes, pages, events, devices, cities] = await Promise.all([
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      metrics: [
+        { name: "activeUsers" },
+        { name: "screenPageViews" },
+        { name: "eventCount" },
+      ],
+    }),
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      metrics: [{ name: "activeUsers" }],
+      minuteRanges: [{ startMinutesAgo: 4, endMinutesAgo: 0 }],
+    }),
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      dimensions: [{ name: "unifiedScreenName" }],
+      metrics: [{ name: "screenPageViews" }, { name: "activeUsers" }],
+      orderBys: byMetric("screenPageViews"),
+      limit: "10",
+    }),
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      dimensions: [{ name: "eventName" }],
+      metrics: [{ name: "eventCount" }],
+      orderBys: byMetric("eventCount"),
+      limit: "10",
+    }),
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      dimensions: [{ name: "deviceCategory" }],
+      metrics: [{ name: "activeUsers" }],
+      orderBys: byMetric("activeUsers"),
+      limit: "10",
+    }),
+    runRealtimeReport(credentials.propertyId, accessToken, {
+      dimensions: [{ name: "city" }],
+      metrics: [{ name: "activeUsers" }],
+      orderBys: byMetric("activeUsers"),
+      limit: "10",
+    }),
+  ]);
+
+  return {
+    activeUsers: metric(totals.rows?.[0], 0),
+    activeUsersLast5Minutes: metric(last5Minutes.rows?.[0], 0),
+    views: metric(totals.rows?.[0], 1),
+    events: metric(totals.rows?.[0], 2),
+    pages: (pages.rows || []).map((row) => ({
+      name: dimension(row, 0, "Không xác định"),
+      views: metric(row, 0),
+      activeUsers: metric(row, 1),
+    })),
+    eventNames: (events.rows || []).map((row) => ({
+      name: dimension(row, 0, "Không xác định"),
+      count: metric(row, 0),
+    })),
+    devices: (devices.rows || []).map((row) => ({
+      name: dimension(row, 0, "Không xác định"),
+      activeUsers: metric(row, 0),
+    })),
+    cities: (cities.rows || []).map((row) => ({
+      name: dimension(row, 0, "Không xác định"),
+      activeUsers: metric(row, 0),
     })),
   };
 }

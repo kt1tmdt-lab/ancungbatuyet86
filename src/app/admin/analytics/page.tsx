@@ -5,93 +5,74 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   ChartNoAxesCombined,
-  Clock3,
-  ExternalLink,
+  Download,
   Eye,
-  MousePointerClick,
+  MapPin,
+  MonitorSmartphone,
   RefreshCw,
   Settings2,
-  UserPlus,
   UsersRound,
 } from "lucide-react";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import { adminRequest, getAdminErrorMessage } from "@/lib/admin-client";
 import { useAuth } from "@/lib/auth-context";
 
-type AnalyticsReport = {
+type MonthlyReport = {
+  source: "internal";
+  month: string;
+  generatedAt: string;
+  totals: { pageViews: number; uniqueVisitors: number; viewsPerVisitor: number };
+  previous: { pageViews: number; uniqueVisitors: number };
+  daily: Array<{ date: string; views: number; visitors: number }>;
+  topPages: Array<{ path: string; views: number; visitors: number }>;
+  sources: Array<{ name: string; views: number; visitors: number }>;
+};
+
+type RealtimeReport = {
   configured: true;
   propertyId: string;
   measurementId: string;
-  days: number;
-  totals: {
-    activeUsers: number;
-    newUsers: number;
-    sessions: number;
-    views: number;
-    engagementRate: number;
-    engagementSecondsPerSession: number;
-  };
-  daily: Array<{
-    date: string;
-    activeUsers: number;
-    sessions: number;
-    views: number;
-  }>;
-  topPages: Array<{
-    path: string;
-    title: string;
-    views: number;
-    activeUsers: number;
-  }>;
-  sources: Array<{
-    source: string;
-    medium: string;
-    sessions: number;
-    activeUsers: number;
-  }>;
+  generatedAt: string;
+  activeUsers: number;
+  activeUsersLast5Minutes: number;
+  views: number;
+  events: number;
+  pages: Array<{ name: string; views: number; activeUsers: number }>;
+  eventNames: Array<{ name: string; count: number }>;
+  devices: Array<{ name: string; activeUsers: number }>;
+  cities: Array<{ name: string; activeUsers: number }>;
 };
 
-type ConfigurationStatus = {
+type RealtimeConfiguration = {
   configured: false;
+  propertyId: string;
   measurementId: string;
   missing: string[];
 };
 
-type AnalyticsResponse = AnalyticsReport | ConfigurationStatus;
-type DateRange = 7 | 30 | 90;
+const numberFormatter = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 });
 
-const RANGE_OPTIONS: Array<{ value: DateRange; label: string }> = [
-  { value: 7, label: "7 ngày" },
-  { value: 30, label: "30 ngày" },
-  { value: 90, label: "90 ngày" },
-];
-
-const numberFormatter = new Intl.NumberFormat("vi-VN", {
-  maximumFractionDigits: 0,
-});
+function currentMonth() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date());
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  return `${year}-${month}`;
+}
 
 function formatNumber(value: number) {
   return numberFormatter.format(value);
 }
 
-function formatDuration(seconds: number) {
-  const rounded = Math.max(0, Math.round(seconds));
-  const minutes = Math.floor(rounded / 60);
-  const remainingSeconds = rounded % 60;
-  return minutes > 0 ? `${minutes}p ${remainingSeconds}s` : `${remainingSeconds}s`;
+function changePercent(current: number, previous: number) {
+  if (!previous) return current ? 100 : 0;
+  return ((current - previous) / previous) * 100;
 }
 
-function formatDate(value: string) {
-  if (!/^\d{8}$/.test(value)) return value;
-  return `${value.slice(6, 8)}/${value.slice(4, 6)}`;
-}
-
-function MetricCard({
-  label,
-  value,
-  note,
-  icon: Icon,
-}: {
+function MetricCard({ label, value, note, icon: Icon }: {
   label: string;
   value: string;
   note: string;
@@ -101,242 +82,189 @@ function MetricCard({
     <div className="border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">
-            {label}
-          </p>
+          <p className="text-[11px] font-black uppercase tracking-[0.12em] text-slate-500">{label}</p>
           <p className="mt-3 text-3xl font-black tracking-tight text-slate-950">{value}</p>
           <p className="mt-1 text-xs text-slate-500">{note}</p>
         </div>
-        <span className="grid h-10 w-10 shrink-0 place-items-center bg-orange-50 text-orange-600">
-          <Icon size={19} />
-        </span>
+        <span className="grid h-10 w-10 shrink-0 place-items-center bg-orange-50 text-orange-600"><Icon size={19} /></span>
       </div>
     </div>
   );
 }
 
-export default function GoogleAnalyticsPage() {
+function DataTable({ title, icon: Icon, headers, rows }: {
+  title: string;
+  icon: typeof Activity;
+  headers: string[];
+  rows: Array<Array<string | number>>;
+}) {
+  return (
+    <section className="border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+        <Icon size={16} className="text-orange-600" />
+        <h2 className="font-black text-slate-950">{title}</h2>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[420px] text-left text-sm">
+          <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+            <tr>{headers.map((header, index) => <th key={header} className={`px-5 py-3 ${index ? "text-right" : ""}`}>{header}</th>)}</tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {rows.map((row, rowIndex) => (
+              <tr key={`${row[0]}-${rowIndex}`}>
+                {row.map((cell, index) => <td key={index} className={`px-5 py-3 ${index ? "text-right font-black text-slate-900" : "max-w-xs truncate font-bold text-slate-700"}`}>{typeof cell === "number" ? formatNumber(cell) : cell}</td>)}
+              </tr>
+            ))}
+            {!rows.length ? <tr><td colSpan={headers.length} className="px-5 py-10 text-center text-slate-500">Chưa có dữ liệu.</td></tr> : null}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+export default function AnalyticsPage() {
   const { token } = useAuth();
-  const [range, setRange] = useState<DateRange>(30);
-  const [data, setData] = useState<AnalyticsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [month, setMonth] = useState(currentMonth);
+  const [monthly, setMonthly] = useState<MonthlyReport | null>(null);
+  const [realtime, setRealtime] = useState<RealtimeReport | RealtimeConfiguration | null>(null);
+  const [monthlyLoading, setMonthlyLoading] = useState(true);
+  const [realtimeLoading, setRealtimeLoading] = useState(true);
+  const [monthlyError, setMonthlyError] = useState("");
+  const [realtimeError, setRealtimeError] = useState("");
 
-  const loadReport = useCallback(async () => {
+  const loadMonthly = useCallback(async () => {
     if (!token) return;
-    setLoading(true);
-    setError("");
-
+    setMonthlyLoading(true);
+    setMonthlyError("");
     try {
-      const report = await adminRequest<AnalyticsResponse>(
-        `/api/admin/analytics?days=${range}`,
-        { token },
-      );
-      setData(report);
-    } catch (requestError) {
-      setError(
-        getAdminErrorMessage(requestError, "Không thể tải dữ liệu Google Analytics."),
-      );
+      setMonthly(await adminRequest<MonthlyReport>(`/api/admin/analytics?month=${month}`, { token }));
+    } catch (error) {
+      setMonthlyError(getAdminErrorMessage(error, "Không thể tải báo cáo tháng."));
     } finally {
-      setLoading(false);
+      setMonthlyLoading(false);
     }
-  }, [range, token]);
+  }, [month, token]);
+
+  const loadRealtime = useCallback(async () => {
+    if (!token) return;
+    setRealtimeLoading(true);
+    setRealtimeError("");
+    try {
+      setRealtime(await adminRequest<RealtimeReport | RealtimeConfiguration>("/api/admin/analytics/realtime", { token }));
+    } catch (error) {
+      setRealtimeError(getAdminErrorMessage(error, "Không thể tải dữ liệu realtime."));
+    } finally {
+      setRealtimeLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
-    const timer = window.setTimeout(() => void loadReport(), 0);
+    const timer = window.setTimeout(() => void loadMonthly(), 0);
     return () => window.clearTimeout(timer);
-  }, [loadReport, token]);
+  }, [loadMonthly, token]);
 
-  const maxDailyViews = useMemo(() => {
-    if (!data?.configured) return 1;
-    return Math.max(...data.daily.map((item) => item.views), 1);
-  }, [data]);
+  useEffect(() => {
+    if (!token) return;
+    const initial = window.setTimeout(() => void loadRealtime(), 0);
+    const interval = window.setInterval(() => void loadRealtime(), 60_000);
+    return () => { window.clearTimeout(initial); window.clearInterval(interval); };
+  }, [loadRealtime, token]);
+
+  const maxDailyViews = useMemo(() => Math.max(...(monthly?.daily.map((item) => item.views) || []), 1), [monthly]);
+  const viewsChange = monthly ? changePercent(monthly.totals.pageViews, monthly.previous.pageViews) : 0;
+  const visitorsChange = monthly ? changePercent(monthly.totals.uniqueVisitors, monthly.previous.uniqueVisitors) : 0;
+
+  const exportCsv = () => {
+    if (!monthly) return;
+    const rows: Array<Array<string | number>> = [
+      ["Báo cáo truy cập acbt.vn", monthly.month],
+      ["Lượt xem", monthly.totals.pageViews],
+      ["Khách truy cập ước tính", monthly.totals.uniqueVisitors],
+      [],
+      ["Ngày", "Lượt xem", "Khách truy cập ước tính"],
+      ...monthly.daily.map((item) => [item.date, item.views, item.visitors]),
+      [],
+      ["Trang", "Lượt xem", "Khách truy cập ước tính"],
+      ...monthly.topPages.map((item) => [item.path, item.views, item.visitors]),
+      [],
+      ["Nguồn", "Lượt xem", "Khách truy cập ước tính"],
+      ...monthly.sources.map((item) => [item.name, item.views, item.visitors]),
+    ];
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `acbt-analytics-${monthly.month}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]}>
       <div className="space-y-6">
-        <div className="flex flex-col gap-4 border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <header className="flex flex-col gap-4 border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="flex items-start gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center bg-orange-600 text-white">
-              <ChartNoAxesCombined size={22} />
-            </span>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">
-                Google Analytics
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
-                Báo cáo truy cập GA4 của website Ăn Cùng Bà Tuyết
-              </p>
-            </div>
+            <span className="grid h-11 w-11 shrink-0 place-items-center bg-orange-600 text-white"><ChartNoAxesCombined size={22} /></span>
+            <div><h1 className="text-2xl font-black tracking-tight text-slate-950">ACBT Analytics</h1><p className="mt-1 text-sm text-slate-500">Số liệu truy cập website acbt.vn</p></div>
           </div>
-
           <div className="flex flex-wrap items-center gap-2">
-            {RANGE_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setRange(option.value)}
-                className={`h-9 border px-3 text-xs font-black transition ${
-                  range === option.value
-                    ? "border-orange-600 bg-orange-600 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => void loadReport()}
-              disabled={loading}
-              className="grid h-9 w-9 place-items-center border border-slate-200 text-slate-600 transition hover:border-orange-300 hover:text-orange-600 disabled:opacity-50"
-              aria-label="Tải lại báo cáo"
-            >
-              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-            </button>
+            <input type="month" value={month} max={currentMonth()} onChange={(event) => setMonth(event.target.value)} className="h-10 border border-slate-200 px-3 text-sm font-bold text-slate-700" />
+            <button type="button" onClick={exportCsv} disabled={!monthly} className="inline-flex h-10 items-center gap-2 border border-slate-200 px-3 text-xs font-black text-slate-700 hover:border-orange-300 hover:text-orange-600 disabled:opacity-40"><Download size={15} /> Xuất CSV</button>
+            <button type="button" onClick={() => { void loadMonthly(); void loadRealtime(); }} disabled={monthlyLoading || realtimeLoading} className="grid h-10 w-10 place-items-center border border-slate-200 text-slate-600 hover:text-orange-600 disabled:opacity-50" aria-label="Tải lại"><RefreshCw size={16} className={monthlyLoading || realtimeLoading ? "animate-spin" : ""} /></button>
           </div>
-        </div>
+        </header>
 
-        {loading && !data ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }, (_, index) => (
-              <div key={index} className="h-32 animate-pulse border border-slate-200 bg-white" />
-            ))}
-          </div>
-        ) : null}
-
-        {error ? (
-          <div className="border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-            <p className="font-black">Không thể kết nối Google Analytics</p>
-            <p className="mt-1 leading-6">{error}</p>
-          </div>
-        ) : null}
-
-        {data && !data.configured ? (
-          <div className="border border-amber-200 bg-amber-50 p-6">
-            <div className="flex items-start gap-3">
-              <Settings2 className="mt-0.5 shrink-0 text-amber-700" size={22} />
-              <div className="min-w-0">
-                <h2 className="text-lg font-black text-amber-950">Cần kết nối Data API</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-amber-900/80">
-                  Mã đo lường <strong>{data.measurementId}</strong> đã gửi lượt truy cập về GA4.
-                  Để đọc báo cáo ngay tại trang này, hãy bật Google Analytics Data API,
-                  cấp quyền Viewer cho service account và thêm các biến sau vào file .env trên VPS.
-                </p>
-                <div className="mt-4 overflow-x-auto bg-slate-950 p-4 font-mono text-xs leading-6 text-slate-200">
-                  {data.missing.map((name) => (
-                    <div key={name}>{name}=&quot;&quot;</div>
-                  ))}
-                </div>
-                <Link
-                  href="https://analytics.google.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 text-sm font-black text-amber-800 hover:text-orange-700"
-                >
-                  Mở Google Analytics <ExternalLink size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {data?.configured ? (
+        {monthlyError ? <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{monthlyError}</div> : null}
+        {monthly ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <MetricCard label="Người dùng" value={formatNumber(data.totals.activeUsers)} note="Người dùng hoạt động" icon={UsersRound} />
-              <MetricCard label="Người dùng mới" value={formatNumber(data.totals.newUsers)} note="Lần đầu truy cập" icon={UserPlus} />
-              <MetricCard label="Phiên truy cập" value={formatNumber(data.totals.sessions)} note="Tổng số phiên" icon={MousePointerClick} />
-              <MetricCard label="Lượt xem" value={formatNumber(data.totals.views)} note="Tổng lượt xem trang" icon={Eye} />
-              <MetricCard label="Tỷ lệ tương tác" value={`${(data.totals.engagementRate * 100).toFixed(1)}%`} note="Phiên có tương tác" icon={Activity} />
-              <MetricCard label="Tương tác / phiên" value={formatDuration(data.totals.engagementSecondsPerSession)} note="Thời gian trung bình" icon={Clock3} />
+              <MetricCard label="Lượt xem trong tháng" value={formatNumber(monthly.totals.pageViews)} note={`${viewsChange >= 0 ? "+" : ""}${viewsChange.toFixed(1)}% so với tháng trước`} icon={Eye} />
+              <MetricCard label="Khách truy cập ước tính" value={formatNumber(monthly.totals.uniqueVisitors)} note={`${visitorsChange >= 0 ? "+" : ""}${visitorsChange.toFixed(1)}% so với tháng trước`} icon={UsersRound} />
+              <MetricCard label="Lượt xem / khách" value={formatNumber(monthly.totals.viewsPerVisitor)} note="Tính từ dữ liệu truy cập nội bộ" icon={Activity} />
             </div>
 
             <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                <div>
-                  <h2 className="font-black text-slate-950">Lượt xem theo ngày</h2>
-                  <p className="mt-1 text-xs text-slate-500">Dữ liệu trong {data.days} ngày gần nhất</p>
-                </div>
-                <span className="text-xs font-bold text-slate-400">Property {data.propertyId}</span>
-              </div>
+              <div className="border-b border-slate-100 pb-4"><h2 className="font-black text-slate-950">Lượt xem theo ngày</h2><p className="mt-1 text-xs text-slate-500">Tháng {monthly.month}</p></div>
               <div className="mt-5 overflow-x-auto pb-2">
-                <div className="flex h-56 min-w-full items-end gap-2" style={{ width: `${Math.max(data.daily.length * 34, 640)}px` }}>
-                  {data.daily.map((item) => (
-                    <div key={item.date} className="group flex h-full min-w-6 flex-1 flex-col items-center justify-end">
-                      <span className="mb-1 text-[10px] font-black text-slate-600 opacity-0 transition group-hover:opacity-100">
-                        {formatNumber(item.views)}
-                      </span>
-                      <div
-                        className="w-full min-h-0.5 bg-orange-500 transition hover:bg-orange-600"
-                        style={{ height: `${Math.max((item.views / maxDailyViews) * 170, 2)}px` }}
-                        title={`${formatDate(item.date)}: ${formatNumber(item.views)} lượt xem`}
-                      />
-                      <span className="mt-2 text-[9px] font-bold text-slate-400 [writing-mode:vertical-rl]">
-                        {formatDate(item.date)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex h-56 items-end gap-2" style={{ width: `${Math.max(monthly.daily.length * 36, 640)}px` }}>
+                  {monthly.daily.map((item) => <div key={item.date} className="group flex h-full min-w-6 flex-1 flex-col items-center justify-end"><span className="mb-1 text-[10px] font-black text-slate-600 opacity-0 group-hover:opacity-100">{item.views}</span><div className="w-full min-h-0.5 bg-orange-500" style={{ height: `${Math.max((item.views / maxDailyViews) * 170, 2)}px` }} title={`${item.date}: ${item.views} lượt xem`} /><span className="mt-2 text-[9px] font-bold text-slate-400">{item.date.slice(8)}</span></div>)}
                 </div>
               </div>
             </section>
 
             <div className="grid gap-6 xl:grid-cols-2">
-              <section className="border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-4">
-                  <h2 className="font-black text-slate-950">Trang được xem nhiều</h2>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[520px] text-left text-sm">
-                    <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
-                      <tr><th className="px-5 py-3">Trang</th><th className="px-4 py-3 text-right">Người dùng</th><th className="px-5 py-3 text-right">Lượt xem</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {data.topPages.map((page) => (
-                        <tr key={`${page.path}-${page.title}`}>
-                          <td className="max-w-xs px-5 py-3"><p className="truncate font-bold text-slate-800">{page.title}</p><p className="mt-0.5 truncate text-xs text-slate-400">{page.path}</p></td>
-                          <td className="px-4 py-3 text-right text-slate-600">{formatNumber(page.activeUsers)}</td>
-                          <td className="px-5 py-3 text-right font-black text-slate-900">{formatNumber(page.views)}</td>
-                        </tr>
-                      ))}
-                      {data.topPages.length === 0 ? <tr><td colSpan={3} className="px-5 py-10 text-center text-slate-500">Chưa có dữ liệu.</td></tr> : null}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-
-              <section className="border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-4">
-                  <h2 className="font-black text-slate-950">Nguồn truy cập</h2>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[520px] text-left text-sm">
-                    <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
-                      <tr><th className="px-5 py-3">Nguồn / phương tiện</th><th className="px-4 py-3 text-right">Người dùng</th><th className="px-5 py-3 text-right">Phiên</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {data.sources.map((source) => (
-                        <tr key={`${source.source}-${source.medium}`}>
-                          <td className="px-5 py-3"><p className="font-bold text-slate-800">{source.source}</p><p className="mt-0.5 text-xs text-slate-400">{source.medium}</p></td>
-                          <td className="px-4 py-3 text-right text-slate-600">{formatNumber(source.activeUsers)}</td>
-                          <td className="px-5 py-3 text-right font-black text-slate-900">{formatNumber(source.sessions)}</td>
-                        </tr>
-                      ))}
-                      {data.sources.length === 0 ? <tr><td colSpan={3} className="px-5 py-10 text-center text-slate-500">Chưa có dữ liệu.</td></tr> : null}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </div>
-
-            <div className="flex justify-end">
-              <Link href={`https://analytics.google.com/analytics/web/#/p${data.propertyId}/reports/intelligenthome`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs font-black text-orange-600 hover:text-orange-700">
-                Xem báo cáo đầy đủ trên Google Analytics <ExternalLink size={13} />
-              </Link>
+              <DataTable title="Trang được xem nhiều" icon={Eye} headers={["Trang", "Khách", "Lượt xem"]} rows={monthly.topPages.map((item) => [item.path, item.visitors, item.views])} />
+              <DataTable title="Nguồn truy cập" icon={ChartNoAxesCombined} headers={["Nguồn", "Khách", "Lượt xem"]} rows={monthly.sources.map((item) => [item.name, item.visitors, item.views])} />
             </div>
           </>
+        ) : monthlyLoading ? <div className="h-32 animate-pulse border border-slate-200 bg-white" /> : null}
+
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3 pt-3"><div><h2 className="text-xl font-black text-slate-950">Realtime GA4</h2><p className="mt-1 text-xs text-slate-500">Tự làm mới mỗi 60 giây · dữ liệu 30 phút gần nhất</p></div><span className={`h-2.5 w-2.5 rounded-full ${realtime?.configured ? "bg-green-500" : "bg-amber-400"}`} /></div>
+        {realtimeError ? <div className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">{realtimeError}</div> : null}
+        {realtime && !realtime.configured ? (
+          <div className="border border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+            <div className="flex gap-3"><Settings2 className="mt-0.5 shrink-0" size={20} /><div><p className="font-black">Báo cáo tháng đã hoạt động. Realtime cần thêm quyền đọc GA4.</p><p className="mt-1 leading-6">Thêm <code>GOOGLE_ANALYTICS_CLIENT_EMAIL</code> và <code>GOOGLE_ANALYTICS_PRIVATE_KEY</code> vào môi trường VPS, rồi cấp quyền Viewer cho email đó tại GA4 Property {realtime.propertyId}.</p></div></div>
+          </div>
         ) : null}
+        {realtime?.configured ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <MetricCard label="Đang hoạt động" value={formatNumber(realtime.activeUsers)} note="Trong 30 phút qua" icon={UsersRound} />
+              <MetricCard label="Hoạt động gần đây" value={formatNumber(realtime.activeUsersLast5Minutes)} note="Trong 5 phút qua" icon={Activity} />
+              <MetricCard label="Lượt xem realtime" value={formatNumber(realtime.views)} note="Trong 30 phút qua" icon={Eye} />
+              <MetricCard label="Sự kiện realtime" value={formatNumber(realtime.events)} note="Trong 30 phút qua" icon={ChartNoAxesCombined} />
+            </div>
+            <div className="grid gap-6 xl:grid-cols-2">
+              <DataTable title="Trang đang được xem" icon={Eye} headers={["Trang", "Người dùng", "Lượt xem"]} rows={realtime.pages.map((item) => [item.name, item.activeUsers, item.views])} />
+              <DataTable title="Sự kiện" icon={Activity} headers={["Tên sự kiện", "Số lượng"]} rows={realtime.eventNames.map((item) => [item.name, item.count])} />
+              <DataTable title="Thiết bị" icon={MonitorSmartphone} headers={["Loại thiết bị", "Người dùng"]} rows={realtime.devices.map((item) => [item.name, item.activeUsers])} />
+              <DataTable title="Thành phố" icon={MapPin} headers={["Thành phố", "Người dùng"]} rows={realtime.cities.map((item) => [item.name, item.activeUsers])} />
+            </div>
+            <div className="flex justify-end"><Link href={`https://analytics.google.com/analytics/web/#/p${realtime.propertyId}/reports/realtime`} target="_blank" className="text-xs font-black text-orange-600 hover:text-orange-700">Mở Google Analytics →</Link></div>
+          </>
+        ) : realtimeLoading ? <div className="h-28 animate-pulse border border-slate-200 bg-white" /> : null}
       </div>
     </ProtectedRoute>
   );
