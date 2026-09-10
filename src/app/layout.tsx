@@ -32,13 +32,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
+      <head>
+        <GoogleAnalytics
+          measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-T551F0HFS0"}
+        />
+      </head>
       <body
         className="min-h-screen flex flex-col font-sans bg-cream text-gray-900 antialiased"
         suppressHydrationWarning
       >
-        <GoogleAnalytics
-          measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-T551F0HFS0"}
-        />
         <AuthProvider>
           <AnalyticsTracker />
           <MainLayoutWrapper initialConfig={config}>{children}</MainLayoutWrapper>
