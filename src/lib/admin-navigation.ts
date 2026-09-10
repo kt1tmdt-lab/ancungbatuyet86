@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   ClipboardCheck,
   ClipboardList,
+  ChartNoAxesCombined,
   FileText,
   FolderKanban,
   Gauge,
@@ -69,6 +70,12 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         icon: Gauge,
         roles: ADMIN_PANEL_ROLES,
         exact: true,
+      },
+      {
+        href: "/admin/analytics",
+        label: "Google Analytics",
+        icon: ChartNoAxesCombined,
+        roles: MARKETING_ROLES,
       },
       {
         href: "/admin/web-control",
