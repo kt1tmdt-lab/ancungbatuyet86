@@ -6,6 +6,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import {
   Check,
   ClipboardCheck,
+  Download,
   Eye,
   Mail,
   MessageSquare,
@@ -51,6 +52,12 @@ const STATUS_LABELS: Record<ContactStatus, string> = {
   READ: "Đã xem",
   RESPONDED: "Đã phản hồi",
 };
+
+function escapeCsvCell(value: unknown) {
+  let text = String(value ?? "").replace(/\r\n/g, "\n");
+  if (/^[=+\-@]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
 
 function normalizeContactSource(value: string | null) {
   return String(value || "")
@@ -221,6 +228,50 @@ export default function ContactsPage() {
       return matchesStatus && matchesSource && matchesSearch;
     });
   }, [contacts, searchQuery, sourceFilter, statusFilter]);
+
+  const exportContacts = () => {
+    const headers = [
+      "STT",
+      "Họ tên / Đơn vị",
+      "Điện thoại",
+      "Email",
+      "Nội dung chi tiết",
+      "Nguồn",
+      "Thời gian",
+      "Trạng thái",
+    ];
+    const rows = filteredContacts.map((contact, index) => [
+      index + 1,
+      contact.name,
+      contact.phone ? `${contact.phone}\t` : "",
+      contact.email || "",
+      contact.content,
+      contact.source || "Website",
+      new Date(contact.createdAt).toLocaleString("vi-VN", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      STATUS_LABELS[contact.status],
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map(escapeCsvCell).join(","))
+      .join("\r\n");
+    const url = URL.createObjectURL(
+      new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `danh-sach-${
+      sourceFilter === "PARTNERSHIP" ? "dang-ky-dai-ly-npp-mua-si" : "lien-he"
+    }-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Đã xuất ${filteredContacts.length} liên hệ.`);
+  };
 
   const columns = useMemo<ColumnDef<ContactMessage>[]>(
     () => [
@@ -399,6 +450,14 @@ export default function ContactsPage() {
               <option value="READ">Đã xem</option>
               <option value="RESPONDED">Đã phản hồi</option>
             </AdminSelect>
+            <Button
+              variant="adminSecondary"
+              leftIcon={<Download size={16} />}
+              disabled={loading || filteredContacts.length === 0}
+              onClick={exportContacts}
+            >
+              Xuất CSV
+            </Button>
           </AdminToolbar>
 
           {loading ? (
