@@ -941,10 +941,12 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [formName, setFormName] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formEmail, setFormEmail] = useState("");
-  const [formType, setFormType] = useState(() =>
+  const [formType] = useState(() =>
     fallback.routePath === "/hop-tac/truyen-thong"
       ? "Hợp tác truyền thông / KOL / KOC"
-      : "Hợp tác Đại lý / NPP",
+      : fallback.routePath === "/hop-tac/dai-ly-nha-phan-phoi"
+        ? "Hợp tác Đại lý / NPP"
+        : "Hợp tác khác",
   );
   const [formContent, setFormContent] = useState("");
 
@@ -956,6 +958,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [formMediaLink, setFormMediaLink] = useState("");
   const [formFollowers, setFormFollowers] = useState("");
   const [formSubject, setFormSubject] = useState("");
+  const [formCooperationType, setFormCooperationType] = useState("");
+  const [formCooperationAddress, setFormCooperationAddress] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -989,6 +993,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         contentText = 
           `ĐĂNG KÝ LIÊN HỆ HỢP TÁC KHÁC\n` +
           `-------------------------------\n` +
+          `- Hình thức / Lĩnh vực hợp tác: ${formCooperationType}\n` +
+          `- Địa chỉ / Địa điểm hợp tác: ${formCooperationAddress}\n` +
           `- Tiêu đề đề xuất: ${formSubject}\n` +
           `- Nội dung chi tiết: ${formContent}`;
       }
@@ -1019,6 +1025,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       setFormMediaLink("");
       setFormFollowers("");
       setFormSubject("");
+      setFormCooperationType("");
+      setFormCooperationAddress("");
       setFormContent("");
     } catch (error) {
       setSubmitError(
@@ -1795,6 +1803,43 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                         className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700">Bạn muốn hợp tác về lĩnh vực gì? *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Icons.BriefcaseBusiness size={14} />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      minLength={3}
+                      value={formCooperationType}
+                      onChange={(e) => setFormCooperationType(e.target.value)}
+                      placeholder="Ví dụ: Tổ chức sự kiện, xuất khẩu, gia công sản phẩm..."
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-slate-700">Địa chỉ / Địa điểm dự kiến hợp tác *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Icons.MapPin size={14} />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      minLength={5}
+                      autoComplete="street-address"
+                      value={formCooperationAddress}
+                      onChange={(e) => setFormCooperationAddress(e.target.value)}
+                      placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                    />
                   </div>
                 </div>
 
