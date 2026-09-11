@@ -8,6 +8,7 @@ import { ArrowRight, FileSearch, HelpCircle } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import type { DefaultInfoPage, InfoPageBlock } from "@/lib/default-info-pages";
+import AddressMapPicker, { type AddressMapPoint } from "@/components/forms/AddressMapPicker";
 
 type ProductCard = {
   id: string;
@@ -948,7 +949,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [formContent, setFormContent] = useState("");
 
   // Specific partnership fields
-  const [formProvince, setFormProvince] = useState("");
+  const [formAddress, setFormAddress] = useState("");
+  const [formCoordinates, setFormCoordinates] = useState<AddressMapPoint | null>(null);
   const [formChannel, setFormChannel] = useState("Cửa hàng tạp hóa");
   const [formMediaChannel, setFormMediaChannel] = useState("TikTok");
   const [formMediaLink, setFormMediaLink] = useState("");
@@ -971,7 +973,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         contentText = 
           `ĐĂNG KÝ HỢP TÁC ĐẠI LÝ / NHÀ PHÂN PHỐI\n` +
           `-------------------------------\n` +
-          `- Địa bàn hoạt động (Tỉnh/Thành): ${formProvince}\n` +
+          `- Địa chỉ kinh doanh cụ thể: ${formAddress}\n` +
+          `- Tọa độ bản đồ: ${formCoordinates ? `${formCoordinates.lat}, ${formCoordinates.lng}` : "Chưa chọn"}\n` +
           `- Kênh phân phối hiện tại: ${formChannel}\n` +
           `- Nội dung đề xuất: ${formContent}`;
       } else if (formType === "Hợp tác truyền thông / KOL / KOC") {
@@ -1011,7 +1014,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       setFormName("");
       setFormPhone("");
       setFormEmail("");
-      setFormProvince("");
+      setFormAddress("");
+      setFormCoordinates(null);
       setFormMediaLink("");
       setFormFollowers("");
       setFormSubject("");
@@ -1988,8 +1992,8 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
                     {/* Specific Distributor Fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold text-slate-700">Tỉnh / Thành phố hoạt động *</label>
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700">Địa chỉ của bạn / địa điểm kinh doanh *</label>
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                             <Icons.MapPin size={14} />
@@ -1997,15 +2001,28 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           <input
                             type="text"
                             required
-                            value={formProvince}
-                            onChange={(e) => setFormProvince(e.target.value)}
-                            placeholder="Ví dụ: Hà Nội, Hải Phòng..."
+                            minLength={10}
+                            autoComplete="street-address"
+                            title="Vui lòng nhập đầy đủ số nhà, đường, phường/xã, quận/huyện và tỉnh/thành."
+                            value={formAddress}
+                            onChange={(e) => setFormAddress(e.target.value)}
+                            placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
                             className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
                           />
                         </div>
+                        <p className="text-[10px] leading-4 text-slate-500">
+                          Vui lòng ghi rõ số nhà, tên đường, phường/xã, quận/huyện và tỉnh/thành.
+                        </p>
+                        <AddressMapPicker
+                          value={formCoordinates}
+                          onChange={(point, address) => {
+                            setFormCoordinates(point);
+                            if (address) setFormAddress(address);
+                          }}
+                        />
                       </div>
 
-                      <div className="space-y-1.5">
+                      <div className="space-y-1.5 sm:col-span-2">
                         <label className="block text-xs font-bold text-slate-700">Kênh phân phối hiện tại *</label>
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
