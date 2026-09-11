@@ -3,6 +3,10 @@ import prisma from "@/lib/prisma";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import { getClientIp, rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { sendTelegramNotification } from "@/lib/telegram";
+import {
+  isDistributorRegistration,
+  isPartnershipRegistration,
+} from "@/lib/contact-partnership";
 
 function cleanString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -14,37 +18,6 @@ function escapeTelegramHtml(value: string) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
-
-function normalizeContactSource(source: string) {
-  return source
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .toLowerCase();
-}
-
-function isDistributorRegistration(source: string) {
-  const normalized = normalizeContactSource(source);
-  return ["dai ly", "npp", "phan phoi", "mua si"].some((keyword) =>
-    normalized.includes(keyword),
-  );
-}
-
-function isPartnershipRegistration(source: string) {
-  const normalized = normalizeContactSource(source);
-  return [
-    "hop tac",
-    "dai ly",
-    "npp",
-    "phan phoi",
-    "mua si",
-    "truyen thong",
-    "kol",
-    "koc",
-  ].some((keyword) =>
-    normalized.includes(keyword),
-  );
 }
 
 export async function GET(req: NextRequest) {

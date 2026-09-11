@@ -66,3 +66,59 @@ export async function sendTelegramNotification(
   console.error("[Telegram] Send message failed:", lastError);
   return { sent: false, skipped: false, error: lastError };
 }
+
+export async function sendTelegramDocument(
+  fileName: string,
+  content: string,
+  caption: string,
+  chatIdOverride?: string,
+): Promise<TelegramSendResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = chatIdOverride || process.env.TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    return {
+      sent: false,
+      skipped: true,
+      error: "Telegram chưa được cấu hình.",
+    };
+  }
+
+  const url = `https://api.telegram.org/bot${token}/sendDocument`;
+  let lastError = "Không thể gửi file qua Telegram.";
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const formData = new FormData();
+      formData.set("chat_id", chatId);
+      formData.set("caption", caption.slice(0, 1_024));
+      formData.set(
+        "document",
+        new Blob(["\uFEFF", content], { type: "text/csv;charset=utf-8" }),
+        fileName,
+      );
+
+      const res = await fetch(url, {
+        method: "POST",
+        body: formData,
+        signal: AbortSignal.timeout(20_000),
+        cache: "no-store",
+      });
+      const payload = (await res.json()) as TelegramApiResponse;
+
+      if (res.ok && payload.ok) return { sent: true, skipped: false };
+
+      lastError = payload.description || `Telegram trả về HTTP ${res.status}.`;
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) break;
+
+      const retryAfter = Math.min(payload.parameters?.retry_after || attempt, 3);
+      if (attempt < 3) await wait(retryAfter * 1_000);
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+      if (attempt < 3) await wait(attempt * 500);
+    }
+  }
+
+  console.error("[Telegram] Send document failed:", lastError);
+  return { sent: false, skipped: false, error: lastError };
+}
