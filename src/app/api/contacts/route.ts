@@ -16,13 +16,33 @@ function escapeTelegramHtml(value: string) {
     .replace(/"/g, "&quot;");
 }
 
-function isDistributorRegistration(source: string) {
-  const normalized = source
+function normalizeContactSource(source: string) {
+  return source
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/đ/g, "d")
     .toLowerCase();
+}
+
+function isDistributorRegistration(source: string) {
+  const normalized = normalizeContactSource(source);
   return ["dai ly", "npp", "phan phoi", "mua si"].some((keyword) =>
+    normalized.includes(keyword),
+  );
+}
+
+function isPartnershipRegistration(source: string) {
+  const normalized = normalizeContactSource(source);
+  return [
+    "hop tac",
+    "dai ly",
+    "npp",
+    "phan phoi",
+    "mua si",
+    "truyen thong",
+    "kol",
+    "koc",
+  ].some((keyword) =>
     normalized.includes(keyword),
   );
 }
@@ -84,18 +104,19 @@ export async function POST(req: NextRequest) {
     // gặp lỗi, thông tin vẫn còn đầy đủ trong trang quản trị để xử lý lại.
     const resolvedSource = source || "Website";
     const isDistributor = isDistributorRegistration(resolvedSource);
+    const isPartnership = isPartnershipRegistration(resolvedSource);
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://acbt.vn").replace(
       /\/$/,
       "",
     );
-    const adminPath = isDistributor
+    const adminPath = isPartnership
       ? "/admin/contacts?source=partnership"
       : "/admin/contacts";
     const contentPreview = content.length > 2_400
       ? `${content.slice(0, 2_400)}…`
       : content;
     const telegramMessage =
-      `🔔 <b>${isDistributor ? "ĐĂNG KÝ ĐẠI LÝ / NPP / MUA SỈ MỚI" : "YÊU CẦU LIÊN HỆ MỚI"}</b>\n\n` +
+      `🔔 <b>${isDistributor ? "ĐĂNG KÝ ĐẠI LÝ / NPP / MUA SỈ MỚI" : isPartnership ? "ĐỀ XUẤT HỢP TÁC MỚI" : "YÊU CẦU LIÊN HỆ MỚI"}</b>\n\n` +
       `🆔 <b>Mã hồ sơ:</b> <code>${escapeTelegramHtml(contact.id)}</code>\n` +
       `👤 <b>Họ tên / Đơn vị:</b> ${escapeTelegramHtml(name)}\n` +
       `📞 <b>Điện thoại:</b> <code>${escapeTelegramHtml(phone || "Không có")}</code>\n` +
@@ -111,7 +132,7 @@ export async function POST(req: NextRequest) {
 
     const contactChatId =
       process.env.TELEGRAM_CONTACT_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
-    const notification = isDistributor
+    const notification = isPartnership
       ? await sendTelegramNotification(telegramMessage, contactChatId)
       : { sent: false, skipped: true };
 
