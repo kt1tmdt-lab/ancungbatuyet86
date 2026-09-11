@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
-  buildPartnershipCsv,
+  buildPartnershipWorkbook,
   buildPartnershipSummary,
   getPartnershipContacts,
 } from "@/lib/partnership-report";
@@ -47,10 +47,11 @@ async function loadPartnershipContacts() {
 async function sendExport(chatId: string, contacts: Awaited<ReturnType<typeof loadPartnershipContacts>>) {
   const date = new Date().toISOString().slice(0, 10);
   return sendTelegramDocument(
-    `acbt-hop-tac-${date}.csv`,
-    buildPartnershipCsv(contacts),
+    `acbt-hop-tac-${date}.xlsx`,
+    await buildPartnershipWorkbook(contacts),
     `Danh sách ${contacts.length} hồ sơ hợp tác ACBT, xuất ngày ${date}.`,
     chatId,
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   );
 }
 

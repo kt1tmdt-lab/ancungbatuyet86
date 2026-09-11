@@ -69,9 +69,10 @@ export async function sendTelegramNotification(
 
 export async function sendTelegramDocument(
   fileName: string,
-  content: string,
+  content: string | Uint8Array,
   caption: string,
   chatIdOverride?: string,
+  mimeType = "text/csv;charset=utf-8",
 ): Promise<TelegramSendResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = chatIdOverride || process.env.TELEGRAM_CHAT_ID;
@@ -92,9 +93,16 @@ export async function sendTelegramDocument(
       const formData = new FormData();
       formData.set("chat_id", chatId);
       formData.set("caption", caption.slice(0, 1_024));
+      const blobParts: BlobPart[] = typeof content === "string"
+        ? ["\uFEFF", content]
+        : [(() => {
+            const buffer = new ArrayBuffer(content.byteLength);
+            new Uint8Array(buffer).set(content);
+            return buffer;
+          })()];
       formData.set(
         "document",
-        new Blob(["\uFEFF", content], { type: "text/csv;charset=utf-8" }),
+        new Blob(blobParts, { type: mimeType }),
         fileName,
       );
 
