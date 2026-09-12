@@ -7,6 +7,8 @@ export type PartnershipPageConfig = {
   imageCaption: string;
   ctaText: string;
   ctaLink: string;
+  heroImages: string[];
+  heroInterval: number;
 };
 
 export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
@@ -19,6 +21,12 @@ export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
   imageCaption: "Nội dung được cập nhật theo từng giai đoạn",
   ctaText: "",
   ctaLink: "",
+  heroImages: [
+    "/bento/bento-factory.png",
+    "/bento/bento-ingredients.png",
+    "/bento/bento-tiktok.png",
+  ],
+  heroInterval: 5000,
 };
 
 function stringValue(value: unknown, fallback: string) {
@@ -32,6 +40,13 @@ export function normalizePartnershipConfig(
     input && typeof input === "object"
       ? (input as Record<string, unknown>)
       : {};
+
+  const heroImages = Array.isArray(source.heroImages)
+    ? source.heroImages.filter(
+        (item): item is string =>
+          typeof item === "string" && item.trim().length > 0,
+      )
+    : [];
 
   return {
     label: stringValue(source.label, DEFAULT_PARTNERSHIP_CONFIG.label),
@@ -60,5 +75,12 @@ export function normalizePartnershipConfig(
       source.ctaLink,
       DEFAULT_PARTNERSHIP_CONFIG.ctaLink,
     ),
+    heroImages: heroImages.length
+      ? heroImages
+      : DEFAULT_PARTNERSHIP_CONFIG.heroImages,
+    heroInterval:
+      typeof source.heroInterval === "number" && Number.isFinite(source.heroInterval)
+        ? Math.min(60000, Math.max(2000, Math.round(source.heroInterval)))
+        : DEFAULT_PARTNERSHIP_CONFIG.heroInterval,
   };
 }

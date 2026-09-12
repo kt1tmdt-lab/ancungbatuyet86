@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, ImagePlus, Save } from "lucide-react";
+import { ArrowDown, ArrowUp, Eye, ImagePlus, Save, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
@@ -18,6 +18,7 @@ export default function AdminPartnershipPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<"overview" | "carousel">("overview");
 
   useEffect(() => {
     fetch("/api/settings/partnership", { cache: "no-store" })
@@ -35,8 +36,46 @@ export default function AdminPartnershipPage() {
     setPickerOpen(false);
   };
 
+  const openPicker = (target: "overview" | "carousel") => {
+    setPickerTarget(target);
+    setPickerOpen(true);
+  };
+
+  const handlePickerSelect = (imageUrl: string) => {
+    if (pickerTarget === "carousel") {
+      setConfig((current) =>
+        current
+          ? { ...current, heroImages: [...current.heroImages, imageUrl] }
+          : current,
+      );
+      setPickerOpen(false);
+      return;
+    }
+
+    updateHeroImage(imageUrl);
+  };
+
   const patch = (next: Partial<PartnershipPageConfig>) => {
     setConfig((current) => (current ? { ...current, ...next } : current));
+  };
+
+  const removeCarouselImage = (index: number) => {
+    setConfig((current) =>
+      current
+        ? { ...current, heroImages: current.heroImages.filter((_, itemIndex) => itemIndex !== index) }
+        : current,
+    );
+  };
+
+  const moveCarouselImage = (index: number, direction: -1 | 1) => {
+    setConfig((current) => {
+      if (!current) return current;
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= current.heroImages.length) return current;
+      const heroImages = [...current.heroImages];
+      [heroImages[index], heroImages[nextIndex]] = [heroImages[nextIndex], heroImages[index]];
+      return { ...current, heroImages };
+    });
   };
 
   const save = async () => {
@@ -171,7 +210,7 @@ export default function AdminPartnershipPage() {
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
               <button
                 type="button"
-                onClick={() => setPickerOpen(true)}
+                onClick={() => openPicker("overview")}
                 className="group relative min-h-72 overflow-hidden border border-dashed border-orange-300 bg-orange-50 text-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
               >
                 {config?.imageUrl ? (
@@ -199,7 +238,7 @@ export default function AdminPartnershipPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => setPickerOpen(true)}
+                  onClick={() => openPicker("overview")}
                   className="mt-6 inline-flex items-center justify-center gap-2 border border-orange-300 bg-white px-4 py-3 text-xs font-black uppercase tracking-wide text-orange-700 transition hover:bg-orange-600 hover:text-white"
                 >
                   <ImagePlus size={15} /> Mở thư viện ảnh
@@ -209,10 +248,67 @@ export default function AdminPartnershipPage() {
           )}
         </section>
 
+        <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5">
+            <h2 className="text-xl font-black text-slate-950">
+              Ảnh tự đổi trang Đại lý / NPP
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Các ảnh dưới đây sẽ lần lượt hiển thị ở đầu trang Đại lý / Nhà phân phối.
+            </p>
+          </div>
+
+          {!config ? (
+            <p className="text-sm font-bold text-slate-500">Đang tải cấu hình ảnh...</p>
+          ) : (
+            <>
+              <label className="mb-6 block max-w-sm">
+                <span className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-500">
+                  Thời gian đổi ảnh (giây)
+                </span>
+                <input
+                  type="number"
+                  min={2}
+                  max={60}
+                  value={Math.round(config.heroInterval / 1000)}
+                  onChange={(event) => {
+                    const seconds = Number(event.target.value) || 5;
+                    patch({ heroInterval: Math.min(60000, Math.max(2000, seconds * 1000)) });
+                  }}
+                  className="w-full border border-slate-300 px-4 py-3 text-sm font-semibold outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                />
+              </label>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {config.heroImages.map((image, index) => (
+                  <div key={`${image}-${index}`} className="overflow-hidden border border-slate-200 bg-slate-50">
+                    <img src={image} alt={`Ảnh hero ${index + 1}`} className="h-40 w-full object-cover" />
+                    <p className="truncate px-3 pt-3 text-xs font-semibold text-slate-600" title={image}>{image}</p>
+                    <div className="flex items-center justify-between gap-2 p-3">
+                      <button type="button" title="Đưa lên" disabled={index === 0} onClick={() => moveCarouselImage(index, -1)} className="border border-slate-300 p-2 text-slate-600 hover:border-orange-500 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"><ArrowUp size={15} /></button>
+                      <button type="button" title="Đưa xuống" disabled={index === config.heroImages.length - 1} onClick={() => moveCarouselImage(index, 1)} className="border border-slate-300 p-2 text-slate-600 hover:border-orange-500 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"><ArrowDown size={15} /></button>
+                      <button type="button" title="Xóa ảnh" onClick={() => removeCarouselImage(index)} className="ml-auto border border-red-200 p-2 text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => openPicker("carousel")}
+                  className="flex min-h-52 flex-col items-center justify-center gap-3 border border-dashed border-orange-300 bg-orange-50 px-4 text-xs font-black uppercase tracking-wide text-orange-700 transition hover:bg-orange-100"
+                >
+                  <ImagePlus size={28} />
+                  Thêm ảnh vào slideshow
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+
         <MediaPickerModal
           open={pickerOpen}
           onClose={() => setPickerOpen(false)}
-          onSelect={updateHeroImage}
+          onSelect={handlePickerSelect}
         />
       </div>
     </ProtectedRoute>

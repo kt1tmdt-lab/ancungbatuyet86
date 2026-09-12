@@ -8,6 +8,7 @@ export type InfoPageBlock =
         subtitle?: string;
         backgroundImage?: string;
         backgroundImages?: string[];
+        backgroundImageInterval?: number;
         imageLabel?: string;
         imageCaption?: string;
         ctaText?: string;

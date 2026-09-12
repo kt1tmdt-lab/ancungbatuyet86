@@ -45,6 +45,7 @@ type RenderBlockData = {
   content?: string;
   backgroundImage?: string;
   backgroundImages?: string[];
+  backgroundImageInterval?: number;
   imageLabel?: string;
   imageCaption?: string;
   backgroundColor?: string;
@@ -63,20 +64,27 @@ function DynIcon({ name, className }: { name: string; className?: string }) {
   return <Icon className={className} />;
 }
 
-function RotatingImage({ images, alt }: { images: string[]; alt: string }) {
+function RotatingImage({
+  images,
+  alt,
+  interval = 5000,
+}: {
+  images: string[];
+  alt: string;
+  interval?: number;
+}) {
   const [index, setIndex] = useState(0);
   const imageKey = images.join("|");
 
   useEffect(() => {
-    setIndex(0);
     if (images.length <= 1) return;
 
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % images.length);
-    }, 5000);
+    }, interval);
 
     return () => window.clearInterval(timer);
-  }, [imageKey, images.length]);
+  }, [imageKey, images.length, interval]);
 
   if (images.length === 0) return null;
 
@@ -1139,7 +1147,11 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           "Nội dung được cập nhật theo từng giai đoạn"}
                       </p>
                     </div>
-                    <RotatingImage images={heroImages} alt={data.title || title} />
+                    <RotatingImage
+                      images={heroImages}
+                      alt={data.title || title}
+                      interval={data.backgroundImageInterval}
+                    />
                   </div>
                 )}
               </div>
