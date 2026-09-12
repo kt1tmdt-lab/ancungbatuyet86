@@ -44,6 +44,7 @@ type RenderBlockData = {
   description?: string;
   content?: string;
   backgroundImage?: string;
+  backgroundImages?: string[];
   imageLabel?: string;
   imageCaption?: string;
   backgroundColor?: string;
@@ -60,6 +61,32 @@ function DynIcon({ name, className }: { name: string; className?: string }) {
   const Icon = (Icons as unknown as Record<string, LucideIcon>)[name];
   if (!Icon) return <HelpCircle className={className} />;
   return <Icon className={className} />;
+}
+
+function RotatingImage({ images, alt }: { images: string[]; alt: string }) {
+  const [index, setIndex] = useState(0);
+  const imageKey = images.join("|");
+
+  useEffect(() => {
+    setIndex(0);
+    if (images.length <= 1) return;
+
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % images.length);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, [imageKey, images.length]);
+
+  if (images.length === 0) return null;
+
+  return (
+    <img
+      src={images[index % images.length]}
+      alt={alt}
+      className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+    />
+  );
 }
 
 function sectionTone(backgroundColor?: string) {
@@ -1065,6 +1092,12 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
         const data = (block.data || {}) as RenderBlockData;
 
         if (block.type === "hero") {
+          const heroImages = data.backgroundImages?.length
+            ? data.backgroundImages
+            : data.backgroundImage
+              ? [data.backgroundImage]
+              : [];
+
           return (
             <section key={block.id || index} className="relative overflow-hidden bg-[#fff4df] px-5 py-20 sm:px-8 lg:px-16">
               <div className="absolute inset-0 bg-[linear-gradient(115deg,#fff4df_0%,#fff4df_54%,#ffffff_54%,#ffffff_100%)]" />
@@ -1094,7 +1127,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                   )}
                 </div>
 
-                {data.backgroundImage && (
+                {heroImages.length > 0 && (
                   <div className="relative min-h-[430px] overflow-hidden bg-white shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
                     <div className="absolute left-5 top-5 z-10 bg-slate-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
                       {data.imageLabel || "Trang nội dung"}
@@ -1106,11 +1139,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           "Nội dung được cập nhật theo từng giai đoạn"}
                       </p>
                     </div>
-                    <img
-                      src={data.backgroundImage}
-                      alt={data.title || title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
+                    <RotatingImage images={heroImages} alt={data.title || title} />
                   </div>
                 )}
               </div>

@@ -7,6 +7,7 @@ export type InfoPageBlock =
         title: string;
         subtitle?: string;
         backgroundImage?: string;
+        backgroundImages?: string[];
         imageLabel?: string;
         imageCaption?: string;
         ctaText?: string;
@@ -118,6 +119,7 @@ function createInfoPage(
   subtitle: string,
   blocks: InfoPageBlock[],
   heroImage?: string,
+  heroImages?: string[],
 ): DefaultInfoPage {
   const cmsSlug = routePath.replace(/^\//, "").replace(/\//g, "-");
   const splitImage = blocks.find((block) => block.type === "split");
@@ -139,6 +141,7 @@ function createInfoPage(
             (splitImage?.type === "split"
               ? splitImage.data.imageUrl
               : "/bento/bento-factory.png"),
+          backgroundImages: heroImages,
         },
       },
       ...blocks,
@@ -246,6 +249,11 @@ export const DEFAULT_INFO_PAGES: Record<string, DefaultInfoPage> = {
       },
     ],
     "/bento/bento-factory.png",
+    [
+      "/bento/bento-factory.png",
+      "/bento/bento-ingredients.png",
+      "/bento/bento-tiktok.png",
+    ],
   ),
   "/hop-tac/truyen-thong": createInfoPage(
     "/hop-tac/truyen-thong",
