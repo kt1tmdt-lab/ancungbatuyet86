@@ -18,7 +18,7 @@ export default function AdminPartnershipPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerTarget, setPickerTarget] = useState<"overview" | "carousel">("overview");
+  const [pickerTarget, setPickerTarget] = useState<"overview" | "fixed" | "carousel">("overview");
 
   useEffect(() => {
     fetch("/api/settings/partnership", { cache: "no-store" })
@@ -36,12 +36,20 @@ export default function AdminPartnershipPage() {
     setPickerOpen(false);
   };
 
-  const openPicker = (target: "overview" | "carousel") => {
+  const openPicker = (target: "overview" | "fixed" | "carousel") => {
     setPickerTarget(target);
     setPickerOpen(true);
   };
 
   const handlePickerSelect = (imageUrl: string) => {
+    if (pickerTarget === "fixed") {
+      setConfig((current) =>
+        current ? { ...current, heroImages: [imageUrl], heroAutoRotate: false } : current,
+      );
+      setPickerOpen(false);
+      return;
+    }
+
     if (pickerTarget === "carousel") {
       setConfig((current) =>
         current
@@ -295,7 +303,32 @@ export default function AdminPartnershipPage() {
                 </span>
               </label>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {!config.heroAutoRotate && (
+                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+                  <div className="relative min-h-72 overflow-hidden border border-slate-200 bg-slate-50">
+                    {config.heroImages[0] ? (
+                      <img src={config.heroImages[0]} alt="Ảnh hero cố định" className="absolute inset-0 h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full min-h-72 place-items-center text-sm font-bold text-slate-500">Chưa chọn ảnh</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-between border border-slate-200 bg-slate-50 p-5">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Ảnh đang dùng cố định</p>
+                      <p className="mt-3 break-all text-sm font-semibold leading-6 text-slate-800">{config.heroImages[0] || "Chưa chọn ảnh"}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openPicker("fixed")}
+                      className="mt-6 inline-flex items-center justify-center gap-2 bg-orange-600 px-4 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-slate-950"
+                    >
+                      <ImagePlus size={15} /> Đổi ảnh này
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className={`${config.heroAutoRotate ? "" : "hidden"} grid gap-4 sm:grid-cols-2 lg:grid-cols-4`}>
                 {config.heroImages.map((image, index) => (
                   <div key={`${image}-${index}`} className="overflow-hidden border border-slate-200 bg-slate-50">
                     <img src={image} alt={`Ảnh hero ${index + 1}`} className="h-40 w-full object-cover" />
