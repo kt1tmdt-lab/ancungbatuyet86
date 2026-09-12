@@ -251,10 +251,10 @@ export default function AdminPartnershipPage() {
         <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <div className="mb-5">
             <h2 className="text-xl font-black text-slate-950">
-              Ảnh tự đổi trang Đại lý / NPP
+              Ảnh hero trang Đại lý / NPP
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Các ảnh dưới đây sẽ lần lượt hiển thị ở đầu trang Đại lý / Nhà phân phối.
+              Ảnh đầu tiên trong danh sách là ảnh cố định mặc định. Bạn có thể bật tự động đổi ảnh nếu cần.
             </p>
           </div>
 
@@ -271,12 +271,28 @@ export default function AdminPartnershipPage() {
                   min={2}
                   max={60}
                   value={Math.round(config.heroInterval / 1000)}
+                  disabled={!config.heroAutoRotate}
                   onChange={(event) => {
                     const seconds = Number(event.target.value) || 5;
                     patch({ heroInterval: Math.min(60000, Math.max(2000, seconds * 1000)) });
                   }}
                   className="w-full border border-slate-300 px-4 py-3 text-sm font-semibold outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
                 />
+              </label>
+
+              <label className="mb-6 flex max-w-sm cursor-pointer items-center gap-3 border border-slate-200 bg-slate-50 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={config.heroAutoRotate}
+                  onChange={(event) => patch({ heroAutoRotate: event.target.checked })}
+                  className="h-4 w-4 accent-orange-600"
+                />
+                <span className="text-sm font-bold text-slate-700">
+                  Tự động đổi ảnh
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    Tắt để giữ cố định ảnh đầu tiên.
+                  </span>
+                </span>
               </label>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

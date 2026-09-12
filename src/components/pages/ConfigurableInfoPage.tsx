@@ -46,6 +46,7 @@ type RenderBlockData = {
   backgroundImage?: string;
   backgroundImages?: string[];
   backgroundImageInterval?: number;
+  backgroundImageAutoRotate?: boolean;
   imageLabel?: string;
   imageCaption?: string;
   backgroundColor?: string;
@@ -68,29 +69,33 @@ function RotatingImage({
   images,
   alt,
   interval = 5000,
+  autoRotate = true,
 }: {
   images: string[];
   alt: string;
   interval?: number;
+  autoRotate?: boolean;
 }) {
   const [index, setIndex] = useState(0);
   const imageKey = images.join("|");
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (!autoRotate || images.length <= 1) return;
 
     const timer = window.setInterval(() => {
       setIndex((current) => (current + 1) % images.length);
     }, interval);
 
     return () => window.clearInterval(timer);
-  }, [imageKey, images.length, interval]);
+  }, [autoRotate, imageKey, images.length, interval]);
 
   if (images.length === 0) return null;
 
+  const currentImage = autoRotate ? images[index % images.length] : images[0];
+
   return (
     <img
-      src={images[index % images.length]}
+      src={currentImage}
       alt={alt}
       className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
     />
@@ -1151,6 +1156,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                       images={heroImages}
                       alt={data.title || title}
                       interval={data.backgroundImageInterval}
+                      autoRotate={data.backgroundImageAutoRotate}
                     />
                   </div>
                 )}

@@ -32,6 +32,7 @@ export default async function PartnershipSubPage({ params }: { params: Promise<{
                     partnershipConfig.heroImages[0] || block.data.backgroundImage,
                   backgroundImages: partnershipConfig.heroImages,
                   backgroundImageInterval: partnershipConfig.heroInterval,
+                  backgroundImageAutoRotate: partnershipConfig.heroAutoRotate,
                 },
               }
             : block,

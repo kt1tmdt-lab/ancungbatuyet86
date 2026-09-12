@@ -9,6 +9,7 @@ export type InfoPageBlock =
         backgroundImage?: string;
         backgroundImages?: string[];
         backgroundImageInterval?: number;
+        backgroundImageAutoRotate?: boolean;
         imageLabel?: string;
         imageCaption?: string;
         ctaText?: string;

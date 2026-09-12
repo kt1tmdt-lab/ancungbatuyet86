@@ -9,6 +9,7 @@ export type PartnershipPageConfig = {
   ctaLink: string;
   heroImages: string[];
   heroInterval: number;
+  heroAutoRotate: boolean;
 };
 
 export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
@@ -27,6 +28,7 @@ export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
     "/bento/bento-tiktok.png",
   ],
   heroInterval: 5000,
+  heroAutoRotate: false,
 };
 
 function stringValue(value: unknown, fallback: string) {
@@ -82,5 +84,9 @@ export function normalizePartnershipConfig(
       typeof source.heroInterval === "number" && Number.isFinite(source.heroInterval)
         ? Math.min(60000, Math.max(2000, Math.round(source.heroInterval)))
         : DEFAULT_PARTNERSHIP_CONFIG.heroInterval,
+    heroAutoRotate:
+      typeof source.heroAutoRotate === "boolean"
+        ? source.heroAutoRotate
+        : DEFAULT_PARTNERSHIP_CONFIG.heroAutoRotate,
   };
 }
