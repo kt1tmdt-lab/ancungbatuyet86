@@ -117,6 +117,7 @@ function createInfoPage(
   label: string,
   subtitle: string,
   blocks: InfoPageBlock[],
+  heroImage?: string,
 ): DefaultInfoPage {
   const cmsSlug = routePath.replace(/^\//, "").replace(/\//g, "-");
   const splitImage = blocks.find((block) => block.type === "split");
@@ -134,9 +135,10 @@ function createInfoPage(
           title,
           subtitle,
           backgroundImage:
-            splitImage?.type === "split"
+            heroImage ||
+            (splitImage?.type === "split"
               ? splitImage.data.imageUrl
-              : "/bento/bento-factory.png",
+              : "/bento/bento-factory.png"),
         },
       },
       ...blocks,
@@ -243,6 +245,7 @@ export const DEFAULT_INFO_PAGES: Record<string, DefaultInfoPage> = {
         },
       },
     ],
+    "/bento/bento-factory.png",
   ),
   "/hop-tac/truyen-thong": createInfoPage(
     "/hop-tac/truyen-thong",
