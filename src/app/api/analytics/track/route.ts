@@ -2,6 +2,21 @@ import { NextResponse, NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import crypto from "crypto";
 
+function maskIpAddress(ip: string) {
+  const ipv4 = ip.match(/(?:\d{1,3}\.){3}\d{1,3}$/)?.[0];
+  if (ipv4) {
+    const parts = ipv4.split(".");
+    return `${parts[0]}.${parts[1]}.xxx.xxx`;
+  }
+
+  if (ip.includes(":")) {
+    const parts = ip.split(":").filter(Boolean);
+    return `${parts.slice(0, 3).join(":")}:****`;
+  }
+
+  return "Không xác định";
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -39,6 +54,7 @@ export async function POST(req: NextRequest) {
     await prisma.visit.create({
       data: {
         ipHash,
+        ipMasked: maskIpAddress(ip),
         path,
         referrer,
       },

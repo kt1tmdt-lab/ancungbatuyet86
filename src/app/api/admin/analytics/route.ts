@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     const [visits, previousPageViews, previousUniqueGroups] = await Promise.all([
       prisma.visit.findMany({
         where: { createdAt: { gte: start, lt: end } },
-        select: { ipHash: true, path: true, referrer: true, createdAt: true },
+        select: { ipHash: true, ipMasked: true, path: true, referrer: true, createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
       prisma.visit.count({ where: { createdAt: { gte: previousStart, lt: start } } }),
@@ -77,6 +77,14 @@ export async function GET(req: NextRequest) {
 
     const pageMap = new Map<string, { views: number; visitors: Set<string> }>();
     const sourceMap = new Map<string, { views: number; visitors: Set<string> }>();
+    const visitorMap = new Map<string, {
+      visitorId: string;
+      ipMasked: string | null;
+      views: number;
+      lastSeen: Date;
+      lastPath: string;
+      source: string;
+    }>();
 
     for (const visit of visits) {
       const daily = dailyMap.get(vietnamDateKey(visit.createdAt));
@@ -96,6 +104,21 @@ export async function GET(req: NextRequest) {
       source.views++;
       source.visitors.add(visit.ipHash);
       sourceMap.set(sourceName, source);
+
+      const visitor = visitorMap.get(visit.ipHash) || {
+        visitorId: visit.ipHash.slice(0, 10).toUpperCase(),
+        ipMasked: visit.ipMasked,
+        views: 0,
+        lastSeen: visit.createdAt,
+        lastPath: path,
+        source: sourceName,
+      };
+      visitor.views++;
+      visitor.ipMasked = visit.ipMasked || visitor.ipMasked;
+      visitor.lastSeen = visit.createdAt;
+      visitor.lastPath = path;
+      visitor.source = sourceName;
+      visitorMap.set(visit.ipHash, visitor);
     }
 
     return NextResponse.json({
@@ -126,6 +149,13 @@ export async function GET(req: NextRequest) {
         views: value.views,
         visitors: value.visitors.size,
       })).sort((a, b) => b.views - a.views),
+      recentVisitors: Array.from(visitorMap.values())
+        .sort((a, b) => b.lastSeen.getTime() - a.lastSeen.getTime())
+        .slice(0, 200)
+        .map((visitor) => ({
+          ...visitor,
+          lastSeen: visitor.lastSeen.toISOString(),
+        })),
     });
   } catch (error) {
     console.error("Internal analytics report error:", error);

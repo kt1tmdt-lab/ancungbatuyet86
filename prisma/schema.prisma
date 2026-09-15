@@ -132,9 +132,12 @@ enum ProductStatus {
 model Visit {
   id        String   @id @default(cuid())
   ipHash    String
+  ipMasked  String?
   path      String
   referrer  String?
   createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 model Product {

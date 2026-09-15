@@ -26,6 +26,14 @@ type MonthlyReport = {
   daily: Array<{ date: string; views: number; visitors: number }>;
   topPages: Array<{ path: string; views: number; visitors: number }>;
   sources: Array<{ name: string; views: number; visitors: number }>;
+  recentVisitors: Array<{
+    visitorId: string;
+    ipMasked: string | null;
+    views: number;
+    lastSeen: string;
+    lastPath: string;
+    source: string;
+  }>;
 };
 
 type RealtimeReport = {
@@ -65,6 +73,14 @@ function currentMonth() {
 
 function formatNumber(value: number) {
   return numberFormatter.format(value);
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function changePercent(current: number, previous: number) {
@@ -116,6 +132,51 @@ function DataTable({ title, icon: Icon, headers, rows }: {
               </tr>
             ))}
             {!rows.length ? <tr><td colSpan={headers.length} className="px-5 py-10 text-center text-slate-500">Chưa có dữ liệu.</td></tr> : null}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function VisitorTable({ visitors }: { visitors: MonthlyReport["recentVisitors"] }) {
+  return (
+    <section className="border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-5 py-4">
+        <div className="flex items-center gap-2">
+          <UsersRound size={16} className="text-orange-600" />
+          <h2 className="font-black text-slate-950">Danh sách khách truy cập</h2>
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          Hiển thị tối đa 200 khách gần nhất trong tháng. IP được che để bảo vệ dữ liệu cá nhân.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[900px] text-left text-sm">
+          <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+            <tr>
+              <th className="px-5 py-3">Mã khách</th>
+              <th className="px-5 py-3">IP đã che</th>
+              <th className="px-5 py-3">Lần cuối</th>
+              <th className="px-5 py-3">Trang cuối</th>
+              <th className="px-5 py-3">Nguồn</th>
+              <th className="px-5 py-3 text-right">Lượt xem</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {visitors.map((visitor) => (
+              <tr key={visitor.visitorId} className="hover:bg-orange-50/40">
+                <td className="px-5 py-3 font-mono text-xs font-bold text-slate-700">{visitor.visitorId}</td>
+                <td className="px-5 py-3 font-mono text-xs text-slate-700">{visitor.ipMasked || "Dữ liệu cũ"}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-600">{formatDateTime(visitor.lastSeen)}</td>
+                <td className="max-w-xs truncate px-5 py-3 font-medium text-slate-700" title={visitor.lastPath}>{visitor.lastPath}</td>
+                <td className="px-5 py-3 text-slate-600">{visitor.source}</td>
+                <td className="px-5 py-3 text-right font-black text-slate-900">{formatNumber(visitor.views)}</td>
+              </tr>
+            ))}
+            {!visitors.length ? (
+              <tr><td colSpan={6} className="px-5 py-10 text-center text-slate-500">Chưa có dữ liệu khách truy cập.</td></tr>
+            ) : null}
           </tbody>
         </table>
       </div>
@@ -191,6 +252,17 @@ export default function AnalyticsPage() {
       [],
       ["Nguồn", "Lượt xem", "Khách truy cập ước tính"],
       ...monthly.sources.map((item) => [item.name, item.views, item.visitors]),
+      [],
+      ["Danh sách khách truy cập"],
+      ["Mã khách", "IP đã che", "Lần cuối", "Trang cuối", "Nguồn", "Lượt xem"],
+      ...monthly.recentVisitors.map((item) => [
+        item.visitorId,
+        item.ipMasked || "Dữ liệu cũ",
+        formatDateTime(item.lastSeen),
+        item.lastPath,
+        item.source,
+        item.views,
+      ]),
     ];
     const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\r\n");
     const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }));
@@ -238,6 +310,7 @@ export default function AnalyticsPage() {
               <DataTable title="Trang được xem nhiều" icon={Eye} headers={["Trang", "Khách", "Lượt xem"]} rows={monthly.topPages.map((item) => [item.path, item.visitors, item.views])} />
               <DataTable title="Nguồn truy cập" icon={ChartNoAxesCombined} headers={["Nguồn", "Khách", "Lượt xem"]} rows={monthly.sources.map((item) => [item.name, item.visitors, item.views])} />
             </div>
+            <VisitorTable visitors={monthly.recentVisitors || []} />
           </>
         ) : monthlyLoading ? <div className="h-32 animate-pulse border border-slate-200 bg-white" /> : null}
 
