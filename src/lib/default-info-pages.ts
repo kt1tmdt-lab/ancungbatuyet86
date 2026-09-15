@@ -10,6 +10,7 @@ export type InfoPageBlock =
         backgroundImages?: string[];
         backgroundImageInterval?: number;
         backgroundImageAutoRotate?: boolean;
+        backgroundImageFit?: "cover" | "contain";
         imageLabel?: string;
         imageCaption?: string;
         ctaText?: string;
@@ -122,6 +123,7 @@ function createInfoPage(
   blocks: InfoPageBlock[],
   heroImage?: string,
   heroImages?: string[],
+  heroImageFit: "cover" | "contain" = "cover",
 ): DefaultInfoPage {
   const cmsSlug = routePath.replace(/^\//, "").replace(/\//g, "-");
   const splitImage = blocks.find((block) => block.type === "split");
@@ -144,6 +146,7 @@ function createInfoPage(
               ? splitImage.data.imageUrl
               : "/bento/bento-factory.png"),
           backgroundImages: heroImages,
+          backgroundImageFit: heroImageFit,
         },
       },
       ...blocks,
@@ -304,6 +307,9 @@ export const DEFAULT_INFO_PAGES: Record<string, DefaultInfoPage> = {
         },
       },
     ],
+    "/hero/ba-tuyet-character.png",
+    undefined,
+    "contain",
   ),
 };
 

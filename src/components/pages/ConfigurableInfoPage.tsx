@@ -47,6 +47,7 @@ type RenderBlockData = {
   backgroundImages?: string[];
   backgroundImageInterval?: number;
   backgroundImageAutoRotate?: boolean;
+  backgroundImageFit?: "cover" | "contain";
   imageLabel?: string;
   imageCaption?: string;
   backgroundColor?: string;
@@ -70,11 +71,13 @@ function RotatingImage({
   alt,
   interval = 5000,
   autoRotate = true,
+  fit = "cover",
 }: {
   images: string[];
   alt: string;
   interval?: number;
   autoRotate?: boolean;
+  fit?: "cover" | "contain";
 }) {
   const [index, setIndex] = useState(0);
   const imageKey = images.join("|");
@@ -97,7 +100,9 @@ function RotatingImage({
     <img
       src={currentImage}
       alt={alt}
-      className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+      className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${
+        fit === "contain" ? "object-contain object-bottom p-5 sm:p-8" : "object-cover"
+      }`}
     />
   );
 }
@@ -1157,6 +1162,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                       alt={data.title || title}
                       interval={data.backgroundImageInterval}
                       autoRotate={data.backgroundImageAutoRotate}
+                      fit={data.backgroundImageFit}
                     />
                   </div>
                 )}
