@@ -140,6 +140,13 @@ function DataTable({ title, icon: Icon, headers, rows }: {
 }
 
 function VisitorTable({ visitors }: { visitors: MonthlyReport["recentVisitors"] }) {
+  const pageSize = 20;
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(visitors.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const visibleVisitors = visitors.slice(startIndex, startIndex + pageSize);
+
   return (
     <section className="border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-5 py-4">
@@ -164,7 +171,7 @@ function VisitorTable({ visitors }: { visitors: MonthlyReport["recentVisitors"] 
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {visitors.map((visitor) => (
+            {visibleVisitors.map((visitor) => (
               <tr key={visitor.visitorId} className="hover:bg-orange-50/40">
                 <td className="px-5 py-3 font-mono text-xs font-bold text-slate-700">{visitor.visitorId}</td>
                 <td className="px-5 py-3 font-mono text-xs text-slate-700">{visitor.ipMasked || "Dữ liệu cũ"}</td>
@@ -180,6 +187,34 @@ function VisitorTable({ visitors }: { visitors: MonthlyReport["recentVisitors"] 
           </tbody>
         </table>
       </div>
+      {visitors.length ? (
+        <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Hiển thị {startIndex + 1}–{Math.min(startIndex + pageSize, visitors.length)} / {visitors.length} khách
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              disabled={currentPage === 1}
+              className="border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-700 transition hover:border-orange-300 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Trang trước
+            </button>
+            <span className="min-w-24 text-center font-semibold text-slate-700">
+              Trang {currentPage}/{totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+              disabled={currentPage === totalPages}
+              className="border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-700 transition hover:border-orange-300 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Trang sau
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -310,7 +345,7 @@ export default function AnalyticsPage() {
               <DataTable title="Trang được xem nhiều" icon={Eye} headers={["Trang", "Khách", "Lượt xem"]} rows={monthly.topPages.map((item) => [item.path, item.visitors, item.views])} />
               <DataTable title="Nguồn truy cập" icon={ChartNoAxesCombined} headers={["Nguồn", "Khách", "Lượt xem"]} rows={monthly.sources.map((item) => [item.name, item.visitors, item.views])} />
             </div>
-            <VisitorTable visitors={monthly.recentVisitors || []} />
+            <VisitorTable key={monthly.month} visitors={monthly.recentVisitors || []} />
           </>
         ) : monthlyLoading ? <div className="h-32 animate-pulse border border-slate-200 bg-white" /> : null}
 
