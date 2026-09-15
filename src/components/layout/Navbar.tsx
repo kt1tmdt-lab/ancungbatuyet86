@@ -627,15 +627,21 @@ export default function Navbar({
                             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">
                               {submenu.eyebrow}
                             </p>
-                            <p className="mt-3 text-2xl font-black leading-7 tracking-[-0.04em]">
+                            <p className={`mt-3 text-2xl leading-7 tracking-[-0.04em] ${
+                              link.href === "/san-pham" ? "font-semibold" : "font-black"
+                            }`}>
                               {submenu.title}
                             </p>
-                            <p className="mt-3 max-w-sm text-sm font-semibold leading-6 text-slate-500">
+                            <p className={`mt-3 max-w-sm text-sm leading-6 text-slate-500 ${
+                              link.href === "/san-pham" ? "font-normal" : "font-semibold"
+                            }`}>
                               {submenu.description}
                             </p>
                             <Link
                               href={overviewHref}
-                              className="group/item mt-6 inline-flex items-center gap-3 border-b border-orange-500 pb-1.5 text-xs font-black uppercase tracking-[0.1em] text-orange-700 transition hover:text-orange-600"
+                              className={`group/item mt-6 inline-flex items-center gap-3 border-b border-orange-500 pb-1.5 text-xs uppercase tracking-[0.1em] text-orange-700 transition hover:text-orange-600 ${
+                                link.href === "/san-pham" ? "font-medium" : "font-black"
+                              }`}
                             >
                               <span>{overviewLabel}</span>
                               <span className="transition group-hover/item:translate-x-1">→</span>
@@ -657,7 +663,9 @@ export default function Navbar({
                                     : "translate-y-3 opacity-0"
                                 }`}
                               >
-                                <span className="flex w-full items-start justify-between gap-4 text-base font-black leading-6 text-slate-900 group-hover/item:text-orange-700">
+                                <span className={`flex w-full items-start justify-between gap-4 text-base leading-6 text-slate-900 group-hover/item:text-orange-700 ${
+                                  link.href === "/san-pham" ? "font-medium" : "font-black"
+                                }`}>
                                   {item.label}
                                   <span className="text-orange-500 opacity-0 transition group-hover/item:translate-x-1 group-hover/item:opacity-100">→</span>
                                 </span>
@@ -785,13 +793,13 @@ export default function Navbar({
                       <div className="border-l-2 border-orange-300 bg-[#fffdf8] px-3 py-2">
                         <div className="mb-2 border-b border-slate-200 bg-white px-3 py-4">
                           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-orange-700">{submenu.eyebrow}</p>
-                          <p className="mt-1 text-sm font-black text-slate-950">{submenu.title}</p>
-                          <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{submenu.description}</p>
+                          <p className={`mt-1 text-sm text-slate-950 ${link.href === "/san-pham" ? "font-semibold" : "font-black"}`}>{submenu.title}</p>
+                          <p className={`mt-1 text-xs leading-5 text-slate-500 ${link.href === "/san-pham" ? "font-normal" : "font-semibold"}`}>{submenu.description}</p>
                         </div>
                         <Link
                           href={overviewHref}
                           onClick={() => setOpen(false)}
-                          className="mb-1 flex items-center justify-between border-b border-orange-200 bg-orange-50 px-4 py-3.5 text-xs font-black uppercase tracking-[0.1em] text-orange-700"
+                          className={`mb-1 flex items-center justify-between border-b border-orange-200 bg-orange-50 px-4 py-3.5 text-xs uppercase tracking-[0.1em] text-orange-700 ${link.href === "/san-pham" ? "font-medium" : "font-black"}`}
                         >
                           {overviewLabel}
                           <span>→</span>
@@ -801,7 +809,7 @@ export default function Navbar({
                             key={`${link.href}-${item.href}-${item.label}`}
                             href={item.href}
                             onClick={() => setOpen(false)}
-                            className="block border-b border-slate-100 bg-white px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-700"
+                            className={`block border-b border-slate-100 bg-white px-4 py-3.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 ${link.href === "/san-pham" ? "font-normal" : "font-bold"}`}
                           >
                             <span className="block">{item.label}</span>
                             {link.href !== "/san-pham" && item.note ? (
