@@ -445,30 +445,75 @@ export default function ProductShowcaseLanding() {
       {isChickenFeet ? (
         <section id="huong-vi" className={`scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28 ${theme.soft}`}>
           <div className="mx-auto max-w-7xl">
-            <Reveal>
-              <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>02 · Thành phần</p>
-              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
-                Bên trong sản phẩm có gì?
-              </h2>
-              <p className="mt-4 text-base font-semibold text-slate-700 sm:text-lg">
-                Chân gà rút xương Bà Tuyết — 95% chân gà, 5% gia vị &amp; phụ gia
-              </p>
+            <Reveal className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-end lg:gap-16">
+              <div>
+                <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>02 · Thành phần</p>
+                <h2 className="mt-4 max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.055em] sm:text-5xl lg:text-6xl">
+                  Bên trong sản phẩm có gì?
+                </h2>
+                <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
+                  Chân gà rút xương Bà Tuyết. Tìm hiểu nguyên liệu, nguồn gốc và vai trò của từng thành phần.
+                </p>
+              </div>
+              <div className="border border-orange-200 bg-white p-5 shadow-[0_18px_45px_rgba(124,58,12,0.08)] sm:p-6">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <span className="text-5xl font-black leading-none tracking-[-0.08em] text-orange-600">95%</span>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Chân gà</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-3xl font-bold leading-none tracking-[-0.06em] text-slate-900">5%</span>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Gia vị &amp; phụ gia</p>
+                  </div>
+                </div>
+                <div className="mt-5 flex h-2 overflow-hidden bg-orange-100" aria-label="Tỷ lệ thành phần: 95% chân gà, 5% gia vị và phụ gia">
+                  <span className="w-[95%] bg-orange-600" />
+                  <span className="w-[5%] bg-slate-900" />
+                </div>
+              </div>
             </Reveal>
-            <div className="mt-10 overflow-x-auto border border-orange-100 bg-white shadow-[0_18px_38px_rgba(166,73,12,0.06)] lg:mt-14">
-              <table className="w-full min-w-[720px] border-collapse text-left text-sm">
-                <thead className="bg-orange-600 text-white">
+
+            <div className="mt-10 grid gap-3 md:hidden">
+              {CHICKEN_FEET_INGREDIENTS.map((ingredient, index) => (
+                <article key={ingredient.name} className={`border p-5 shadow-[0_10px_25px_rgba(124,58,12,0.04)] ${index === 0 ? "border-orange-300 bg-orange-50" : "border-orange-100 bg-white"}`}>
+                  <div className="flex items-start gap-4">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center bg-orange-100 font-mono text-xs font-bold text-orange-700">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="min-w-0">
+                      <h3 className="text-base font-bold leading-6 text-slate-950">{ingredient.name}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{ingredient.origin}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 border-t border-orange-100 pt-3 text-sm leading-6 text-slate-700">
+                    <span className="mr-2 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-700">Vai trò</span>
+                    {ingredient.role}
+                  </p>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-12 hidden overflow-hidden border border-orange-200 bg-white shadow-[0_24px_55px_rgba(124,58,12,0.08)] md:block">
+              <div className="flex items-center justify-between border-b border-orange-100 px-7 py-5">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">Chi tiết thành phần</p>
+                <span className="font-mono text-xs text-slate-500">15 thành phần</span>
+              </div>
+              <table className="w-full border-collapse text-left text-sm">
+                <thead className="bg-[#fff7eb] text-[11px] uppercase tracking-[0.12em] text-slate-600">
                   <tr>
-                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Thành phần</th>
-                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Đến từ đâu</th>
-                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Vai trò trong sản phẩm</th>
+                    <th scope="col" className="w-16 px-6 py-4 font-semibold">#</th>
+                    <th scope="col" className="w-[31%] px-5 py-4 font-semibold">Thành phần</th>
+                    <th scope="col" className="w-[32%] px-5 py-4 font-semibold">Đến từ đâu</th>
+                    <th scope="col" className="px-5 py-4 font-semibold">Vai trò trong sản phẩm</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-orange-100">
+                <tbody className="divide-y divide-orange-100/80">
                   {CHICKEN_FEET_INGREDIENTS.map((ingredient, index) => (
-                    <tr key={ingredient.name} className={index === 0 ? "bg-orange-50" : "even:bg-slate-50/60"}>
-                      <th scope="row" className="px-5 py-4 font-semibold text-slate-950 sm:px-7">{ingredient.name}</th>
-                      <td className="px-5 py-4 text-slate-700 sm:px-7">{ingredient.origin}</td>
-                      <td className="px-5 py-4 text-slate-700 sm:px-7">{ingredient.role}</td>
+                    <tr key={ingredient.name} className={`transition-colors hover:bg-orange-50 ${index === 0 ? "bg-orange-50/70" : ""}`}>
+                      <td className="px-6 py-4 font-mono text-xs font-semibold text-orange-600">{String(index + 1).padStart(2, "0")}</td>
+                      <th scope="row" className="px-5 py-4 font-semibold leading-6 text-slate-950">{ingredient.name}</th>
+                      <td className="px-5 py-4 leading-6 text-slate-600">{ingredient.origin}</td>
+                      <td className="px-5 py-4 leading-6 text-slate-700">{ingredient.role}</td>
                     </tr>
                   ))}
                 </tbody>
