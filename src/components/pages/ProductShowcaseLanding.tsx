@@ -34,6 +34,24 @@ type ProductSpec = {
   value?: string;
 };
 
+const CHICKEN_FEET_INGREDIENTS = [
+  { name: "Chân gà (95%)", origin: "Gia cầm chăn nuôi", role: "Nguyên liệu chính · giàu collagen" },
+  { name: "Nước tinh khiết", origin: "Nước lọc", role: "Chế biến · hoà tan gia vị" },
+  { name: "Muối", origin: "Khoáng chất", role: "Gia vị · bảo quản tự nhiên" },
+  { name: "Đường", origin: "Mía", role: "Cân bằng vị" },
+  { name: "Dầu ớt", origin: "Ớt ép", role: "Tạo vị cay · màu đỏ tự nhiên" },
+  { name: "Mì chính (MSG)", origin: "Lên men từ mía/sắn", role: "Tăng vị ngọt thịt (umami)" },
+  { name: "Gừng", origin: "Củ gia vị tự nhiên", role: "Hương thơm · khử mùi tanh" },
+  { name: "I+G", origin: "Chiết xuất từ tinh bột lên men", role: "Tăng vị umami (cùng MSG)" },
+  { name: "Acid lactic (INS 270)", origin: "Lên men tự nhiên (như dưa muối, sữa chua)", role: "Điều chỉnh độ chua · ức chế vi khuẩn" },
+  { name: "Acid citric (INS 330)", origin: "Chiết xuất từ trái cây họ cam chanh", role: "Chống oxy hoá · giữ pH ổn định" },
+  { name: "Sodium diacetate (INS 262ii)", origin: "Muối ăn + giấm", role: "Bảo quản · chống khuẩn" },
+  { name: "Nisin (INS 234)", origin: "Vi khuẩn có lợi trong sữa chua lên men", role: "Bảo quản sinh học · chống khuẩn" },
+  { name: "Phosphate (INS 450iii, 451i, 340ii)", origin: "Khoáng chất (có tự nhiên trong xương, sữa)", role: "Giữ kết cấu giòn dai" },
+  { name: "Caramel (INS 150c)", origin: "Đường nấu cháy", role: "Tạo màu nâu đặc trưng" },
+  { name: "Hương gà, hương thịt", origin: "Hương liệu tổng hợp", role: "Tăng hương vị" },
+] as const;
+
 type Product = {
   id: string | number;
   slug: string;
@@ -286,6 +304,7 @@ export default function ProductShowcaseLanding() {
   }
 
   const theme = SHOWCASE_THEMES[themeIndex(product)];
+  const isChickenFeet = product.slug === "chan-ga" || product.slug === "chan-ga-rut-xuong";
   const ingredients = safeArray<string>(product.ingredients).filter(Boolean);
   const specs = safeArray<ProductSpec>(product.specs).filter((item) => item.label && item.value);
   const variants = safeArray<ProductVariant>(product.variants).filter((item) => item.name);
@@ -303,7 +322,7 @@ export default function ProductShowcaseLanding() {
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] sm:px-6 lg:px-8">
           {[
             ["#cau-chuyen", "Câu chuyện"],
-            ["#huong-vi", "Hương vị"],
+            ["#huong-vi", isChickenFeet ? "Thành phần" : "Hương vị"],
             ["#quy-trinh", "Quy trình"],
             ["#ho-so", "Hồ sơ"],
           ].map(([href, label]) => (
@@ -423,7 +442,41 @@ export default function ProductShowcaseLanding() {
         </div>
       </section>
 
-      {ingredients.length > 0 && (
+      {isChickenFeet ? (
+        <section id="huong-vi" className={`scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28 ${theme.soft}`}>
+          <div className="mx-auto max-w-7xl">
+            <Reveal>
+              <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>02 · Thành phần</p>
+              <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.055em] sm:text-5xl">
+                Bên trong sản phẩm có gì?
+              </h2>
+              <p className="mt-4 text-base font-semibold text-slate-700 sm:text-lg">
+                Chân gà rút xương Bà Tuyết — 95% chân gà, 5% gia vị &amp; phụ gia
+              </p>
+            </Reveal>
+            <div className="mt-10 overflow-x-auto border border-orange-100 bg-white shadow-[0_18px_38px_rgba(166,73,12,0.06)] lg:mt-14">
+              <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+                <thead className="bg-orange-600 text-white">
+                  <tr>
+                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Thành phần</th>
+                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Đến từ đâu</th>
+                    <th scope="col" className="px-5 py-4 font-bold sm:px-7">Vai trò trong sản phẩm</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-orange-100">
+                  {CHICKEN_FEET_INGREDIENTS.map((ingredient, index) => (
+                    <tr key={ingredient.name} className={index === 0 ? "bg-orange-50" : "even:bg-slate-50/60"}>
+                      <th scope="row" className="px-5 py-4 font-semibold text-slate-950 sm:px-7">{ingredient.name}</th>
+                      <td className="px-5 py-4 text-slate-700 sm:px-7">{ingredient.origin}</td>
+                      <td className="px-5 py-4 text-slate-700 sm:px-7">{ingredient.role}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      ) : ingredients.length > 0 && (
         <section id="huong-vi" className={`scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28 ${theme.soft}`}>
           <div className="mx-auto max-w-7xl">
             <Reveal className="max-w-3xl">

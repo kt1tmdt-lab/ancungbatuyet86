@@ -1150,13 +1150,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                     <div className="absolute left-5 top-5 z-10 bg-slate-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
                       {data.imageLabel || "Trang nội dung"}
                     </div>
-                    <div className="absolute bottom-6 left-6 z-10 max-w-xs bg-white/90 p-5 backdrop-blur">
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
-                      <p className="mt-1 text-lg font-black leading-tight text-slate-950">
-                        {data.imageCaption ||
-                          "Nội dung được cập nhật theo từng giai đoạn"}
-                      </p>
-                    </div>
                     <RotatingImage
                       images={heroImages}
                       alt={data.title || title}
@@ -1459,10 +1452,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                   <div className={`relative aspect-[4/3] min-h-[360px] overflow-hidden bg-white shadow-[0_28px_70px_rgba(15,23,42,0.14)] ${imageLeft ? "lg:order-1" : "lg:order-2"}`}>
                     <div className="absolute left-4 top-4 z-10 bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">
                       Hồ sơ / hình ảnh
-                    </div>
-                    <div className="absolute bottom-0 right-0 z-10 bg-white/90 px-5 py-3 text-right backdrop-blur">
-                      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-orange-600">ACBT</p>
-                      <p className="text-sm font-black text-slate-950">Minh bạch thông tin</p>
                     </div>
                     <img src={data.imageUrl} alt={data.title} className="absolute inset-0 h-full w-full object-cover" />
                   </div>
