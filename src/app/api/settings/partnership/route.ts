@@ -61,10 +61,11 @@ export async function PUT(req: NextRequest) {
       action: "UPDATE_PARTNERSHIP_PAGE",
       entityType: "SiteConfig",
       entityId: "partnership_page",
-      details: { imageUrl: data.imageUrl, title: data.title },
+      details: { imageUrl: data.imageUrl, dealerSectionImageUrl: data.dealerSectionImageUrl, title: data.title },
     });
 
     revalidatePath("/hop-tac");
+    revalidatePath("/hop-tac/dai-ly-nha-phan-phoi");
     return NextResponse.json(config);
   } catch (error) {
     console.error("PUT Partnership Config Error:", error);

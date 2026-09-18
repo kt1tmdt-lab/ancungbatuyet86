@@ -10,6 +10,7 @@ export type PartnershipPageConfig = {
   heroImages: string[];
   heroInterval: number;
   heroAutoRotate: boolean;
+  dealerSectionImageUrl: string;
 };
 
 export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
@@ -29,6 +30,7 @@ export const DEFAULT_PARTNERSHIP_CONFIG: PartnershipPageConfig = {
   ],
   heroInterval: 5000,
   heroAutoRotate: false,
+  dealerSectionImageUrl: "/hero/chan-ga-plate.png",
 };
 
 function stringValue(value: unknown, fallback: string) {
@@ -88,5 +90,9 @@ export function normalizePartnershipConfig(
       typeof source.heroAutoRotate === "boolean"
         ? source.heroAutoRotate
         : DEFAULT_PARTNERSHIP_CONFIG.heroAutoRotate,
+    dealerSectionImageUrl: stringValue(
+      source.dealerSectionImageUrl,
+      DEFAULT_PARTNERSHIP_CONFIG.dealerSectionImageUrl,
+    ),
   };
 }

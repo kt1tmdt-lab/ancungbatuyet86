@@ -18,7 +18,7 @@ export default function AdminPartnershipPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerTarget, setPickerTarget] = useState<"overview" | "fixed" | "carousel">("overview");
+  const [pickerTarget, setPickerTarget] = useState<"overview" | "dealerSection" | "fixed" | "carousel">("overview");
 
   useEffect(() => {
     fetch("/api/settings/partnership", { cache: "no-store" })
@@ -36,12 +36,18 @@ export default function AdminPartnershipPage() {
     setPickerOpen(false);
   };
 
-  const openPicker = (target: "overview" | "fixed" | "carousel") => {
+  const openPicker = (target: "overview" | "dealerSection" | "fixed" | "carousel") => {
     setPickerTarget(target);
     setPickerOpen(true);
   };
 
   const handlePickerSelect = (imageUrl: string) => {
+    if (pickerTarget === "dealerSection") {
+      setConfig((current) => current ? { ...current, dealerSectionImageUrl: imageUrl } : current);
+      setPickerOpen(false);
+      return;
+    }
+
     if (pickerTarget === "fixed") {
       setConfig((current) =>
         current ? { ...current, heroImages: [imageUrl], heroAutoRotate: false } : current,
@@ -241,6 +247,54 @@ export default function AdminPartnershipPage() {
                 >
                   <ImagePlus size={15} /> Mở thư viện ảnh
                 </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section className="border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <div className="mb-5">
+            <h2 className="text-xl font-black text-slate-950">Ảnh khối nội dung Đại lý / NPP</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Ảnh bên cạnh dòng “Cùng mở rộng kênh phân phối chính thức” trên trang Đại lý / NPP.
+              Đây là ảnh cố định, độc lập với ảnh hero và slideshow phía dưới.
+            </p>
+          </div>
+          {!config ? (
+            <p className="text-sm font-bold text-slate-500">Đang tải ảnh...</p>
+          ) : (
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <button
+                type="button"
+                onClick={() => openPicker("dealerSection")}
+                className="group relative min-h-72 overflow-hidden border border-dashed border-orange-300 bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+              >
+                {config.dealerSectionImageUrl ? (
+                  <img src={config.dealerSectionImageUrl} alt="Ảnh khối nội dung Đại lý / NPP" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" />
+                ) : (
+                  <ImagePlus className="mx-auto text-orange-700" size={34} />
+                )}
+                <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-slate-950/80 px-4 py-3 text-xs font-black uppercase tracking-wide text-white">
+                  <ImagePlus size={15} /> Chọn ảnh khác
+                </span>
+              </button>
+              <div className="flex flex-col justify-between border border-slate-200 bg-slate-50 p-5">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">Ảnh đang dùng</p>
+                  <p className="mt-3 break-all text-sm font-semibold leading-6 text-slate-800">{config.dealerSectionImageUrl || "Chưa chọn ảnh"}</p>
+                </div>
+                <div className="mt-6 space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => openPicker("dealerSection")}
+                    className="inline-flex w-full items-center justify-center gap-2 bg-orange-600 px-4 py-3 text-xs font-black uppercase tracking-wide text-white transition hover:bg-slate-950"
+                  >
+                    <ImagePlus size={15} /> Đổi ảnh này
+                  </button>
+                  <Link href="/hop-tac/dai-ly-nha-phan-phoi" target="_blank" className="inline-flex w-full items-center justify-center gap-2 border border-slate-300 px-4 py-3 text-xs font-black uppercase tracking-wide text-slate-700 hover:border-orange-500 hover:text-orange-600">
+                    <Eye size={15} /> Xem trang Đại lý / NPP
+                  </Link>
+                </div>
               </div>
             </div>
           )}

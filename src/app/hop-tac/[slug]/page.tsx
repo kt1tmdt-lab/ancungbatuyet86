@@ -23,7 +23,15 @@ export default async function PartnershipSubPage({ params }: { params: Promise<{
       configuredFallback = {
         ...fallback,
         blocks: fallback.blocks.map((block) =>
-          block.type === "hero"
+          block.type === "split" && block.id === "dealer-partner-split"
+            ? {
+                ...block,
+                data: {
+                  ...block.data,
+                  imageUrl: partnershipConfig.dealerSectionImageUrl,
+                },
+              }
+            : block.type === "hero"
             ? {
                 ...block,
                 data: {
