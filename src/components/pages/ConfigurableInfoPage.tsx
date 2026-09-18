@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
@@ -998,6 +998,12 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   // Specific partnership fields
   const [formAddress, setFormAddress] = useState("");
   const [formProvince, setFormProvince] = useState("");
+  const [formWard, setFormWard] = useState("");
+  const [formFormerDistrict, setFormFormerDistrict] = useState("");
+  const [wards, setWards] = useState<string[]>([]);
+  const [wardsLoading, setWardsLoading] = useState(false);
+  const [wardsError, setWardsError] = useState(false);
+  const wardRequestId = useRef(0);
   const [formChannel, setFormChannel] = useState("Cửa hàng tạp hóa");
   const [formMediaChannel, setFormMediaChannel] = useState("TikTok");
   const [formMediaLink, setFormMediaLink] = useState("");
@@ -1010,6 +1016,29 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  const handleProvinceChange = async (province: string) => {
+    const requestId = ++wardRequestId.current;
+    setFormProvince(province);
+    setFormWard("");
+    setWards([]);
+    setWardsError(false);
+    setWardsLoading(false);
+    if (!province) return;
+
+    setWardsLoading(true);
+    try {
+      const response = await fetch(`/api/locations/wards?province=${encodeURIComponent(province)}`);
+      if (!response.ok) throw new Error("Không tải được danh sách xã/phường.");
+      const payload = (await response.json()) as { wards?: string[] };
+      if (!payload.wards?.length) throw new Error("Danh sách xã/phường đang trống.");
+      if (requestId === wardRequestId.current) setWards(payload.wards);
+    } catch {
+      if (requestId === wardRequestId.current) setWardsError(true);
+    } finally {
+      if (requestId === wardRequestId.current) setWardsLoading(false);
+    }
+  };
+
   const handlePartnershipSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -1019,11 +1048,16 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
     try {
       let contentText = "";
       if (formType === "Hợp tác Đại lý / NPP") {
+        if (!formProvince || !formWard.trim()) {
+          throw new Error("Vui lòng chọn tỉnh/thành và xã/phường trước khi gửi.");
+        }
         contentText = 
           `ĐĂNG KÝ HỢP TÁC ĐẠI LÝ / NHÀ PHÂN PHỐI\n` +
           `-------------------------------\n` +
           `- Tỉnh/thành phố: ${formProvince}\n` +
-          `- Địa chỉ kinh doanh cụ thể: ${formAddress.trim()}, ${formProvince}\n` +
+          `- Xã/phường/đặc khu: ${formWard.trim()}\n` +
+          (formFormerDistrict.trim() ? `- Quận/huyện cũ: ${formFormerDistrict.trim()}\n` : "") +
+          `- Địa chỉ kinh doanh cụ thể: ${formAddress.trim()}, ${formWard.trim()}, ${formProvince}\n` +
           `- Kênh phân phối hiện tại: ${formChannel}\n` +
           `- Nội dung đề xuất: ${formContent}`;
       } else if (formType === "Hợp tác truyền thông / KOL / KOC") {
@@ -1067,6 +1101,10 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
       setFormEmail("");
       setFormAddress("");
       setFormProvince("");
+      setFormWard("");
+      setFormFormerDistrict("");
+      setWards([]);
+      setWardsError(false);
       setFormMediaLink("");
       setFormFollowers("");
       setFormSubject("");
@@ -2077,7 +2115,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                           required
                           autoComplete="address-level1"
                           value={formProvince}
-                          onChange={(e) => setFormProvince(e.target.value)}
+                          onChange={(e) => void handleProvinceChange(e.target.value)}
                           className="w-full px-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
                         >
                           <option value="" disabled>Chọn tỉnh / thành phố</option>
@@ -2085,6 +2123,52 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                             <option key={province} value={province}>{province}</option>
                           ))}
                         </select>
+                      </div>
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="distributor-ward" className="block text-xs font-bold text-slate-700">Xã / phường / đặc khu *</label>
+                        {wardsError ? (
+                          <input
+                            id="distributor-ward"
+                            type="text"
+                            required
+                            value={formWard}
+                            onChange={(e) => setFormWard(e.target.value)}
+                            placeholder="Nhập tên xã/phường của bạn"
+                            className="w-full px-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                          />
+                        ) : (
+                          <select
+                            id="distributor-ward"
+                            required
+                            autoComplete="address-level2"
+                            value={formWard}
+                            onChange={(e) => setFormWard(e.target.value)}
+                            disabled={!formProvince || wardsLoading}
+                            className="w-full px-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+                          >
+                            <option value="" disabled>
+                              {wardsLoading ? "Đang tải xã/phường..." : formProvince ? "Chọn xã / phường / đặc khu" : "Chọn tỉnh/thành trước"}
+                            </option>
+                            {wards.map((ward) => <option key={ward} value={ward}>{ward}</option>)}
+                          </select>
+                        )}
+                        {wardsError ? (
+                          <p className="text-[10px] text-amber-700">Không tải được danh sách; bạn có thể nhập xã/phường thủ công.</p>
+                        ) : null}
+                      </div>
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="distributor-former-district" className="block text-xs font-bold text-slate-700">Quận / huyện cũ (nếu cần)</label>
+                        <input
+                          id="distributor-former-district"
+                          type="text"
+                          value={formFormerDistrict}
+                          onChange={(e) => setFormFormerDistrict(e.target.value)}
+                          placeholder="Ví dụ: Quận Thanh Xuân"
+                          className="w-full px-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
+                        />
+                        <p className="text-[10px] leading-4 text-slate-500">Địa chỉ hành chính hiện nay dùng tỉnh/thành và xã/phường; quận/huyện cũ chỉ để tham khảo.</p>
                       </div>
 
                       <div className="space-y-1.5 sm:col-span-2">
@@ -2099,15 +2183,15 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
                             required
                             minLength={5}
                             autoComplete="street-address"
-                            title="Vui lòng ghi rõ số nhà, tên đường và phường/xã."
+                            title="Vui lòng ghi rõ số nhà, tên đường hoặc thôn/xóm."
                             value={formAddress}
                             onChange={(e) => setFormAddress(e.target.value)}
-                            placeholder="Ví dụ: Số 12, đường Nguyễn Trãi, phường Thanh Xuân"
+                            placeholder="Ví dụ: Số 12, đường Nguyễn Trãi hoặc thôn/xóm"
                             className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 rounded-xl transition duration-200"
                           />
                         </div>
                         <p className="text-[10px] leading-4 text-slate-500">
-                          Ghi số nhà, tên đường, phường/xã và thông tin giúp chúng tôi tìm đúng địa điểm của bạn.
+                          Ghi số nhà, tên đường hoặc thôn/xóm để chúng tôi tìm đúng địa điểm của bạn.
                         </p>
                       </div>
 
@@ -2162,7 +2246,7 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || wardsLoading}
                       className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black uppercase tracking-wider text-xs py-3.5 transition flex items-center justify-center gap-2 rounded-xl disabled:opacity-50 shadow-md shadow-orange-500/10"
                     >
                       {submitting ? (
