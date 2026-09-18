@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import {
   DEFAULT_MARKETING_CONFIG,
+  PRODUCTS_LANDING_DESCRIPTION,
   normalizeMarketingConfig,
   type HomeTextItem,
   type PageAssetItem,
@@ -410,7 +411,7 @@ export default function ProductsPage() {
               {pageText(
                 pageTexts,
                 "products_landing_description",
-                "Một showroom vị giác dành cho những sản phẩm đại diện của Ăn Cùng Bà Tuyết — nơi từng dòng sản phẩm được kể như một màn ra mắt riêng.",
+                PRODUCTS_LANDING_DESCRIPTION,
               )}
             </p>
             <button

@@ -155,6 +155,7 @@ model Product {
   featured      Boolean  @default(false)
   purchaseUrl   String   @default("")
   ingredients   String[]
+  ingredientDetails Json?
   specs         Json?
   variants      Json?
   stats         Json?

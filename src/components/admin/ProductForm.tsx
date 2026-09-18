@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Plus,
   Trash,
+  ArrowUp,
+  ArrowDown,
   ExternalLink,
   ImagePlus,
 } from "lucide-react";
@@ -18,6 +20,13 @@ import { MediaPickerModal } from "@/components/admin/MediaPickerModal";
 import { uploadAdminImage } from "@/lib/admin-upload-client";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import {
+  createDefaultChickenFeetIngredientDetails,
+  isChickenFeetProduct,
+  normalizeProductIngredientDetails,
+  type ProductIngredientDetails,
+  type ProductIngredientRow,
+} from "@/lib/product-ingredient-details";
 
 export interface ProductData {
   id?: string;
@@ -34,6 +43,7 @@ export interface ProductData {
   featured: boolean;
   purchaseUrl?: string;
   ingredients: string[];
+  ingredientDetails?: unknown;
   specs?: { label: string; value: string }[];
   variants?: { name: string; weight: string; price: string; spiceLevel?: number }[];
   stats?: { label: string; value: string }[];
@@ -84,7 +94,12 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
   const [sortOrder, setSortOrder] = useState(initialData?.sortOrder || 0);
   const [shortDescription, setShortDescription] = useState(initialData?.shortDescription || "");
   const [ingredients, setIngredients] = useState<string[]>(initialData?.ingredients || []);
+  const [ingredientDetails, setIngredientDetails] = useState<ProductIngredientDetails | null>(
+    normalizeProductIngredientDetails(initialData?.ingredientDetails)
+      ?? (isChickenFeetProduct(initialData?.slug || "") ? createDefaultChickenFeetIngredientDetails() : null),
+  );
   const [newIngredient, setNewIngredient] = useState("");
+  const showIngredientDetailsEditor = isChickenFeetProduct(slug) || ingredientDetails !== null;
 
   // Specs state
   const [specs, setSpecs] = useState<{ label: string; value: string }[]>(
@@ -171,6 +186,22 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
+  const updateIngredientRow = (index: number, field: keyof ProductIngredientRow, value: string) => {
+    setIngredientDetails((current) => current && ({
+      ...current,
+      rows: current.rows.map((row, rowIndex) => rowIndex === index ? { ...row, [field]: value } : row),
+    }));
+  };
+
+  const moveIngredientRow = (index: number, direction: -1 | 1) => {
+    setIngredientDetails((current) => {
+      if (!current || index + direction < 0 || index + direction >= current.rows.length) return current;
+      const rows = [...current.rows];
+      [rows[index], rows[index + direction]] = [rows[index + direction], rows[index]];
+      return { ...current, rows };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -189,6 +220,21 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
     if (!image.trim()) validationErrors.image = "Vui lòng chọn ảnh sản phẩm.";
     setFieldErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
+    if (ingredientDetails) {
+      const primaryPercent = Number(ingredientDetails.primaryPercent);
+      const secondaryPercent = Number(ingredientDetails.secondaryPercent);
+      if (!ingredientDetails.title.trim() || !ingredientDetails.secondaryName.trim() || !ingredientDetails.rows.length
+        || ingredientDetails.rows.some((row) => !row.name.trim() || !row.origin.trim() || !row.role.trim())) {
+        setError("Vui lòng điền đủ tiêu đề, nhóm phụ và tên/nguồn gốc/vai trò cho từng thành phần.");
+        return;
+      }
+      if (!ingredientDetails.primaryPercent.trim() || !ingredientDetails.secondaryPercent.trim()
+        || !Number.isFinite(primaryPercent) || !Number.isFinite(secondaryPercent)
+        || primaryPercent < 0 || secondaryPercent < 0 || Math.abs(primaryPercent + secondaryPercent - 100) > 0.001) {
+        setError("Hai tỷ lệ thành phần phải là số không âm và cộng lại bằng 100%.");
+        return;
+      }
+    }
     setLoading(true);
 
     const payload = {
@@ -204,7 +250,18 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
       heroImage: heroImage || image,
       featured,
       purchaseUrl: initialData?.purchaseUrl || "",
-      ingredients,
+      ingredients: ingredientDetails ? ingredientDetails.rows.map((row) => row.name.trim()) : ingredients,
+      ingredientDetails: ingredientDetails ? {
+        ...ingredientDetails,
+        title: ingredientDetails.title.trim(),
+        intro: ingredientDetails.intro.trim(),
+        secondaryName: ingredientDetails.secondaryName.trim(),
+        rows: ingredientDetails.rows.map((row) => ({
+          name: row.name.trim(),
+          origin: row.origin.trim(),
+          role: row.role.trim(),
+        })),
+      } : null,
       specs,
       variants,
       processSteps,
@@ -818,7 +875,81 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
             </div>
 
             {/* Ingredients Manager */}
-            <div>
+            {showIngredientDetailsEditor && (
+              <div className="space-y-5 border-t border-slate-100 pt-6">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Bên trong sản phẩm có gì?</h3>
+                  <p className="mt-1 text-sm text-slate-500">Chỉnh nội dung hiển thị trên trang chi tiết sản phẩm. Dòng đầu tiên là nguyên liệu chính.</p>
+                </div>
+                {!ingredientDetails ? (
+                  <button
+                    type="button"
+                    onClick={() => setIngredientDetails(createDefaultChickenFeetIngredientDetails())}
+                    className="border border-orange-300 bg-orange-50 px-4 py-3 text-sm font-semibold text-orange-700 hover:bg-orange-100"
+                  >
+                    Tạo danh sách thành phần chi tiết
+                  </button>
+                ) : (
+                  <>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="sm:col-span-2">
+                        <span className="mb-1 block text-xs font-bold text-slate-600">Tiêu đề mục</span>
+                        <input value={ingredientDetails.title} onChange={(event) => setIngredientDetails({ ...ingredientDetails, title: event.target.value })} className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label className="sm:col-span-2">
+                        <span className="mb-1 block text-xs font-bold text-slate-600">Mô tả ngắn</span>
+                        <textarea value={ingredientDetails.intro} onChange={(event) => setIngredientDetails({ ...ingredientDetails, intro: event.target.value })} rows={2} className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label>
+                        <span className="mb-1 block text-xs font-bold text-slate-600">Tỷ lệ nguyên liệu chính (%)</span>
+                        <input type="number" min="0" max="100" step="any" value={ingredientDetails.primaryPercent} onChange={(event) => setIngredientDetails({ ...ingredientDetails, primaryPercent: event.target.value })} className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label>
+                        <span className="mb-1 block text-xs font-bold text-slate-600">Tỷ lệ nhóm còn lại (%)</span>
+                        <input type="number" min="0" max="100" step="any" value={ingredientDetails.secondaryPercent} onChange={(event) => setIngredientDetails({ ...ingredientDetails, secondaryPercent: event.target.value })} className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                      <label className="sm:col-span-2">
+                        <span className="mb-1 block text-xs font-bold text-slate-600">Tên nhóm còn lại</span>
+                        <input value={ingredientDetails.secondaryName} onChange={(event) => setIngredientDetails({ ...ingredientDetails, secondaryName: event.target.value })} className="w-full border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900" />
+                      </label>
+                    </div>
+                    <div className="space-y-3">
+                      {ingredientDetails.rows.map((row, index) => (
+                        <div key={index} className="border border-slate-200 bg-slate-50 p-4">
+                          <div className="mb-3 flex items-center justify-between gap-2">
+                            <span className="text-xs font-bold uppercase tracking-wider text-orange-700">{index === 0 ? "Nguyên liệu chính" : `Thành phần ${index + 1}`}</span>
+                            <div className="flex gap-1">
+                              <button type="button" aria-label={`Đưa thành phần ${index + 1} lên`} title="Đưa lên" disabled={index === 0} onClick={() => moveIngredientRow(index, -1)} className="border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-30"><ArrowUp size={14} /></button>
+                              <button type="button" aria-label={`Đưa thành phần ${index + 1} xuống`} title="Đưa xuống" disabled={index === ingredientDetails.rows.length - 1} onClick={() => moveIngredientRow(index, 1)} className="border border-slate-200 bg-white p-2 text-slate-600 disabled:opacity-30"><ArrowDown size={14} /></button>
+                              <button type="button" aria-label={`Xóa thành phần ${index + 1}`} title="Xóa" disabled={ingredientDetails.rows.length === 1} onClick={() => setIngredientDetails({ ...ingredientDetails, rows: ingredientDetails.rows.filter((_, rowIndex) => rowIndex !== index) })} className="border border-red-200 bg-white p-2 text-red-600 disabled:opacity-30"><Trash size={14} /></button>
+                            </div>
+                          </div>
+                          <div className="grid gap-3">
+                            <label>
+                              <span className="mb-1 block text-xs font-semibold text-slate-500">Tên thành phần</span>
+                              <input value={row.name} onChange={(event) => updateIngredientRow(index, "name", event.target.value)} className="w-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900" />
+                            </label>
+                            <label>
+                              <span className="mb-1 block text-xs font-semibold text-slate-500">Đến từ đâu</span>
+                              <input value={row.origin} onChange={(event) => updateIngredientRow(index, "origin", event.target.value)} className="w-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900" />
+                            </label>
+                            <label>
+                              <span className="mb-1 block text-xs font-semibold text-slate-500">Vai trò trong sản phẩm</span>
+                              <input value={row.role} onChange={(event) => updateIngredientRow(index, "role", event.target.value)} className="w-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900" />
+                            </label>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button type="button" onClick={() => setIngredientDetails({ ...ingredientDetails, rows: [...ingredientDetails.rows, { name: "", origin: "", role: "" }] })} className="inline-flex items-center gap-2 border border-orange-300 bg-orange-50 px-4 py-2.5 text-sm font-semibold text-orange-700 hover:bg-orange-100">
+                      <Plus size={15} /> Thêm thành phần
+                    </button>
+                    <p className="text-xs leading-5 text-slate-500">Kiểm tra nội dung với nhãn sản phẩm trước khi công bố. Hai tỷ lệ phải cộng lại bằng 100%.</p>
+                  </>
+                )}
+              </div>
+            )}
+            {!showIngredientDetailsEditor && <div>
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Thành phần / Nguyên liệu</label>
               <div className="flex gap-2 mb-3">
                 <input
@@ -858,7 +989,7 @@ export function ProductForm({ initialData }: { initialData?: ProductData }) {
                   ))
                 )}
               </div>
-            </div>
+            </div>}
           </div>
         </div>
       </div>

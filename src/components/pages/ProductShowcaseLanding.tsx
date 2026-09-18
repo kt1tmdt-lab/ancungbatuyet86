@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
+  createDefaultChickenFeetIngredientDetails,
+  isChickenFeetProduct,
+  normalizeProductIngredientDetails,
+} from "@/lib/product-ingredient-details";
+import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -34,24 +39,6 @@ type ProductSpec = {
   value?: string;
 };
 
-const CHICKEN_FEET_INGREDIENTS = [
-  { name: "Chân gà (95%)", origin: "Gia cầm chăn nuôi", role: "Nguyên liệu chính · giàu collagen" },
-  { name: "Nước tinh khiết", origin: "Nước lọc", role: "Chế biến · hoà tan gia vị" },
-  { name: "Muối", origin: "Khoáng chất", role: "Gia vị · bảo quản tự nhiên" },
-  { name: "Đường", origin: "Mía", role: "Cân bằng vị" },
-  { name: "Dầu ớt", origin: "Ớt ép", role: "Tạo vị cay · màu đỏ tự nhiên" },
-  { name: "Mì chính (MSG)", origin: "Lên men từ mía/sắn", role: "Tăng vị ngọt thịt (umami)" },
-  { name: "Gừng", origin: "Củ gia vị tự nhiên", role: "Hương thơm · khử mùi tanh" },
-  { name: "I+G", origin: "Chiết xuất từ tinh bột lên men", role: "Tăng vị umami (cùng MSG)" },
-  { name: "Acid lactic (INS 270)", origin: "Lên men tự nhiên (như dưa muối, sữa chua)", role: "Điều chỉnh độ chua · ức chế vi khuẩn" },
-  { name: "Acid citric (INS 330)", origin: "Chiết xuất từ trái cây họ cam chanh", role: "Chống oxy hoá · giữ pH ổn định" },
-  { name: "Sodium diacetate (INS 262ii)", origin: "Muối ăn + giấm", role: "Bảo quản · chống khuẩn" },
-  { name: "Nisin (INS 234)", origin: "Vi khuẩn có lợi trong sữa chua lên men", role: "Bảo quản sinh học · chống khuẩn" },
-  { name: "Phosphate (INS 450iii, 451i, 340ii)", origin: "Khoáng chất (có tự nhiên trong xương, sữa)", role: "Giữ kết cấu giòn dai" },
-  { name: "Caramel (INS 150c)", origin: "Đường nấu cháy", role: "Tạo màu nâu đặc trưng" },
-  { name: "Hương gà, hương thịt", origin: "Hương liệu tổng hợp", role: "Tăng hương vị" },
-] as const;
-
 type Product = {
   id: string | number;
   slug: string;
@@ -65,6 +52,7 @@ type Product = {
   shortDescription?: string | null;
   story?: string;
   ingredients?: string[];
+  ingredientDetails?: unknown;
   specs?: ProductSpec[];
   variants?: ProductVariant[];
   processSteps?: ProductStep[];
@@ -304,7 +292,13 @@ export default function ProductShowcaseLanding() {
   }
 
   const theme = SHOWCASE_THEMES[themeIndex(product)];
-  const isChickenFeet = product.slug === "chan-ga" || product.slug === "chan-ga-rut-xuong";
+  const ingredientDetails = normalizeProductIngredientDetails(product.ingredientDetails)
+    ?? (isChickenFeetProduct(product.slug) ? createDefaultChickenFeetIngredientDetails() : null);
+  const primaryIngredient = ingredientDetails?.rows[0];
+  const primaryRatio = Number(ingredientDetails?.primaryPercent || 0);
+  const secondaryRatio = Number(ingredientDetails?.secondaryPercent || 0);
+  const ratioTotal = primaryRatio + secondaryRatio;
+  const primaryRatioWidth = ratioTotal > 0 ? Math.max(0, Math.min(100, (primaryRatio / ratioTotal) * 100)) : 0;
   const ingredients = safeArray<string>(product.ingredients).filter(Boolean);
   const specs = safeArray<ProductSpec>(product.specs).filter((item) => item.label && item.value);
   const variants = safeArray<ProductVariant>(product.variants).filter((item) => item.name);
@@ -322,7 +316,7 @@ export default function ProductShowcaseLanding() {
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 [scrollbar-width:none] sm:px-6 lg:px-8">
           {[
             ["#cau-chuyen", "Câu chuyện"],
-            ["#huong-vi", isChickenFeet ? "Thành phần" : "Hương vị"],
+            ["#huong-vi", primaryIngredient ? "Thành phần" : "Hương vị"],
             ["#quy-trinh", "Quy trình"],
             ["#ho-so", "Hồ sơ"],
           ].map(([href, label]) => (
@@ -431,8 +425,7 @@ export default function ProductShowcaseLanding() {
           </Reveal>
 
           <Reveal direction="right" className="order-2">
-            <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>01 · Câu chuyện</p>
-            <h2 className="mt-4 max-w-2xl text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
+            <h2 className="max-w-2xl text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
               Không chỉ là một món ăn vặt.
             </h2>
             <p className="mt-7 whitespace-pre-line text-base font-medium leading-8 text-slate-600 sm:text-lg sm:leading-9">
@@ -442,82 +435,71 @@ export default function ProductShowcaseLanding() {
         </div>
       </section>
 
-      {isChickenFeet ? (
-        <section id="huong-vi" className={`scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28 ${theme.soft}`}>
-          <div className="mx-auto max-w-7xl">
-            <Reveal className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-end lg:gap-16">
-              <div>
-                <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>02 · Thành phần</p>
-                <h2 className="mt-4 max-w-2xl text-4xl font-black leading-[1.02] tracking-[-0.055em] sm:text-5xl lg:text-6xl">
-                  Bên trong sản phẩm có gì?
-                </h2>
-                <p className="mt-5 max-w-xl text-base leading-7 text-slate-600">
-                  Chân gà rút xương Bà Tuyết. Tìm hiểu nguyên liệu, nguồn gốc và vai trò của từng thành phần.
+      {ingredientDetails && primaryIngredient ? (
+        <section id="huong-vi" className="scroll-mt-32 border-b border-orange-100 bg-[#fffaf3] px-5 py-16 sm:px-8 sm:py-24 lg:px-12 lg:py-28">
+          <div className="mx-auto max-w-6xl">
+            <Reveal className="max-w-3xl">
+              <h2 className="text-4xl font-black leading-[1.08] tracking-[-0.055em] text-slate-950 sm:text-5xl lg:text-6xl">
+                {ingredientDetails.title}
+              </h2>
+              {ingredientDetails.intro && (
+                <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+                  {ingredientDetails.intro}
                 </p>
-              </div>
-              <div className="border border-orange-200 bg-white p-5 shadow-[0_18px_45px_rgba(124,58,12,0.08)] sm:p-6">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <span className="text-5xl font-black leading-none tracking-[-0.08em] text-orange-600">95%</span>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Chân gà</p>
+              )}
+            </Reveal>
+
+            <Reveal className="relative mt-10 overflow-hidden bg-slate-950 px-6 py-8 text-white sm:px-10 sm:py-10 lg:mt-14 lg:px-14 lg:py-12">
+              <div className="pointer-events-none absolute -right-20 -top-36 h-96 w-96 rounded-full border-[70px] border-orange-500/10" />
+              <div className="relative grid gap-9 md:grid-cols-[1fr_1.2fr] md:items-end">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-300">Nguyên liệu chính</p>
+                  <div className="mt-4 flex items-baseline gap-4">
+                    <span className="text-[5.5rem] font-black leading-none tracking-[-0.09em] text-orange-400 sm:text-[7rem]">{ingredientDetails.primaryPercent}%</span>
+                    <span className="text-lg font-semibold sm:text-xl">{primaryIngredient.name}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-3xl font-bold leading-none tracking-[-0.06em] text-slate-900">5%</span>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">Gia vị &amp; phụ gia</p>
-                  </div>
+                  <p className="mt-3 max-w-sm text-sm leading-7 text-slate-300 sm:text-base">
+                    {primaryIngredient.origin} · {primaryIngredient.role}
+                  </p>
                 </div>
-                <div className="mt-5 flex h-2 overflow-hidden bg-orange-100" aria-label="Tỷ lệ thành phần: 95% chân gà, 5% gia vị và phụ gia">
-                  <span className="w-[95%] bg-orange-600" />
-                  <span className="w-[5%] bg-slate-900" />
+                <div className="md:pb-2">
+                  <div className="flex items-end justify-between gap-4 border-b border-white/20 pb-5">
+                    <p className="text-base font-medium text-slate-200 sm:text-lg">{ingredientDetails.secondaryName}</p>
+                    <span className="text-4xl font-bold tracking-[-0.06em] sm:text-5xl">{ingredientDetails.secondaryPercent}%</span>
+                  </div>
+                  <div className="mt-6 flex h-2 bg-white/15" aria-label={`Tỷ lệ thành phần: ${ingredientDetails.primaryPercent}% ${primaryIngredient.name}, ${ingredientDetails.secondaryPercent}% ${ingredientDetails.secondaryName}`}>
+                    <span style={{ width: `${primaryRatioWidth}%` }} className="bg-orange-400" />
+                    <span style={{ width: `${100 - primaryRatioWidth}%` }} className="bg-white" />
+                  </div>
+                  <p className="mt-4 text-sm text-slate-300">{ingredientDetails.rows.length - 1} thành phần còn lại được trình bày bên dưới.</p>
                 </div>
               </div>
             </Reveal>
 
-            <div className="mt-10 grid gap-3 md:hidden">
-              {CHICKEN_FEET_INGREDIENTS.map((ingredient, index) => (
-                <article key={ingredient.name} className={`border p-5 shadow-[0_10px_25px_rgba(124,58,12,0.04)] ${index === 0 ? "border-orange-300 bg-orange-50" : "border-orange-100 bg-white"}`}>
-                  <div className="flex items-start gap-4">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center bg-orange-100 font-mono text-xs font-bold text-orange-700">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div className="min-w-0">
-                      <h3 className="text-base font-bold leading-6 text-slate-950">{ingredient.name}</h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{ingredient.origin}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 border-t border-orange-100 pt-3 text-sm leading-6 text-slate-700">
-                    <span className="mr-2 text-[10px] font-bold uppercase tracking-[0.12em] text-orange-700">Vai trò</span>
-                    {ingredient.role}
-                  </p>
-                </article>
-              ))}
+            <div className="mt-14 flex flex-col gap-4 border-b border-orange-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-700">Hồ sơ nguyên liệu</p>
+                <h3 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-slate-950 sm:text-3xl">{ingredientDetails.secondaryName}</h3>
+              </div>
+              <p className="text-sm text-slate-500">Nguồn gốc và vai trò của từng thành phần</p>
             </div>
 
-            <div className="mt-12 hidden overflow-hidden border border-orange-200 bg-white shadow-[0_24px_55px_rgba(124,58,12,0.08)] md:block">
-              <div className="flex items-center justify-between border-b border-orange-100 px-7 py-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-700">Chi tiết thành phần</p>
-                <span className="font-mono text-xs text-slate-500">15 thành phần</span>
-              </div>
-              <table className="w-full border-collapse text-left text-sm">
-                <thead className="bg-[#fff7eb] text-[11px] uppercase tracking-[0.12em] text-slate-600">
-                  <tr>
-                    <th scope="col" className="w-16 px-6 py-4 font-semibold">#</th>
-                    <th scope="col" className="w-[31%] px-5 py-4 font-semibold">Thành phần</th>
-                    <th scope="col" className="w-[32%] px-5 py-4 font-semibold">Đến từ đâu</th>
-                    <th scope="col" className="px-5 py-4 font-semibold">Vai trò trong sản phẩm</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-orange-100/80">
-                  {CHICKEN_FEET_INGREDIENTS.map((ingredient, index) => (
-                    <tr key={ingredient.name} className={`transition-colors hover:bg-orange-50 ${index === 0 ? "bg-orange-50/70" : ""}`}>
-                      <td className="px-6 py-4 font-mono text-xs font-semibold text-orange-600">{String(index + 1).padStart(2, "0")}</td>
-                      <th scope="row" className="px-5 py-4 font-semibold leading-6 text-slate-950">{ingredient.name}</th>
-                      <td className="px-5 py-4 leading-6 text-slate-600">{ingredient.origin}</td>
-                      <td className="px-5 py-4 leading-6 text-slate-700">{ingredient.role}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-6 grid gap-3 md:grid-cols-2 md:gap-4">
+              {ingredientDetails.rows.slice(1).map((ingredient, index) => (
+                <article key={`${ingredient.name}-${index}`} className="group border border-orange-100 bg-white p-5 transition-colors hover:border-orange-300 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <span className="shrink-0 font-mono text-sm font-semibold text-orange-600">{String(index + 2).padStart(2, "0")}</span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-lg font-bold leading-6 text-slate-950">{ingredient.name}</h4>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{ingredient.origin}</p>
+                      <p className="mt-4 border-t border-orange-100 pt-3 text-sm leading-6 text-slate-800">
+                        <span className="mr-2 font-semibold text-orange-700">Vai trò</span>
+                        {ingredient.role}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -525,8 +507,7 @@ export default function ProductShowcaseLanding() {
         <section id="huong-vi" className={`scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28 ${theme.soft}`}>
           <div className="mx-auto max-w-7xl">
             <Reveal className="max-w-3xl">
-              <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>02 · Hương vị</p>
-              <h2 className="mt-4 text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
+              <h2 className="text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
                 Cá tính bắt đầu từ những thành phần rõ ràng.
               </h2>
             </Reveal>
@@ -557,16 +538,10 @@ export default function ProductShowcaseLanding() {
       {processSteps.length > 0 && (
         <section id="quy-trinh" className="scroll-mt-32 border-b border-orange-100 px-5 py-14 sm:px-8 sm:py-20 lg:px-12 lg:py-28">
           <div className="mx-auto max-w-7xl">
-            <Reveal className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr] lg:items-end">
-              <div>
-                <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>03 · Quy trình</p>
-                <h2 className="mt-4 text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
-                  Mỗi bước đều góp vào trải nghiệm cuối cùng.
-                </h2>
-              </div>
-              <p className="max-w-2xl text-sm font-semibold leading-7 text-slate-600 lg:justify-self-end">
-                Hành trình của sản phẩm được kể theo đúng các công đoạn đang lưu trong hồ sơ sản phẩm.
-              </p>
+            <Reveal>
+              <h2 className="max-w-3xl text-3xl font-black leading-[0.98] tracking-[-0.055em] sm:text-5xl">
+                Mỗi bước đều góp vào trải nghiệm cuối cùng.
+              </h2>
             </Reveal>
 
             <div className="relative mt-10 grid gap-3 lg:mt-16 lg:grid-cols-3">
@@ -600,8 +575,7 @@ export default function ProductShowcaseLanding() {
           <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:gap-20">
             {specs.length > 0 && (
               <Reveal direction="left">
-                <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>04 · Hồ sơ</p>
-                <h2 className="mt-4 text-3xl font-black leading-none tracking-[-0.055em] sm:text-5xl">
+                <h2 className="text-3xl font-black leading-none tracking-[-0.055em] sm:text-5xl">
                   Thông tin sản phẩm.
                 </h2>
                 <div className="mt-8 border-t border-slate-900/15">
@@ -667,8 +641,7 @@ export default function ProductShowcaseLanding() {
         <div className="mx-auto max-w-7xl">
           <Reveal className="flex items-end justify-between gap-6">
             <div>
-              <p className={`text-[10px] font-black uppercase tracking-[0.24em] ${theme.accentText}`}>Tiếp tục khám phá</p>
-              <h2 className="mt-3 text-3xl font-black tracking-[-0.05em] sm:text-5xl">Những câu chuyện khác.</h2>
+              <h2 className="text-3xl font-black tracking-[-0.05em] sm:text-5xl">Những câu chuyện khác.</h2>
             </div>
             <Link
               href="/san-pham"

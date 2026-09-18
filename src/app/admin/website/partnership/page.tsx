@@ -175,10 +175,6 @@ export default function AdminPartnershipPage() {
                 <span className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-500">Mô tả</span>
                 <textarea value={config.subtitle} onChange={(event) => patch({ subtitle: event.target.value })} className="min-h-28 w-full border border-slate-300 px-4 py-3 text-sm font-semibold leading-7 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100" />
               </label>
-              <label className="block">
-                <span className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-500">Chữ trên góc ảnh</span>
-                <input value={config.imageLabel} onChange={(event) => patch({ imageLabel: event.target.value })} className="w-full border border-slate-300 px-4 py-3 text-sm font-semibold outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-100" />
-              </label>
               <div className="grid gap-5 md:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-xs font-black uppercase tracking-[0.14em] text-slate-500">Tên nút (để trống sẽ ẩn)</span>

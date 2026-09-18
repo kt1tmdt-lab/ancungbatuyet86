@@ -1147,9 +1147,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
 
                 {heroImages.length > 0 && (
                   <div className="relative min-h-[430px] overflow-hidden bg-white shadow-[0_30px_80px_rgba(15,23,42,0.16)]">
-                    <div className="absolute left-5 top-5 z-10 bg-slate-950 px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">
-                      {data.imageLabel || "Trang nội dung"}
-                    </div>
                     <RotatingImage
                       images={heroImages}
                       alt={data.title || title}
@@ -1241,9 +1238,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
               <div className="mx-auto max-w-7xl">
               <div className="mb-12 grid gap-5 lg:grid-cols-[0.55fr_1.45fr] lg:items-end">
                 <div>
-                  <p className="mb-3 inline-flex border-l-4 border-orange-500 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700">
-                    {String(index + 1).padStart(2, "0")} · Nội dung chính
-                  </p>
                   <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950 sm:text-4xl">
                     {data.title}
                   </h2>
@@ -1450,9 +1444,6 @@ export default function ConfigurableInfoPage({ fallback }: { fallback: DefaultIn
               <div className="relative mx-auto grid max-w-7xl gap-0 lg:grid-cols-2 lg:items-center">
                 {data.imageUrl && (
                   <div className={`relative aspect-[4/3] min-h-[360px] overflow-hidden bg-white shadow-[0_28px_70px_rgba(15,23,42,0.14)] ${imageLeft ? "lg:order-1" : "lg:order-2"}`}>
-                    <div className="absolute left-4 top-4 z-10 bg-orange-600 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">
-                      Hồ sơ / hình ảnh
-                    </div>
                     <img src={data.imageUrl} alt={data.title} className="absolute inset-0 h-full w-full object-cover" />
                   </div>
                 )}

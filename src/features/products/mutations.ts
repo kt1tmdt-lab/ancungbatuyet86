@@ -17,6 +17,7 @@ type ProductWriteData = {
   featured: boolean;
   purchaseUrl: string;
   ingredients: string[];
+  ingredientDetails: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
   specs: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
   variants: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
   stats: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
@@ -59,6 +60,7 @@ function normalizeProductCreate(input: ProductPayload): ProductWriteData {
     featured: Boolean(input.featured),
     purchaseUrl: input.purchaseUrl || "",
     ingredients: Array.isArray(input.ingredients) ? input.ingredients : [],
+    ingredientDetails: toPrismaJson(input.ingredientDetails),
     specs: toPrismaJson(input.specs),
     variants: toPrismaJson(input.variants),
     stats: toPrismaJson(input.stats),
@@ -85,6 +87,7 @@ function normalizeProductUpdate(input: ProductPayload, existing: Product): Produ
     featured: input.featured === undefined ? existing.featured : Boolean(input.featured),
     purchaseUrl: input.purchaseUrl ?? existing.purchaseUrl,
     ingredients: Array.isArray(input.ingredients) ? input.ingredients : existing.ingredients,
+    ingredientDetails: toPrismaJson(input.ingredientDetails === undefined ? existing.ingredientDetails : input.ingredientDetails),
     specs: toPrismaJson(input.specs === undefined ? existing.specs : input.specs),
     variants: toPrismaJson(input.variants === undefined ? existing.variants : input.variants),
     stats: toPrismaJson(input.stats === undefined ? existing.stats : input.stats),

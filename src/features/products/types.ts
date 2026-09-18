@@ -20,6 +20,7 @@ export type ProductPayload = Partial<{
   featured: boolean;
   purchaseUrl: string;
   ingredients: string[];
+  ingredientDetails: Prisma.InputJsonValue | null;
   specs: Prisma.InputJsonValue | null;
   variants: Prisma.InputJsonValue | null;
   stats: Prisma.InputJsonValue | null;
