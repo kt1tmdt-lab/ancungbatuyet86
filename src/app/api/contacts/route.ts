@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
     // Hồ sơ đã được lưu vào database trước bước gửi Telegram. Vì vậy nếu bot
     // gặp lỗi, thông tin vẫn còn đầy đủ trong trang quản trị để xử lý lại.
     const resolvedSource = source || "Website";
-    const isDistributor = isDistributorRegistration(resolvedSource);
-    const isPartnership = isPartnershipRegistration(resolvedSource);
+    const isDistributor = isDistributorRegistration(resolvedSource, content);
+    const isPartnership = isPartnershipRegistration(resolvedSource, content);
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://acbt.vn").replace(
       /\/$/,
       "",
@@ -105,9 +105,7 @@ export async function POST(req: NextRequest) {
 
     const contactChatId =
       process.env.TELEGRAM_CONTACT_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
-    const notification = isPartnership
-      ? await sendTelegramNotification(telegramMessage, contactChatId)
-      : { sent: false, skipped: true };
+    const notification = await sendTelegramNotification(telegramMessage, contactChatId);
 
     return NextResponse.json(
       {

@@ -11,6 +11,7 @@ import {
   Mail,
   MessageSquare,
   Phone,
+  Send,
   Trash2,
   UserRound,
 } from "lucide-react";
@@ -32,6 +33,7 @@ import {
 } from "@/components/admin/AdminPrimitives";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
+import { isPartnershipRegistration } from "@/lib/contact-partnership";
 
 type ContactStatus = "NEW" | "READ" | "RESPONDED";
 type ContactSourceFilter = "ALL" | "PARTNERSHIP" | "CONTACT";
@@ -53,28 +55,6 @@ const STATUS_LABELS: Record<ContactStatus, string> = {
   RESPONDED: "Đã phản hồi",
 };
 
-function escapeCsvCell(value: unknown) {
-  let text = String(value ?? "").replace(/\r\n/g, "\n");
-  if (/^[=+\-@]/.test(text)) text = `'${text}`;
-  return `"${text.replace(/"/g, '""')}"`;
-}
-
-function normalizeContactSource(value: string | null) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D")
-    .toLowerCase();
-}
-
-function isPartnershipContact(source: string | null) {
-  const normalized = normalizeContactSource(source);
-  return ["hop tac", "dai ly", "phan phoi", "mua si"].some((keyword) =>
-    normalized.includes(keyword),
-  );
-}
-
 export default function ContactsPage() {
   const { token, user } = useAuth();
   const router = useRouter();
@@ -90,6 +70,7 @@ export default function ContactsPage() {
     searchParams.get("source") === "partnership" ? "PARTNERSHIP" : "ALL",
   );
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState(false);
   const [viewingContact, setViewingContact] =
     useState<ContactMessage | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ContactMessage | null>(
@@ -205,6 +186,22 @@ export default function ContactsPage() {
     }
   };
 
+  const handleResendTelegram = async (contact: ContactMessage) => {
+    if (!token) return;
+    setActionLoading(contact.id);
+    try {
+      await adminRequest(`/api/contacts/${contact.id}/notify`, {
+        method: "POST",
+        token,
+      });
+      toast.success("Đã gửi lại thông báo Telegram.");
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể gửi thông báo Telegram."));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const canDelete =
     user?.role === "SUPER_ADMIN" || user?.role === "ADMIN";
 
@@ -213,7 +210,7 @@ export default function ContactsPage() {
     return contacts.filter((contact) => {
       const matchesStatus =
         statusFilter === "ALL" || contact.status === statusFilter;
-      const partnershipContact = isPartnershipContact(contact.source);
+      const partnershipContact = isPartnershipRegistration(contact.source, contact.content);
       const matchesSource =
         sourceFilter === "ALL" ||
         (sourceFilter === "PARTNERSHIP"
@@ -229,48 +226,39 @@ export default function ContactsPage() {
     });
   }, [contacts, searchQuery, sourceFilter, statusFilter]);
 
-  const exportContacts = () => {
-    const headers = [
-      "STT",
-      "Họ tên / Đơn vị",
-      "Điện thoại",
-      "Email",
-      "Nội dung chi tiết",
-      "Nguồn",
-      "Thời gian",
-      "Trạng thái",
-    ];
-    const rows = filteredContacts.map((contact, index) => [
-      index + 1,
-      contact.name,
-      contact.phone ? `${contact.phone}\t` : "",
-      contact.email || "",
-      contact.content,
-      contact.source || "Website",
-      new Date(contact.createdAt).toLocaleString("vi-VN", {
-        timeZone: "Asia/Ho_Chi_Minh",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      STATUS_LABELS[contact.status],
-    ]);
-    const csv = [headers, ...rows]
-      .map((row) => row.map(escapeCsvCell).join(","))
-      .join("\r\n");
-    const url = URL.createObjectURL(
-      new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }),
-    );
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `danh-sach-${
-      sourceFilter === "PARTNERSHIP" ? "dang-ky-dai-ly-npp-mua-si" : "lien-he"
-    }-${new Date().toISOString().slice(0, 10)}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Đã xuất ${filteredContacts.length} liên hệ.`);
+  const exportContacts = async () => {
+    if (!token || filteredContacts.length === 0) return;
+    setExportLoading(true);
+    try {
+      const response = await fetch("/api/contacts/export", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ids: filteredContacts.map((contact) => contact.id),
+          kind: sourceFilter,
+        }),
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || "Không thể xuất file Excel.");
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `danh-sach-${
+        sourceFilter === "PARTNERSHIP" ? "hop-tac" : "lien-he"
+      }-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      toast.success(`Đã xuất ${filteredContacts.length} liên hệ ra Excel.`);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xuất file Excel."));
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   const columns = useMemo<ColumnDef<ContactMessage>[]>(
@@ -454,9 +442,10 @@ export default function ContactsPage() {
               variant="adminSecondary"
               leftIcon={<Download size={16} />}
               disabled={loading || filteredContacts.length === 0}
-              onClick={exportContacts}
+              loading={exportLoading}
+              onClick={() => void exportContacts()}
             >
-              Xuất CSV
+              Xuất Excel
             </Button>
           </AdminToolbar>
 
@@ -504,6 +493,16 @@ export default function ContactsPage() {
         footer={
           viewingContact ? (
             <>
+              {canDelete ? (
+                <Button
+                  variant="adminSecondary"
+                  leftIcon={<Send size={15} />}
+                  loading={actionLoading === viewingContact.id}
+                  onClick={() => void handleResendTelegram(viewingContact)}
+                >
+                  Gửi lại Telegram
+                </Button>
+              ) : null}
               {viewingContact.status !== "RESPONDED" ? (
                 <Button
                   variant="adminSecondary"

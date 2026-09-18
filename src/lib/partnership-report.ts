@@ -32,8 +32,8 @@ function escapeCsvCell(value: unknown) {
   return `"${text.replace(/"/g, '""')}"`;
 }
 
-export function getPartnershipContacts<T extends { source: string | null }>(contacts: T[]) {
-  return contacts.filter((contact) => isPartnershipRegistration(contact.source));
+export function getPartnershipContacts<T extends { source: string | null; content: string }>(contacts: T[]) {
+  return contacts.filter((contact) => isPartnershipRegistration(contact.source, contact.content));
 }
 
 export function buildPartnershipCsv(contacts: PartnershipContact[]) {
@@ -72,25 +72,51 @@ export function buildPartnershipCsv(contacts: PartnershipContact[]) {
     .join("\r\n");
 }
 
-export async function buildPartnershipWorkbook(contacts: PartnershipContact[]) {
+export async function buildPartnershipWorkbook(
+  contacts: PartnershipContact[],
+  options: { title?: string; sheetName?: string; sourceHeader?: string } = {},
+) {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "ACBT Website";
   workbook.created = new Date();
 
-  const worksheet = workbook.addWorksheet("Hồ sơ hợp tác", {
-    views: [{ state: "frozen", ySplit: 1 }],
+  const title = options.title || "DANH SÁCH HỒ SƠ HỢP TÁC";
+  const worksheet = workbook.addWorksheet(options.sheetName || "Hồ sơ hợp tác", {
+    views: [{ state: "frozen", ySplit: 5 }],
+    pageSetup: { orientation: "landscape", paperSize: 9, fitToPage: true, fitToWidth: 1 },
   });
   worksheet.columns = [
-    { header: "STT", key: "index", width: 8 },
-    { header: "Mã hồ sơ", key: "id", width: 28 },
-    { header: "Họ tên / Đơn vị", key: "name", width: 26 },
-    { header: "Điện thoại", key: "phone", width: 18 },
-    { header: "Email", key: "email", width: 30 },
-    { header: "Loại hợp tác", key: "source", width: 30 },
-    { header: "Nội dung chi tiết", key: "content", width: 72 },
-    { header: "Trạng thái", key: "status", width: 18 },
-    { header: "Thời gian", key: "createdAt", width: 22 },
+    { key: "index", width: 7 },
+    { key: "id", width: 27 },
+    { key: "name", width: 28 },
+    { key: "phone", width: 19 },
+    { key: "email", width: 32 },
+    { key: "source", width: 27 },
+    { key: "content", width: 65 },
+    { key: "status", width: 19 },
+    { key: "createdAt", width: 22 },
   ];
+
+  worksheet.mergeCells("A1:I2");
+  const titleCell = worksheet.getCell("A1");
+  titleCell.value = `ĂN CÙNG BÀ TUYẾT  |  ${title}`;
+  titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF111827" } };
+  titleCell.font = { name: "Aptos Display", size: 18, bold: true, color: { argb: "FFFFFFFF" } };
+  titleCell.alignment = { vertical: "middle", indent: 1 };
+  worksheet.getRow(1).height = 26;
+  worksheet.getRow(2).height = 25;
+
+  worksheet.mergeCells("A3:I3");
+  const subtitleCell = worksheet.getCell("A3");
+  subtitleCell.value = `Tổng số: ${contacts.length} hồ sơ     •     Xuất lúc: ${new Date().toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}`;
+  subtitleCell.font = { name: "Aptos", size: 11, color: { argb: "FF475569" } };
+  subtitleCell.alignment = { vertical: "middle", indent: 1 };
+  subtitleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFF7ED" } };
+  worksheet.getRow(3).height = 25;
+  worksheet.getRow(4).height = 10;
+
+  const headers = ["STT", "Mã hồ sơ", "Họ tên / Đơn vị", "Điện thoại", "Email", options.sourceHeader || "Loại hợp tác", "Nội dung chi tiết", "Trạng thái", "Thời gian"];
+  worksheet.getRow(5).values = headers;
 
   for (const [index, contact] of contacts.entries()) {
     worksheet.addRow({
@@ -110,26 +136,32 @@ export async function buildPartnershipWorkbook(contacts: PartnershipContact[]) {
     });
   }
 
-  const header = worksheet.getRow(1);
-  header.height = 28;
-  header.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
+  const header = worksheet.getRow(5);
+  header.height = 34;
+  header.font = { name: "Aptos", bold: true, color: { argb: "FFFFFFFF" }, size: 11 };
   header.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
   header.fill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FFF97316" },
+    fgColor: { argb: "FFEA580C" },
   };
   header.eachCell((cell) => {
     cell.border = {
-      bottom: { style: "medium", color: { argb: "FFEA580C" } },
+      bottom: { style: "medium", color: { argb: "FF9A3412" } },
     };
   });
 
-  worksheet.autoFilter = { from: "A1", to: "I1" };
+  worksheet.autoFilter = { from: "A5", to: "I5" };
   worksheet.eachRow((row, rowNumber) => {
-    if (rowNumber > 1) {
+    if (rowNumber > 5) {
       row.alignment = { vertical: "top", wrapText: true };
-      row.height = 42;
+      row.height = Math.min(84, Math.max(32, Math.ceil(String(row.getCell("G").value || "").length / 75) * 16));
+      row.font = { name: "Aptos", size: 10, color: { argb: "FF1E293B" } };
+      if (rowNumber % 2 === 1) {
+        row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+      }
+      row.getCell("C").font = { name: "Aptos", size: 10, bold: true, color: { argb: "FF0F172A" } };
+      row.getCell("D").numFmt = "@";
       const statusCell = row.getCell("H");
       const status = String(statusCell.value || "");
       const color = status.includes("Mới")
@@ -138,12 +170,11 @@ export async function buildPartnershipWorkbook(contacts: PartnershipContact[]) {
           ? "FFDCFCE7"
           : "FFEFF6FF";
       statusCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: color } };
+      statusCell.font = { name: "Aptos", size: 10, bold: true, color: { argb: "FF334155" } };
+      row.eachCell((cell) => {
+        cell.border = { bottom: { style: "thin", color: { argb: "FFE2E8F0" } } };
+      });
     }
-    row.eachCell((cell) => {
-      cell.border = {
-        bottom: { style: "thin", color: { argb: "FFE2E8F0" } },
-      };
-    });
   });
 
   const summary = workbook.addWorksheet("Tóm tắt");
@@ -152,7 +183,7 @@ export async function buildPartnershipWorkbook(contacts: PartnershipContact[]) {
     { header: "Số lượng", key: "count", width: 16 },
   ];
   summary.addRows([
-    { metric: "Tổng hồ sơ hợp tác", count: contacts.length },
+    { metric: "Tổng hồ sơ", count: contacts.length },
     { metric: "Mới nhận", count: contacts.filter((contact) => contact.status === "NEW").length },
     { metric: "Đã xem", count: contacts.filter((contact) => contact.status === "READ").length },
     { metric: "Đã phản hồi", count: contacts.filter((contact) => contact.status === "RESPONDED").length },
