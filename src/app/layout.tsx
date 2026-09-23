@@ -19,6 +19,26 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: config.seo.description,
     keywords: keywordsToArray(config.seo.keywords),
+    icons: {
+      icon: "/icon.png",
+      apple: "/apple-icon.png",
+    },
+    openGraph: {
+      title: config.seo.title,
+      description: config.seo.description,
+      url: siteUrl,
+      siteName: "Ăn Cùng Bà Tuyết",
+      images: [
+        {
+          url: "/logo-acbt.png",
+          width: 1080,
+          height: 1080,
+          alt: "Logo Ăn Cùng Bà Tuyết",
+        },
+      ],
+      locale: "vi_VN",
+      type: "website",
+    },
   };
 }
 

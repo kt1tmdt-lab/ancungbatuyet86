@@ -330,8 +330,8 @@ const realProducts = [
     categoryLabel: "Ăn Vặt Khác",
     price: "12.000đ",
     priceRange: "12.000đ - 55.000đ",
-    image: "/uploads/1780482029143-bo-kobe.png",
-    heroImage: "/uploads/1780482029143-bo-kobe.png",
+    image: "/uploads/1780482029143-bo-kobe-mockup.png",
+    heroImage: "/uploads/1780482029143-bo-kobe-mockup.png",
     featured: false,
     purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-tam-cay",
     ingredients: [

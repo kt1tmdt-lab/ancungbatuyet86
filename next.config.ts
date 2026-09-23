@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "www.acbt.vn", pathname: "/uploads/**" },
+      { protocol: "https", hostname: "acbt.vn", pathname: "/uploads/**" },
       { protocol: "https", hostname: "i1-kinhdoanh.vnecdn.net" },
       { protocol: "https", hostname: "i1-giadinh.vnecdn.net" },
     ],
