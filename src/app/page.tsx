@@ -14,6 +14,8 @@ import {
   Users,
   Play,
   ShoppingBag,
+  ShoppingCart,
+  BookOpen,
   Star,
   Newspaper,
   Leaf,
@@ -415,10 +417,47 @@ function HeroSection() {
         <Image className="home-hero__layer home-hero__pack-left" src="/hero ver new/cgkl.png" alt="" width={2780} height={1937} />
         <Image className="home-hero__layer home-hero__pack-right" src="/hero ver new/cgbt.png" alt="" width={2780} height={1937} />
         <Image className="home-hero__layer home-hero__pack-mobile" src="/hero ver new/cgbt.png" alt="" width={2780} height={1937} />
-        <Image className="home-hero__layer home-hero__person" src="/hero ver new/Asset 3.png" alt="" width={761} height={508} priority />
+        <Image className="home-hero__layer home-hero__person" src="/hero ver new/BT1.png" alt="" width={2780} height={2602} priority />
         <Image className="home-hero__layer home-hero__title-first" src="/hero ver new/Asset 2.png" alt="" width={689} height={231} priority />
         <Image className="home-hero__layer home-hero__title-second" src="/hero ver new/Asset 8.png" alt="" width={816} height={297} priority />
       </Link>
+      <nav className="home-hero__actions" aria-label="Khám phá Ăn Cùng Bà Tuyết">
+        <Link
+          className="home-hero__action home-hero__action--intro"
+          href="/gioi-thieu"
+          title="Tìm hiểu câu chuyện thương hiệu Ăn Cùng Bà Tuyết"
+        >
+          <span className="home-hero__icon-box home-hero__icon-box--intro">
+            <BookOpen aria-hidden="true" size={16} strokeWidth={2.5} />
+          </span>
+          <span className="home-hero__label">Giới thiệu</span>
+          <ArrowRight
+            className="home-hero__arrow"
+            aria-hidden="true"
+            size={14}
+            strokeWidth={2.5}
+          />
+        </Link>
+        <Link
+          className="home-hero__action home-hero__action--products"
+          href="/san-pham"
+          title="Khám phá các món ăn vặt Ăn Cùng Bà Tuyết"
+        >
+          <span className="home-hero__shimmer" aria-hidden="true" />
+          <span className="home-hero__icon-box home-hero__icon-box--products">
+            <ShoppingCart aria-hidden="true" size={16} strokeWidth={2.5} />
+          </span>
+          <span className="home-hero__label">
+            <span>Xem sản phẩm</span>
+          </span>
+          <ArrowRight
+            className="home-hero__arrow"
+            aria-hidden="true"
+            size={14}
+            strokeWidth={2.5}
+          />
+        </Link>
+      </nav>
     </section>
   );
 }
