@@ -81,6 +81,7 @@ export async function PUT(req: NextRequest) {
     revalidatePath("/chat-luong");
     revalidatePath("/diem-ban");
     revalidatePath("/san-pham");
+    revalidatePath("/tin-tuc");
     return NextResponse.json(config);
   } catch (error) {
     console.error("PUT Marketing Config Error:", error);

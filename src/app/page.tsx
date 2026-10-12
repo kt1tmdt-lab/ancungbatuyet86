@@ -518,7 +518,7 @@ function StatsSection() {
   return (
     <section className="bg-white px-0 py-0">
       <div className="w-full">
-        <div className="border-b border-orange-100 px-5 py-8 sm:px-8 lg:px-16">
+        <div className="border-b border-orange-100 px-5 py-12 sm:px-8 lg:px-16 lg:py-16">
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1fr] lg:items-center">
             <div>
             <p className="mb-3 inline-block -rotate-1 font-[var(--font-script)] text-3xl font-bold italic tracking-[-0.04em] text-primary drop-shadow-[0_10px_22px_rgba(234,88,12,0.14)] sm:text-4xl">
@@ -603,7 +603,7 @@ function TrustSection() {
   );
 
   return (
-    <section className="bg-[#fff8ed] py-0">
+    <section className="bg-[#fff8ed] py-12 lg:py-16">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="mx-auto max-w-5xl text-center">
           <h2 className="text-4xl font-black leading-tight tracking-[-0.04em] text-slate-950 sm:text-5xl">
@@ -854,7 +854,7 @@ function FeaturedProducts() {
   }, [displayProducts]);
 
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fff7ed_52%,#ffffff_100%)] py-16">
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fff7ed_52%,#ffffff_100%)] py-12 lg:py-16">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="relative flex flex-col gap-6 border-b border-orange-100 px-5 pb-8 sm:px-8 md:flex-row md:items-end md:justify-between lg:px-16">
           <SectionTitle
@@ -1005,7 +1005,7 @@ function WhyChooseUsFromDb() {
   }, []);
 
   return (
-    <section className="bg-white py-0">
+    <section className="bg-white py-12 lg:py-16">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <SectionTitle
           label={homeTextValue(homeTexts, "news_section_label", "Tin tức")}
@@ -1174,7 +1174,7 @@ function MarketingAssetsSection() {
 
   return (
     <section id="factory-proof" className="scroll-mt-24 bg-[#fff8ed] py-0">
-      <div className="w-full px-5 py-14 sm:px-8 lg:px-16 lg:py-20">
+      <div className="w-full px-5 py-12 sm:px-8 lg:px-16 lg:py-16">
         <SectionTitle
           label="Niềm tin từ khách hàng"
           title="Khách hàng và đối tác nói gì về chúng tôi"
@@ -1320,7 +1320,7 @@ function TrustEvidenceSections() {
 
   return (
     <section id="uy-tin" className="scroll-mt-24 border-y border-orange-100 bg-[#fffaf3]">
-      <div className="px-5 py-12 sm:px-8 lg:px-16">
+      <div className="px-5 py-12 sm:px-8 lg:px-16 lg:py-16">
         <div className="mb-7 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-3xl font-black tracking-[-0.04em] text-slate-950">
@@ -1435,7 +1435,7 @@ function FactoryProofSection() {
     };
   });
   return (
-    <section className="relative overflow-hidden border-y border-orange-100 bg-[#f7f0e5] px-4 py-14 sm:px-6 sm:py-20 lg:px-10 lg:py-28">
+    <section className="relative overflow-hidden border-y border-orange-100 bg-[#f7f0e5] px-4 py-12 sm:px-6 lg:px-10 lg:py-16">
       <div className="pointer-events-none absolute -left-40 top-40 h-[520px] w-[520px] rounded-full bg-orange-300/15 blur-3xl" />
       <div className="pointer-events-none absolute -right-48 bottom-20 h-[600px] w-[600px] rounded-full bg-yellow-200/30 blur-3xl" />
 
@@ -1539,7 +1539,7 @@ function ProcessSection() {
   ];
 
   return (
-    <section className="bg-[#fff8ed] py-0">
+    <section className="bg-[#fff8ed] py-12 lg:py-16">
       <div className="w-full px-5 sm:px-8 lg:px-16">
         <div className="grid gap-0 lg:grid-cols-[0.82fr_1.18fr] lg:items-stretch">
           <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:min-h-[520px] lg:p-16">
@@ -1619,7 +1619,7 @@ function BrandStory() {
   ];
 
   return (
-    <section id="brand-story" className="bg-white py-0">
+    <section id="brand-story" className="bg-white py-12 lg:py-16">
       <div className="grid w-full gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
         <div className="border-r border-orange-100 bg-[#fffaf3] p-5 sm:p-8 lg:sticky lg:top-28 lg:h-fit lg:min-h-[520px] lg:p-16">
           <span className="mb-5 inline-flex items-center gap-2 border-l-4 border-orange-500 bg-orange-50 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-orange-700">
