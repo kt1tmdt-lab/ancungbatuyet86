@@ -2,7 +2,7 @@ import { mkdir, unlink, writeFile } from "fs/promises";
 import { dirname, extname, join, relative, resolve, sep } from "path";
 import { buildUploadPublicUrl, getUploadKeyFromUrl, getUploadPublicUrl } from "@/lib/upload-url";
 
-const uploadDir = resolve(process.env.UPLOAD_DIR || join("public", "uploads"));
+                                                                                                        const uploadDir = resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR || join("public", "uploads"));
 const publicUrl = getUploadPublicUrl();
 
 function isInsideDir(baseDir: string, targetPath: string) {
@@ -30,7 +30,7 @@ export function getLocalPathFromPublicUrl(url: string) {
   const key = getLocalKeyFromPublicUrl(url);
   if (!key) return null;
 
-  const targetPath = resolve(uploadDir, key);
+  const targetPath = resolve(/* turbopackIgnore: true */ uploadDir, key);
   if (!isInsideDir(uploadDir, targetPath)) return null;
 
   return targetPath;
@@ -55,7 +55,7 @@ export async function saveLocalUpload(params: {
   key: string;
   body: Buffer;
 }) {
-  const targetPath = resolve(uploadDir, params.key);
+  const targetPath = resolve(/* turbopackIgnore: true */ uploadDir, params.key);
   if (!isInsideDir(uploadDir, targetPath)) {
     throw new Error("Invalid upload path");
   }

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import {
   DEFAULT_SITE_CONFIG,
+  normalizeSiteConfig,
   type SiteConfigData,
 } from "@/lib/site-config-defaults";
 import "./home-hero.css";
