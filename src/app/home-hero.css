@@ -159,37 +159,36 @@
   }
 
   .home-hero__small-left {
-    top: 1%;
-    left: 8%;
-    width: 21%;
+    top: 0.5%;
+    left: 5%;
+    width: 35%;
   }
 
   .home-hero__small-right {
-    top: -1%;
-    right: 4%;
-    width: 32%;
+    top: 0.5%;
+    right: 3%;
+    width: 36%;
   }
 
   .home-hero__pack-left {
-    top: 6.2%;
-    left: 26%;
-    width: 48%;
+    top: 6%;
+    left: 17%;
+    width: 69%;
   }
 
   .home-hero__pack-right {
-    top: 20%;
+    top: 16.5%;
     right: auto;
-    left: 1%;
-    width: 28%;
+    left: -12%;
+    width: 65%;
   }
 
   .home-hero__pack-mobile {
     z-index: 2;
     display: block;
-    top: 20%;
-    right: 1%;
-    width: 28%;
-    transform: rotate(26deg);
+    top: 16.5%;
+    right: -7%;
+    width: 55%;
   }
 
   .home-hero__title-first {
