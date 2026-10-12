@@ -414,7 +414,7 @@ function HeroSection() {
         <Image className="home-hero__layer home-hero__small-right" src="/hero ver new/maiton.png" alt="" width={2780} height={1937} />
         <Image className="home-hero__layer home-hero__pack-left" src="/hero ver new/cgkl.png" alt="" width={2780} height={1937} />
         <Image className="home-hero__layer home-hero__pack-right" src="/hero ver new/cgbt.png" alt="" width={2780} height={1937} />
-        <Image className="home-hero__layer home-hero__pack-mobile" src="/hero ver new/Asset 5.png" alt="" width={320} height={430} />
+        <Image className="home-hero__layer home-hero__pack-mobile" src="/hero ver new/cgbt.png" alt="" width={320} height={430} />
         <Image className="home-hero__layer home-hero__person" src="/hero ver new/Asset 3.png" alt="" width={761} height={508} priority />
         <Image className="home-hero__layer home-hero__title-first" src="/hero ver new/Asset 2.png" alt="" width={689} height={231} priority />
         <Image className="home-hero__layer home-hero__title-second" src="/hero ver new/Asset 8.png" alt="" width={816} height={297} priority />
