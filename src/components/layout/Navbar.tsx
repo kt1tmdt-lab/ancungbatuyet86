@@ -580,7 +580,7 @@ export default function Navbar({
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1">
             {navLinks.map((link) => {
               const submenu = getHeaderSubmenu(link, productMenuLinks);
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
@@ -749,7 +749,7 @@ export default function Navbar({
 
             <button
               onClick={() => setOpen(!open)}
-              className="inline-flex items-center justify-center p-2 text-slate-700 transition hover:bg-primary-light hover:text-primary-dark lg:hidden"
+              className="inline-flex items-center justify-center p-2 text-slate-700 transition hover:bg-primary-light hover:text-primary-dark xl:hidden"
               aria-label="Menu"
             >
               {open ? <X size={24} /> : <Menu size={24} />}
@@ -759,7 +759,7 @@ export default function Navbar({
       </div>
 
       {open && (
-        <div className="bg-white border-t border-gray-100 shadow-lg lg:hidden">
+        <div className="bg-white border-t border-gray-100 shadow-lg xl:hidden">
           <nav className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
             {navLinks.map((link) => {
               const submenu = getHeaderSubmenu(link, productMenuLinks);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -28,9 +29,9 @@ import {
 } from "lucide-react";
 import {
   DEFAULT_SITE_CONFIG,
-  normalizeSiteConfig,
   type SiteConfigData,
 } from "@/lib/site-config-defaults";
+import "./home-hero.css";
 import {
   DEFAULT_MARKETING_CONFIG,
   normalizeMarketingConfig,
@@ -84,22 +85,6 @@ type NewsEvidenceItem = {
   logo?: string;
   href: string;
   label?: string;
-};
-
-type HeroBannerConfig = SiteConfigData["heroBanner"];
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0 },
-};
-
-const stagger = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
 };
 
 const FEATURED_PRODUCT_PRIORITY = [
@@ -279,10 +264,6 @@ function CurtainAction({
   );
 }
 
-function getProductKey(product?: HeroProduct | Product) {
-  return String(product?.slug || product?.id || product?.name || "");
-}
-
 function getProductImage(product?: Product | HeroProduct) {
   return product?.image || product?.heroImage || "";
 }
@@ -310,27 +291,6 @@ function sortFeaturedProducts<T extends Product | HeroProduct>(items: T[]) {
   });
 }
 
-function toHeroProduct(product: HeroProduct): HeroProduct {
-  const image = getProductImage(product);
-
-  return {
-    ...product,
-    image,
-    orbitImage:
-      product.orbitImage || product.heroImage || product.image || image,
-    tagline:
-      product.tagline ||
-      "Đồ ăn vặt Việt Nam đóng gói chỉn chu, hương vị đặc trưng, dễ ăn mọi lúc.",
-    proof:
-      product.proof ||
-      "Thông tin in trên bao bì và hồ sơ sản phẩm có thể kiểm chứng.",
-    facts:
-      product.facts && product.facts.length > 0
-        ? product.facts
-        : ["Nguyên liệu chọn lọc", "Đóng gói sạch sẽ", "Giao toàn quốc"],
-  };
-}
-
 async function fetchHomeProducts() {
   const featuredResponse = await fetch("/api/products?featured=true");
   const featuredData = await featuredResponse.json();
@@ -351,13 +311,6 @@ async function fetchHomePosts() {
 
   // Giới hạn 4 bài để đồng bộ với giới hạn của marketing config (buildConfiguredNewsEvidenceItems cũng slice 4)
   return Array.isArray(data) ? (data as PostItem[]).slice(0, 4) : [];
-}
-
-async function fetchHomeSiteConfig(): Promise<HeroBannerConfig> {
-  const response = await fetch("/api/settings");
-  const data = await response.json();
-
-  return normalizeSiteConfig(data?.data).heroBanner;
 }
 
 async function fetchHomeMarketingConfig(): Promise<MarketingConfigData> {
@@ -443,248 +396,34 @@ function buildConfiguredNewsEvidenceItems(items: HomeNewsItem[]) {
     );
 }
 // ==========================================
-// 1. HERO SECTION - BRAND STORY STYLE
+// 1. HERO SECTION
 // ==========================================
 function HeroSection() {
-  const { homeSections } = useHomeMarketingConfig();
-  const [products, setProducts] = useState<HeroProduct[]>(
-    showcaseHeroProductsFallback,
-  );
-  const [activeProduct, setActiveProduct] = useState<HeroProduct>(
-    showcaseHeroProductsFallback[0],
-  );
-  const [heroBanner, setHeroBanner] = useState<HeroBannerConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchHomeSiteConfig()
-      .then(setHeroBanner)
-      .catch((err) => {
-        console.error("Failed to load site config from DB", err);
-        setHeroBanner(DEFAULT_SITE_CONFIG.heroBanner);
-      });
-
-    fetchHomeProducts()
-      .then((data) => {
-        if (data.length > 0) {
-          const dbProducts = data.map(toHeroProduct);
-          const withImages = dbProducts.filter((product) =>
-            getProductImage(product),
-          );
-          const nextProducts = sortFeaturedProducts(withImages.length > 0 ? withImages : dbProducts);
-          setProducts(nextProducts);
-          setActiveProduct(nextProducts[0]);
-          setLoading(false);
-          return;
-        }
-
-        setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[0]);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load hero products from DB", err);
-        setProducts(showcaseHeroProductsFallback);
-        setActiveProduct(showcaseHeroProductsFallback[0]);
-        setLoading(false);
-      });
-  }, []);
-
-  // Dùng default nếu API chưa trả về (cho text/buttons), nhưng ẩn ảnh cho đến khi có dữ liệu thật
-  const heroBannerDisplay = heroBanner ?? DEFAULT_SITE_CONFIG.heroBanner;
-
-  const displayProducts = useMemo(() => products.slice(0, 5), [products]);
-  const activeImage =
-    activeProduct?.orbitImage || getProductImage(activeProduct);
-  const brandName = "Ăn Cùng Bà Tuyết";
-  const heroTitle = heroBannerDisplay.title || DEFAULT_SITE_CONFIG.heroBanner.title;
-  const heroTitlePrefix = heroTitle.includes(brandName)
-    ? heroTitle.replace(brandName, "").trim()
-    : "Ăn vặt thì phải";
-  const showHeroProducts = homeSectionEnabled(homeSections, "hero_products");
-  // heroBanner === null nghĩa là chưa load xong từ API
-  const heroBannerReady = heroBanner !== null;
-
   return (
-    <section className="relative overflow-hidden bg-[#fff3df] text-slate-950">
-      <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#ea580c_0%,#f97316_45%,#166534_100%)]" />
-      <div className="absolute inset-y-0 right-0 hidden w-[40%] bg-orange-100/70 lg:block" />
-      <div className="absolute left-[-12%] top-[-20%] h-96 w-96 rounded-full bg-orange-200/25 blur-3xl" />
-      <div className="absolute bottom-[-18%] right-[-10%] h-96 w-96 rounded-full bg-orange-300/20 blur-3xl" />
-      <div className="absolute right-[8%] top-[16%] hidden h-80 w-80 rounded-full border border-orange-300/50 xl:block" />
-
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-6 px-4 py-10 sm:gap-10 sm:px-8 sm:py-14 lg:min-h-[calc(100vh-72px)] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-12 lg:px-10 lg:py-20 xl:gap-20 xl:py-24">
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="show"
-          className="relative z-20 order-2 lg:order-1 lg:pr-4 xl:pr-8"
-        >
-          <motion.div
-            variants={fadeUp}
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-orange-700 shadow-[0_18px_50px_rgba(234,88,12,0.10)] backdrop-blur-sm sm:mb-8 sm:gap-3 sm:px-5 sm:py-3 sm:text-xs sm:tracking-[0.22em]"
-          >
-            <Leaf size={14} />
-            {loading ? "Đang tải sản phẩm" : heroBannerDisplay.eyebrow}
-          </motion.div>
-
-          <motion.h1
-            variants={fadeUp}
-            className="max-w-4xl text-[clamp(2.35rem,11vw,5.25rem)] font-black leading-[0.94] tracking-[-0.06em] text-slate-950"
-          >
-            <span className="block whitespace-nowrap">{heroTitlePrefix}</span>
-            <span className="block whitespace-nowrap font-black text-primary">
-              {brandName}
-            </span>
-          </motion.h1>
-
-          <motion.p
-            variants={fadeUp}
-            className="mt-5 max-w-xl text-sm font-semibold leading-7 text-slate-700 sm:mt-8 sm:text-lg sm:leading-8 xl:max-w-2xl"
-          >
-            {heroBannerDisplay.subtitle}
-          </motion.p>
-
-          <motion.div
-            variants={fadeUp}
-            className="mt-6 grid grid-cols-2 gap-3 sm:mt-10 sm:flex sm:gap-4"
-          >
-            <CurtainAction
-              href={heroBannerDisplay.secondaryCtaLink}
-              variant="white"
-              className="h-12 w-full px-3 shadow-[0_14px_36px_rgba(15,23,42,0.08)] sm:h-14 sm:w-56 sm:px-6"
-            >
-              {heroBannerDisplay.secondaryCtaText}
-            </CurtainAction>
-
-            <CurtainAction
-              href={heroBannerDisplay.ctaLink}
-              icon={<ArrowRight size={18} />}
-              variant="orange"
-              className="h-12 w-full px-3 shadow-[0_20px_45px_rgba(234,88,12,0.25)] sm:h-14 sm:w-56 sm:px-6"
-            >
-              {heroBannerDisplay.ctaText}
-            </CurtainAction>
-          </motion.div>
-
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 28, scale: 0.96 }}
-          animate={{ opacity: 1, x: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative z-10 order-1 overflow-visible lg:order-2 ${
-            showHeroProducts
-              ? "min-h-[620px] sm:min-h-[740px] lg:min-h-[780px] xl:min-h-[840px]"
-              : "min-h-[330px] sm:min-h-[500px] lg:min-h-[640px] xl:min-h-[680px]"
-          }`}
-        >
-          <AnimatePresence>
-            {heroBannerReady && (
-              <motion.div
-                key="hero-visual"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="absolute inset-0"
-              >
-                <div className={`absolute left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-orange-600 shadow-[0_35px_80px_rgba(234,88,12,0.22)] sm:h-[430px] sm:w-[430px] xl:h-[520px] xl:w-[520px] ${
-                  showHeroProducts ? "top-[5%] lg:top-[9%]" : "top-0 sm:top-[8%] lg:top-[10%]"
-                }`}>
-                  <Star className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 fill-yellow-300 text-yellow-300 opacity-80 xl:h-32 xl:w-32" />
-                </div>
-                <div className="absolute right-6 top-[18%] hidden h-48 w-48 rounded-full border border-orange-300/60 bg-orange-100/30 xl:block" />
-                <img
-                  src={heroBannerDisplay.characterImage}
-                  alt={heroBannerDisplay.characterAlt}
-                  className={`absolute left-1/2 z-20 h-[290px] w-auto -translate-x-1/2 object-contain drop-shadow-[0_30px_50px_rgba(15,23,42,0.20)] sm:h-[420px] xl:h-[500px] ${
-                    showHeroProducts ? "top-[5%] lg:top-[8%] xl:top-[7%]" : "top-0 sm:top-[8%] lg:top-[10%] xl:top-[9%]"
-                  }`}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {showHeroProducts && (
-            <>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={getProductKey(activeProduct)}
-                  initial={{ opacity: 0, y: 26, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -18, scale: 0.96 }}
-                  transition={{ duration: 0.35 }}
-                  className="absolute bottom-32 left-1/2 z-30 w-[min(100%,440px)] -translate-x-1/2 rounded-[1.7rem] bg-white/94 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur sm:bottom-36 sm:w-[min(100%,500px)] xl:bottom-40 xl:w-[min(92vw,530px)]"
-                >
-                  <div className="grid gap-4 sm:grid-cols-[125px_1fr] sm:items-center xl:grid-cols-[145px_1fr]">
-                    <div className="rounded-[1.2rem] bg-orange-50 p-4">
-                      {activeImage ? (
-                        <img
-                          src={activeImage}
-                          alt={activeProduct?.name || "Sản phẩm"}
-                          className="h-24 w-full object-contain xl:h-28"
-                        />
-                      ) : (
-                        <div className="flex h-28 items-center justify-center text-2xl font-black text-orange-500">
-                          BT
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-700">
-                        Sản phẩm đại diện
-                      </p>
-                      <h3 className="mt-2 line-clamp-2 text-xl font-black leading-tight tracking-[-0.04em] text-slate-950 xl:text-2xl">
-                        {activeProduct?.name}
-                      </h3>
-                      <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-                        {activeProduct?.tagline}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="absolute bottom-3 left-1/2 z-40 flex w-full -translate-x-1/2 gap-2 overflow-x-auto rounded-[1.4rem] bg-white/95 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur sm:bottom-4 xl:w-[min(94vw,680px)]">
-                {displayProducts.map((product) => {
-                  const isActive =
-                    getProductKey(activeProduct) === getProductKey(product);
-                  const image = product.orbitImage || getProductImage(product);
-                  return (
-                    <button
-                      key={getProductKey(product)}
-                      type="button"
-                      onMouseEnter={() => setActiveProduct(product)}
-                      onFocus={() => setActiveProduct(product)}
-                      onClick={() => setActiveProduct(product)}
-                      className={`min-w-[118px] rounded-[1rem] border p-2 text-left transition-all ${isActive ? "border-orange-600 bg-orange-600 text-white shadow-[0_14px_30px_rgba(234,88,12,0.24)]" : "border-orange-100 bg-white text-slate-950 hover:border-orange-300"}`}
-                    >
-                      <div className="mb-2 h-12 rounded-xl bg-white/80 p-1">
-                        {image ? (
-                          <img
-                            src={image}
-                            alt={product.name || "Sản phẩm"}
-                            className="h-full w-full object-contain"
-                          />
-                        ) : null}
-                      </div>
-                      <p className="line-clamp-2 text-[10px] font-black leading-4">
-                        {product.name}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </motion.div>
-      </div>
+    <section className="home-hero" aria-labelledby="home-hero-title">
+      <h1 id="home-hero-title" className="sr-only">
+        Ăn vặt thì phải Ăn Cùng Bà Tuyết
+      </h1>
+      <Link
+        href="/san-pham"
+        className="home-hero__link"
+        aria-label="Khám phá sản phẩm Ăn Cùng Bà Tuyết"
+      >
+        <Image className="home-hero__layer home-hero__small-left" src="/hero ver new/tamcaybb.png" alt="" width={2780} height={1937} />
+        <Image className="home-hero__layer home-hero__small-right" src="/hero ver new/maiton.png" alt="" width={2780} height={1937} />
+        <Image className="home-hero__layer home-hero__pack-left" src="/hero ver new/cgkl.png" alt="" width={2780} height={1937} />
+        <Image className="home-hero__layer home-hero__pack-right" src="/hero ver new/cgbt.png" alt="" width={2780} height={1937} />
+        <Image className="home-hero__layer home-hero__pack-mobile" src="/hero ver new/Asset 5.png" alt="" width={320} height={430} />
+        <Image className="home-hero__layer home-hero__person" src="/hero ver new/Asset 3.png" alt="" width={761} height={508} priority />
+        <Image className="home-hero__layer home-hero__title-first" src="/hero ver new/Asset 2.png" alt="" width={689} height={231} priority />
+        <Image className="home-hero__layer home-hero__title-second" src="/hero ver new/Asset 8.png" alt="" width={816} height={297} priority />
+      </Link>
     </section>
   );
 }
 
 // ==========================================
-// 2. CAPABILITY / STATS SECTION
+// 2. STATS SECTION
 // ==========================================
 function StatsSection() {
   const [statsData, setStatsData] = useState<SiteConfigData["stats"]>(DEFAULT_SITE_CONFIG.stats);

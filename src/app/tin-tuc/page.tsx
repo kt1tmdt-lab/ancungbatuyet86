@@ -128,7 +128,7 @@ export default function BlogPage() {
           </div>
           <div className="border-l-4 border-orange-500 bg-white p-6">
             <p className="text-sm font-bold leading-7 text-slate-600 sm:text-base">
-              Trang tin tức nên giống một chuyên trang truyền thông: có ảnh, chuyên mục, ngày đăng và nội dung rõ ràng để tăng niềm tin cho khách hàng, đại lý và đối tác.
+              Cập nhật câu chuyện sản phẩm, hoạt động thương hiệu và những thông tin từ nhà máy Ăn Cùng Bà Tuyết.
             </p>
           </div>
         </div>

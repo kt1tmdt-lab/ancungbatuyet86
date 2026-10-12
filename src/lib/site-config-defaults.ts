@@ -87,6 +87,7 @@ export const REQUIRED_NAV_LINKS: LinkItem[] = [
   { href: "/gioi-thieu", label: "Giới thiệu" },
   { href: "/chat-luong", label: "Chất lượng" },
   { href: "/san-pham", label: "Sản phẩm" },
+  { href: "/tin-tuc", label: "Tin tức" },
   { href: "/diem-ban", label: "Điểm bán" },
   { href: "/hop-tac", label: "Hợp tác" },
   { href: "/lien-he", label: "Liên hệ" },
@@ -136,6 +137,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     { href: "/gioi-thieu", label: "Giới thiệu" },
     { href: "/chat-luong", label: "Chất lượng" },
     { href: "/san-pham", label: "Sản phẩm" },
+    { href: "/tin-tuc", label: "Tin tức" },
     { href: "/diem-ban", label: "Điểm bán" },
     { href: "/hop-tac", label: "Hợp tác" },
     { href: "/lien-he", label: "Liên hệ" },
@@ -254,7 +256,6 @@ function normalizeNavbarLinks(value: unknown) {
   const legacyHrefMap: Record<string, string | null> = {
     "/quy-trinh": "/chat-luong",
     "/he-thong-ban": "/diem-ban",
-    "/tin-tuc": null,
   };
 
   const configuredLinks = links

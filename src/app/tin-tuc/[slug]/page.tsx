@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps) {
       const token = cookieStore.get("auth_token")?.value;
       if (token) {
         const payload = verifyToken(token);
-        if (payload && (payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
+        if (payload && (payload.role === "SUPER_ADMIN" || payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
           isPreview = true;
         }
       }
@@ -106,7 +106,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       const token = cookieStore.get("auth_token")?.value;
       if (token) {
         const payload = verifyToken(token);
-        if (payload && (payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
+        if (payload && (payload.role === "SUPER_ADMIN" || payload.role === "ADMIN" || payload.role === "EDITOR" || post.authorId === payload.id)) {
           isPreview = true;
         }
       }
@@ -283,7 +283,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 Truyền thông thương hiệu
               </p>
               <p className="mt-3 text-sm font-medium leading-7 text-slate-600">
-                Nội dung tin tức nên dùng để kể câu chuyện sản phẩm, nhà máy, quy trình và hoạt động thương hiệu một cách có bằng chứng.
+                Khám phá thêm về sản phẩm, quy trình sản xuất và các hoạt động của Ăn Cùng Bà Tuyết.
               </p>
               <Link
                 href="/gioi-thieu"
