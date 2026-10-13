@@ -858,7 +858,7 @@ function normalizePress(input: unknown): PressItem[] {
   if (!Array.isArray(input)) return [];
 
   return input
-    .map((item) => {
+    .map((item): PressItem | null => {
       if (!isRecord(item)) return null;
       const sourceName = stringValue(item.sourceName);
       const title = stringValue(item.title);
