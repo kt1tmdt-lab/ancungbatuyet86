@@ -272,6 +272,20 @@ export function CreatePostForm({ postId }: { postId?: string }) {
         <ArrowLeft size={16} /> Quay lại
       </Link>
 
+      {!postId && isEditorOrAdmin && (
+        <div className="flex flex-col gap-3 border border-orange-200 bg-orange-50 px-5 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-semibold text-slate-700">
+            Có bài báo do bên khác viết về Ăn Cùng Bà Tuyết? Hãy thêm liên kết bài gốc tại mục Bài báo bên ngoài.
+          </p>
+          <Link
+            href="/admin/marketing?tab=press"
+            className="shrink-0 font-bold text-orange-700 hover:text-orange-900 hover:underline"
+          >
+            Thêm bài báo bên ngoài →
+          </Link>
+        </div>
+      )}
+
       <form className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white border border-slate-100 p-6 sm:p-8 shadow-sm space-y-6">

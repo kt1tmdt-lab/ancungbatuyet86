@@ -174,6 +174,23 @@ export const ADMIN_NAVIGATION: AdminNavGroup[] = [
         label: "Nội dung thương hiệu",
         icon: Megaphone,
         roles: MARKETING_ROLES,
+        children: [
+          {
+            href: "/admin/marketing?tab=press",
+            label: "Bài báo bên ngoài",
+            roles: MARKETING_ROLES,
+          },
+          {
+            href: "/admin/marketing?tab=feedback",
+            label: "Đánh giá khách hàng",
+            roles: MARKETING_ROLES,
+          },
+          {
+            href: "/admin/marketing?tab=videos",
+            label: "Video truyền thông",
+            roles: MARKETING_ROLES,
+          },
+        ],
       },
       {
         href: "/admin/media-intelligence",
