@@ -101,7 +101,7 @@ function ArticleImage({ post, className = "" }: { post: Post; className?: string
     <div className={`flex h-full min-h-[220px] w-full flex-col justify-between bg-[linear-gradient(145deg,#f79435_0%,#e95b1a_60%,#ad3015_100%)] p-8 text-white ${className}`}>
       <span className="text-xs font-black uppercase tracking-[0.18em] text-white/85">Ăn Cùng Bà Tuyết</span>
       <span className="max-w-lg text-2xl font-black leading-tight tracking-[-0.04em] sm:text-3xl">{post.title}</span>
-      <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/85">Tin tức & câu chuyện</span>
+      <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/85">Tin tức</span>
     </div>
   );
 }
@@ -286,13 +286,12 @@ export default function BlogPage() {
     <main className="min-h-screen bg-[#fffdfa] text-[#1d2b25]">
       <header className="border-b border-[#e9dfd2] bg-[#fffaf3]">
         <div className="mx-auto max-w-[1280px] px-5 pb-8 pt-9 sm:px-8 sm:pb-10 sm:pt-11 lg:px-10">
-          <p className="mb-4 flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#d95319]"><span className="h-2 w-2 bg-[#df581d]" /> Ăn Cùng Bà Tuyết <span className="text-[#a99a8a]">/</span> Bản tin</p>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-[clamp(2.8rem,6vw,5.2rem)] font-black leading-none tracking-[-0.065em]">Tin tức <span className="text-[#df581d]">&</span> câu chuyện</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-[#657168] sm:text-base">Cập nhật từ Ăn Cùng Bà Tuyết và những bài viết về chúng tôi trên báo chí.</p>
+              <h1 className="text-[clamp(2.8rem,6vw,5.2rem)] font-black leading-none tracking-[-0.065em]">Tin tức <span className="text-[#df581d]"></span></h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-[#657168] sm:text-base">Thông tin cập nhật từ Ăn Cùng Bà Tuyết.</p>
             </div>
-            <span className="hidden shrink-0 pb-1 text-xs font-bold uppercase tracking-[0.16em] text-[#9b8c7b] sm:block">Chuyện mới mỗi ngày</span>
+            <span className="hidden shrink-0 pb-1 text-xs font-bold uppercase tracking-[0.16em] text-[#9b8c7b] sm:block"></span>
           </div>
         </div>
       </header>
@@ -301,7 +300,7 @@ export default function BlogPage() {
         <div className="mx-auto max-w-[1280px] px-5 pb-16 sm:px-8 lg:px-10">
           <div className="flex flex-col gap-5 border-b-2 border-[#1d2b25] py-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h2 className="text-base font-black uppercase tracking-[0.08em]">Mới cập nhật</h2>
+              <h2 className="text-base font-black uppercase tracking-[0.08em]"></h2>
             </div>
             <div className="relative w-full lg:w-[280px]">
               <label htmlFor="news-search" className="sr-only">Tìm kiếm bài viết</label>
