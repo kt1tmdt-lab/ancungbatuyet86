@@ -21,7 +21,7 @@ export default function PostsPage() {
             variant="admin"
             leftIcon={<Plus size={16} />}
           >
-            Viết bài mới
+            Thêm bài viết
           </Button>
           }
         />

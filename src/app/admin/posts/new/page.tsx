@@ -1,4 +1,4 @@
-import { CreatePostForm } from "@/components/admin/CreatePostForm";
+import { NewPostContent } from "@/components/admin/NewPostContent";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 
 export const metadata = {
@@ -8,7 +8,7 @@ export const metadata = {
 export default function NewPostPage() {
   return (
     <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN", "EDITOR", "AUTHOR"]}>
-      <CreatePostForm />
+      <NewPostContent />
     </ProtectedRoute>
   );
 }
