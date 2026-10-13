@@ -37,7 +37,6 @@ interface MediaItem {
   description: string;
   source: string;
   imageUrl: string;
-  logoUrl: string;
   href: string;
   sourceUrl: string;
   date: string;
@@ -59,7 +58,6 @@ function buildMediaItems(homeNewsItems: HomeNewsItem[], pressItems: PressItem[])
       description: item.description,
       source: item.label || "Báo chí",
       imageUrl: item.imageUrl,
-      logoUrl: item.logoUrl,
       href: mediaHref(item.linkUrl),
       sourceUrl: mediaHref(item.linkUrl),
       date: "",
@@ -72,7 +70,6 @@ function buildMediaItems(homeNewsItems: HomeNewsItem[], pressItems: PressItem[])
       description: item.description || (item.sourceName ? `Bài viết được đăng trên ${item.sourceName}.` : ""),
       source: item.sourceName || "Báo chí",
       imageUrl: item.imageUrl || "",
-      logoUrl: "",
       href: item.link ? `/tin-tuc/bao-chi/${encodeURIComponent(item.id)}` : "",
       sourceUrl: mediaHref(item.link),
       date: item.publishDate,
@@ -145,7 +142,6 @@ function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boo
             <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/85">{item.source}</span>
           </div>
         )}
-        {item.logoUrl && <img src={item.logoUrl} alt={item.source} className="absolute bottom-4 left-4 h-10 max-w-36 rounded-md bg-white p-1.5 object-contain shadow-md" />}
       </div>
       <div className="flex flex-1 flex-col pt-4">
         <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#d94f17]">
