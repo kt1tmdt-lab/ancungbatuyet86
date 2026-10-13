@@ -33,7 +33,7 @@ export default async function PressArticlePage({ params }: PressPageProps) {
           <a href={article.link} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 bg-[#df581d] px-5 py-3 text-sm font-extrabold text-white transition hover:bg-[#bc4211]">Mở bài gốc trên {article.sourceName || "trang báo"} <ExternalLink size={16} /></a>
         </div>
 
-        {article.imageUrl && <img src={article.imageUrl} alt={article.title} referrerPolicy="no-referrer" className="mt-8 max-h-[550px] w-full object-cover" />}
+        {article.imageUrl && <img src={article.imageUrl} alt={article.title} referrerPolicy="no-referrer" className="mt-8 block h-auto w-full object-contain" />}
 
         <section className="mt-10" aria-labelledby="embedded-article-heading">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

@@ -4,8 +4,14 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import { Bold, Italic, Heading2, Heading3, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Code, Quote, Undo, Redo } from 'lucide-react';
-import { useCallback, useEffect, type ReactNode } from 'react';
+import TextAlign from '@tiptap/extension-text-align';
+import { TextStyleKit } from '@tiptap/extension-text-style';
+import Highlight from '@tiptap/extension-highlight';
+import { TableKit } from '@tiptap/extension-table';
+import { Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Code, Quote, Undo, Redo, Underline, Strikethrough, AlignLeft, AlignCenter, AlignRight, AlignJustify, Highlighter, Table2, Upload, RemoveFormatting, Minus } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { uploadAdminImage } from '@/lib/admin-upload-client';
 
 interface RichTextEditorProps {
   value: string;
@@ -33,6 +39,7 @@ function ToolbarButton({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={title}
       className={`p-1.5 rounded transition ${
         isActive
           ? 'bg-primary/20 text-primary-dark'
@@ -45,6 +52,12 @@ function ToolbarButton({
 }
 
 export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+  const { token } = useAuth();
+  const imageInput = useRef<HTMLInputElement>(null);
+  const tokenRef = useRef(token);
+  const editorRef = useRef<ReturnType<typeof useEditor>>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -53,7 +66,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'w-full rounded-lg my-6 shadow-sm',
+          class: 'article-editor-image',
         },
       }),
       Link.configure({
@@ -62,6 +75,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
           class: 'text-primary font-semibold underline hover:text-primary-dark cursor-pointer',
         },
       }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextStyleKit,
+      Highlight.configure({ multicolor: true }),
+      TableKit,
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -69,10 +86,60 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-orange max-w-none text-slate-800 min-h-[300px] w-full px-4 py-3 bg-white border-0 focus:outline-none text-sm leading-relaxed',
+        class: 'article-editor prose prose-orange max-w-none text-slate-800 min-h-[360px] w-full px-4 py-3 bg-white border-0 focus:outline-none text-sm leading-relaxed',
+      },
+      handlePaste: (view, event) => {
+        const itemFiles = Array.from(event.clipboardData?.items || [])
+          .filter((item) => item.kind === 'file' && item.type.startsWith('image/'))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => file !== null);
+        const files = itemFiles.length > 0
+          ? itemFiles
+          : Array.from(event.clipboardData?.files || []).filter((file) => file.type.startsWith('image/'));
+        if (files.length === 0) return false;
+
+        event.preventDefault();
+        const pasteSelection = {
+          from: view.state.selection.from,
+          to: view.state.selection.to,
+        };
+        setUploadError('');
+        setUploading(true);
+
+        void (async () => {
+          let position = pasteSelection.from;
+          let firstImage = true;
+          try {
+            for (const file of files) {
+              const { url } = await uploadAdminImage({ file, token: tokenRef.current });
+              const currentEditor = editorRef.current;
+              if (!currentEditor || currentEditor.isDestroyed) return;
+              position = Math.min(position, currentEditor.state.doc.content.size);
+              currentEditor.chain().insertContentAt(firstImage ? {
+                from: position,
+                to: Math.min(pasteSelection.to, currentEditor.state.doc.content.size),
+              } : position, {
+                type: 'image',
+                attrs: { src: url, alt: file.name },
+              }).run();
+              firstImage = false;
+              position += 1;
+            }
+          } catch (error) {
+            setUploadError(error instanceof Error ? error.message : 'Không lưu được ảnh vào thư viện');
+          } finally {
+            setUploading(false);
+          }
+        })();
+        return true;
       },
     },
   });
+
+  useEffect(() => {
+    tokenRef.current = token;
+    editorRef.current = editor;
+  }, [token, editor]);
 
   useEffect(() => {
     if (!editor || editor.getHTML() === value) return;
@@ -100,13 +167,66 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     }
   }, [editor]);
 
+  const uploadImage = async (file?: File) => {
+    if (!file || !editor) return;
+    setUploading(true);
+    setUploadError('');
+    try {
+      const { url } = await uploadAdminImage({ file, token });
+      editor.chain().focus().setImage({ src: url, alt: file.name }).run();
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : 'Không tải được ảnh lên');
+    } finally {
+      setUploading(false);
+      if (imageInput.current) imageInput.current.value = '';
+    }
+  };
+
   if (!editor) {
     return <div className="min-h-[300px] bg-slate-50 flex items-center justify-center text-slate-400">Loading editor...</div>;
   }
 
   return (
     <div className="border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-primary transition-all">
-      <div className="flex flex-wrap gap-1 bg-slate-50 p-2 border-b border-slate-200">
+      <div className="flex flex-wrap items-center gap-1 bg-slate-50 p-2 border-b border-slate-200" role="toolbar" aria-label="Định dạng bài viết">
+        <select
+          aria-label="Kiểu đoạn văn"
+          title="Kiểu đoạn văn"
+          className="h-8 rounded border border-slate-200 bg-white px-2 text-xs"
+          value={editor.isActive('heading', { level: 1 }) ? 'h1' : editor.isActive('heading', { level: 2 }) ? 'h2' : editor.isActive('heading', { level: 3 }) ? 'h3' : 'p'}
+          onChange={(event) => {
+            const format = event.target.value;
+            if (format === 'p') editor.chain().focus().setParagraph().run();
+            else editor.chain().focus().setHeading({ level: format === 'h1' ? 1 : format === 'h2' ? 2 : 3 }).run();
+          }}
+        >
+          <option value="p">Đoạn văn</option>
+          <option value="h1">Tiêu đề 1</option>
+          <option value="h2">Tiêu đề 2</option>
+          <option value="h3">Tiêu đề 3</option>
+        </select>
+        <select aria-label="Phông chữ" title="Phông chữ" className="h-8 w-28 rounded border border-slate-200 bg-white px-1 text-xs"
+          value={editor.getAttributes('textStyle').fontFamily || ''}
+          onChange={(event) => event.target.value ? editor.chain().focus().setFontFamily(event.target.value).run() : editor.chain().focus().unsetFontFamily().run()}>
+          <option value="">Phông chữ</option>
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+        <select aria-label="Cỡ chữ" title="Cỡ chữ" className="h-8 w-20 rounded border border-slate-200 bg-white px-1 text-xs"
+          value={editor.getAttributes('textStyle').fontSize || ''}
+          onChange={(event) => event.target.value ? editor.chain().focus().setFontSize(event.target.value).run() : editor.chain().focus().unsetFontSize().run()}>
+          <option value="">Cỡ chữ</option>
+          {[12, 14, 16, 18, 20, 24, 28, 32, 40].map((size) => <option key={size} value={`${size}px`}>{size}</option>)}
+        </select>
+        <select aria-label="Giãn dòng" title="Giãn dòng" className="h-8 w-20 rounded border border-slate-200 bg-white px-1 text-xs"
+          value={editor.getAttributes('paragraph').lineHeight || ''}
+          onChange={(event) => event.target.value ? editor.chain().focus().setLineHeight(event.target.value).run() : editor.chain().focus().unsetLineHeight().run()}>
+          <option value="">Dòng</option>
+          <option value="1">1</option><option value="1.3">1.3</option><option value="1.5">1.5</option><option value="2">2</option>
+        </select>
+        <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={!editor.can().chain().focus().toggleBold().run()}
@@ -123,7 +243,15 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         >
           <Italic size={15} />
         </ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Gạch chân"><Underline size={15} /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} isActive={editor.isActive('strike')} title="Gạch ngang"><Strikethrough size={15} /></ToolbarButton>
+        <label className="flex h-8 items-center gap-1 rounded px-1 text-xs text-slate-700" title="Màu chữ">A
+          <input type="color" aria-label="Màu chữ" defaultValue="#1e293b" className="h-5 w-5 cursor-pointer border-0 bg-transparent p-0"
+            onChange={(event) => editor.chain().focus().setColor(event.target.value).run()} />
+        </label>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHighlight({ color: '#fff0a8' }).run()} isActive={editor.isActive('highlight')} title="Tô sáng"><Highlighter size={15} /></ToolbarButton>
         <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive('heading', { level: 1 })} title="Tiêu đề 1"><Heading1 size={15} /></ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           isActive={editor.isActive('heading', { level: 2 })}
@@ -138,6 +266,11 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         >
           <Heading3 size={15} />
         </ToolbarButton>
+        <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} isActive={editor.isActive({ textAlign: 'left' })} title="Căn trái"><AlignLeft size={15} /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} isActive={editor.isActive({ textAlign: 'center' })} title="Căn giữa"><AlignCenter size={15} /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} isActive={editor.isActive({ textAlign: 'right' })} title="Căn phải"><AlignRight size={15} /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} isActive={editor.isActive({ textAlign: 'justify' })} title="Căn đều"><AlignJustify size={15} /></ToolbarButton>
         <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -168,6 +301,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         >
           <Code size={15} />
         </ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Đường kẻ ngang"><Minus size={15} /></ToolbarButton>
         <div className="w-px h-6 bg-slate-300 mx-1 self-center" />
         <ToolbarButton onClick={setLink} isActive={editor.isActive('link')} title="Chèn liên kết">
           <LinkIcon size={15} />
@@ -175,6 +309,17 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         <ToolbarButton onClick={addImage} title="Chèn hình ảnh">
           <ImageIcon size={15} />
         </ToolbarButton>
+        <ToolbarButton onClick={() => imageInput.current?.click()} disabled={uploading} title={uploading ? 'Đang tải ảnh' : 'Tải ảnh từ máy'}><Upload size={15} /></ToolbarButton>
+        <input ref={imageInput} type="file" accept="image/*" className="hidden" onChange={(event) => void uploadImage(event.target.files?.[0])} />
+        <ToolbarButton onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="Chèn bảng"><Table2 size={15} /></ToolbarButton>
+        {editor.isActive('table') && <>
+          <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Thêm hàng">+H</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Thêm cột">+C</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Xóa hàng">−H</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Xóa cột">−C</ToolbarButton>
+          <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Xóa bảng">×</ToolbarButton>
+        </>}
+        <ToolbarButton onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} title="Xóa định dạng"><RemoveFormatting size={15} /></ToolbarButton>
         <div className="flex-1" />
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -192,7 +337,9 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         </ToolbarButton>
       </div>
 
+      {uploadError && <p role="alert" className="border-b border-red-100 bg-red-50 px-4 py-2 text-xs text-red-700">{uploadError}</p>}
       <EditorContent editor={editor} />
+      <p className="border-t border-slate-100 px-4 py-2 text-xs text-slate-500">{uploading ? 'Đang lưu ảnh vào thư viện...' : 'Dán ảnh bằng Ctrl+V; ảnh sẽ được lưu vào thư viện và chèn vào bài viết.'}</p>
     </div>
   );
 }

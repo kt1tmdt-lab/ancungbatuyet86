@@ -242,11 +242,11 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         {post.coverImageUrl && (
           <section className="border-b border-orange-100 bg-white px-4 py-6 sm:px-6 lg:px-10">
-            <div className="aspect-[16/7] min-h-[280px] w-full overflow-hidden border border-orange-100 bg-orange-50">
+            <div className="w-full border border-orange-100 bg-orange-50">
               <img
                 src={post.coverImageUrl}
                 alt={post.title}
-                className="h-full w-full object-cover"
+                className="block h-auto w-full object-contain"
               />
             </div>
           </section>
@@ -255,7 +255,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <section className="grid gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(280px,0.22fr)] lg:px-10">
           <div className="border border-orange-100 bg-white p-6 sm:p-8 lg:p-10">
             <div
-              className="prose prose-orange max-w-none prose-headings:font-black prose-headings:tracking-[-0.03em] prose-p:leading-8 prose-img:border prose-img:border-orange-100 prose-a:font-bold prose-a:text-orange-600 text-slate-800"
+              className="article-content prose prose-orange max-w-none prose-headings:font-black prose-headings:tracking-[-0.03em] prose-p:leading-8 prose-img:border prose-img:border-orange-100 prose-a:font-bold prose-a:text-orange-600 text-slate-800"
               dangerouslySetInnerHTML={{ __html: postContent }}
             />
 

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 import { getTokenFromReq, verifyToken } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { sanitizeFileBaseName, saveLocalUpload } from "@/lib/local-storage";
+import { deleteLocalUploadByUrl, sanitizeFileBaseName, saveLocalUpload } from "@/lib/local-storage";
 import { getClientIp, rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 const allowedRoles = new Set(["SUPER_ADMIN", "ADMIN", "EDITOR", "MARKETING"]);
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Only valid image files are allowed" }, { status: 400 });
     }
 
-    const finalKey = `media/${Date.now()}-${sanitizeFileBaseName(file.name)}.${typeInfo.ext}`;
+    const finalKey = `media/${Date.now()}-${randomUUID()}-${sanitizeFileBaseName(file.name)}.${typeInfo.ext}`;
     let fileUrl: string;
     try {
       fileUrl = await saveLocalUpload({
@@ -75,7 +76,16 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (dbError) {
-      console.warn("Media record save failed:", dbError);
+      console.error("Media record save failed:", dbError);
+      try {
+        await deleteLocalUploadByUrl(fileUrl);
+      } catch (cleanupError) {
+        console.error("Upload cleanup failed:", cleanupError);
+      }
+      return NextResponse.json(
+        { error: "Cannot save image to media library" },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ url: fileUrl }, { status: 200 });
