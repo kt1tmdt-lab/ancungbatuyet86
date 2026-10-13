@@ -370,10 +370,11 @@ function buildNewsEvidenceItems(posts: PostItem[], pressItems: PressItem[] = [])
       (item): NewsEvidenceItem => ({
         icon: Newspaper,
         title: item.title || item.sourceName || "Bài báo nhắc tới Ăn Cùng Bà Tuyết",
-        desc: item.sourceName
+        desc: item.description || (item.sourceName
           ? `Bài viết từ ${item.sourceName}${item.publishDate ? `, đăng ngày ${item.publishDate}` : ""}.`
-          : "Bài báo bên ngoài nhắc tới thương hiệu Ăn Cùng Bà Tuyết.",
-        href: item.link || "/tin-tuc",
+          : "Bài báo bên ngoài nhắc tới thương hiệu Ăn Cùng Bà Tuyết."),
+        image: item.imageUrl || undefined,
+        href: item.link ? `/tin-tuc/bao-chi/${encodeURIComponent(item.id)}` : "/tin-tuc",
         label: item.sourceName || "Báo chí",
       }),
     );

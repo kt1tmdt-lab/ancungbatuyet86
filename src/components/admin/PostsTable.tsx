@@ -34,6 +34,7 @@ import {
   ConfirmDialog,
 } from "./AdminPrimitives";
 import Button from "@/components/ui/Button";
+import { normalizeMarketingConfig, type PressItem } from "@/lib/marketing-config";
 
 export type PostStatus =
   | "DRAFT"
@@ -52,6 +53,7 @@ interface Post {
   viewCount: number;
   createdAt: string;
   rejectedReason?: string | null;
+  press?: PressItem;
 }
 
 interface Category {
@@ -71,9 +73,13 @@ export function PostsTable({
 }: PostsTableProps) {
   const { user, token } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [pressItems, setPressItems] = useState<PressItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pressLoading, setPressLoading] = useState(!fixedStatus);
   const [loadError, setLoadError] = useState("");
+  const [pressError, setPressError] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "written" | "press">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<PostStatus | "">(
     fixedStatus || "",
@@ -82,6 +88,7 @@ export function PostsTable({
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearch = useDeferredValue(searchQuery);
   const [deleteTarget, setDeleteTarget] = useState<Post | null>(null);
+  const [pressDeleteTarget, setPressDeleteTarget] = useState<PressItem | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Post | null>(null);
   const [rejectNote, setRejectNote] = useState("");
   const [rejectError, setRejectError] = useState("");
@@ -119,6 +126,22 @@ export function PostsTable({
     }
   }, [categoryFilter, deferredSearch, statusFilter, token]);
 
+  const fetchPress = useCallback(async () => {
+    if (fixedStatus) return;
+    setPressLoading(true);
+    setPressError("");
+    try {
+      const response = await fetch("/api/settings/marketing", { cache: "no-store" });
+      if (!response.ok) throw new Error("Không thể tải bài báo bên ngoài.");
+      const result = await response.json();
+      setPressItems(normalizeMarketingConfig(result?.data).press);
+    } catch (error) {
+      setPressError(getAdminErrorMessage(error, "Không thể tải bài báo bên ngoài."));
+    } finally {
+      setPressLoading(false);
+    }
+  }, [fixedStatus]);
+
   useEffect(() => {
     const timer = window.setTimeout(() => void fetchCategories(), 0);
     return () => window.clearTimeout(timer);
@@ -128,6 +151,12 @@ export function PostsTable({
     const timer = window.setTimeout(() => void fetchPosts(), 0);
     return () => window.clearTimeout(timer);
   }, [fetchPosts]);
+
+  useEffect(() => {
+    if (fixedStatus) return;
+    const timer = window.setTimeout(() => void fetchPress(), 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchPress, fixedStatus]);
 
   const updatePostLocally = useCallback(
     (postId: string, nextStatus: PostStatus, rejectedReason?: string) => {
@@ -241,10 +270,50 @@ export function PostsTable({
     }
   };
 
+  const handleDeletePress = async () => {
+    if (!pressDeleteTarget || !token) return;
+    setActionLoading(pressDeleteTarget.id);
+    try {
+      await adminRequest(`/api/settings/marketing/press/${encodeURIComponent(pressDeleteTarget.id)}`, {
+        method: "DELETE",
+        token,
+      });
+      setPressItems((current) => current.filter((item) => item.id !== pressDeleteTarget.id));
+      setPressDeleteTarget(null);
+      toast.success("Đã xóa bài báo bên ngoài.");
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xóa bài báo."));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const canReview =
     user?.role === "SUPER_ADMIN" ||
     user?.role === "ADMIN" ||
     user?.role === "EDITOR";
+
+  const tableRows = useMemo(() => {
+    const query = deferredSearch.trim().toLocaleLowerCase("vi-VN");
+    const visiblePress = !fixedStatus && !categoryFilter && (!statusFilter || statusFilter === "PUBLISHED")
+      ? pressItems.filter((item) => !query || [item.title, item.sourceName, item.description || ""].some((value) => value.toLocaleLowerCase("vi-VN").includes(query)))
+      : [];
+    const pressRows: Post[] = visiblePress.map((item) => ({
+      id: `press:${item.id}`,
+      title: item.title || `Bài báo từ ${item.sourceName}`,
+      slug: "",
+      status: "PUBLISHED",
+      author: { id: "", name: item.sourceName || "Báo chí", email: "" },
+      category: { id: "external-press", name: "Báo chí bên ngoài", slug: "external-press" },
+      viewCount: 0,
+      createdAt: item.publishDate || new Date(0).toISOString(),
+      press: item,
+    }));
+    return [
+      ...(typeFilter === "press" ? [] : posts),
+      ...(typeFilter === "written" ? [] : pressRows),
+    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [categoryFilter, deferredSearch, fixedStatus, posts, pressItems, statusFilter, typeFilter]);
 
   const columns = useMemo<ColumnDef<Post>[]>(
     () => [
@@ -254,18 +323,17 @@ export function PostsTable({
         cell: ({ row }) => {
           const post = row.original;
           return (
-            <div className="min-w-64 max-w-lg">
-              <p className="line-clamp-2 font-black leading-5 text-slate-950">
-                {post.title}
-              </p>
-              <p className="mt-1 text-[10px] font-medium text-slate-400">
-                {new Date(post.createdAt).toLocaleDateString("vi-VN")}
-              </p>
-              {post.status === "REJECTED" && post.rejectedReason ? (
-                <p className="mt-2 border-l-2 border-red-400 bg-red-50 px-2 py-1 text-[11px] font-medium leading-5 text-red-700">
-                  {post.rejectedReason}
+            <div className="flex min-w-64 max-w-lg items-start gap-3">
+              {post.press?.imageUrl && <img src={post.press.imageUrl} alt="" className="h-14 w-20 shrink-0 bg-slate-100 object-cover" referrerPolicy="no-referrer" />}
+              <div>
+                <p className="line-clamp-2 font-black leading-5 text-slate-950">{post.title}</p>
+                <p className="mt-1 text-[10px] font-medium text-slate-400">
+                  {new Date(post.createdAt).toLocaleDateString("vi-VN")}
                 </p>
-              ) : null}
+                {post.status === "REJECTED" && post.rejectedReason ? (
+                  <p className="mt-2 border-l-2 border-red-400 bg-red-50 px-2 py-1 text-[11px] font-medium leading-5 text-red-700">{post.rejectedReason}</p>
+                ) : null}
+              </div>
             </div>
           );
         },
@@ -273,7 +341,7 @@ export function PostsTable({
       {
         id: "author",
         accessorFn: (post) => post.author.name || post.author.email,
-        header: "Tác giả",
+        header: "Tác giả / nguồn",
         cell: ({ row }) => (
           <span className="text-xs font-bold text-slate-700">
             {row.original.author.name || row.original.author.email}
@@ -296,16 +364,16 @@ export function PostsTable({
       {
         accessorKey: "viewCount",
         header: "Lượt xem",
-        cell: ({ row }) => (
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600">
-            <Eye size={13} /> {row.original.viewCount}
-          </span>
-        ),
+        cell: ({ row }) => row.original.press
+          ? <span className="text-xs text-slate-400">—</span>
+          : <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600"><Eye size={13} /> {row.original.viewCount}</span>,
       },
       {
         accessorKey: "status",
         header: "Trạng thái",
-        cell: ({ row }) => <CmsStatusBadge status={row.original.status} />,
+        cell: ({ row }) => row.original.press
+          ? <span className="inline-flex border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">Đã gắn link</span>
+          : <CmsStatusBadge status={row.original.status} />,
       },
       {
         id: "actions",
@@ -313,6 +381,15 @@ export function PostsTable({
         enableSorting: false,
         cell: ({ row }) => {
           const post = row.original;
+          if (post.press) {
+            return (
+              <div className="flex items-center justify-end gap-1">
+                <Link href={`/tin-tuc/bao-chi/${encodeURIComponent(post.press.id)}`} target="_blank" className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-950" title="Xem trên website" aria-label={`Xem ${post.title}`}><ExternalLink size={16} /></Link>
+                {canReview && <Link href="/admin/marketing?tab=press" className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600" title="Chỉnh sửa thông tin bài báo" aria-label={`Sửa ${post.title}`}><Edit3 size={16} /></Link>}
+                {canReview && <button type="button" onClick={() => setPressDeleteTarget(post.press || null)} disabled={actionLoading === post.press.id} className="acbt-icon-btn grid h-9 w-9 place-items-center text-red-500 hover:bg-red-50 hover:text-red-700 disabled:opacity-50" title="Xóa bài báo" aria-label={`Xóa ${post.title}`}><Trash2 size={16} /></button>}
+              </div>
+            );
+          }
           const isOwner = post.author.id === user?.id;
           const canEdit =
             canReview ||
@@ -412,13 +489,35 @@ export function PostsTable({
 
   return (
     <>
+      {!fixedStatus && (
+        <div className="flex flex-wrap gap-2 border-b border-slate-200 px-4 pt-4 sm:px-5" aria-label="Lọc loại bài viết">
+          {([
+            ["all", "Tất cả"],
+            ["written", "Bài tự viết"],
+            ["press", "Bài báo bên ngoài"],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={typeFilter === value}
+              onClick={() => {
+                setTypeFilter(value);
+                if (value === "press") { setStatusFilter(""); setCategoryFilter(""); }
+              }}
+              className={`border-b-2 px-2 pb-3 text-sm font-bold transition ${typeFilter === value ? "border-orange-600 text-orange-700" : "border-transparent text-slate-500 hover:text-slate-900"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <AdminToolbar>
         <AdminSearchInput
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="Tìm theo tiêu đề hoặc nội dung..."
         />
-        <div className="flex flex-col gap-2 sm:flex-row">
+        {typeFilter !== "press" && <div className="flex flex-col gap-2 sm:flex-row">
           {!fixedStatus ? (
             <AdminSelect
               label="Lọc trạng thái"
@@ -447,39 +546,35 @@ export function PostsTable({
               </option>
             ))}
           </AdminSelect>
-        </div>
+        </div>}
       </AdminToolbar>
 
-      {loading ? (
+      {loadError && !loading && (
+        <AdminErrorState description={loadError} action={<Button variant="adminSecondary" onClick={() => void fetchPosts()}>Thử lại</Button>} />
+      )}
+      {pressError && !pressLoading && (
+        <div role="status" className="mx-5 my-3 border-l-2 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {pressError} <button type="button" onClick={() => void fetchPress()} className="font-bold underline">Thử lại</button>
+        </div>
+      )}
+      {loading || pressLoading ? (
         <AdminLoadingState title="Đang tải bài viết" />
-      ) : loadError ? (
-        <AdminErrorState
-          description={loadError}
-          action={
-            <Button
-              variant="adminSecondary"
-              onClick={() => void fetchPosts()}
-            >
-              Thử lại
-            </Button>
-          }
-        />
-      ) : (
+      ) : !loadError || tableRows.length > 0 ? (
         <DataTable
           columns={columns}
-          data={posts}
+          data={tableRows}
           emptyTitle={
             fixedStatus === "PENDING_REVIEW"
               ? "Không có bài chờ duyệt"
-              : "Không tìm thấy bài viết"
+              : typeFilter === "press" ? "Không tìm thấy bài báo bên ngoài" : "Không tìm thấy bài viết"
           }
           emptyDescription={
             searchQuery || statusFilter || categoryFilter
               ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
-              : "Bài viết mới sẽ xuất hiện tại đây."
+              : typeFilter === "press" ? "Bài báo được gắn link sẽ xuất hiện tại đây." : "Bài viết mới sẽ xuất hiện tại đây."
           }
         />
-      )}
+      ) : null}
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}
@@ -490,6 +585,15 @@ export function PostsTable({
         )}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => void handleDelete()}
+      />
+
+      <ConfirmDialog
+        open={Boolean(pressDeleteTarget)}
+        title="Xóa bài báo bên ngoài?"
+        description={`Bài báo “${pressDeleteTarget?.title || ""}” sẽ bị gỡ khỏi trang Tin tức.`}
+        loading={Boolean(pressDeleteTarget && actionLoading === pressDeleteTarget.id)}
+        onClose={() => setPressDeleteTarget(null)}
+        onConfirm={() => void handleDeletePress()}
       />
 
       <AdminModal

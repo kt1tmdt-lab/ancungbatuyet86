@@ -39,6 +39,7 @@ interface MediaItem {
   imageUrl: string;
   logoUrl: string;
   href: string;
+  sourceUrl: string;
   date: string;
 }
 
@@ -60,6 +61,7 @@ function buildMediaItems(homeNewsItems: HomeNewsItem[], pressItems: PressItem[])
       imageUrl: item.imageUrl,
       logoUrl: item.logoUrl,
       href: mediaHref(item.linkUrl),
+      sourceUrl: mediaHref(item.linkUrl),
       date: "",
     }));
   const press = pressItems
@@ -67,17 +69,18 @@ function buildMediaItems(homeNewsItems: HomeNewsItem[], pressItems: PressItem[])
     .map((item): MediaItem => ({
       id: `press-${item.id}`,
       title: item.title || `Bài viết từ ${item.sourceName}`,
-      description: item.sourceName ? `Bài viết được đăng trên ${item.sourceName}.` : "",
+      description: item.description || (item.sourceName ? `Bài viết được đăng trên ${item.sourceName}.` : ""),
       source: item.sourceName || "Báo chí",
-      imageUrl: "",
+      imageUrl: item.imageUrl || "",
       logoUrl: "",
-      href: mediaHref(item.link),
+      href: item.link ? `/tin-tuc/bao-chi/${encodeURIComponent(item.id)}` : "",
+      sourceUrl: mediaHref(item.link),
       date: item.publishDate,
     }));
 
   const seen = new Set<string>();
   return [...configured, ...press].filter((item) => {
-    const key = item.href ? `url:${item.href.replace(/\/$/, "")}` : `title:${item.title.toLocaleLowerCase("vi-VN")}`;
+    const key = item.sourceUrl ? `url:${item.sourceUrl.replace(/\/$/, "")}` : `title:${item.title.toLocaleLowerCase("vi-VN")}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

@@ -6,6 +6,8 @@ export type PressItem = {
   title: string;
   link: string;
   publishDate: string;
+  description?: string;
+  imageUrl?: string;
 };
 
 export type FeedbackItem = {
@@ -862,6 +864,8 @@ function normalizePress(input: unknown): PressItem[] {
       const title = stringValue(item.title);
       const link = stringValue(item.link);
       const publishDate = stringValue(item.publishDate);
+      const description = stringValue(item.description);
+      const imageUrl = stringValue(item.imageUrl);
 
       if (!sourceName && !title && !link) return null;
 
@@ -871,6 +875,8 @@ function normalizePress(input: unknown): PressItem[] {
         title,
         link,
         publishDate: publishDate || new Date().toISOString().slice(0, 10),
+        description,
+        imageUrl,
       };
     })
     .filter((item): item is PressItem => Boolean(item));

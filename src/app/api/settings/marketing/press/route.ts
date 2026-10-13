@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
     const title = typeof body?.title === "string" ? body.title.trim() : "";
     const link = typeof body?.link === "string" ? body.link.trim() : "";
     const publishDate = typeof body?.publishDate === "string" ? body.publishDate.trim() : "";
+    const description = typeof body?.description === "string" ? body.description.trim().slice(0, 500) : "";
+    const rawImageUrl = typeof body?.imageUrl === "string" ? body.imageUrl.trim() : "";
 
     if (!sourceName || !title || !link || sourceName.length > 120 || title.length > 240 || link.length > 2048) {
       return NextResponse.json({ error: "Vui lòng nhập tên báo, tiêu đề và link hợp lệ." }, { status: 400 });
@@ -38,6 +40,13 @@ export async function POST(req: NextRequest) {
     if (publishDate && (!/^\d{4}-\d{2}-\d{2}$/.test(publishDate) || Number.isNaN(Date.parse(publishDate)))) {
       return NextResponse.json({ error: "Ngày đăng không hợp lệ." }, { status: 400 });
     }
+    let imageUrl = "";
+    if (rawImageUrl) {
+      try {
+        const image = new URL(rawImageUrl);
+        if (["http:", "https:"].includes(image.protocol)) imageUrl = image.toString();
+      } catch { /* Keep the article without a cover image. */ }
+    }
 
     const article: PressItem = {
       id: randomUUID(),
@@ -45,6 +54,8 @@ export async function POST(req: NextRequest) {
       title,
       link: articleUrl.toString(),
       publishDate: publishDate || new Date().toISOString().slice(0, 10),
+      description,
+      imageUrl,
     };
 
     await prisma.$transaction(async (tx) => {

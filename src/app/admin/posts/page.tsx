@@ -14,7 +14,7 @@ export default function PostsPage() {
         <CmsPageHeader
           eyebrow="Nội dung"
           title="Quản lý bài viết"
-          description="Tìm kiếm, biên tập và theo dõi trạng thái xuất bản của tin tức, thông báo và công thức."
+          description="Quản lý bài tự viết và bài báo bên ngoài đã gắn link trên trang Tin tức."
           actions={
           <Button
             href="/admin/posts/new"
