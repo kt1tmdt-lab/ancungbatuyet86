@@ -34,7 +34,7 @@ import {
   ConfirmDialog,
 } from "./AdminPrimitives";
 import Button from "@/components/ui/Button";
-import { normalizeMarketingConfig, type PressItem } from "@/lib/marketing-config";
+import { normalizeMarketingConfig, type HomeNewsItem, type PressItem } from "@/lib/marketing-config";
 
 export type PostStatus =
   | "DRAFT"
@@ -54,6 +54,8 @@ interface Post {
   createdAt: string;
   rejectedReason?: string | null;
   press?: PressItem;
+  homeNews?: HomeNewsItem;
+  homeVisible?: boolean;
 }
 
 interface Category {
@@ -74,12 +76,13 @@ export function PostsTable({
   const { user, token } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [pressItems, setPressItems] = useState<PressItem[]>([]);
+  const [homeNewsItems, setHomeNewsItems] = useState<HomeNewsItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [pressLoading, setPressLoading] = useState(!fixedStatus);
   const [loadError, setLoadError] = useState("");
   const [pressError, setPressError] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"all" | "written" | "press">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "written" | "press" | "home">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<PostStatus | "">(
     fixedStatus || "",
@@ -132,11 +135,13 @@ export function PostsTable({
     setPressError("");
     try {
       const response = await fetch("/api/settings/marketing", { cache: "no-store" });
-      if (!response.ok) throw new Error("Không thể tải bài báo bên ngoài.");
+      if (!response.ok) throw new Error("Không thể tải bài báo và thẻ trang chủ.");
       const result = await response.json();
-      setPressItems(normalizeMarketingConfig(result?.data).press);
+      const config = normalizeMarketingConfig(result?.data);
+      setPressItems(config.press);
+      setHomeNewsItems(config.homeNewsItems);
     } catch (error) {
-      setPressError(getAdminErrorMessage(error, "Không thể tải bài báo bên ngoài."));
+      setPressError(getAdminErrorMessage(error, "Không thể tải bài báo và thẻ trang chủ."));
     } finally {
       setPressLoading(false);
     }
@@ -309,11 +314,38 @@ export function PostsTable({
       createdAt: item.publishDate || new Date(0).toISOString(),
       press: item,
     }));
+    const homepageIds = new Set(homeNewsItems
+      .filter((item) => item.enabled && (item.title || item.linkUrl || item.imageUrl))
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .slice(0, 4)
+      .map((item) => item.id));
+    const homeRows: Post[] = !fixedStatus && !categoryFilter
+      ? homeNewsItems
+        .filter((item) => (!statusFilter || (item.enabled ? statusFilter === "PUBLISHED" : statusFilter === "DRAFT"))
+          && (!query || [item.title, item.description, item.label].some((value) => value.toLocaleLowerCase("vi-VN").includes(query))))
+        .map((item) => ({
+          id: `home:${item.id}`,
+          title: item.title || item.label || "Thẻ tin trang chủ",
+          slug: "",
+          status: item.enabled ? "PUBLISHED" : "DRAFT",
+          author: { id: "", name: item.label || "Trang chủ", email: "" },
+          category: { id: "home-news", name: "Thẻ trang chủ", slug: "home-news" },
+          viewCount: 0,
+          createdAt: new Date(0).toISOString(),
+          homeNews: item,
+          homeVisible: homepageIds.has(item.id),
+        }))
+      : [];
+    const rank = (post: Post) => post.homeVisible ? 2 : post.homeNews ? 0 : 1;
     return [
-      ...(typeFilter === "press" ? [] : posts),
-      ...(typeFilter === "written" ? [] : pressRows),
-    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [categoryFilter, deferredSearch, fixedStatus, posts, pressItems, statusFilter, typeFilter]);
+      ...(typeFilter === "all" || typeFilter === "home" ? homeRows : []),
+      ...(typeFilter === "all" || typeFilter === "written" ? posts : []),
+      ...(typeFilter === "all" || typeFilter === "press" ? pressRows : []),
+    ].sort((a, b) => rank(b) - rank(a)
+      || (a.homeNews && b.homeNews
+        ? a.homeNews.sortOrder - b.homeNews.sortOrder
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  }, [categoryFilter, deferredSearch, fixedStatus, homeNewsItems, posts, pressItems, statusFilter, typeFilter]);
 
   const columns = useMemo<ColumnDef<Post>[]>(
     () => [
@@ -324,11 +356,11 @@ export function PostsTable({
           const post = row.original;
           return (
             <div className="flex min-w-64 max-w-lg items-start gap-3">
-              {post.press?.imageUrl && <img src={post.press.imageUrl} alt="" className="h-14 w-20 shrink-0 bg-slate-100 object-cover" referrerPolicy="no-referrer" />}
+              {(post.press?.imageUrl || post.homeNews?.imageUrl) && <img src={post.press?.imageUrl || post.homeNews?.imageUrl} alt="" className="h-14 w-20 shrink-0 bg-slate-100 object-cover" referrerPolicy="no-referrer" />}
               <div>
                 <p className="line-clamp-2 font-black leading-5 text-slate-950">{post.title}</p>
                 <p className="mt-1 text-[10px] font-medium text-slate-400">
-                  {new Date(post.createdAt).toLocaleDateString("vi-VN")}
+                  {post.homeNews ? "Cấu hình trang chủ" : new Date(post.createdAt).toLocaleDateString("vi-VN")}
                 </p>
                 {post.status === "REJECTED" && post.rejectedReason ? (
                   <p className="mt-2 border-l-2 border-red-400 bg-red-50 px-2 py-1 text-[11px] font-medium leading-5 text-red-700">{post.rejectedReason}</p>
@@ -364,16 +396,18 @@ export function PostsTable({
       {
         accessorKey: "viewCount",
         header: "Lượt xem",
-        cell: ({ row }) => row.original.press
+        cell: ({ row }) => row.original.press || row.original.homeNews
           ? <span className="text-xs text-slate-400">—</span>
           : <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-600"><Eye size={13} /> {row.original.viewCount}</span>,
       },
       {
         accessorKey: "status",
         header: "Trạng thái",
-        cell: ({ row }) => row.original.press
-          ? <span className="inline-flex border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">Đã gắn link</span>
-          : <CmsStatusBadge status={row.original.status} />,
+        cell: ({ row }) => row.original.homeNews
+          ? <span className={`inline-flex border px-2.5 py-1 text-[11px] font-bold ${row.original.homeVisible ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-slate-200 bg-slate-50 text-slate-600"}`}>{row.original.homeVisible ? "Trên trang chủ" : row.original.homeNews.enabled ? "Ngoài 4 vị trí" : "Đang ẩn"}</span>
+          : row.original.press
+            ? <span className="inline-flex border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800">Đã gắn link</span>
+            : <CmsStatusBadge status={row.original.status} />,
       },
       {
         id: "actions",
@@ -381,6 +415,17 @@ export function PostsTable({
         enableSorting: false,
         cell: ({ row }) => {
           const post = row.original;
+          if (post.homeNews) {
+            const href = post.homeNews.linkUrl;
+            const isExternal = /^https?:\/\//i.test(href);
+            const safeHref = isExternal || (href.startsWith("/") && !href.startsWith("//")) ? href : "/";
+            return (
+              <div className="flex items-center justify-end gap-1">
+                <Link href={safeHref} target="_blank" rel="noopener noreferrer" className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-500 hover:bg-slate-100 hover:text-slate-950" title="Xem liên kết của thẻ" aria-label={`Xem ${post.title}`}><ExternalLink size={16} /></Link>
+                {canReview && <Link href="/admin/website/home" className="acbt-icon-btn grid h-9 w-9 place-items-center text-slate-600 hover:bg-orange-50 hover:text-orange-600" title="Chỉnh sửa thẻ trang chủ" aria-label={`Sửa ${post.title}`}><Edit3 size={16} /></Link>}
+              </div>
+            );
+          }
           if (post.press) {
             return (
               <div className="flex items-center justify-end gap-1">
@@ -495,6 +540,7 @@ export function PostsTable({
             ["all", "Tất cả"],
             ["written", "Bài tự viết"],
             ["press", "Bài báo bên ngoài"],
+            ["home", "Thẻ trang chủ"],
           ] as const).map(([value, label]) => (
             <button
               key={value}
@@ -502,7 +548,7 @@ export function PostsTable({
               aria-pressed={typeFilter === value}
               onClick={() => {
                 setTypeFilter(value);
-                if (value === "press") { setStatusFilter(""); setCategoryFilter(""); }
+                if (value === "press" || value === "home") { setStatusFilter(""); setCategoryFilter(""); }
               }}
               className={`border-b-2 px-2 pb-3 text-sm font-bold transition ${typeFilter === value ? "border-orange-600 text-orange-700" : "border-transparent text-slate-500 hover:text-slate-900"}`}
             >
@@ -517,7 +563,7 @@ export function PostsTable({
           onChange={setSearchQuery}
           placeholder="Tìm theo tiêu đề hoặc nội dung..."
         />
-        {typeFilter !== "press" && <div className="flex flex-col gap-2 sm:flex-row">
+        {typeFilter !== "press" && typeFilter !== "home" && <div className="flex flex-col gap-2 sm:flex-row">
           {!fixedStatus ? (
             <AdminSelect
               label="Lọc trạng thái"
@@ -566,12 +612,12 @@ export function PostsTable({
           emptyTitle={
             fixedStatus === "PENDING_REVIEW"
               ? "Không có bài chờ duyệt"
-              : typeFilter === "press" ? "Không tìm thấy bài báo bên ngoài" : "Không tìm thấy bài viết"
+              : typeFilter === "press" ? "Không tìm thấy bài báo bên ngoài" : typeFilter === "home" ? "Không có thẻ tin trang chủ" : "Không tìm thấy bài viết"
           }
           emptyDescription={
             searchQuery || statusFilter || categoryFilter
               ? "Hãy đổi từ khóa hoặc bộ lọc để xem kết quả khác."
-              : typeFilter === "press" ? "Bài báo được gắn link sẽ xuất hiện tại đây." : "Bài viết mới sẽ xuất hiện tại đây."
+              : typeFilter === "press" ? "Bài báo được gắn link sẽ xuất hiện tại đây." : typeFilter === "home" ? "Thẻ tin được thêm ở phần Nội dung trang chủ sẽ xuất hiện tại đây." : "Bài viết mới sẽ xuất hiện tại đây."
           }
         />
       ) : null}

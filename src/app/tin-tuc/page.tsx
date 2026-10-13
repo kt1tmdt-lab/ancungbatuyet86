@@ -105,12 +105,12 @@ function ArticleImage({ post, className = "" }: { post: Post; className?: string
 
 function ArticleCard({ post }: { post: Post }) {
   return (
-    <article className="group border-b border-[#e9e1d6] pb-6">
+    <article className="group overflow-hidden rounded-[20px] border border-[#eadbc9] bg-white transition-all hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(77,47,23,0.1)]">
       <Link href={`/tin-tuc/${post.slug}`} className="flex h-full flex-col focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-orange-500">
         <div className="aspect-[16/10] overflow-hidden">
           <ArticleImage post={post} className="transition-transform duration-500 group-hover:scale-105" />
         </div>
-        <div className="flex flex-1 flex-col pt-4">
+        <div className="flex flex-1 flex-col p-5 sm:p-6">
           <div className="flex items-center gap-3 text-xs font-bold text-[#946f58]">
             <span className="font-black uppercase tracking-[0.12em] text-[#db571b]">{post.category?.name || "Tin tức"}</span>
             <span aria-hidden="true" className="h-1 w-1 rounded-full bg-[#d6bca7]" />
@@ -132,29 +132,31 @@ function ArticleCard({ post }: { post: Post }) {
 function MediaCard({ item, featured = false }: { item: MediaItem; featured?: boolean }) {
   const content = (
     <>
-      <div className="relative aspect-[16/10] overflow-hidden bg-[#183a2a]">
+      <div className={`relative overflow-hidden bg-[#e96c22] ${featured ? "aspect-[16/10] lg:aspect-auto lg:min-h-[390px]" : "aspect-[16/10]"}`}>
         {item.imageUrl ? (
-          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img src={item.imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <div className="flex h-full w-full flex-col justify-between bg-[linear-gradient(145deg,#f79435_0%,#e95b1a_60%,#ad3015_100%)] p-6 text-white">
-            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-white/85">Ăn Cùng Bà Tuyết</span>
-            <span className="line-clamp-3 max-w-lg text-xl font-black leading-tight tracking-[-0.04em] sm:text-2xl">{item.title}</span>
-            <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/85">{item.source}</span>
+          <div className="flex h-full w-full flex-col justify-between bg-[radial-gradient(circle_at_80%_15%,#ffcb79_0%,transparent_38%),linear-gradient(135deg,#f88f34,#d94c17_70%,#ae3018)] p-6 text-white">
+            <span className="text-xs font-black uppercase tracking-[0.18em] text-white/80">Ăn Cùng Bà Tuyết</span>
+            <span className="max-w-md text-3xl font-black leading-tight tracking-[-0.05em]">Góc báo chí</span>
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/80">{item.source}</span>
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col pt-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#d94f17]">
+      <div className={`flex min-w-0 flex-1 flex-col ${featured ? "justify-center p-6 sm:p-8 lg:p-10" : "p-5 sm:p-6"}`}>
+        <div className="flex flex-wrap items-center gap-2 text-[11px] font-black uppercase tracking-[0.12em] text-[#d94f17]">
           <span>{item.source}</span>
           {item.date && <span className="font-semibold normal-case tracking-normal text-[#946f58]">· {formatDate(item.date)}</span>}
         </div>
-        <h3 className={`mt-3 line-clamp-2 font-black leading-snug tracking-[-0.035em] text-[#172a21] group-hover:text-[#d94f17] ${featured ? "text-3xl sm:text-4xl" : "text-xl"}`}>{item.title}</h3>
-        {item.description && <p className="mt-3 line-clamp-3 text-sm leading-6 text-[#68716b]">{item.description}</p>}
-        {item.href && <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-extrabold text-[#d94f17]">Đọc bài báo <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" /></span>}
+        <h3 className={`mt-3 line-clamp-3 font-black leading-tight tracking-[-0.035em] text-[#172a21] transition-colors group-hover:text-[#d94f17] ${featured ? "text-2xl sm:text-3xl lg:text-[2.25rem]" : "text-xl"}`}>{item.title}</h3>
+        {item.description && <p className={`mt-3 text-sm leading-6 text-[#68716b] ${featured ? "line-clamp-4 sm:text-base sm:leading-7" : "line-clamp-3"}`}>{item.description}</p>}
+        {item.href && <span className="mt-auto inline-flex items-center gap-2 pt-6 text-sm font-extrabold text-[#d94f17]">Đọc bài báo <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" /></span>}
       </div>
     </>
   );
-  const cardClass = "group flex h-full flex-col border-b border-[#e9e1d6] pb-6";
+  const cardClass = featured
+    ? "group grid min-w-0 overflow-hidden rounded-[24px] border border-[#eadbc9] bg-white shadow-[0_16px_45px_rgba(77,47,23,0.07)] transition-all hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(77,47,23,0.12)] lg:grid-cols-[1.08fr_0.92fr]"
+    : "group flex h-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-[#eadbc9] bg-white transition-all hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(77,47,23,0.1)]";
 
   return item.href ? (
     <Link href={item.href} target={/^https?:\/\//i.test(item.href) ? "_blank" : undefined} rel={/^https?:\/\//i.test(item.href) ? "noopener noreferrer" : undefined} className={cardClass}>
@@ -280,34 +282,28 @@ export default function BlogPage() {
 
   return (
     <main className="min-h-screen bg-[#fffdfa] text-[#1d2b25]">
-      <header className="border-b border-[#e9dfd2] bg-[#fffaf3]">
-        <div className="mx-auto max-w-[1280px] px-5 pb-8 pt-9 sm:px-8 sm:pb-10 sm:pt-11 lg:px-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-[clamp(2.8rem,6vw,5.2rem)] font-black leading-none tracking-[-0.065em]">Tin tức <span className="text-[#df581d]"></span></h1>
-              <p className="mt-4 max-w-2xl text-sm leading-6 text-[#657168] sm:text-base">Thông tin cập nhật từ Ăn Cùng Bà Tuyết.</p>
-            </div>
-            <span className="hidden shrink-0 pb-1 text-xs font-bold uppercase tracking-[0.16em] text-[#9b8c7b] sm:block"></span>
-          </div>
+      <header className="border-b border-[#ecd9c5] bg-[#fff6e9]">
+        <div className="mx-auto max-w-[1280px] px-5 py-10 sm:px-8 sm:py-12 lg:px-10">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#d95319]">Ăn Cùng Bà Tuyết / Bản tin</p>
+          <h1 className="mt-3 text-4xl font-black leading-[1.05] tracking-[-0.055em] text-[#172a21] sm:text-6xl">Tin tức <span className="text-[#df581d]">& câu chuyện</span></h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#657168] sm:text-base">Bài viết từ thương hiệu và những câu chuyện được các báo nhắc đến.</p>
         </div>
       </header>
 
       <section id="bai-viet" className="scroll-mt-24">
         <div className="mx-auto max-w-[1280px] px-5 pb-16 sm:px-8 lg:px-10">
-          <div className="flex flex-col gap-5 border-b-2 border-[#1d2b25] py-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h2 className="text-base font-black uppercase tracking-[0.08em]"></h2>
-            </div>
-            <div className="relative w-full lg:w-[280px]">
+          <div className="flex flex-col gap-4 border-b border-[#e6d5c1] py-6 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-black tracking-[-0.03em] text-[#172a21]">Khám phá bài viết</h2>
+            <div className="relative w-full sm:w-[290px]">
               <label htmlFor="news-search" className="sr-only">Tìm kiếm bài viết</label>
-              <Search size={17} className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-[#9a8877]" />
+              <Search size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9a8877]" />
               <input
                 id="news-search"
                 type="search"
                 placeholder="Tìm bài viết..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                className="h-9 w-full border-b border-[#cfc3b4] bg-transparent pl-7 pr-7 text-sm font-medium text-[#172a21] outline-none transition placeholder:text-[#a69b8d] focus:border-[#e85d1a]"
+                className="h-11 w-full rounded-xl border border-[#ddc9b4] bg-white pl-10 pr-9 text-sm font-medium text-[#172a21] outline-none transition placeholder:text-[#a69b8d] focus:border-[#e85d1a]"
               />
               {searchQuery && (
                 <button type="button" onClick={() => setSearchQuery("")} aria-label="Xóa tìm kiếm" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-[#8f8071] hover:bg-[#fff1e4] hover:text-[#d94f17]">
@@ -317,17 +313,17 @@ export default function BlogPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 py-5" aria-label="Lọc theo chuyên mục">
-            <button type="button" onClick={() => setSelectedCategorySlug("all")} aria-pressed={selectedCategorySlug === "all"} className={`border-b-2 pb-1 text-sm font-extrabold transition ${selectedCategorySlug === "all" ? "border-[#df581d] text-[#d95319]" : "border-transparent text-[#536157] hover:text-[#d95319]"}`}>
+          <div className="flex flex-wrap items-center gap-2 py-5" aria-label="Lọc theo chuyên mục">
+            <button type="button" onClick={() => setSelectedCategorySlug("all")} aria-pressed={selectedCategorySlug === "all"} className={`rounded-full border px-4 py-2 text-sm font-bold transition ${selectedCategorySlug === "all" ? "border-[#df581d] bg-[#df581d] text-white" : "border-[#e7d8c7] bg-white text-[#536157] hover:border-[#df581d] hover:text-[#d95319]"}`}>
               Tất cả
             </button>
             {mediaItems.length > 0 && (
-              <button type="button" onClick={() => setSelectedCategorySlug(PRESS_FILTER)} aria-pressed={selectedCategorySlug === PRESS_FILTER} className={`border-b-2 pb-1 text-sm font-extrabold transition ${selectedCategorySlug === PRESS_FILTER ? "border-[#df581d] text-[#d95319]" : "border-transparent text-[#536157] hover:text-[#d95319]"}`}>
+              <button type="button" onClick={() => setSelectedCategorySlug(PRESS_FILTER)} aria-pressed={selectedCategorySlug === PRESS_FILTER} className={`rounded-full border px-4 py-2 text-sm font-bold transition ${selectedCategorySlug === PRESS_FILTER ? "border-[#df581d] bg-[#df581d] text-white" : "border-[#e7d8c7] bg-white text-[#536157] hover:border-[#df581d] hover:text-[#d95319]"}`}>
                 Báo chí nói về chúng tôi
               </button>
             )}
             {categories.map((category) => (
-              <button key={category.id} type="button" onClick={() => setSelectedCategorySlug(category.slug)} aria-pressed={selectedCategorySlug === category.slug} className={`border-b-2 pb-1 text-sm font-extrabold transition ${selectedCategorySlug === category.slug ? "border-[#df581d] text-[#d95319]" : "border-transparent text-[#536157] hover:text-[#d95319]"}`}>
+              <button key={category.id} type="button" onClick={() => setSelectedCategorySlug(category.slug)} aria-pressed={selectedCategorySlug === category.slug} className={`rounded-full border px-4 py-2 text-sm font-bold transition ${selectedCategorySlug === category.slug ? "border-[#df581d] bg-[#df581d] text-white" : "border-[#e7d8c7] bg-white text-[#536157] hover:border-[#df581d] hover:text-[#d95319]"}`}>
                 {category.name}
               </button>
             ))}
@@ -341,9 +337,9 @@ export default function BlogPage() {
           )}
           <div aria-live="polite">
             {loading || marketingLoading ? (
-              <div className="grid gap-8 pt-2 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]" aria-label="Đang tải bài viết">
-                <div><div className="aspect-[16/10] animate-pulse bg-[#f4eadc]" /><div className="mt-5 h-8 w-4/5 animate-pulse bg-[#f4eadc]" /><div className="mt-3 h-4 w-2/3 animate-pulse bg-[#f4eadc]" /></div>
-                <div className="space-y-5"><div className="h-4 w-32 animate-pulse bg-[#f4eadc]" /><div className="h-28 animate-pulse bg-[#f4eadc]" /><div className="h-28 animate-pulse bg-[#f4eadc]" /></div>
+              <div className="space-y-6 pt-2" aria-label="Đang tải bài viết">
+                <div className="grid overflow-hidden rounded-3xl border border-[#eadbc9] bg-white lg:grid-cols-2"><div className="aspect-[16/10] animate-pulse bg-[#f4eadc]" /><div className="space-y-4 p-8"><div className="h-4 w-28 animate-pulse bg-[#f4eadc]" /><div className="h-9 w-4/5 animate-pulse bg-[#f4eadc]" /><div className="h-4 w-full animate-pulse bg-[#f4eadc]" /></div></div>
+                <div className="grid gap-6 md:grid-cols-3">{[0, 1, 2].map((item) => <div key={item} className="h-72 animate-pulse rounded-2xl bg-[#f4eadc]" />)}</div>
               </div>
             ) : visiblePosts.length === 0 && visibleMediaItems.length === 0 ? (
               <div className="grid gap-8 py-9 md:grid-cols-[1fr_0.8fr] md:items-center">
@@ -373,33 +369,38 @@ export default function BlogPage() {
                       </div>
                       <span className="text-sm font-semibold text-[#68716b]">{visibleMediaItems.length} bài viết</span>
                     </div>
-                    <div className="grid gap-7 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)] lg:gap-10">
+                    <div className="space-y-6">
                       <MediaCard item={visibleMediaItems[0]} featured />
-                      {visibleMediaItems.length > 1 && <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">{visibleMediaItems.slice(1, 3).map((item) => <MediaCard key={item.id} item={item} />)}</div>}
+                      {visibleMediaItems.length > 1 && <div className="grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">{visibleMediaItems.slice(1).map((item) => <MediaCard key={item.id} item={item} />)}</div>}
                     </div>
-                    {visibleMediaItems.length > 3 && <div className="mt-8 grid gap-7 md:grid-cols-2 lg:grid-cols-3">{visibleMediaItems.slice(3).map((item) => <MediaCard key={item.id} item={item} />)}</div>}
                   </section>
                 )}
                 {featured && (
-                  <Link href={`/tin-tuc/${featured.slug}`} className="group grid border-t-2 border-[#1d2b25] pt-6 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
-                    <div className="min-h-[280px] overflow-hidden sm:min-h-[360px]"><ArticleImage post={featured} className="transition-transform duration-500 group-hover:scale-105" /></div>
-                    <div className="flex flex-col justify-center py-5 lg:py-0">
-                      <span className="w-fit text-xs font-black uppercase tracking-[0.16em] text-[#d94f17]">Bài nổi bật</span>
-                      <h3 className="mt-5 text-3xl font-black leading-tight tracking-[-0.045em] text-[#172a21] transition group-hover:text-[#d94f17] sm:text-4xl">{featured.title}</h3>
-                      {featured.excerpt && <p className="mt-4 line-clamp-3 text-sm leading-7 text-[#68716b] sm:text-base">{featured.excerpt}</p>}
-                      <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-bold text-[#8b796b]">
-                        <span className="inline-flex items-center gap-1.5"><CalendarDays size={15} />{formatDate(featured.createdAt)}</span>
-                        {featured.author?.name && <span>{featured.author.name}</span>}
-                      </div>
-                      <span className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-[#d94f17]">Đọc câu chuyện <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" /></span>
+                  <section aria-labelledby="brand-stories-heading" className="space-y-6">
+                    <div className="border-b border-[#d8cbb9] pb-4">
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-[#d94f17]">Tin từ thương hiệu</p>
+                      <h3 id="brand-stories-heading" className="mt-2 text-2xl font-black tracking-[-0.04em] sm:text-3xl">Câu chuyện của chúng tôi</h3>
                     </div>
-                  </Link>
+                    <Link href={`/tin-tuc/${featured.slug}`} className="group grid overflow-hidden rounded-[24px] border border-[#eadbc9] bg-white shadow-[0_16px_45px_rgba(77,47,23,0.07)] transition-all hover:-translate-y-1 hover:shadow-[0_22px_55px_rgba(77,47,23,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 lg:grid-cols-[1.08fr_0.92fr]">
+                      <div className="aspect-[16/10] overflow-hidden lg:aspect-auto lg:min-h-[390px]"><ArticleImage post={featured} className="transition-transform duration-500 group-hover:scale-105" /></div>
+                      <div className="flex flex-col justify-center p-6 sm:p-8 lg:p-10">
+                        <span className="w-fit text-xs font-black uppercase tracking-[0.16em] text-[#d94f17]">Bài nổi bật</span>
+                        <h4 className="mt-4 text-2xl font-black leading-tight tracking-[-0.045em] text-[#172a21] transition group-hover:text-[#d94f17] sm:text-3xl">{featured.title}</h4>
+                        {featured.excerpt && <p className="mt-4 line-clamp-4 text-sm leading-7 text-[#68716b] sm:text-base">{featured.excerpt}</p>}
+                        <div className="mt-6 flex flex-wrap items-center gap-4 text-xs font-bold text-[#8b796b]">
+                          <span className="inline-flex items-center gap-1.5"><CalendarDays size={15} />{formatDate(featured.createdAt)}</span>
+                          {featured.author?.name && <span>{featured.author.name}</span>}
+                        </div>
+                        <span className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-[#d94f17]">Đọc câu chuyện <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" /></span>
+                      </div>
+                    </Link>
+                  </section>
                 )}
 
                 {gridPosts.length > 0 && (
                   <div>
-                    {featured && <h3 className="mb-6 border-t-2 border-[#1d2b25] pt-5 text-2xl font-black tracking-[-0.04em]">Các bài viết khác</h3>}
-                    <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+                    {featured && <h3 className="mb-6 border-b border-[#d8cbb9] pb-4 text-2xl font-black tracking-[-0.04em]">Các bài viết khác</h3>}
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {gridPosts.map((post) => <ArticleCard key={post.id} post={post} />)}
                     </div>
                   </div>
