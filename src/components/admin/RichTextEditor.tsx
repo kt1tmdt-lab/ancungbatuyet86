@@ -96,7 +96,10 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         const files = itemFiles.length > 0
           ? itemFiles
           : Array.from(event.clipboardData?.files || []).filter((file) => file.type.startsWith('image/'));
-        if (files.length === 0) return false;
+        const html = event.clipboardData?.getData('text/html') || '';
+        const document = html ? new DOMParser().parseFromString(html, 'text/html') : null;
+        const images = Array.from(document?.body.querySelectorAll('img') || []);
+        if (files.length === 0 && images.length === 0) return false;
 
         event.preventDefault();
         const pasteSelection = {
@@ -108,22 +111,55 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
 
         void (async () => {
           let position = pasteSelection.from;
-          let firstImage = true;
           try {
-            for (const file of files) {
+            const unusedFiles = [...files];
+            const uploadedImages: Array<{ type: 'image'; attrs: { src: string; alt: string } }> = [];
+            let missingImages = 0;
+
+            for (const [index, image] of images.entries()) {
+              const source = image.getAttribute('src') || '';
+              const clipboardFile = unusedFiles.shift();
+              let file: File | undefined;
+              if (/^(data:image\/|blob:|https?:\/\/)/i.test(source)) {
+                try {
+                  const response = await fetch(source);
+                  const blob = await response.blob();
+                  if (response.ok && blob.type.startsWith('image/')) {
+                    const extension = blob.type.split('/')[1]?.split('+')[0] || 'png';
+                    file = new File([blob], `pasted-image-${index + 1}.${extension}`, { type: blob.type });
+                  }
+                } catch {
+                  // Clipboard image files below can still provide this image.
+                }
+              }
+              if (!file) file = clipboardFile;
+              if (!file) {
+                image.remove();
+                missingImages += 1;
+                continue;
+              }
               const { url } = await uploadAdminImage({ file, token: tokenRef.current });
-              const currentEditor = editorRef.current;
-              if (!currentEditor || currentEditor.isDestroyed) return;
-              position = Math.min(position, currentEditor.state.doc.content.size);
-              currentEditor.chain().insertContentAt(firstImage ? {
-                from: position,
-                to: Math.min(pasteSelection.to, currentEditor.state.doc.content.size),
-              } : position, {
-                type: 'image',
-                attrs: { src: url, alt: file.name },
-              }).run();
-              firstImage = false;
-              position += 1;
+              image.setAttribute('src', url);
+              image.setAttribute('alt', image.getAttribute('alt') || file.name);
+            }
+
+            for (const file of unusedFiles) {
+              const { url } = await uploadAdminImage({ file, token: tokenRef.current });
+              uploadedImages.push({ type: 'image', attrs: { src: url, alt: file.name } });
+            }
+
+            const currentEditor = editorRef.current;
+            if (!currentEditor || currentEditor.isDestroyed) return;
+            position = Math.min(position, currentEditor.state.doc.content.size);
+            const target = { from: position, to: Math.min(pasteSelection.to, currentEditor.state.doc.content.size) };
+            if (document && images.length > 0) {
+              currentEditor.chain().insertContentAt(target, document.body.innerHTML).run();
+              if (uploadedImages.length > 0) currentEditor.chain().insertContentAt(currentEditor.state.selection.to, uploadedImages).run();
+            } else {
+              currentEditor.chain().insertContentAt(target, uploadedImages).run();
+            }
+            if (missingImages > 0) {
+              setUploadError(`${missingImages} ảnh trong clipboard không có dữ liệu truy cập được. Hãy sao chép riêng ảnh hoặc dùng nút Tải ảnh từ máy.`);
             }
           } catch (error) {
             setUploadError(error instanceof Error ? error.message : 'Không lưu được ảnh vào thư viện');

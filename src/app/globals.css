@@ -391,6 +391,10 @@ body {
   object-fit: contain !important;
 }
 
+.article-content img {
+  margin-inline: auto;
+}
+
 .article-content figure,
 .article-editor figure {
   width: 100% !important;
