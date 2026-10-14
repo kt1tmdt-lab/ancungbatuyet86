@@ -1,8 +1,10 @@
 "use client";
 
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, useEditorState, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
+import { Fragment } from '@tiptap/pm/model';
+import { NodeSelection } from '@tiptap/pm/state';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyleKit } from '@tiptap/extension-text-style';
@@ -16,7 +18,26 @@ import { uploadAdminImage } from '@/lib/admin-upload-client';
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+  coverImageUrl?: string;
 }
+
+type ImageLayout = 'full' | 'center' | 'left' | 'right';
+
+const ArticleImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      layout: {
+        default: 'full',
+        parseHTML: (element) => {
+          const value = element.getAttribute('data-layout');
+          return value === 'center' || value === 'left' || value === 'right' ? value : 'full';
+        },
+        renderHTML: (attributes) => ({ 'data-layout': attributes.layout }),
+      },
+    };
+  },
+});
 
 type ToolbarButtonProps = {
   onClick: () => void;
@@ -51,7 +72,7 @@ function ToolbarButton({
   );
 }
 
-export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, coverImageUrl }: RichTextEditorProps) {
   const { token } = useAuth();
   const imageInput = useRef<HTMLInputElement>(null);
   const tokenRef = useRef(token);
@@ -64,7 +85,7 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       StarterKit.configure({
         link: false,
       }),
-      Image.configure({
+      ArticleImage.configure({
         HTMLAttributes: {
           class: 'article-editor-image',
         },
@@ -172,6 +193,16 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
     },
   });
 
+  const selectedImageLayout = useEditorState({
+    editor,
+    selector: ({ editor: currentEditor }) => {
+      const selection = currentEditor?.state.selection;
+      return selection instanceof NodeSelection && selection.node.type.name === 'image'
+        ? (selection.node.attrs.layout as ImageLayout) || 'full'
+        : null;
+    },
+  });
+
   useEffect(() => {
     tokenRef.current = token;
     editorRef.current = editor;
@@ -216,6 +247,28 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
       setUploading(false);
       if (imageInput.current) imageInput.current.value = '';
     }
+  };
+
+  const moveSelectedImage = (direction: -1 | 1) => {
+    if (!editor) return;
+    const { selection, doc } = editor.state;
+    if (!(selection instanceof NodeSelection) || selection.node.type.name !== 'image') return;
+
+    const blocks: Array<{ node: typeof selection.node; position: number }> = [];
+    doc.forEach((node, position) => blocks.push({ node, position }));
+    const index = blocks.findIndex((block) => block.position === selection.from);
+    const neighbor = blocks[index + direction];
+    if (index < 0 || !neighbor) return;
+
+    const start = direction === -1 ? neighbor.position : selection.from;
+    const end = direction === -1 ? selection.to : neighbor.position + neighbor.node.nodeSize;
+    const replacement = direction === -1
+      ? [selection.node, neighbor.node]
+      : [neighbor.node, selection.node];
+    const transaction = editor.state.tr.replaceWith(start, end, Fragment.fromArray(replacement));
+    transaction.setSelection(NodeSelection.create(transaction.doc, direction === -1 ? start : start + neighbor.node.nodeSize));
+    editor.view.dispatch(transaction);
+    editor.commands.focus();
   };
 
   if (!editor) {
@@ -371,6 +424,27 @@ export function RichTextEditor({ value, onChange }: RichTextEditorProps) {
         >
           <Redo size={15} />
         </ToolbarButton>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-white px-3 py-2 text-xs">
+        <span className="font-bold text-slate-700">Bố cục ảnh</span>
+        {coverImageUrl?.trim() && (
+          <button type="button" onClick={() => editor.chain().focus().insertContent({ type: 'image', attrs: { src: coverImageUrl.trim(), alt: 'Ảnh bìa', layout: 'center' } }).run()}
+            className="rounded border border-orange-200 bg-orange-50 px-2.5 py-1.5 font-semibold text-orange-700 hover:bg-orange-100">
+            Chèn ảnh bìa tại con trỏ
+          </button>
+        )}
+        <select aria-label="Vị trí ảnh đang chọn" value={selectedImageLayout || 'full'} disabled={!selectedImageLayout}
+          onChange={(event) => editor.chain().focus().updateAttributes('image', { layout: event.target.value as ImageLayout }).run()}
+          className="rounded border border-slate-200 bg-white px-2 py-1.5 disabled:opacity-50">
+          <option value="full">Ảnh riêng toàn chiều rộng</option>
+          <option value="center">Ảnh riêng ở giữa</option>
+          <option value="left">Ảnh trái, chữ bên phải</option>
+          <option value="right">Ảnh phải, chữ bên trái</option>
+        </select>
+        <button type="button" disabled={!selectedImageLayout} onClick={() => moveSelectedImage(-1)} className="rounded border border-slate-200 px-2.5 py-1.5 disabled:opacity-50">Đưa ảnh lên</button>
+        <button type="button" disabled={!selectedImageLayout} onClick={() => moveSelectedImage(1)} className="rounded border border-slate-200 px-2.5 py-1.5 disabled:opacity-50">Đưa ảnh xuống</button>
+        {!selectedImageLayout && <span className="text-slate-500">Đặt con trỏ ở đoạn muốn chèn ảnh; nhấp vào ảnh để đổi bố cục.</span>}
       </div>
 
       {uploadError && <p role="alert" className="border-b border-red-100 bg-red-50 px-4 py-2 text-xs text-red-700">{uploadError}</p>}

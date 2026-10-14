@@ -206,6 +206,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
 
     const payloadBody = {
       ...data,
+      categoryId: data.categoryId || null,
       content: normalizeContentAssetUrls(data.content),
       status,
     };
@@ -325,6 +326,7 @@ export function CreatePostForm({ postId }: { postId?: string }) {
               <label className="block text-sm font-bold text-slate-800">Nội dung</label>
               <RichTextEditor 
                 value={normalizeContentAssetUrls(formValues.content)} 
+                coverImageUrl={formValues.coverImageUrl}
                 onChange={(html) => setValue("content", normalizeContentAssetUrls(html), { shouldValidate: true })}
               />
               {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content.message}</p>}

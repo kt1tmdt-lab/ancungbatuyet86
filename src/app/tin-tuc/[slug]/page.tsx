@@ -27,6 +27,13 @@ function getReadTime(content: string | null) {
   return `${time} phút`;
 }
 
+function hasCoverImageInContent(content: string, coverImageUrl: string | null) {
+  if (!coverImageUrl) return false;
+  const normalizedCoverUrl = coverImageUrl.replace(/&amp;/g, "&");
+  return [...content.matchAll(/<img\b[^>]*\ssrc\s*=\s*(["'])(.*?)\1/gi)]
+    .some((match) => match[2].replace(/&amp;/g, "&") === normalizedCoverUrl);
+}
+
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const post = await prisma.post.findUnique({
@@ -134,6 +141,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const currentViewCount = post.viewCount + (isPreview ? 0 : 1);
   const postContent = normalizeContentAssetUrls(post.content);
+  const coverImageIsInContent = hasCoverImageInContent(postContent, post.coverImageUrl);
 
   const relatedPosts = post.categoryId
     ? await prisma.post.findMany({
@@ -240,7 +248,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </header>
 
-        {post.coverImageUrl && (
+        {post.coverImageUrl && !coverImageIsInContent && (
           <section className="border-b border-orange-100 bg-white px-4 py-6 sm:px-6 lg:px-10">
             <div className="mx-auto w-full max-w-[880px] overflow-hidden border border-orange-100 bg-orange-50">
               <img

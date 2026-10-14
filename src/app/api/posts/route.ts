@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       return jsonError(message, getAuthErrorStatus(error));
     }
 
-    if (message.includes("required") || message.includes("exists")) {
+    if (message.includes("required") || message.includes("exists") || message.startsWith("Chuyên mục")) {
       return jsonError(message, 400);
     }
 

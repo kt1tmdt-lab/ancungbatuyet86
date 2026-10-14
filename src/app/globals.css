@@ -391,8 +391,62 @@ body {
   object-fit: contain !important;
 }
 
+.article-content,
+.article-editor {
+  display: flow-root;
+}
+
+.article-content img[data-layout="left"],
+.article-editor img[data-layout="left"] {
+  float: left;
+  clear: left;
+  width: 42% !important;
+  max-width: 320px !important;
+  margin: 0.25rem 1.25rem 1rem 0 !important;
+}
+
+.article-content img[data-layout="right"],
+.article-editor img[data-layout="right"] {
+  float: right;
+  clear: right;
+  width: 42% !important;
+  max-width: 320px !important;
+  margin: 0.25rem 0 1rem 1.25rem !important;
+}
+
+.article-content img[data-layout="center"],
+.article-editor img[data-layout="center"] {
+  clear: both;
+  width: 72% !important;
+  margin: 1.5rem auto !important;
+}
+
+.article-content img[data-layout="full"],
+.article-editor img[data-layout="full"] {
+  clear: both;
+  margin: 1.5rem auto !important;
+}
+
+@media (max-width: 639px) {
+  .article-content img[data-layout="left"],
+  .article-content img[data-layout="right"],
+  .article-editor img[data-layout="left"],
+  .article-editor img[data-layout="right"] {
+    float: none;
+    clear: both;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 1rem auto !important;
+  }
+}
+
 .article-content img {
   margin-inline: auto;
+}
+
+.article-editor img.ProseMirror-selectednode {
+  outline: 3px solid #f97316;
+  outline-offset: 3px;
 }
 
 .article-content figure,

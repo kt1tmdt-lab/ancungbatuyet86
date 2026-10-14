@@ -47,6 +47,21 @@ async function buildTagRelations(tags: string | undefined) {
   return tagRelations;
 }
 
+async function resolveCategoryId(categoryId: string | null | undefined) {
+  if (categoryId === undefined) return undefined;
+  const id = categoryId?.trim();
+  if (!id) return null;
+
+  const category = await prisma.category.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!category) {
+    throw new Error("Chuyên mục không còn tồn tại. Vui lòng chọn lại chuyên mục.");
+  }
+  return id;
+}
+
 export async function createPost(input: PostPayload, viewer: AuthPayload) {
   if (!input.title || !input.slug) {
     throw new Error("Title and slug are required");
@@ -57,6 +72,7 @@ export async function createPost(input: PostPayload, viewer: AuthPayload) {
   }
 
   const finalStatus = resolveCreateStatus(input.status, viewer);
+  const categoryId = await resolveCategoryId(input.categoryId);
   const tagRelations = await buildTagRelations(input.tags);
 
   const post = await prisma.post.create({
@@ -68,7 +84,7 @@ export async function createPost(input: PostPayload, viewer: AuthPayload) {
       coverImageUrl: input.coverImageUrl || null,
       status: finalStatus as Prisma.PostCreateInput["status"],
       authorId: viewer.id,
-      categoryId: input.categoryId || null,
+      categoryId: categoryId ?? null,
       seoTitle: input.seoTitle || null,
       seoDescription: input.seoDescription || null,
       seoKeywords: input.seoKeywords || null,
@@ -121,6 +137,8 @@ export async function updatePost(postId: string, input: Partial<PostPayload>, vi
     }
   }
 
+  const categoryId = await resolveCategoryId(input.categoryId);
+
   let tagRelations = undefined;
   if (input.tags !== undefined) {
     await prisma.postTag.deleteMany({ where: { postId } });
@@ -135,7 +153,7 @@ export async function updatePost(postId: string, input: Partial<PostPayload>, vi
     content: input.content !== undefined ? input.content : existingPost.content,
     coverImageUrl: input.coverImageUrl !== undefined ? input.coverImageUrl : existingPost.coverImageUrl,
     status: finalStatus,
-    categoryId: input.categoryId !== undefined ? input.categoryId : existingPost.categoryId,
+    categoryId: categoryId !== undefined ? categoryId : existingPost.categoryId,
     seoTitle: input.seoTitle !== undefined ? input.seoTitle : existingPost.seoTitle,
     seoDescription: input.seoDescription !== undefined ? input.seoDescription : existingPost.seoDescription,
     seoKeywords: input.seoKeywords !== undefined ? input.seoKeywords : existingPost.seoKeywords,
