@@ -1440,63 +1440,50 @@ function FactoryProofSection() {
       <div className="pointer-events-none absolute -left-40 top-40 h-[520px] w-[520px] rounded-full bg-orange-300/15 blur-3xl" />
       <div className="pointer-events-none absolute -right-48 bottom-20 h-[600px] w-[600px] rounded-full bg-yellow-200/30 blur-3xl" />
 
-      <div className="relative mx-auto max-w-[1480px]">
+      <div className="relative">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-5xl"
+          className="max-w-4xl"
         >
-          <h2 className="text-3xl font-black leading-[1.02] tracking-[-0.055em] text-slate-950 sm:text-5xl lg:text-6xl">
+          <h2 className="text-3xl font-black leading-[1.05] tracking-[-0.055em] text-slate-950 sm:text-4xl lg:text-5xl">
             {homeTextValue(homeTexts, "factory_section_title", "Năng lực sản xuất rõ ràng trước khi nói về bán hàng")}
           </h2>
         </motion.div>
 
-        <div className="mt-10 space-y-8 sm:mt-16 sm:space-y-12 lg:mt-20 lg:space-y-16">
+        <div className="mt-8 grid gap-5 sm:mt-10 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 xl:grid-cols-5">
           {proofs.map((proof, index) => {
             const Icon = proof.icon;
-            const imageOnRight = index % 2 === 1;
 
             return (
               <motion.article
                 key={`${proof.title}-${index}`}
-                initial={{ opacity: 0, y: 42 }}
+                initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-                className="relative grid overflow-hidden border border-orange-100 bg-white shadow-[0_20px_55px_rgba(72,38,12,0.08)] lg:min-h-[430px] lg:grid-cols-[1.12fr_0.88fr]"
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="group relative flex flex-col overflow-hidden border border-orange-100 bg-white shadow-[0_16px_40px_rgba(72,38,12,0.07)] transition-shadow duration-300 hover:shadow-[0_22px_55px_rgba(72,38,12,0.14)]"
               >
-                <div
-                  className={`relative aspect-[4/3] min-w-0 overflow-hidden bg-[#ece6dd] sm:aspect-[16/9] lg:aspect-auto lg:h-full ${
-                    imageOnRight ? "lg:order-2" : "lg:order-1"
-                  }`}
-                >
+                <div className="relative aspect-[4/3] overflow-hidden bg-[#ece6dd]">
                   <img
                     src={proof.imageUrl}
                     alt={proof.title}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent" />
-                  <div className="absolute bottom-5 left-5 grid h-12 w-12 place-items-center bg-orange-600 text-white shadow-lg sm:bottom-7 sm:left-7 sm:h-14 sm:w-14">
-                    <Icon size={23} />
+                  <div className="absolute bottom-4 left-4 grid h-11 w-11 place-items-center bg-orange-600 text-white shadow-lg">
+                    <Icon size={20} />
                   </div>
                 </div>
 
-                <div
-                  className={`relative flex min-w-0 flex-col justify-center p-6 sm:p-9 lg:p-12 ${
-                    imageOnRight ? "lg:order-1" : "lg:order-2"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0 h-1 w-full bg-orange-600 lg:bottom-0 lg:top-auto lg:h-full lg:w-1 ${
-                      imageOnRight ? "lg:right-0" : "lg:left-0"
-                    }`}
-                  />
-                  <h3 className="mt-0 text-2xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-4xl">
+                <div className="relative flex flex-1 flex-col p-5 sm:p-6">
+                  <span className="absolute left-0 top-0 h-1 w-full bg-orange-600" />
+                  <h3 className="text-xl font-black leading-tight tracking-[-0.04em] text-slate-950">
                     {proof.title}
                   </h3>
-                  <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 sm:text-base sm:leading-8">
+                  <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
                     {proof.text}
                   </p>
                 </div>
