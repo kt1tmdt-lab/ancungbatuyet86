@@ -46,7 +46,8 @@ export default function DeadlineCountdown() {
       <b>
         {days} ngày {hours} giờ {minutes} phút
       </b>{" "}
-      · hạn 23h59 ngày 22/11/2026
+      <span className="sep">· </span>
+      <span className="deadline">hạn 23h59 ngày 22/11/2026</span>
     </p>
   );
 }

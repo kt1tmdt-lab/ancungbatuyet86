@@ -3,6 +3,7 @@ import { Be_Vietnam_Pro, Paytone_One } from "next/font/google";
 import Image from "next/image";
 import { Clapperboard, Crown, Sofa, TriangleAlert } from "lucide-react";
 import DeadlineCountdown from "./DeadlineCountdown";
+import RuleArticle from "./RuleArticle";
 import "./tuyen-thuong-de.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -327,28 +328,19 @@ export default function TuyenThuongDePage() {
               </ol>
             </nav>
             <div>
-            <div className="art" id="dieu-1">
-              <h3>
-                <span>Điều 1.</span> Đơn vị tổ chức
-              </h3>
+            <RuleArticle n={1} title={RULE_TITLES[0]}>
               <p>Công ty Cổ phần Thực phẩm Ăn Cùng Bà Tuyết (sau đây gọi là “Ban tổ chức” hoặc “Ăn Cùng Bà Tuyết”).</p>
               <p>Địa chỉ: Cụm công nghiệp Từ Liêm, Xuân Phương, Hà Nội.</p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-2">
-              <h3>
-                <span>Điều 2.</span> Nội dung chương trình
-              </h3>
+            <RuleArticle n={2} title={RULE_TITLES[1]}>
               <p>
                 Ban tổ chức tuyển chọn <b>01 (một)</b> người đảm nhận vai trò “Thượng Đế” trong tháng 12/2026: trải nghiệm sản phẩm và môi trường của Ăn Cùng Bà Tuyết với vai trò khách hàng, đồng thời tham gia sản xuất nội dung cùng Ban tổ chức.
               </p>
               <p>“Thượng Đế” trong chương trình được hiểu theo nghĩa “khách hàng là thượng đế”. Đây là chương trình tuyển chọn, không phải chương trình khuyến mại; việc ứng tuyển hoàn toàn miễn phí và không gắn với việc mua bất kỳ sản phẩm nào.</p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-3">
-              <h3>
-                <span>Điều 3.</span> Thời gian
-              </h3>
+            <RuleArticle n={3} title={RULE_TITLES[2]}>
               <table>
                 <tbody>
                   <tr>
@@ -377,23 +369,17 @@ export default function TuyenThuongDePage() {
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-4">
-              <h3>
-                <span>Điều 4.</span> Đối tượng tham gia
-              </h3>
+            <RuleArticle n={4} title={RULE_TITLES[3]}>
               <ol>
                 <li>Cá nhân đủ 18 tuổi trở lên tính đến ngày nộp đơn, có năng lực hành vi dân sự đầy đủ, đang sinh sống tại Việt Nam.</li>
                 <li>Có thể tham gia trọn thời gian làm Thượng Đế từ 01/12/2026 đến 31/12/2026 nếu trúng tuyển.</li>
                 <li>Không thuộc diện xét tuyển: người sáng tạo nội dung (KOL, KOC, creator) nhận phí hợp tác với Ăn Cùng Bà Tuyết trong chương trình; người lao động của Ăn Cùng Bà Tuyết và các đơn vị trực tiếp tổ chức chương trình.</li>
               </ol>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-5">
-              <h3>
-                <span>Điều 5.</span> Cách ứng tuyển
-              </h3>
+            <RuleArticle n={5} title={RULE_TITLES[4]}>
               <ol>
                 <li>Quay một video có chính người ứng tuyển xuất hiện, kể nếu được mời về làm Thượng Đế nhà Bà Tuyết thì mình sẽ làm gì.</li>
                 <li>
@@ -402,12 +388,9 @@ export default function TuyenThuongDePage() {
                 <li>Giữ video ở chế độ công khai ít nhất đến hết ngày 29/11/2026 để Hội đồng xét tuyển.</li>
                 <li>Mỗi người được nộp nhiều video. Hội đồng xét theo người, không theo số lượng video hay lượt tương tác.</li>
               </ol>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-6">
-              <h3>
-                <span>Điều 6.</span> Yêu cầu với video ứng tuyển
-              </h3>
+            <RuleArticle n={6} title={RULE_TITLES[5]}>
               <ul>
                 <li>Do chính người ứng tuyển thực hiện và xuất hiện; không dùng hình ảnh, giọng nói của người khác khi chưa được đồng ý.</li>
                 <li>Không vi phạm pháp luật, thuần phong mỹ tục; không xúc phạm, bôi nhọ cá nhân hay tổ chức nào.</li>
@@ -416,12 +399,9 @@ export default function TuyenThuongDePage() {
                 <li>Trẻ em dưới 16 tuổi xuất hiện trong video phải có sự đồng ý của cha mẹ hoặc người giám hộ.</li>
               </ul>
               <p>Ban tổ chức có quyền không xét các video không đáp ứng yêu cầu trên.</p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-7">
-              <h3>
-                <span>Điều 7.</span> Quy trình và tiêu chí tuyển chọn
-              </h3>
+            <RuleArticle n={7} title={RULE_TITLES[6]}>
               <ol>
                 <li>
                   <b>Vòng hồ sơ:</b> Hội đồng tuyển chọn của Ban tổ chức xem các video hợp lệ và chọn ứng viên mời vào vòng livestream. Ứng viên được mời sẽ được liên hệ qua tin nhắn từ tài khoản TikTok chính thức <b>@ancungbatuyet86</b> hoặc <b>Thượng Đế Nhà Bà Tuyết</b>.
@@ -437,12 +417,9 @@ export default function TuyenThuongDePage() {
                 </li>
               </ol>
               <p>Tiêu chí: có duyên khi lên hình; phản ứng tự nhiên; gần gũi, dễ khiến nhiều người thấy mình trong đó; thoải mái được quay trong suốt thời gian làm việc. Không yêu cầu kinh nghiệm làm nội dung hay số lượng người theo dõi.</p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-8">
-              <h3>
-                <span>Điều 8.</span> Quyền lợi
-              </h3>
+            <RuleArticle n={8} title={RULE_TITLES[7]}>
               <p>
                 <b>Thượng Đế trúng tuyển:</b>
               </p>
@@ -459,12 +436,9 @@ export default function TuyenThuongDePage() {
               <p>
                 <b>Ứng viên lên livestream không được chọn:</b> nhận quà cảm ơn từ nhà Bà Tuyết.
               </p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-9">
-              <h3>
-                <span>Điều 9.</span> Quyền sử dụng video ứng tuyển
-              </h3>
+            <RuleArticle n={9} title={RULE_TITLES[8]}>
               <ol>
                 <li>
                   Khi gắn hashtag <b>#BaTuyetTuyenThuongDe</b>, người ứng tuyển đồng ý để Ăn Cùng Bà Tuyết chia sẻ lại, duet, stitch, trích đoạn video ứng tuyển trên các kênh chính thức của Ăn Cùng Bà Tuyết trong phạm vi chương trình, có ghi tên tài khoản, không phát sinh chi phí.
@@ -473,54 +447,56 @@ export default function TuyenThuongDePage() {
                 <li>Người ứng tuyển có thể rút video bằng cách xóa video hoặc nhắn tin cho Ban tổ chức; Ban tổ chức ngừng sử dụng mới trong thời gian hợp lý. Nội dung đã phát trực tiếp không thể thu hồi.</li>
                 <li>Việc sử dụng hình ảnh của Thượng Đế và Thượng Đế dự bị được quy định riêng trong hợp đồng.</li>
               </ol>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-10">
-              <h3>
-                <span>Điều 10.</span> Thông tin cá nhân
-              </h3>
+            <RuleArticle n={10} title={RULE_TITLES[9]}>
               <p>Ban tổ chức chỉ đề nghị cung cấp thông tin cá nhân (họ tên, ngày sinh, số điện thoại, giấy tờ tùy thân) với ứng viên được mời vào vòng livestream và người trúng tuyển, nhằm xác minh, ký hợp đồng và thực hiện nghĩa vụ thuế. Thông tin được bảo mật, không cung cấp cho bên thứ ba trừ trường hợp pháp luật yêu cầu, và được xử lý theo quy định pháp luật về bảo vệ dữ liệu cá nhân.</p>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-11">
-              <h3>
-                <span>Điều 11.</span> Trường hợp không xét hoặc hủy kết quả
-              </h3>
+            <RuleArticle n={11} title={RULE_TITLES[10]}>
               <ul>
                 <li>Khai không đúng độ tuổi, nhân thân hoặc thông tin cung cấp cho Ban tổ chức.</li>
                 <li>Gian lận tương tác (mua lượt xem, tài khoản ảo…) hoặc vi phạm Điều 6.</li>
                 <li>Người trúng tuyển không ký hợp đồng trong thời hạn Ban tổ chức thông báo. Khi đó Thượng Đế dự bị được mời thay thế.</li>
               </ul>
-            </div>
+            </RuleArticle>
 
-            <div className="art" id="dieu-12">
-              <h3>
-                <span>Điều 12.</span> Điều khoản chung
-              </h3>
+            <RuleArticle n={12} title={RULE_TITLES[11]}>
               <ol>
                 <li>Ban tổ chức có thể điều chỉnh lịch trình vì lý do khách quan và sẽ thông báo trên trang này cùng các kênh chính thức của Ăn Cùng Bà Tuyết.</li>
                 <li>Kết quả tuyển chọn do Hội đồng tuyển chọn của Ban tổ chức quyết định.</li>
                 <li>Mọi thắc mắc, khiếu nại được giải quyết trên tinh thần thương lượng, theo quy định của pháp luật Việt Nam.</li>
               </ol>
+            </RuleArticle>
+            <div className="rules-contact">
               <div className="warn">
                 <TriangleAlert size={22} aria-hidden="true" />
                 <div>
                 <b>Cảnh giác mạo danh:</b> Ban tổ chức <b>không thu bất kỳ khoản phí nào</b>, không yêu cầu chuyển khoản, không hỏi mã OTP hay mật khẩu. Ban tổ chức chỉ chủ động nhắn tin cho ứng viên qua tài khoản TikTok chính thức nêu tại Điều 7.
                 </div>
               </div>
-              <p style={{ marginTop: 12 }}>
-                Liên hệ Ban tổ chức: Hotline{" "}
-                <a href="tel:02483889679">
-                  <b>024 8388 9679</b>
-                </a>{" "}
-                · Email{" "}
-                <a href="mailto:gdtruyenthong@acbt.vn">
-                  <b>gdtruyenthong@acbt.vn</b>
-                </a>{" "}
-                · Fanpage{" "}
-                <a href="https://www.facebook.com/ancungbatuyet" target="_blank" rel="noopener">
-                  <b>facebook.com/ancungbatuyet</b>
-                </a>
+              <p>
+                Liên hệ Ban tổ chức:{" "}
+                <span className="item">
+                  Hotline{" "}
+                  <a href="tel:02483889679">
+                    <b>024 8388 9679</b>
+                  </a>
+                </span>{" "}
+                <span className="sep">·</span>{" "}
+                <span className="item">
+                  Email{" "}
+                  <a href="mailto:gdtruyenthong@acbt.vn">
+                    <b>gdtruyenthong@acbt.vn</b>
+                  </a>
+                </span>{" "}
+                <span className="sep">·</span>{" "}
+                <span className="item">
+                  Fanpage{" "}
+                  <a href="https://www.facebook.com/ancungbatuyet" target="_blank" rel="noopener">
+                    <b>facebook.com/ancungbatuyet</b>
+                  </a>
+                </span>
               </p>
             </div>
             </div>
@@ -552,16 +528,26 @@ export default function TuyenThuongDePage() {
             <br />
             Cụm công nghiệp Từ Liêm, Xuân Phương, Hà Nội
             <br />
-            Hotline <a href="tel:02483889679">024 8388 9679</a> · <a href="mailto:gdtruyenthong@acbt.vn">gdtruyenthong@acbt.vn</a>
-            <br />
-            <a href="https://www.facebook.com/ancungbatuyet" target="_blank" rel="noopener">
-              Fanpage
-            </a>{" "}
-            ·{" "}
-            <a href="https://www.tiktok.com/@ancungbatuyet86" target="_blank" rel="noopener">
-              TikTok @ancungbatuyet86
-            </a>{" "}
-            · #BaTuyetTuyenThuongDe
+            <span className="item">
+              Hotline <a href="tel:02483889679">024 8388 9679</a>
+            </span>{" "}
+            <span className="sep">·</span>{" "}
+            <span className="item">
+              <a href="mailto:gdtruyenthong@acbt.vn">gdtruyenthong@acbt.vn</a>
+            </span>
+            <br className="desktop-only" />
+            <span className="item">
+              <a href="https://www.facebook.com/ancungbatuyet" target="_blank" rel="noopener">
+                Fanpage
+              </a>
+            </span>{" "}
+            <span className="sep">·</span>{" "}
+            <span className="item">
+              <a href="https://www.tiktok.com/@ancungbatuyet86" target="_blank" rel="noopener">
+                TikTok @ancungbatuyet86
+              </a>
+            </span>{" "}
+            <span className="sep">·</span> <span className="item">#BaTuyetTuyenThuongDe</span>
           </div>
         </div>
       </footer>

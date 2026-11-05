@@ -30,6 +30,8 @@
 .ttd a { color: inherit; }
 .ttd a:focus-visible, .ttd summary:focus-visible { outline: 3px solid var(--brown); outline-offset: 3px; border-radius: 8px; }
 .ttd .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+.ttd h1, .ttd h2, .ttd h3 { text-wrap: balance; }
+.ttd p, .ttd li { text-wrap: pretty; }
 /* Tránh tiêu đề bị thanh trên che khi bấm link neo */
 .ttd [id] { scroll-margin-top: 76px; }
 
@@ -77,6 +79,7 @@
 .ttd .fact .l { font-size: 14px; font-weight: 700; }
 .ttd .count { margin-top: 18px; font-size: 15px; font-weight: 600; }
 .ttd .count b { font-weight: 900; color: var(--yellow); }
+.ttd .count .deadline { white-space: nowrap; }
 
 /* Ảnh Bà Tuyết */
 .ttd .hero-art { position: relative; align-self: end; max-width: 520px; width: 100%; margin: 0 auto; }
@@ -177,6 +180,8 @@
 .ttd .toc a:hover { color: var(--ink-orange); background: var(--cream); }
 .ttd .rules .art { border-top: 2px solid #F0DCCB; padding: 24px 0; max-width: 760px; }
 .ttd .rules .art:first-child { border-top: 0; padding-top: 0; }
+.ttd .rules .art summary { list-style: none; cursor: default; }
+.ttd .rules .art summary::-webkit-details-marker { display: none; }
 .ttd .rules .art h3 { font-weight: 800; font-size: 19px; line-height: 1.35; margin-bottom: 10px; }
 .ttd .rules .art h3 span { color: var(--ink-orange); }
 .ttd .rules .art p, .ttd .rules .art li { font-size: 15.5px; color: #54342B; }
@@ -189,6 +194,8 @@
 .ttd .rules table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 6px; }
 .ttd .rules td { border: 1.5px solid #F0DCCB; padding: 10px 12px; vertical-align: top; }
 .ttd .rules td:first-child { font-weight: 700; width: 36%; background: var(--cream); }
+.ttd .rules-contact { max-width: 760px; }
+.ttd .rules-contact p { margin-top: 12px; font-size: 15.5px; color: #54342B; }
 .ttd .warn { display: flex; gap: 12px; align-items: flex-start; background: #FFF4D6; border: var(--stroke); border-radius: 14px; padding: 14px 16px; margin-top: 14px; font-size: 15px; }
 .ttd .warn svg { flex: 0 0 auto; margin-top: 2px; color: var(--ink-orange); }
 
@@ -222,22 +229,46 @@
   .ttd .apply-grid, .ttd .faq-grid { grid-template-columns: 1fr; gap: 26px; }
   .ttd .apply-head { position: static; }
   .ttd .final .pack { display: none; }
+
+  .ttd .rules .art, .ttd .rules .art:first-child { max-width: none; padding: 0; border-top: 2px solid #F0DCCB; }
+  .ttd .rules .art:last-of-type { border-bottom: 2px solid #F0DCCB; }
+  .ttd .rules .art summary { position: relative; cursor: pointer; padding: 16px 44px 16px 0; }
+  .ttd .rules .art summary::after { content: "+"; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 50%; background: var(--yellow); color: var(--brown); font-size: 20px; line-height: 27px; text-align: center; font-weight: 700; }
+  .ttd .rules .art[open] summary::after { content: "–"; }
+  .ttd .rules .art h3 { font-size: 17px; margin: 0; text-wrap: pretty; }
+  .ttd .rules .art-body { padding-bottom: 20px; }
+  .ttd .rules-contact { max-width: none; margin-top: 22px; }
 }
 
 @media (max-width: 820px) {
-  .ttd section { padding: 56px 0; }
+  .ttd section { padding: 48px 0; }
+  .ttd h2 { font-size: clamp(26px, 7.6vw, 40px); margin-bottom: 14px; }
+  .ttd .lead { font-size: 16.5px; margin-bottom: 26px; }
   .ttd .hero { background: repeating-conic-gradient(from 4deg at 50% 82%, var(--chili) 0 9deg, var(--chili-2) 9deg 18deg); }
   .ttd .hero-grid { grid-template-columns: 1fr; gap: 0; }
-  .ttd .hero-copy { padding: 34px 0 30px; text-align: center; }
-  .ttd .facts { margin-left: auto; margin-right: auto; }
-  .ttd .hero-art { max-width: 320px; }
+  .ttd .hero-copy { padding: 26px 0 22px; text-align: center; }
+  .ttd .hero h1 { font-size: clamp(34px, 11vw, 56px); margin: 16px 0 12px; text-shadow: 0 2px 0 var(--brown); }
+  .ttd .hero .sub { font-size: 18px; }
+  .ttd .facts { margin: 20px auto 22px; }
+  .ttd .count { margin-top: 16px; }
+  .ttd .hero-art { max-width: 300px; }
   .ttd .hero-art .p1 { left: -4%; }
   .ttd .hero-art .p2 { right: -3%; }
   .ttd .hero-art .p3 { right: -1%; }
-  .ttd .cards { grid-template-columns: 1fr; gap: 26px; }
+  .ttd .cards { grid-template-columns: 1fr; gap: 18px; }
+  /* Icon và tiêu đề cùng một hàng để thẻ gọn hơn */
+  .ttd .card { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 12px; align-items: center; padding: 18px 18px 16px; }
   .ttd .card.c1, .ttd .card.c3 { transform: none; }
   .ttd .card.c2 { margin-top: 0; }
-  .ttd .card .peek { right: 8px; top: -18px; }
+  .ttd .card .ic { width: 44px; height: 44px; }
+  .ttd .card .ic svg { width: 24px; height: 24px; }
+  .ttd .card h3 { font-size: 20px; margin: 0; }
+  .ttd .card ul { grid-column: 1 / -1; margin-top: 10px; }
+  .ttd .card li { margin: 6px 0; font-size: 15.5px; }
+  .ttd .card .peek { right: 6px; top: -16px; width: 66px; }
+  .ttd .note { margin-top: 20px; }
+  .ttd .step { padding: 20px 0; }
+  .ttd .final { padding: 52px 0 56px; }
 
   /* Lịch chuyển thành trục dọc */
   .ttd .tl { grid-template-columns: 1fr; gap: 0; margin-top: 24px; }
@@ -249,11 +280,29 @@
 }
 
 @media (max-width: 480px) {
-  .ttd .step { gap: 12px; }
-  .ttd .step .no { width: 42px; font-size: 48px; }
+  .ttd .step { gap: 10px; }
+  .ttd .step .no { width: 36px; font-size: 44px; }
+  .ttd .step h3 { font-size: 20px; }
+  .ttd .step p { font-size: 16px; }
   .ttd .btn { font-size: 17px; padding: 15px 22px; }
-  .ttd .rules td { padding: 8px; }
-  .ttd footer .wrap { align-items: flex-start; }
+  .ttd .sep, .ttd footer br.desktop-only { display: none; }
+  .ttd .count .deadline { display: block; }
+  .ttd .apply .btn { display: block; text-align: center; padding: 14px 12px; }
+
+  /* Bảng thời gian: mỗi hàng thành một khối nhãn + nội dung */
+  .ttd .rules table, .ttd .rules tbody, .ttd .rules tr, .ttd .rules td { display: block; width: 100%; }
+  .ttd .rules tr { border: 1.5px solid #F0DCCB; border-radius: 12px; overflow: hidden; margin-bottom: 10px; }
+  .ttd .rules td { border: 0; padding: 8px 12px; }
+  .ttd .rules td:first-child { width: 100%; }
+
+  /* Link gọi điện, email đủ lớn để bấm */
+  .ttd .rules-contact .item, .ttd footer .item { display: block; }
+  .ttd .rules-contact a, .ttd footer a { display: inline-block; padding: 9px 0; }
+  .ttd .rules-contact p { line-height: 1.4; font-weight: 600; }
+  .ttd .rules-contact .item { font-weight: 400; }
+  .ttd footer { padding: 28px 0 22px; }
+  .ttd footer .wrap { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ttd footer .logo { flex: 0 0 auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
