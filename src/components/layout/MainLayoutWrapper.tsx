@@ -15,7 +15,10 @@ export default function MainLayoutWrapper({
 }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
-  const isStandalone = isAdmin || pathname?.startsWith("/tiktok-food-fest");
+  const isStandalone =
+    isAdmin ||
+    pathname?.startsWith("/tiktok-food-fest") ||
+    pathname?.startsWith("/tuyen-thuong-de");
   const [config, setConfig] = useState<SiteConfigData | undefined>(initialConfig);
 
   useEffect(() => {
