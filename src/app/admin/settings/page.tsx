@@ -428,7 +428,7 @@ export default function SettingsPage() {
                       <textarea
                         {...register("heroBanner.subtitle")}
                         className="w-full border border-slate-300 p-2.5 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none min-h-[90px] text-sm font-medium"
-                        placeholder="VD: Thương hiệu đồ ăn vặt sạch hàng đầu Việt Nam..."
+                        placeholder="VD: Ăn Cùng Bà Tuyết – Ăn vặt thì phải ăn cùng Bà Tuyết"
                       />
                       {errors.heroBanner?.subtitle && (
                         <p className="text-red-500 text-xs mt-1">{errors.heroBanner.subtitle.message}</p>

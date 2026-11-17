@@ -184,7 +184,7 @@ function ImportReportDialog({
           <div>
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-orange-600">
               <FileSpreadsheet size={16} />
-              Báo cáo nhập CSV
+              Báo cáo nhập Excel
             </div>
             <h2 className="mt-2 text-xl font-black text-slate-950 sm:text-2xl">
               {report.fileName}
@@ -298,7 +298,7 @@ function ImportReportDialog({
                   </div>
                   <div className="flex flex-wrap gap-2 text-[11px] font-black">
                     <span className="bg-slate-100 px-2.5 py-1.5 text-slate-700">
-                      CSV có{" "}
+                      File có{" "}
                       {
                         selectedRow.importedFields.filter(
                           (key) => key !== "id",
@@ -378,7 +378,7 @@ function ImportReportDialog({
 
                 <div className="mt-5 grid gap-4 xl:grid-cols-2">
                   <ImportValueColumn
-                    title="Dữ liệu trong file CSV"
+                    title="Dữ liệu trong file"
                     fields={report.fields}
                     values={selectedRow.source}
                     missingRequired={selectedRow.missingRequired}
@@ -703,6 +703,40 @@ export default function AdminProductsPage() {
     const timer = window.setTimeout(() => void fetchProducts(), 0);
     return () => window.clearTimeout(timer);
   }, [fetchProducts]);
+
+  const handleExport = async (template: boolean) => {
+    if (!token) return;
+    const actionKey = template ? "export:template" : "export:all";
+    setActionLoading(actionKey);
+
+    try {
+      const res = await fetch(
+        `/api/admin/products/export${template ? "?template=1" : ""}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || "Không thể xuất file Excel.");
+      }
+
+      const disposition = res.headers.get("Content-Disposition") || "";
+      const filename =
+        disposition.match(/filename="([^"]+)"/)?.[1] ||
+        (template ? "mau-nhap-san-pham.xlsx" : "danh-sach-san-pham.xlsx");
+      const url = URL.createObjectURL(await res.blob());
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error(getAdminErrorMessage(error, "Không thể xuất file Excel."));
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -1049,17 +1083,24 @@ export default function AdminProductsPage() {
                 ref={fileInputRef}
                 type="file"
                 onChange={handleImport}
-                accept=".csv"
+                accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
                 className="hidden"
               />
               <Button
                 variant="adminSecondary"
-                leftIcon={<Download size={16} />}
-                onClick={() =>
-                  window.open("/api/admin/products/export", "_blank")
-                }
+                leftIcon={<FileSpreadsheet size={16} />}
+                loading={actionLoading === "export:template"}
+                onClick={() => void handleExport(true)}
               >
-                Xuất CSV
+                File mẫu
+              </Button>
+              <Button
+                variant="adminSecondary"
+                leftIcon={<Download size={16} />}
+                loading={actionLoading === "export:all"}
+                onClick={() => void handleExport(false)}
+              >
+                Xuất Excel
               </Button>
               <Button
                 variant="adminSecondary"
@@ -1067,7 +1108,7 @@ export default function AdminProductsPage() {
                 loading={isImporting}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Nhập CSV
+                Nhập Excel
               </Button>
               <Button
                 href="/admin/products/new"

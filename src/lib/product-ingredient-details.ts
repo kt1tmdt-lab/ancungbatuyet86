@@ -20,7 +20,7 @@ export const DEFAULT_CHICKEN_FEET_INGREDIENT_DETAILS: ProductIngredientDetails =
   secondaryPercent: "5",
   secondaryName: "Gia vị & phụ gia",
   rows: [
-    { name: "Chân gà", origin: "Gia cầm chăn nuôi", role: "Nguyên liệu chính · giàu collagen" },
+    { name: "Chân gà", origin: "Nhập khẩu từ châu Âu", role: "Nguyên liệu chính" },
     { name: "Nước tinh khiết", origin: "Nước lọc", role: "Chế biến · hoà tan gia vị" },
     { name: "Muối", origin: "Khoáng chất", role: "Gia vị · bảo quản tự nhiên" },
     { name: "Đường", origin: "Mía", role: "Cân bằng vị" },
@@ -30,10 +30,10 @@ export const DEFAULT_CHICKEN_FEET_INGREDIENT_DETAILS: ProductIngredientDetails =
     { name: "I+G", origin: "Chiết xuất từ tinh bột lên men", role: "Tăng vị umami (cùng MSG)" },
     { name: "Acid lactic (INS 270)", origin: "Lên men tự nhiên (như dưa muối, sữa chua)", role: "Điều chỉnh độ chua · ức chế vi khuẩn" },
     { name: "Acid citric (INS 330)", origin: "Chiết xuất từ trái cây họ cam chanh", role: "Chống oxy hoá · giữ pH ổn định" },
-    { name: "Sodium diacetate (INS 262ii)", origin: "Muối ăn + giấm", role: "Bảo quản · chống khuẩn" },
-    { name: "Nisin (INS 234)", origin: "Vi khuẩn có lợi trong sữa chua lên men", role: "Bảo quản sinh học · chống khuẩn" },
+    { name: "Sodium diacetate (INS 262ii)", origin: "Natri axetat + axit axetic", role: "Bảo quản · chống khuẩn" },
+    { name: "Nisin (INS 234)", origin: "Peptide do lợi khuẩn tạo ra khi lên men", role: "Bảo quản sinh học · chống khuẩn" },
     { name: "Phosphate (INS 450iii, 451i, 340ii)", origin: "Khoáng chất (có tự nhiên trong xương, sữa)", role: "Giữ kết cấu giòn dai" },
-    { name: "Caramel (INS 150c)", origin: "Đường nấu cháy", role: "Tạo màu nâu đặc trưng" },
+    { name: "Caramel (INS 150c)", origin: "Phẩm màu caramel (caramel amoni)", role: "Tạo màu nâu đặc trưng" },
     { name: "Hương gà, hương thịt", origin: "Hương liệu tổng hợp", role: "Tăng hương vị" },
   ],
 };

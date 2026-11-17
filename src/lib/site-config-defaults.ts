@@ -1,4 +1,5 @@
 import { isCustomPageHref } from "@/lib/custom-pages";
+import { REQUIRED_POLICY_LINKS } from "@/lib/legal-documents";
 
 export type LinkItem = {
   href: string;
@@ -127,10 +128,10 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     ],
   },
   seo: {
-    title: "Ăn Cùng Bà Tuyết - Đồ ăn vặt sạch hàng đầu Việt Nam",
+    title: "Ăn Cùng Bà Tuyết – Ăn vặt thì phải ăn cùng Bà Tuyết",
     description:
-      "Thương hiệu đồ ăn vặt sạch hàng đầu Việt Nam. Chân gà rút xương, tăm cay, snack bánh tráng với nguyên liệu sạch và quy trình rõ ràng.",
-    keywords: "đồ ăn vặt sạch, ăn cùng bà tuyết, tăm cay, chân gà rút xương, snack bánh tráng",
+      "Ăn Cùng Bà Tuyết – thương hiệu đồ ăn vặt Việt Nam: chân gà rút xương, tăm cay, snack bánh tráng, công khai thành phần và nguồn gốc.",
+    keywords: "đồ ăn vặt, ăn cùng bà tuyết, tăm cay, chân gà rút xương, snack bánh tráng",
   },
   navbarLinks: [
     { href: "/", label: "Trang chủ" },
@@ -167,6 +168,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfigData = {
     policies: [
       { href: "/chat-luong", label: "Chất lượng & quyền lợi khách hàng" },
       { href: "/gioi-thieu#about-history", label: "Thông tin thương hiệu" },
+      ...REQUIRED_POLICY_LINKS,
     ],
   },
   footerContact: {
@@ -248,6 +250,12 @@ function normalizeFooterLinks(value: unknown, fallback: LinkItem[]) {
     ...link,
     href: legacyHrefMap[link.href] || link.href,
   }));
+}
+
+/** Thêm các link bắt buộc còn thiếu (so theo href) vào cuối danh sách. */
+function withRequiredLinks(links: LinkItem[], required: LinkItem[]) {
+  const hrefs = new Set(links.map((link) => link.href));
+  return [...links, ...required.filter((link) => !hrefs.has(link.href))];
 }
 
 function normalizeNavbarLinks(value: unknown) {
@@ -362,7 +370,11 @@ export function normalizeSiteConfig(input: unknown): SiteConfigData {
       products: normalizeFooterLinks(footerLinks.products, DEFAULT_SITE_CONFIG.footerLinks.products),
       explore: normalizeFooterLinks(footerLinks.explore, DEFAULT_SITE_CONFIG.footerLinks.explore),
       support: normalizeFooterLinks(footerLinks.support, DEFAULT_SITE_CONFIG.footerLinks.support),
-      policies: normalizeFooterLinks(footerLinks.policies, DEFAULT_SITE_CONFIG.footerLinks.policies),
+      // Link pháp lý luôn hiển thị ở footer, kể cả khi admin đã tự cấu hình danh sách
+      policies: withRequiredLinks(
+        normalizeFooterLinks(footerLinks.policies, DEFAULT_SITE_CONFIG.footerLinks.policies),
+        REQUIRED_POLICY_LINKS,
+      ),
     },
     footerContact: {
       phone: stringOrDefault(footerContact.phone, DEFAULT_SITE_CONFIG.footerContact.phone),

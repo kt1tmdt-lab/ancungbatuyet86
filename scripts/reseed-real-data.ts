@@ -6,7 +6,7 @@ const realProducts = [
     slug: "chan-ga",
     name: "Chân Gà Rút Xương Vị Cay Tê",
     tagline: "Giòn sần sật, vị cay tê đậm đà chuẩn vị ăn vặt Bà Tuyết.",
-    description: "Chân gà rút xương được tuyển chọn từ nguồn nguyên liệu sạch đạt tiêu chuẩn VietGAP. Sơ chế sạch sẽ qua 3 bước khử trùng sục ozone, hấp chín tới và rút xương thủ công khéo léo để giữ nguyên độ giòn dai đặc trưng. Gia vị sốt cay tê thấm đượm từng thớ thịt.",
+    description: "Chân gà nhập khẩu từ châu Âu (Ba Lan, Hungary…), có đủ giấy thông quan và kiểm dịch. Chân gà được rút xương thủ công và đóng gói hút chân không để giữ chất lượng khi vận chuyển xa. Gia vị sốt cay tê thấm đượm từng thớ thịt.",
     category: "chan-ga",
     categoryLabel: "Chân Gà",
     price: "15.000đ",
@@ -16,7 +16,7 @@ const realProducts = [
     featured: true,
     purchaseUrl: "https://shopee.vn/an-vat-ba-tuyet-chan-ga",
     ingredients: [
-      "Chân gà tươi sạch (92%)",
+      "Chân gà nhập khẩu",
       "Ớt tươi",
       "Hoa tiêu",
       "Gừng",
@@ -27,9 +27,9 @@ const realProducts = [
     ],
     specs: [
       { label: "Trọng lượng", value: "52g / gói" },
-      { label: "Hạn sử dụng", value: "6 tháng kể từ ngày sản xuất" },
+      { label: "Hạn sử dụng", value: "In trên bao bì từng sản phẩm" },
       { label: "Bảo quản", value: "Nơi khô ráo, thoáng mát, tránh ánh nắng trực tiếp" },
-      { label: "Tiêu chuẩn", value: "Đạt chứng nhận ATVSTP & Bảo hiểm PVI bảo chứng" },
+      { label: "Bảo hiểm", value: "Bảo hiểm trách nhiệm sản phẩm PVI" },
       { label: "Nơi sản xuất", value: "Thái Nguyên, Việt Nam" }
     ],
     variants: [
@@ -44,13 +44,11 @@ const realProducts = [
       { label: "TikTok Shop", value: "Top 1" }
     ],
     processSteps: [
-      { step: 1, title: "Kiểm định nguyên liệu", description: "Chân gà tươi nhập từ trang trại sạch VietGAP" },
-      { step: 2, title: "Khử trùng sục ozone", description: "Loại bỏ hoàn toàn vi khuẩn có hại" },
-      { step: 3, title: "Rút xương thủ công", description: "Thực hiện bởi thợ lành nghề trong phòng vô trùng" },
-      { step: 4, title: "Ủ sốt cay tê", description: "Tẩm ướp sốt hoa tiêu ớt hiểm trong 6 tiếng" },
-      { step: 5, title: "Đóng gói hút chân không", description: "Đảm bảo tươi ngon không dùng chất bảo quản" }
+      { step: 1, title: "Nhập khẩu & kiểm dịch", description: "Kiểm tra giấy tờ kiểm dịch từng lô nhập khẩu" },
+      { step: 2, title: "Rút xương thủ công", description: "Rút xương từng chiếc chân gà" },
+      { step: 3, title: "Đóng gói hút chân không", description: "Hút chân không để giữ chất lượng khi vận chuyển xa" }
     ],
-    story: "Sản phẩm Chân Gà Rút Xương bắt đầu từ công thức ủ sả ớt truyền thống trong căn bếp nhỏ của Bà Tuyết. Nhờ sự yêu mến của hàng triệu bạn trẻ qua mạng xã hội, công thức gia đình đã được nhân rộng lên quy mô nhà máy hiện đại, nhưng hương vị cay giòn đậm đà nguyên bản vẫn được giữ trọn vẹn."
+    story: ""
   },
   {
     slug: "tam-cay",
